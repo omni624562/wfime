@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material Design 3 Color Scheme for LIME IME
+  Generated based on a green primary color (traditional Chinese input method theme)
+-->
+<resources>
+    <!-- Primary colors -->
+    <color name="md_theme_primary">#006C4C</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#89F8C7</color>
+    <color name="md_theme_onPrimaryContainer">#002115</color>
+    
+    <!-- Secondary colors -->
+    <color name="md_theme_secondary">#4C6358</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_secondaryContainer">#CFE9D9</color>
+    <color name="md_theme_onSecondaryContainer">#092017</color>
+    
+    <!-- Tertiary colors -->
+    <color name="md_theme_tertiary">#3E6374</color>
+    <color name="md_theme_onTertiary">#FFFFFF</color>
+    <color name="md_theme_tertiaryContainer">#C1E8FC</color>
+    <color name="md_theme_onTertiaryContainer">#001F29</color>
+    
+    <!-- Error colors -->
+    <color name="md_theme_error">#BA1A1A</color>
+    <color name="md_theme_onError">#FFFFFF</color>
+    <color name="md_theme_errorContainer">#FFDAD6</color>
+    <color name="md_theme_onErrorContainer">#410002</color>
+    
+    <!-- Background and Surface -->
+    <color name="md_theme_background">#FBFDF8</color>
+    <color name="md_theme_onBackground">#191C1A</color>
+    <color name="md_theme_surface">#FBFDF8</color>
+    <color name="md_theme_onSurface">#191C1A</color>
+    <color name="md_theme_surfaceVariant">#DBE5DD</color>
+    <color name="md_theme_onSurfaceVariant">#404943</color>
+    
+    <!-- Outline -->
+    <color name="md_theme_outline">#707972</color>
+    <color name="md_theme_outlineVariant">#BFC9C1</color>
+    
+    <!-- Inverse colors -->
+    <color name="md_theme_inverseSurface">#2E312E</color>
+    <color name="md_theme_inverseOnSurface">#F0F1EC</color>
+    <color name="md_theme_inversePrimary">#6CDBAC</color>
+    
+    <!-- Scrim -->
+    <color name="md_theme_scrim">#000000</color>
+</resources>
