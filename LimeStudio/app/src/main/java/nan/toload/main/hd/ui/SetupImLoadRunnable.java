@@ -277,100 +277,10 @@ public class SetupImLoadRunnable implements Runnable {
         return result;
     }
 
-    @Deprecated
-    public synchronized void setImInfo(String im, String field, String value) {
-
-        ContentValues cv = new ContentValues();
-        cv.put("code", im);
-        cv.put("title", field);
-        cv.put("desc", value);
-
-        removeImInfo(im, field);
-
-        datasource.insert("im", cv);
-        /*
-         * try {
-         * datasource.open();
-         * datasource.close();
-         * } catch (SQLException e) {
-         * e.printStackTrace();
-         * }
-         */
-    }
-
-    private void setIMKeyboardOnDB(String im, String value, String keyboard) {
-
-        ContentValues cv = new ContentValues();
-        cv.put("code", im);
-        cv.put("title", "keyboard");
-        cv.put("desc", value);
-        cv.put("keyboard", keyboard);
-
-        removeImInfoOnDB(im, "keyboard");
-
-        datasource.insert("im", cv);
-
-    }
-
-    private void removeImInfoOnDB(String im, String field) {
-        String removeString = "DELETE FROM im WHERE code='" + im + "' AND title='" + field + "'";
-        datasource.remove(removeString);
-
-    }
-
-    @Deprecated
-    public synchronized void setIMKeyboard(String im, String value, String keyboard) {
-        try {
-            setIMKeyboardOnDB(im, value, keyboard);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public synchronized void removeImInfo(String im, String field) {
-        try {
-            removeImInfoOnDB(im, field);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @SuppressLint("Range")
-    @Deprecated
-    public KeyboardObj getKeyboardObj(String keyboard) {
-
-        if (keyboard == null || keyboard.equals(""))
-            return null;
-        KeyboardObj kobj = null;
-
-        if (!keyboard.equals("wb") && !keyboard.equals("hs")) {
-            try {
-                Cursor cursor = datasource.query("keyboard", "code" + " = '" + keyboard + "'");
-                if (cursor.moveToFirst()) {
-                    kobj = new KeyboardObj();
-                    kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                    kobj.setName(cursor.getString(cursor.getColumnIndex("name")));
-                    kobj.setDescription(cursor.getString(cursor.getColumnIndex("desc")));
-                    kobj.setType(cursor.getString(cursor.getColumnIndex("type")));
-                    kobj.setImage(cursor.getString(cursor.getColumnIndex("image")));
-                    kobj.setImkb(cursor.getString(cursor.getColumnIndex("imkb")));
-                    kobj.setImshiftkb(cursor.getString(cursor.getColumnIndex("imshiftkb")));
-                    kobj.setEngkb(cursor.getString(cursor.getColumnIndex("engkb")));
-                    kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndex("engshiftkb")));
-                    kobj.setSymbolkb(cursor.getString(cursor.getColumnIndex("symbolkb")));
-                    kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndex("symbolshiftkb")));
-                    kobj.setDefaultkb(cursor.getString(cursor.getColumnIndex("defaultkb")));
-                    kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndex("defaultshiftkb")));
-                    kobj.setExtendedkb(cursor.getString(cursor.getColumnIndex("extendedkb")));
-                    kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndex("extendedshiftkb")));
-                }
-                cursor.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return kobj;
-    }
+    // Removed @Deprecated methods:
+    // - setImInfo() - use LimeDB.setImInfo() instead
+    // - setIMKeyboard() - use LimeDB.setIMKeyboard() instead
+    // - getKeyboardObj() - use LimeDB.getKeyboardObj() instead
 
     /*
      * Download Remote File

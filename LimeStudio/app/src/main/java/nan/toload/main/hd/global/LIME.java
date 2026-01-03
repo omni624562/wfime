@@ -110,7 +110,8 @@ public class LIME {
      * Consider using context.getFilesDir() instead.
      * 
      * @return Path to LIME data root folder
-     * @deprecated Use getLimeDataRootFolder(Context) instead
+     * @deprecated Use getLimeDataRootFolder(Context) instead when Context is
+     *             available
      */
     @Deprecated
     public static String getLimeDataRootFolder() {
@@ -121,11 +122,12 @@ public class LIME {
      * Get the LIME database folder path.
      * 
      * @return Path to LIME database folder
-     * @deprecated Use getLIMEDatabaseFolder(Context) instead
+     * @deprecated Use getLIMEDatabaseFolder(Context) instead when Context is
+     *             available
      */
     @Deprecated
     public static String getLIMEDatabaseFolder() {
-        return Environment.getDataDirectory() + "/data/" + LIME.PACKAGE_NAME + LIME.DATABASE_RELATIVE_FOLDER;
+        return Environment.getDataDirectory() + "/data/" + LIME.PACKAGE_NAME + DATABASE_RELATIVE_FOLDER;
     }
 
     /**

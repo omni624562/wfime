@@ -24,7 +24,6 @@
 
 package nan.toload.main.hd.global;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -53,78 +52,82 @@ public class LIMEPreferenceManager {
         if (records.equals("")) {
             SharedPreferences ssp = ctx.getSharedPreferences(table + "total_record", 0);
             records = ssp.getString(table + "total_record", "");
-            if (!records.equals("")) setTableTotalRecords(table, records);
+            if (!records.equals(""))
+                setTableTotalRecords(table, records);
         }
         return records;
     }
 
     public void setTableTotalRecords(String table, String records) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "total_record", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "total_record", 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putString(table + "total_record", records).commit();
     }
-
 
     public String getTableVersion(String table) {
         table = preProcessTableName(table);
 
         SharedPreferences sdp = PreferenceManager.getDefaultSharedPreferences(ctx);
         String version = sdp.getString(table + "mapping_version", "");
-        // retain mapping_version saved in shared Preference and saved to default reference
+        // retain mapping_version saved in shared Preference and saved to default
+        // reference
         if (version.equals("")) {
             SharedPreferences ssp = ctx.getSharedPreferences(table + "mapping_version", 0);
             version = ssp.getString(table + "mapping_version", "");
-            if (!version.equals("")) setTableVersion(table, version);
+            if (!version.equals(""))
+                setTableVersion(table, version);
         }
         return version;
     }
 
     public void setTableVersion(String table, String version) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_version", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_version",
+        // 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putString(table + "mapping_version", version).commit();
     }
 
     public String getTableMappingFilename(String table) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file", 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getString(table + "mapping_file", "");
     }
 
     public void setTableMappingFilename(String table, String filename) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file", 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putString(table + "mapping_file", filename).commit();
     }
 
     public String getTableMappingTempFilename(String table) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file_temp", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file_temp",
+        // 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getString(table + "mapping_file_temp", "");
     }
 
     public void setTableTempMappingFilename(String table, String filename) {
         table = preProcessTableName(table);
-        //SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file_temp", 0);
+        // SharedPreferences sp = ctx.getSharedPreferences(table + "mapping_file_temp",
+        // 0);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putString(table + "mapping_file_temp", filename).commit();
     }
 
-
     public String getTotalUserdictRecords() {
-
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         String records = sp.getString("total_userdict_record", "0");
         if (records.equals("0")) {
             SharedPreferences ssp = ctx.getSharedPreferences("total_userdict_record", 0);
             records = ssp.getString("total_userdict_record", "0");
-            if (records.equals("0")) setTotalUserdictRecords(records);
+            if (records.equals("0"))
+                setTotalUserdictRecords(records);
         }
         return records;
 
@@ -136,21 +139,9 @@ public class LIMEPreferenceManager {
         sp.edit().putString("total_userdict_record", records).commit();
     }
 
-    @Deprecated
-    public boolean getDatabaseOnHold() {
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return sp.getString("mapping_loadg", "no").equals("yes");
-    }
-
-    @Deprecated
-    public void holdDatabaseCoonection(boolean loading) {
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String loadingStatus = loading ? "yes" : "no";
-        sp.edit().putString("mapping_loadg", loadingStatus).commit();
-
-    }
+    // Removed @Deprecated methods:
+    // - getDatabaseOnHold() - never called
+    // - holdDatabaseCoonection() - never called (only in comments)
 
     public boolean getLanguageMode() {
 
@@ -166,7 +157,6 @@ public class LIMEPreferenceManager {
         sp.edit().putString("language_mode", loadingStatus).commit();
 
     }
-
 
     public int getMappingFileImportLines() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -187,26 +177,31 @@ public class LIMEPreferenceManager {
         }
     }
 
-
     public boolean getFixedCandidateViewDisplay() {
 
         return true;
-		/*SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-
-		// force user to checked the fixed_candidate_view_display setting
-		boolean forceactive = sp.getBoolean("fixed_candidate_view_display_force", true);
-		if(forceactive){
-			sp.edit().putBoolean("fixed_candidate_view_display_force", false).commit();
-			sp.edit().putBoolean("fixed_candidate_view_display", true).commit();
-		}
-
-		return sp.getBoolean("fixed_candidate_view_display", true);  //Jeremy '15,6,4 set default to  true.*/
+        /*
+         * SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
+         * 
+         * // force user to checked the fixed_candidate_view_display setting
+         * boolean forceactive = sp.getBoolean("fixed_candidate_view_display_force",
+         * true);
+         * if(forceactive){
+         * sp.edit().putBoolean("fixed_candidate_view_display_force", false).commit();
+         * sp.edit().putBoolean("fixed_candidate_view_display", true).commit();
+         * }
+         * 
+         * return sp.getBoolean("fixed_candidate_view_display", true); //Jeremy '15,6,4
+         * set default to true.
+         */
     }
 
-	/*public boolean getEnableTransparentCandidateView(){
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-		return sp.getBoolean("enable_transparent_candidate_view", false);
-	}*/
+    /*
+     * public boolean getEnableTransparentCandidateView(){
+     * SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
+     * return sp.getBoolean("enable_transparent_candidate_view", false);
+     * }
+     */
 
     public boolean getDisableSoftwareKeyboard() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -277,7 +272,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("vibrate_on_keypress", false);
     }
 
-
     public boolean getSoundOnKeyPressed() {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -286,7 +280,7 @@ public class LIMEPreferenceManager {
 
     public boolean getEmojiMode() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-        //Jeremy '16,7,30 Emoji support is limited before API 16
+        // Jeremy '16,7,30 Emoji support is limited before API 16
         return sp.getBoolean("enable_emoji", Build.VERSION.SDK_INT >= 27);
     }
 
@@ -364,7 +358,6 @@ public class LIMEPreferenceManager {
         return sp.getString("keyboard_list", "phonetic");
     }
 
-
     public void setActiveIM(String activeIM) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putString("keyboard_list", String.valueOf(activeIM)).commit();
@@ -417,7 +410,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("disable_physical_selkey", false);
     }
 
-
     public Integer getHanCovertOption() {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -465,19 +457,16 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("auto_chinese_symbol", false);
     }
 
-
     public Integer getVibrateLevel() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return Integer.parseInt(sp.getString("vibrate_level", "40"));
     }
-
 
     public boolean getShowNumberKeypard() {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getBoolean("display_number_keypads", false);
     }
-
 
     public boolean getAllowNumberMapping() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -489,7 +478,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("accept_symbol_index", false);
     }
 
-
     public boolean getSwitchEnglishModeHotKey() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getBoolean("switch_english_mode", false);
@@ -499,7 +487,6 @@ public class LIMEPreferenceManager {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getBoolean("switch_english_mode_shift", true);
     }
-
 
     public boolean getAutoHideSoftKeyboard() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -540,12 +527,10 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("searchsrv_reset_cache", defaultvalue);
     }
 
-
     public void setResetCacheFlag(boolean value) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         sp.edit().putBoolean("searchsrv_reset_cache", value).commit();
     }
-
 
     /*
      * INT Parameter SET/GET
@@ -600,7 +585,6 @@ public class LIMEPreferenceManager {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
         return sp.getString(label, defaultstring);
     }
-
 
     /*
      * Boolean Parameter SET/GET
