@@ -132,13 +132,21 @@ public class IMSwitchHelper {
 
         String pIMActiveState = mLIMEPref.getIMActivatedState();
 
+        if (DEBUG)
+            Log.i(TAG, "buildActivatedIMList(): pIMActiveState='" + pIMActiveState + "', mIMActivatedState='"
+                    + mIMActivatedState + "'");
+
         if (pIMActiveState.trim().isEmpty()) {
             // Set default activated input methods: dayi (0) and phonetic (1)
             pIMActiveState = "0;1;";
             mLIMEPref.setIMActivatedState(pIMActiveState);
+            if (DEBUG)
+                Log.i(TAG, "Set default pIMActiveState: " + pIMActiveState);
         }
 
         if (!(mIMActivatedState.length() > 0 && mIMActivatedState.equals(pIMActiveState))) {
+            if (DEBUG)
+                Log.i(TAG, "Rebuilding list (cache miss)");
             mIMActivatedState = pIMActiveState;
             String[] s = pIMActiveState.split(";");
 
@@ -159,8 +167,39 @@ public class IMSwitchHelper {
                         Log.i(TAG, "buildActivatedIMList(): [" + index + "] = "
                                 + codes[index].toString() + " ;" + shortNames[index].toString());
                 } else {
-                    break;
+                    if (DEBUG)
+                        Log.i(TAG, "Invalid index " + index + " >= items.length " + items.length);
                 }
+            }
+
+            // If list is still empty after parsing, reset to defaults
+            if (activatedIMList.isEmpty()) {
+                if (DEBUG)
+                    Log.i(TAG, "List empty after parsing, resetting to defaults 0;1");
+                pIMActiveState = "0;1;";
+                mIMActivatedState = pIMActiveState;
+                mLIMEPref.setIMActivatedState(pIMActiveState);
+
+                // Add default IMs
+                for (int i = 0; i < Math.min(2, codes.length); i++) {
+                    activatedIMNameList.add(items[i].toString());
+                    activatedIMShortNameList.add(shortNames[i].toString());
+                    activatedIMList.add(codes[i].toString());
+                    if (DEBUG)
+                        Log.i(TAG, "Added default IM: [" + i + "] = " + codes[i].toString());
+                }
+            }
+        } else {
+            if (DEBUG)
+                Log.i(TAG, "Skipping rebuild (cache hit)");
+
+            // If list is empty despite cache hit, force rebuild
+            if (activatedIMList.isEmpty()) {
+                if (DEBUG)
+                    Log.i(TAG, "List empty despite cache hit, forcing rebuild");
+                mIMActivatedState = ""; // Clear cache to force rebuild on next call
+                buildActivatedIMList(); // Recursive call to rebuild
+                return;
             }
         }
 
@@ -205,6 +244,9 @@ public class IMSwitchHelper {
             Log.i(TAG, "switchToNextActivatedIM()");
 
         buildActivatedIMList();
+
+        if (DEBUG)
+            Log.i(TAG, "activatedIMList.size()=" + activatedIMList.size() + ", contents: " + activatedIMList);
 
         if (activatedIMList.isEmpty()) {
             return "";
