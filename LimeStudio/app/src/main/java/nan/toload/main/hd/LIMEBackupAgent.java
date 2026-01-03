@@ -51,23 +51,24 @@ public class LIMEBackupAgent extends BackupAgentHelper {
     public void onCreate() {
         if (DEBUG)
             Log.i(TAG, "onCreate(), backingup default share prferences for :" + this.getPackageName() + "_preferences");
-        SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, this.getPackageName() + "_preferences");
+        SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this,
+                this.getPackageName() + "_preferences");
         addHelper(PREFS_BACKUP_KEY, helper);
     }
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-                         ParcelFileDescriptor newState) throws IOException {
-        // TODO Auto-generated method stub
+            ParcelFileDescriptor newState) throws IOException {
         super.onBackup(oldState, data, newState);
-        if (DEBUG) Log.i(TAG, "onBackup()");
+        if (DEBUG)
+            Log.i(TAG, "onBackup()");
     }
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode,
-                          ParcelFileDescriptor newState) throws IOException {
-        // TODO Auto-generated method stub
+            ParcelFileDescriptor newState) throws IOException {
         super.onRestore(data, appVersionCode, newState);
-        if (DEBUG) Log.i(TAG, "onRestore()");
+        if (DEBUG)
+            Log.i(TAG, "onRestore()");
     }
 }
