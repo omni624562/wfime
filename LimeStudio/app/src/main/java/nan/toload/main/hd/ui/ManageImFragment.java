@@ -160,135 +160,108 @@ public class ManageImFragment extends Fragment {
         this.progress.setMessage(getResources().getString(R.string.manage_im_loading));
 
         this.gridManageIm = rootView.findViewById(R.id.gridManageIm);
-        this.gridManageIm.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // try {
-                // datasource.open();
-                Word w = datasource.getWord(table, id);
-                // datasource.close();
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
+        this.gridManageIm.setOnItemClickListener((parent, view, position, id) -> {
+            // try {
+            // datasource.open();
+            Word w = datasource.getWord(table, id);
+            // datasource.close();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
 
-                // Create and show the dialog.
-                ManageImEditDialog dialog = ManageImEditDialog.newInstance(table);
-                dialog.setHandler(handler, w);
-                dialog.show(ft, "editdialog");
-                // } catch (SQLException e) {
-                // e.printStackTrace();
-                // }
-            }
+            // Create and show the dialog.
+            ManageImEditDialog dialog = ManageImEditDialog.newInstance(table);
+            dialog.setHandler(handler, w);
+            dialog.show(ft, "editdialog");
+            // } catch (SQLException e) {
+            // e.printStackTrace();
+            // }
         });
 
         this.btnManageImAdd = rootView.findViewById(R.id.btnManageImAdd);
-        this.btnManageImAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ManageImAddDialog dialog = ManageImAddDialog.newInstance(table);
-                dialog.setHandler(handler);
-                dialog.show(ft, "adddialog");
-            }
+        this.btnManageImAdd.setOnClickListener(v -> {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ManageImAddDialog dialog = ManageImAddDialog.newInstance(table);
+            dialog.setHandler(handler);
+            dialog.show(ft, "adddialog");
         });
 
         this.btnManageImKeyboard = rootView.findViewById(R.id.btnManageImKeyboard);
         if (table != null && table.equals(Lime.IM_HS)) {
             this.btnManageImKeyboard.setEnabled(false);
         } else {
-            this.btnManageImKeyboard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentTransaction ft = getFragmentManager().beginTransaction();
-                    ManageImKeyboardDialog dialog = ManageImKeyboardDialog.newInstance();
-                    dialog.setHandler(handler, table);
-                    dialog.show(ft, "keyboarddialog");
-                }
+            this.btnManageImKeyboard.setOnClickListener(v -> {
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ManageImKeyboardDialog dialog = ManageImKeyboardDialog.newInstance();
+                dialog.setHandler(handler, table);
+                dialog.show(ft, "keyboarddialog");
             });
         }
 
         this.toggleManageIm = rootView.findViewById(R.id.toggleManageIm);
-        this.toggleManageIm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                searchroot = !isChecked;
-                total = 0;
-                prequery = "";
-                edtManageImSearch.setText("");
-                searchword(null);
-                searchreset = false;
-                btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
-            }
+        this.toggleManageIm.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            searchroot = !isChecked;
+            total = 0;
+            prequery = "";
+            edtManageImSearch.setText("");
+            searchword(null);
+            searchreset = false;
+            btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
         });
 
         this.btnManageImNext = rootView.findViewById(R.id.btnManageImNext);
         this.btnManageImNext.setEnabled(false);
-        this.btnManageImNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int checkrecord = Lime.IM_MANAGE_DISPLAY_AMOUNT * (page + 1);
-                if (checkrecord < total) {
-                    page++;
-                }
-                searchword();
-                // updateGridView(wordlist);
+        this.btnManageImNext.setOnClickListener(v -> {
+            int checkrecord = Lime.IM_MANAGE_DISPLAY_AMOUNT * (page + 1);
+            if (checkrecord < total) {
+                page++;
             }
+            searchword();
+            // updateGridView(wordlist);
         });
         this.btnManageImPrevious = rootView.findViewById(R.id.btnManageImPrevious);
         this.btnManageImPrevious.setEnabled(false);
-        this.btnManageImPrevious.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (page > 0) {
-                    page--;
-                }
-                searchword();
-                // updateGridView(wordlist);
+        this.btnManageImPrevious.setOnClickListener(v -> {
+            if (page > 0) {
+                page--;
             }
+            searchword();
+            // updateGridView(wordlist);
         });
 
         this.edtManageImSearch = rootView.findViewById(R.id.edtManageImSearch);
-        this.edtManageImSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchreset = false;
-                btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
-            }
+        this.edtManageImSearch.setOnClickListener(v -> {
+            searchreset = false;
+            btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
         });
-        this.edtManageImSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager imm = (InputMethodManager) getActivity()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(edtManageImSearch.getWindowToken(), 0);
-                }
+        this.edtManageImSearch.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(edtManageImSearch.getWindowToken(), 0);
             }
         });
 
         this.btnManageImSearch = rootView.findViewById(R.id.btnManageImSearch);
-        this.btnManageImSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!searchreset) {
-                    String query = edtManageImSearch.getText().toString();
-                    // hide the soft keyboard before search Jeremy 15,6,4
-                    InputMethodManager imm = (InputMethodManager) getActivity()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(edtManageImSearch.getWindowToken(), 0);
-                    if (query != null && query.length() > 0 &&
-                            (prequery == null || !prequery.equals(query) || !searchreset)) {
-                        query = query.trim();
-                        searchword(query);
+        this.btnManageImSearch.setOnClickListener(v -> {
+            if (!searchreset) {
+                String query = edtManageImSearch.getText().toString();
+                // hide the soft keyboard before search Jeremy 15,6,4
+                InputMethodManager imm = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(edtManageImSearch.getWindowToken(), 0);
+                if (query != null && query.length() > 0 &&
+                        (prequery == null || !prequery.equals(query) || !searchreset)) {
+                    query = query.trim();
+                    searchword(query);
 
-                    }
-                    searchreset = true;
-                    btnManageImSearch.setText(getResources().getText(R.string.manage_im_reset));
-                } else {
-                    total = 0;
-                    searchword(null);
-                    edtManageImSearch.setText("");
-                    searchreset = false;
-                    btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
                 }
+                searchreset = true;
+                btnManageImSearch.setText(getResources().getText(R.string.manage_im_reset));
+            } else {
+                total = 0;
+                searchword(null);
+                edtManageImSearch.setText("");
+                searchreset = false;
+                btnManageImSearch.setText(getResources().getText(R.string.manage_im_search));
             }
         });
 

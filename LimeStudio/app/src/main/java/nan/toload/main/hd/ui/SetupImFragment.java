@@ -24,10 +24,8 @@
 
 package nan.toload.main.hd.ui;
 
-
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -50,6 +48,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +95,7 @@ public class SetupImFragment extends Fragment {
     Button btnSetupImSystemIMPicker;
     Button btnSetupImGrantPermission;
 
-    //Activate LIME IM
+    // Activate LIME IM
     // Custom Import
     Button btnSetupImImportStandard;
     Button btnSetupImImportRelated;
@@ -145,10 +145,11 @@ public class SetupImFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         /*
-        if(vpadnBanner != null){
-            vpadnBanner.destroy();
-            vpadnBanner = null;
-        }*/
+         * if(vpadnBanner != null){
+         * vpadnBanner.destroy();
+         * vpadnBanner = null;
+         * }
+         */
     }
 
     @Override
@@ -158,13 +159,16 @@ public class SetupImFragment extends Fragment {
     }
 
     public void showProgress(boolean spinnerStyle, String message) {
-        if (progress.isShowing()) progress.dismiss();
+        if (progress.isShowing())
+            progress.dismiss();
 
         progress = new ProgressDialog(activity);
         progress.setCancelable(false);
         progress.setProgressStyle(spinnerStyle ? ProgressDialog.STYLE_SPINNER : ProgressDialog.STYLE_HORIZONTAL);
-        if (message != null) progress.setMessage(message);
-        if (!spinnerStyle) progress.setProgress(0);
+        if (message != null)
+            progress.setMessage(message);
+        if (!spinnerStyle)
+            progress.setProgress(0);
 
         progress.show();
     }
@@ -192,7 +196,7 @@ public class SetupImFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
 
         datasource = new LimeDB(this.getActivity());
 
@@ -234,7 +238,8 @@ public class SetupImFragment extends Fragment {
         btnSetupImRestoreLocal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlertDialog(Lime.RESTORE, Lime.LOCAL, getResources().getString(R.string.l3_initial_restore_confirm));
+                showAlertDialog(Lime.RESTORE, Lime.LOCAL,
+                        getResources().getString(R.string.l3_initial_restore_confirm));
             }
         });
 
@@ -251,14 +256,13 @@ public class SetupImFragment extends Fragment {
         return rootView;
     }
 
-
     public void initialbutton() {
         HashMap<String, String> check = new HashMap<>();
 
         // Load Menu Item
         if (!DBSrv.isDatabseOnHold()) {
             try {
-                //datasource.open();
+                // datasource.open();
                 imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
                 for (int i = 0; i < imlist.size(); i++) {
                     check.put(imlist.get(i).getCode(), imlist.get(i).getDesc());
@@ -268,29 +272,30 @@ public class SetupImFragment extends Fragment {
                 mLIMEPref.syncIMActivatedState(imlist);
 
                 Context ctx = getActivity().getApplicationContext();
-                if (LIMEUtilities.isLIMEEnabled(getActivity().getApplicationContext())) {  //LIME is activated in system
+                if (LIMEUtilities.isLIMEEnabled(getActivity().getApplicationContext())) { // LIME is activated in system
                     btnSetupImSystemSettings.setVisibility(View.GONE);
                     rootView.findViewById(R.id.setup_im_system_settings_description).setVisibility(View.GONE);
                     rootView.findViewById(R.id.SetupImList).setVisibility(View.VISIBLE);
                     if (LIMEUtilities.isLIMEActive(getActivity().getApplicationContext()) &&
-                            true
-                    ) {  //LIME is activated, also the active Keyboard, and write storage permission is grated
+                            true) { // LIME is activated, also the active Keyboard, and write storage permission is
+                                    // grated
                         btnSetupImSystemIMPicker.setVisibility(View.GONE);
                         rootView.findViewById(R.id.Setup_Wizard).setVisibility(View.GONE);
                         btnSetupImBackupLocal.setEnabled(true);
                         btnSetupImRestoreLocal.setEnabled(true);
                         btnSetupImImportStandard.setEnabled(true);
                         btnSetupImImportRelated.setEnabled(true);
-                    } else  //LIME is activated, but not active keyboard
+                    } else // LIME is activated, but not active keyboard
                     {
                         if (LIMEUtilities.isLIMEActive(getActivity().getApplicationContext())) {
                             btnSetupImSystemIMPicker.setVisibility(View.GONE);
                             rootView.findViewById(R.id.setup_im_system_impicker_description).setVisibility(View.GONE);
                         } else {
                             btnSetupImSystemIMPicker.setVisibility(View.VISIBLE);
-                            rootView.findViewById(R.id.setup_im_system_impicker_description).setVisibility(View.VISIBLE);
+                            rootView.findViewById(R.id.setup_im_system_impicker_description)
+                                    .setVisibility(View.VISIBLE);
                         }
-                        //Check permission for > API 23
+                        // Check permission for > API 23
                         if (true) {
                             rootView.findViewById(R.id.setup_im_grant_permission).setVisibility((View.GONE));
                             btnSetupImGrantPermission.setVisibility(View.GONE);
@@ -318,7 +323,6 @@ public class SetupImFragment extends Fragment {
                     rootView.findViewById(R.id.SetupImList).setVisibility(View.GONE);
                 }
 
-
                 btnSetupImGrantPermission.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -331,7 +335,6 @@ public class SetupImFragment extends Fragment {
                         btnSetupImImportRelated.setEnabled(true);
                     }
                 });
-
 
                 btnSetupImSystemSettings.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -356,7 +359,6 @@ public class SetupImFragment extends Fragment {
                     btnSetupImImportStandard.setAlpha(Lime.NORMAL_ALPHA_VALUE);
                     btnSetupImImportStandard.setTypeface(null, Typeface.BOLD);
                 }
-
 
                 btnSetupImImportStandard.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -419,49 +421,41 @@ public class SetupImFragment extends Fragment {
 
     }
 
-
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(getActivity())
+        new MaterialAlertDialogBuilder(getActivity())
                 .setMessage(message)
                 .setPositiveButton("OK", okListener)
                 .setNegativeButton("Cancel", null)
-                .create()
                 .show();
     }
 
     public void showAlertDialog(final String action, final String type, String message) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(message);
-        builder.setCancelable(false);
-        builder.setPositiveButton(getResources().getString(R.string.dialog_confirm),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (action != null) {
-                            if (action.equalsIgnoreCase(Lime.BACKUP)) {
-
-                                if (type.equalsIgnoreCase(Lime.LOCAL)) {
-//                                    backupLocalDrive();
+        new MaterialAlertDialogBuilder(activity)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton(getResources().getString(R.string.dialog_confirm),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (action != null) {
+                                    if (action.equalsIgnoreCase(Lime.BACKUP)) {
+                                        if (type.equalsIgnoreCase(Lime.LOCAL)) {
+                                            // backupLocalDrive();
+                                        }
+                                    } else if (action.equalsIgnoreCase(Lime.RESTORE)) {
+                                        if (type.equalsIgnoreCase(Lime.LOCAL)) {
+                                            // restoreLocalDrive();
+                                        }
+                                    }
                                 }
-
-                            } else if (action.equalsIgnoreCase(Lime.RESTORE)) {
-
-                                if (type.equalsIgnoreCase(Lime.LOCAL)) {
-//                                    restoreLocalDrive();
-                                }
-
                             }
-                        }
-                    }
-                });
-        builder.setNegativeButton(getResources().getString(R.string.dialog_cancel),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-        AlertDialog alert = builder.create();
-        alert.show();
+                        })
+                .setNegativeButton(getResources().getString(R.string.dialog_cancel),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        })
+                .show();
     }
 
     @Override
@@ -469,22 +463,9 @@ public class SetupImFragment extends Fragment {
         super.onAttach(context);
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Lime.PAYMENT_REQUEST_CODE) {
-            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            //int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-            //String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-
-            this.getActivity();
-            if (resultCode == Activity.RESULT_OK) {
-                mLIMEPref.setParameter(Lime.PAYMENT_FLAG, true);
-                showToastMessage(getResources().getString(R.string.payment_service_success), Toast.LENGTH_LONG);
-                //Log.i("LIME", "purchasing complete " + new Date() + " / " + purchaseData);
-            }
-        }
-
+        // Payment functionality removed
     }
 
     public void showToastMessage(String msg, int length) {
@@ -512,28 +493,28 @@ public class SetupImFragment extends Fragment {
     }
 
     private void showExplanation(String title,
-                                 String message,
-                                 final String permission,
-                                 final int permissionRequestCode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(title)
+            String message,
+            final String permission,
+            final int permissionRequestCode) {
+        new MaterialAlertDialogBuilder(getActivity())
+                .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         requestPermission(permission, permissionRequestCode);
                     }
-                });
-        builder.create().show();
+                })
+                .show();
     }
 
     private void requestPermission(String permissionName, int permissionRequestCode) {
         ActivityCompat.requestPermissions(getActivity(),
-                new String[]{permissionName}, permissionRequestCode);
+                new String[] { permissionName }, permissionRequestCode);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+            String permissions[], int[] grantResults) {
         // Modern Android - permissions handled through document picker
         // No explicit permission handling needed for file access
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

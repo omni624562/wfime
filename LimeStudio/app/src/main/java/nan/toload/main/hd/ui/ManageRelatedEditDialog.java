@@ -25,7 +25,6 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -38,6 +37,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import nan.toload.main.hd.R;
 import nan.toload.main.hd.data.Related;
@@ -94,7 +95,6 @@ public class ManageRelatedEditDialog extends DialogFragment {
         this.setCancelable(false);
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
@@ -111,14 +111,15 @@ public class ManageRelatedEditDialog extends DialogFragment {
         getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(android.content.DialogInterface dialog,
-                                 int keyCode, android.view.KeyEvent event) {
+                    int keyCode, android.view.KeyEvent event) {
                 if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
                     // To dismiss the fragment when the back-button is pressed.
                     dismiss();
                     return true;
                 }
                 // Otherwise, do nothing else
-                else return false;
+                else
+                    return false;
             }
         });
     }
@@ -147,24 +148,24 @@ public class ManageRelatedEditDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-                alertDialog.setTitle(activity.getResources().getString(R.string.manage_related_dialog_delete));
-                alertDialog.setMessage(activity.getResources().getString(R.string.manage_related_dialog_delete_message));
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getResources().getString(R.string.dialog_confirm),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                handler.removeRelated(related.getId());
-                                dialog.dismiss();
-                                cancelDialog();
-                            }
-                        });
-                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_cancel),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
+                new MaterialAlertDialogBuilder(activity)
+                        .setTitle(activity.getResources().getString(R.string.manage_related_dialog_delete))
+                        .setMessage(activity.getResources().getString(R.string.manage_related_dialog_delete_message))
+                        .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        handler.removeRelated(related.getId());
+                                        dialog.dismiss();
+                                        cancelDialog();
+                                    }
+                                })
+                        .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                        .show();
             }
         });
 
@@ -172,39 +173,37 @@ public class ManageRelatedEditDialog extends DialogFragment {
         btnManageRelatedUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-                alertDialog.setTitle(activity.getResources().getString(R.string.manage_related_dialog_edit));
-                alertDialog.setMessage(activity.getResources().getString(R.string.manage_related_dialog_message));
-                //alertDialog.setIcon(R.drawable.);
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getResources().getString(R.string.dialog_confirm),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                new MaterialAlertDialogBuilder(activity)
+                        .setTitle(activity.getResources().getString(R.string.manage_related_dialog_edit))
+                        .setMessage(activity.getResources().getString(R.string.manage_related_dialog_message))
+                        .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String score = edtManageRelatedScore.getText().toString();
+                                        String source = edtManageRelatedWord.getText().toString();
+                                        String pword = "";
+                                        String cword = "";
 
-                                String score = edtManageRelatedScore.getText().toString();
-                                String source = edtManageRelatedWord.getText().toString();
-                                String pword = "";
-                                String cword = "";
-
-                                if (!source.isEmpty() || source.length() > 1) {
-                                    source = source.trim();
-                                    pword = source.substring(0, 1);
-                                    cword = source.substring(1);
-                                    handler.updateRelated(related.getId(), pword, cword, Integer.parseInt(score));
-                                    dialog.dismiss();
-                                    cancelDialog();
-                                } else {
-                                    Toast.makeText(activity, R.string.update_error, Toast.LENGTH_SHORT).show();
-                                }
-
-                            }
-                        });
-                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_cancel),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
+                                        if (!source.isEmpty() || source.length() > 1) {
+                                            source = source.trim();
+                                            pword = source.substring(0, 1);
+                                            cword = source.substring(1);
+                                            handler.updateRelated(related.getId(), pword, cword,
+                                                    Integer.parseInt(score));
+                                            dialog.dismiss();
+                                            cancelDialog();
+                                        } else {
+                                            Toast.makeText(activity, R.string.update_error, Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                })
+                        .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                        .show();
             }
         });
 

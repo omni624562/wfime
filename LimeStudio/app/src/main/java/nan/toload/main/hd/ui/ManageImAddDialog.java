@@ -25,7 +25,6 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -39,6 +38,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import nan.toload.main.hd.R;
 
 public class ManageImAddDialog extends DialogFragment {
@@ -48,8 +49,8 @@ public class ManageImAddDialog extends DialogFragment {
 
     private String imtype;
 
-    //Button btnQuizExitConfirm;
-    //Button btnQuizExitCancel;
+    // Button btnQuizExitConfirm;
+    // Button btnQuizExitCancel;
 
     private ManageImHandler handler;
 
@@ -63,7 +64,7 @@ public class ManageImAddDialog extends DialogFragment {
     private EditText edtManageImWordCode;
     private EditText edtManageImWordWord;
 
-    //private TextView txtManageImWordCode3r;
+    // private TextView txtManageImWordCode3r;
 
     public ManageImAddDialog() {
     }
@@ -111,7 +112,6 @@ public class ManageImAddDialog extends DialogFragment {
         this.setCancelable(false);
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -119,14 +119,15 @@ public class ManageImAddDialog extends DialogFragment {
         getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(android.content.DialogInterface dialog,
-                                 int keyCode, android.view.KeyEvent event) {
+                    int keyCode, android.view.KeyEvent event) {
                 if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
                     // To dismiss the fragment when the back-button is pressed.
                     dismiss();
                     return true;
                 }
                 // Otherwise, do nothing else
-                else return false;
+                else
+                    return false;
             }
         });
     }
@@ -145,28 +146,18 @@ public class ManageImAddDialog extends DialogFragment {
         view = inflater.inflate(R.layout.fragment_dialog_add, container, false);
 
         btnManageImWordCancel = view.findViewById(R.id.btnManageImWordCancel);
-        btnManageImWordCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cancelDialog();
-            }
-        });
+        btnManageImWordCancel.setOnClickListener(v -> cancelDialog());
 
         btnManageImWordSave = view.findViewById(R.id.btnManageImWordSave);
-        btnManageImWordSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-                alertDialog.setTitle(activity.getResources().getString(R.string.manage_word_dialog_add));
-                alertDialog.setMessage(activity.getResources().getString(R.string.manage_word_dialog_add_message));
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getResources().getString(R.string.dialog_confirm),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+        btnManageImWordSave.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(activity)
+                    .setTitle(activity.getResources().getString(R.string.manage_word_dialog_add))
+                    .setMessage(activity.getResources().getString(R.string.manage_word_dialog_add_message))
+                    .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                            (dialog, which) -> {
                                 String code = edtManageImWordCode.getText().toString();
-                                //String code3r = edtManageImWordCode3r.getText().toString();
                                 String text = edtManageImWordWord.getText().toString();
                                 if (!code.isEmpty() && !text.isEmpty()) {
-
                                     int value = Integer.parseInt(edtManageImWordScore.getText().toString());
                                     handler.addWord(code, value, text);
                                     handler.updateRelated(code);
@@ -175,43 +166,31 @@ public class ManageImAddDialog extends DialogFragment {
                                 } else {
                                     Toast.makeText(activity, R.string.insert_error, Toast.LENGTH_SHORT).show();
                                 }
-                            }
-                        });
-                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_cancel),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
-            }
+                            })
+                    .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                            (dialog, which) -> dialog.dismiss())
+                    .show();
         });
 
         btnManageMinusScore = view.findViewById(R.id.btnManageMinusScore);
-        btnManageMinusScore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    int value = Integer.parseInt(edtManageImWordScore.getText().toString());
-                    if (value > 0) {
-                        value = value - 1;
-                        edtManageImWordScore.setText(String.valueOf(value));
-                    }
-                } catch (Exception e) {
+        btnManageMinusScore.setOnClickListener(v -> {
+            try {
+                int value = Integer.parseInt(edtManageImWordScore.getText().toString());
+                if (value > 0) {
+                    value = value - 1;
+                    edtManageImWordScore.setText(String.valueOf(value));
                 }
+            } catch (Exception e) {
             }
         });
 
         btnManageAddScore = view.findViewById(R.id.btnManageAddScore);
-        btnManageAddScore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    int value = Integer.parseInt(edtManageImWordScore.getText().toString());
-                    value = value + 1;
-                    edtManageImWordScore.setText(String.valueOf(value));
-                } catch (Exception e) {
-                }
+        btnManageAddScore.setOnClickListener(v -> {
+            try {
+                int value = Integer.parseInt(edtManageImWordScore.getText().toString());
+                value = value + 1;
+                edtManageImWordScore.setText(String.valueOf(value));
+            } catch (Exception e) {
             }
         });
 
@@ -221,12 +200,15 @@ public class ManageImAddDialog extends DialogFragment {
         edtManageImWordCode = view.findViewById(R.id.edtManageImWordCode);
         edtManageImWordWord = view.findViewById(R.id.edtManageImWordWord);
 
-        //txtManageImWordCode3r = (TextView) view.findViewById(R.id.txtManageImWordCode3r);
+        // txtManageImWordCode3r = (TextView)
+        // view.findViewById(R.id.txtManageImWordCode3r);
 
-		/*if(!imtype.equals(Lime.DB_TABLE_DAYI)){
-			edtManageImWordCode3r.setVisibility(View.GONE);
-			txtManageImWordCode3r.setVisibility(View.GONE);
-		}*/
+        /*
+         * if(!imtype.equals(Lime.DB_TABLE_DAYI)){
+         * edtManageImWordCode3r.setVisibility(View.GONE);
+         * txtManageImWordCode3r.setVisibility(View.GONE);
+         * }
+         */
 
         return view;
     }

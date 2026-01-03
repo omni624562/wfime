@@ -25,7 +25,6 @@
 package nan.toload.main.hd;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -78,6 +77,8 @@ import nan.toload.main.hd.keyboard.LIMEKeyboardBaseView;
 import nan.toload.main.hd.keyboard.LIMEKeyboardView;
 import nan.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
 import nan.toload.main.hd.limesettings.LIMEPreferenceHC;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class LIMEService extends InputMethodService implements
         LIMEKeyboardBaseView.OnKeyboardActionListener {
@@ -205,7 +206,7 @@ public class LIMEService extends InputMethodService implements
     private LIMEPreferenceManager mLIMEPref;
     private boolean hasChineseSymbolCandidatesShown = false;
     private boolean hasCandidatesShown = false;
-    private AlertDialog mOptionsDialog;
+    private androidx.appcompat.app.AlertDialog mOptionsDialog;
     private int mKeyboardThemeIndex = -1;
 
     // Helper classes for better code organization
@@ -1811,9 +1812,9 @@ public class LIMEService extends InputMethodService implements
     private void handleOptions() {
         if (DEBUG)
             Log.i(TAG, "handleOptions()");
-        AlertDialog.Builder builder;
+        MaterialAlertDialogBuilder builder;
 
-        builder = new AlertDialog.Builder(this);
+        builder = new MaterialAlertDialogBuilder(this);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_dark);
@@ -1975,9 +1976,9 @@ public class LIMEService extends InputMethodService implements
      * Add by Jeremy '11,9,17 for han convert (tranditional <-> simplifed) options
      */
     private void showHanConvertPicker() {
-        AlertDialog.Builder builder;
+        MaterialAlertDialogBuilder builder;
 
-        builder = new AlertDialog.Builder(this);
+        builder = new MaterialAlertDialogBuilder(this);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_light);
@@ -2020,9 +2021,9 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "showIMPicker()");
         buildActivatedIMList();
 
-        AlertDialog.Builder builder;
+        MaterialAlertDialogBuilder builder;
 
-        builder = new AlertDialog.Builder(this);
+        builder = new MaterialAlertDialogBuilder(this);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_light);

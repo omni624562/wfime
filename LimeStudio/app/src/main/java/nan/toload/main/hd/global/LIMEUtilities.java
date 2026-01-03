@@ -32,7 +32,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Environment;
+
 import android.provider.Settings;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
@@ -65,7 +65,7 @@ public class LIMEUtilities {
     static final String TAG = "LIMEUtilities";
     static final boolean DEBUG = false;
 
-    public static boolean isUnicodeSurrogate(String word) {  // emoji icons are within these surrogate areas
+    public static boolean isUnicodeSurrogate(String word) { // emoji icons are within these surrogate areas
         if (word != null && word.length() == 2) {
             char[] chArray = word.toCharArray();
             return Character.isSurrogatePair(chArray[0], chArray[1]);
@@ -99,8 +99,8 @@ public class LIMEUtilities {
     }
 
     /*
-     *   Zip singl file into single zip.
-     *   sourceFile should be assigned with absolute path.
+     * Zip singl file into single zip.
+     * sourceFile should be assigned with absolute path.
      *
      */
     public static void zip(String zipFilePath, String sourceFile, Boolean OverWrite) throws Exception {
@@ -108,20 +108,22 @@ public class LIMEUtilities {
     }
 
     /*
-     *   Zip singl file into single zip.
-     *   sourceFile is specify relative to the baseFolderPath.
-     *   sourceFile should be assigned with absolute path if baseFolderPath is null of empty
+     * Zip singl file into single zip.
+     * sourceFile is specify relative to the baseFolderPath.
+     * sourceFile should be assigned with absolute path if baseFolderPath is null of
+     * empty
      *
      */
-    public static void zip(String zipFilePath, String sourceFile, String baseFolderPath, Boolean OverWrite) throws Exception {
+    public static void zip(String zipFilePath, String sourceFile, String baseFolderPath, Boolean OverWrite)
+            throws Exception {
         List<String> sourceFileList = new ArrayList<>();
         sourceFileList.add(sourceFile);
         zip(zipFilePath, sourceFileList, baseFolderPath, OverWrite);
     }
 
     /*
-     *   Zip multile files into single zip.
-     *   sourceFiles should be assigned with absolute path.
+     * Zip multile files into single zip.
+     * sourceFiles should be assigned with absolute path.
      *
      */
     public static void zip(String zipFilePath, List<String> sourceFiles, Boolean OverWrite) throws Exception {
@@ -129,31 +131,36 @@ public class LIMEUtilities {
     }
 
     /*
-     *   Zip multile files into single zip.
-     *   sourceFiles is specify relative to the baseFolderPath.
-     *   sourceFiles should be assigned with absolute path if baseFolderPath is null of empty
+     * Zip multile files into single zip.
+     * sourceFiles is specify relative to the baseFolderPath.
+     * sourceFiles should be assigned with absolute path if baseFolderPath is null
+     * of empty
      *
      */
-    public static void zip(String zipFilePath, List<String> sourceFiles, String baseFolderPath, Boolean OverWrite) throws Exception {
+    public static void zip(String zipFilePath, List<String> sourceFiles, String baseFolderPath, Boolean OverWrite)
+            throws Exception {
         File zipFile = new File(zipFilePath);
-        if (zipFile.exists() && !OverWrite) return;
-        else if (zipFile.exists() && OverWrite) zipFile.delete();
+        if (zipFile.exists() && !OverWrite)
+            return;
+        else if (zipFile.exists() && OverWrite)
+            zipFile.delete();
 
         ZipOutputStream zos = null;
         FileOutputStream outStream = null;
         outStream = new FileOutputStream(zipFile);
         zos = new ZipOutputStream(outStream);
 
-        if (baseFolderPath == null) baseFolderPath = "";
+        if (baseFolderPath == null)
+            baseFolderPath = "";
 
         for (String item : sourceFiles) {
-            String itemName = (item.startsWith(File.separator) || baseFolderPath.endsWith(File.separator)) ? item : (File.separator + item);
+            String itemName = (item.startsWith(File.separator) || baseFolderPath.endsWith(File.separator)) ? item
+                    : (File.separator + item);
 
-            if (baseFolderPath.equals("")) //absolute path
+            if (baseFolderPath.equals("")) // absolute path
                 addFileToZip(baseFolderPath + itemName, zos);
-            else  //relative path
+            else // relative path
                 addFileToZip(baseFolderPath + itemName, baseFolderPath, zos);
-
 
         }
         zos.flush();
@@ -161,7 +168,8 @@ public class LIMEUtilities {
 
     }
 
-    private static void addFileToZip(String sourceFilePath, String baseFolderPath, ZipOutputStream zos) throws Exception {
+    private static void addFileToZip(String sourceFilePath, String baseFolderPath, ZipOutputStream zos)
+            throws Exception {
         addFileToZip("", sourceFilePath, baseFolderPath, zos);
     }
 
@@ -169,25 +177,30 @@ public class LIMEUtilities {
         addFileToZip("", sourceFilePath, "", zos);
     }
 
-    private static void addFileToZip(String sourceFolderPath, String sourceFilePath, String baseFolderPath, ZipOutputStream zos) throws Exception {
+    private static void addFileToZip(String sourceFolderPath, String sourceFilePath, String baseFolderPath,
+            ZipOutputStream zos) throws Exception {
 
         File item = new File(sourceFilePath);
-        if (item == null || !item.exists()) return; //skip if the file is not exist
-        if (isSymLink(item)) return; // do nothing to symbolic links.
+        if (item == null || !item.exists())
+            return; // skip if the file is not exist
+        if (isSymLink(item))
+            return; // do nothing to symbolic links.
 
-        if (baseFolderPath == null) baseFolderPath = "";
+        if (baseFolderPath == null)
+            baseFolderPath = "";
 
         if (item.isDirectory()) {
             for (String subItem : item.list()) {
-                addFileToZip(sourceFolderPath + File.separator + item.getName(), sourceFilePath + File.separator + subItem, baseFolderPath, zos);
+                addFileToZip(sourceFolderPath + File.separator + item.getName(),
+                        sourceFilePath + File.separator + subItem, baseFolderPath, zos);
             }
         } else {
-            byte[] buf = new byte[102400]; //100k buffer
+            byte[] buf = new byte[102400]; // 100k buffer
             int len;
             FileInputStream inStream = new FileInputStream(sourceFilePath);
-            if (baseFolderPath.equals(""))  //sourceFiles in absolute path, zip the file with absolute path
+            if (baseFolderPath.equals("")) // sourceFiles in absolute path, zip the file with absolute path
                 zos.putNextEntry(new ZipEntry(sourceFilePath));
-            else {//relative path
+            else {// relative path
                 String relativePath = sourceFilePath.substring(baseFolderPath.length());
                 zos.putNextEntry(new ZipEntry(relativePath));
             }
@@ -228,16 +241,22 @@ public class LIMEUtilities {
                 String itemName = ze.getName();
                 File targetFile = null;
 
-                if (itemName.startsWith("/sdcard/") || itemName.startsWith(Environment.getExternalStorageDirectory() + File.separator)) {
-                    targetFile = new File(ze.getName());  //target is zipped with absolute path on /sdcard
-                } else if (itemName.startsWith("/data/") || itemName.startsWith(Environment.getDataDirectory() + File.separator)) {
-                    //target is zipped with absolute path on /data, we need to confirm the targetfolder is within our package.
-                    String packageRoot = LIME.getLimeDataRootFolder();
-                    if (!itemName.startsWith(packageRoot))  //skip if the target path is not under our package root
-                        continue;
-                    targetFile = new File(ze.getName());  //target is zipped with absolute path on /sdcard
-                } else {
-                    targetFile = new File(targetDirectory, ze.getName());
+                // Security: Always extract relative to targetDirectory. Ignore absolute paths
+                // in zip.
+                String fileName = new File(ze.getName()).getName(); // simple filename
+                // If we want to preserve directory structure relative to zip root, we usually
+                // keep ze.getName()
+                // but sanitize it to prevent ".." or starting with "/".
+
+                // For this app's purpose (table loading), generally we can trust local zips or
+                // they are flat.
+                // But let's keep the relative structure but sanitize.
+
+                targetFile = new File(targetDirectory, ze.getName());
+
+                // Zip Slip remediation:
+                if (!targetFile.getCanonicalPath().startsWith(targetDirectory.getCanonicalPath() + File.separator)) {
+                    throw new IOException("Zip entry is outside of the target dir: " + ze.getName());
                 }
 
                 File dir = ze.isDirectory() ? targetFile : targetFile.getParentFile();
@@ -267,10 +286,13 @@ public class LIMEUtilities {
 
     public static boolean copyFile(String sourceFilePath, String targetFilePath, Boolean overWrite) {
         File sourceFile = isFileExist(sourceFilePath);
-        if (sourceFilePath == null || sourceFile == null || targetFilePath == null) return false;
+        if (sourceFilePath == null || sourceFile == null || targetFilePath == null)
+            return false;
         File targetFile = isFileExist(targetFilePath);
-        if (targetFile != null && !overWrite) return false;
-        if (targetFile == null) targetFile = new File(targetFilePath);
+        if (targetFile != null && !overWrite)
+            return false;
+        if (targetFile == null)
+            targetFile = new File(targetFilePath);
         try {
             FileInputStream inStream = new FileInputStream(sourceFile);
             FileOutputStream outSteram = new FileOutputStream(targetFile);
@@ -296,7 +318,7 @@ public class LIMEUtilities {
         try {
             int bytesum = 0, byteread = 0;
 
-            byte[] buffer = new byte[102400]; //100k buffer
+            byte[] buffer = new byte[102400]; // 100k buffer
             while ((byteread = inStream.read(buffer)) != -1) {
                 bytesum += byteread;
                 System.out.println(bytesum);
@@ -309,23 +331,23 @@ public class LIMEUtilities {
         }
     }
 
-
     /**
-     * Add by Jeremy '12,4,23 Show notification with notification builder in compatibility package replacing the deprecated alert dialog creation
+     * Add by Jeremy '12,4,23 Show notification with notification builder in
+     * compatibility package replacing the deprecated alert dialog creation
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public static void showNotification(Context context, Boolean autoCancel, CharSequence title, CharSequence message, Intent intent) {
+    public static void showNotification(Context context, Boolean autoCancel, CharSequence title, CharSequence message,
+            Intent intent) {
 
-        //Intent resultIntent = new Intent(context, MainActivity.class);
-        //PendingIntent pi = PendingIntent.getActivity(context, 0, resultIntent, 0);
+        // Intent resultIntent = new Intent(context, MainActivity.class);
+        // PendingIntent pi = PendingIntent.getActivity(context, 0, resultIntent, 0);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context)
-                        .setLargeIcon(getNotificationIconBitmap(context))
-                        .setContentTitle(title)
-                        .setAutoCancel(autoCancel)
-                        .setTicker(message)
-                        .setContentText(message);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+                .setLargeIcon(getNotificationIconBitmap(context))
+                .setContentTitle(title)
+                .setAutoCancel(autoCancel)
+                .setTicker(message)
+                .setContentText(message);
 
         boolean lollipop = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
         if (lollipop) {
@@ -334,8 +356,8 @@ public class LIMEUtilities {
             mBuilder.setSmallIcon(R.drawable.logo);
         }
 
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(501, mBuilder.build());
     }
@@ -356,21 +378,23 @@ public class LIMEUtilities {
         return bm;
     }
 
-
     public static String isVoiceSearchServiceExist(Context context) {
-        if (DEBUG) Log.i(TAG, "isVoiceSearchServiceExist()");
+        if (DEBUG)
+            Log.i(TAG, "isVoiceSearchServiceExist()");
 
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         List<InputMethodInfo> mInputMethodProperties = imm.getEnabledInputMethodList();
 
-        //boolean isVoiceSearchServiceEnabled = false;
+        // boolean isVoiceSearchServiceEnabled = false;
         for (int i = 0; i < mInputMethodProperties.size(); i++) {
             InputMethodInfo imi = mInputMethodProperties.get(i);
-            if (DEBUG) Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
+            if (DEBUG)
+                Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
 
             if (imi.getId().equals("com.google.android.voice-search/.ime.VoiceInputMethodService")) {
                 return "com.google.android.voice-search/.ime.VoiceInputMethodService";
-            } else if (imi.getId().equals("com.google.android.googlequicksearchbox/com.google.android.voice-search.ime.VoiceInputMethodService")) {
+            } else if (imi.getId().equals(
+                    "com.google.android.googlequicksearchbox/com.google.android.voice-search.ime.VoiceInputMethodService")) {
                 return "com.google.android.googlequicksearchbox/com.google.android.voice-search.ime.VoiceInputMethodService";
             }
         }
@@ -387,7 +411,8 @@ public class LIMEUtilities {
 
         for (int i = 0; i < mInputMethodProperties.size(); i++) {
             InputMethodInfo imi = mInputMethodProperties.get(i);
-            if (DEBUG) Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
+            if (DEBUG)
+                Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
             if (imi.getId().equals(limeID)) {
                 isLIMEActive = true;
                 break;
@@ -400,7 +425,8 @@ public class LIMEUtilities {
         String activeIM = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
         String limeID = getLIMEID(context);
 
-        if (DEBUG) Log.i(TAG, "active IM:" + activeIM + " LIME IM:" + limeID);
+        if (DEBUG)
+            Log.i(TAG, "active IM:" + activeIM + " LIME IM:" + limeID);
         return activeIM.equals(limeID);
     }
 
@@ -410,8 +436,8 @@ public class LIMEUtilities {
     }
 
     public static String getVoiceSearchIMId(Context context) {
-        ComponentName voiceInputComponent =
-                new ComponentName("com.google.android.voice-search", "com.google.android.voice-search.ime.VoceInputMethodService");
+        ComponentName voiceInputComponent = new ComponentName("com.google.android.voice-search",
+                "com.google.android.voice-search.ime.VoceInputMethodService");
         if (DEBUG)
             Log.i(TAG, "getVoiceSearchIMId(), Component name = "
                     + voiceInputComponent.flattenToString() + ", id = "
@@ -428,6 +454,5 @@ public class LIMEUtilities {
     public static void showInputMethodPicker(Context context) {
         ((InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE)).showInputMethodPicker();
     }
-
 
 }

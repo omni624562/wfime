@@ -26,7 +26,6 @@ package nan.toload.main.hd.ui;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -48,6 +47,8 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -196,40 +197,26 @@ public class SetupImLoadDialog extends DialogFragment {
             getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_related_title));
 
             btnSetupImDialogCustom.setText(getResources().getString(R.string.setup_im_import_related_default));
-            btnSetupImDialogCustom.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-                    alertDialog.setMessage(
-                            activity.getResources().getString(R.string.setup_im_import_related_default_confirm));
-                    alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                            activity.getResources().getString(R.string.dialog_confirm),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
+            btnSetupImDialogCustom.setOnClickListener(v -> {
+                new MaterialAlertDialogBuilder(activity)
+                        .setMessage(
+                                activity.getResources().getString(R.string.setup_im_import_related_default_confirm))
+                        .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                                (dialog, which) -> {
                                     loadDefaultRelated();
                                     handler.initialImButtons();
                                     dismiss();
-                                }
-                            });
-                    alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-                            activity.getResources().getString(R.string.dialog_cancel),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-                }
+                                })
+                        .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                                (dialog, which) -> dialog.dismiss())
+                        .show();
             });
 
             btnSetupImDialogLoad1.setText(getResources().getString(R.string.setup_im_import_related));
-            btnSetupImDialogLoad1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectMappingFile();
-                    handler.initialImButtons();
-                    dismiss();
-                }
+            btnSetupImDialogLoad1.setOnClickListener(v -> {
+                selectMappingFile();
+                handler.initialImButtons();
+                dismiss();
             });
 
             // btnSetupImDialogLoad1.setVisibility(View.GONE);
@@ -249,38 +236,24 @@ public class SetupImLoadDialog extends DialogFragment {
                 getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_dialog_title_remove));
 
                 btnSetupImDialogLoad1.setText(getResources().getString(R.string.setup_im_dialog_remove));
-                btnSetupImDialogLoad1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-                        alertDialog.setMessage(
-                                activity.getResources().getString(R.string.setup_im_dialog_remove_confirm_message));
-                        // alertDialog.setIcon(R.drawable.);
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                                activity.getResources().getString(R.string.dialog_confirm),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-
+                btnSetupImDialogLoad1.setOnClickListener(v -> {
+                    new MaterialAlertDialogBuilder(activity)
+                            .setMessage(activity.getResources()
+                                    .getString(R.string.setup_im_dialog_remove_confirm_message))
+                            .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                                    (dialog, which) -> {
                                         boolean backuplearning = chkSetupImBackupLearning.isChecked();
                                         handler.resetImTable(imtype, backuplearning);
-                                        // DBSrv.resetMapping(imtype);
                                         if (imtype.equals(Lime.DB_TABLE_CUSTOM)) {
                                             handler.updateCustomButton();
                                         }
                                         handler.initialImButtons();
                                         dismiss();
                                         frgdialog.dismiss();
-                                    }
-                                });
-                        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-                                activity.getResources().getString(R.string.dialog_cancel),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                        alertDialog.show();
-                    }
+                                    })
+                            .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                                    (dialog, which) -> dialog.dismiss())
+                            .show();
                 });
                 btnSetupImDialogLoad2.setVisibility(View.GONE);
                 btnSetupImDialogLoad3.setVisibility(View.GONE);
@@ -308,13 +281,10 @@ public class SetupImLoadDialog extends DialogFragment {
                 btnSetupImDialogCustom.setEnabled(ContextCompat.checkSelfPermission(this.getActivity(),
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
 
-                btnSetupImDialogCustom.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        selectMappingFile();
-                        handler.initialImButtons();
-                        dismiss();
-                    }
+                btnSetupImDialogCustom.setOnClickListener(v -> {
+                    selectMappingFile();
+                    handler.initialImButtons();
+                    dismiss();
                 });
 
                 if (imtype.equals(Lime.DB_TABLE_PHONETIC)) {
@@ -329,28 +299,16 @@ public class SetupImLoadDialog extends DialogFragment {
                     });
                     btnSetupImDialogLoad2
                             .setText(getResources().getString(R.string.l3_im_download_from_phonetic) + " (34,838)");
-                    btnSetupImDialogLoad2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV);
-                        }
-                    });
+                    btnSetupImDialogLoad2
+                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV));
                     btnSetupImDialogLoad3.setText(
                             getResources().getString(R.string.l3_im_download_from_phonetic_adv_big5) + " (76,122)");
-                    btnSetupImDialogLoad3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV_BIG5);
-                        }
-                    });
+                    btnSetupImDialogLoad3.setOnClickListener(
+                            v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV_BIG5));
                     btnSetupImDialogLoad4
                             .setText(getResources().getString(R.string.l3_im_download_from_phonetic_adv) + " (95,029)");
-                    btnSetupImDialogLoad4.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV);
-                        }
-                    });
+                    btnSetupImDialogLoad4
+                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV));
 
                     btnSetupImDialogLoad5.setVisibility(View.GONE);
                     btnSetupImDialogLoad6.setVisibility(View.GONE);
@@ -358,28 +316,15 @@ public class SetupImLoadDialog extends DialogFragment {
 
                     btnSetupImDialogLoad1
                             .setText(getResources().getString(R.string.setup_load_download_dayiuni) + " (27,198)");
-                    btnSetupImDialogLoad1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNI);
-                        }
-                    });
+                    btnSetupImDialogLoad1
+                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNI));
                     btnSetupImDialogLoad2
                             .setText(getResources().getString(R.string.setup_load_download_dayiunip) + " (117,766)");
-                    btnSetupImDialogLoad2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNIP);
-                        }
-                    });
+                    btnSetupImDialogLoad2
+                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNIP));
                     btnSetupImDialogLoad3
                             .setText(getResources().getString(R.string.l3_im_download_from_dayi) + " (18,638)");
-                    btnSetupImDialogLoad3.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYI);
-                        }
-                    });
+                    btnSetupImDialogLoad3.setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYI));
                     btnSetupImDialogLoad4.setVisibility(View.GONE);
                     btnSetupImDialogLoad5.setVisibility(View.GONE);
                     btnSetupImDialogLoad6.setVisibility(View.GONE);
@@ -395,12 +340,7 @@ public class SetupImLoadDialog extends DialogFragment {
         }
 
         btnSetupImDialogCancel = rootView.findViewById(R.id.btnSetupImDialogCancel);
-        btnSetupImDialogCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        btnSetupImDialogCancel.setOnClickListener(v -> dismiss());
 
         return rootView;
     }
@@ -413,12 +353,7 @@ public class SetupImLoadDialog extends DialogFragment {
         dialog.setContentView(R.layout.target);
         dialog.setCancelable(false);
         Button button = dialog.findViewById(R.id.btn_loading_sync_cancel);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        button.setOnClickListener(v -> dialog.dismiss());
 
         listview = dialog.findViewById(R.id.listview_loading_target);
         toplayout = dialog.findViewById(R.id.linearlayout_loading_confirm_top);
@@ -429,21 +364,15 @@ public class SetupImLoadDialog extends DialogFragment {
         listview.setAdapter(getAdapter(startDir));
 
         createNavigationButtons(startDir);
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1,
-                    int position, long arg3) {
-                File f = flist.get(position);
-                if (f.isDirectory()) {
-                    listview.setAdapter(getAdapter(f));
-                    createNavigationButtons(f);
-                } else {
-                    getAvailableFiles(f.getAbsolutePath());
-                    dialog.dismiss();
-                }
+        listview.setOnItemClickListener((arg0, arg1, position, arg3) -> {
+            File f = flist.get(position);
+            if (f.isDirectory()) {
+                listview.setAdapter(getAdapter(f));
+                createNavigationButtons(f);
+            } else {
+                getAvailableFiles(f.getAbsolutePath());
+                dialog.dismiss();
             }
-
         });
         dialog.show();
     }
@@ -470,12 +399,10 @@ public class SetupImLoadDialog extends DialogFragment {
                 b.setText(p);
                 b.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
-                b.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View arg0) {
-                        createNavigationButtons(new File(actpath));
-                        flist = getAvailableFiles(actpath);
-                        listview.setAdapter(getAdapter(flist));
-                    }
+                b.setOnClickListener(arg0 -> {
+                    createNavigationButtons(new File(actpath));
+                    flist = getAvailableFiles(actpath);
+                    listview.setAdapter(getAdapter(flist));
                 });
 
                 toplayout.addView(b);
@@ -486,12 +413,10 @@ public class SetupImLoadDialog extends DialogFragment {
             b.setText("/");
             b.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
-            b.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-                    createNavigationButtons(new File("/"));
-                    flist = getAvailableFiles("/");
-                    listview.setAdapter(getAdapter(flist));
-                }
+            b.setOnClickListener(arg0 -> {
+                createNavigationButtons(new File("/"));
+                flist = getAvailableFiles("/");
+                listview.setAdapter(getAdapter(flist));
             });
             toplayout.addView(b);
             flist = getAvailableFiles("/");

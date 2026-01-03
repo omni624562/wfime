@@ -25,7 +25,6 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
@@ -48,6 +47,8 @@ import nan.toload.main.hd.data.Related;
 import nan.toload.main.hd.data.Word;
 import nan.toload.main.hd.limedb.LimeDB;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 public class ImportDialog extends DialogFragment {
 
     LimeDB datasource;
@@ -56,14 +57,13 @@ public class ImportDialog extends DialogFragment {
 
     Button btnImportCancel;
 
-//    Button btnImportCustom;
-//    Button btnImportCj;
-//    Button btnImportCj5;
+    // Button btnImportCustom;
+    // Button btnImportCj;
+    // Button btnImportCj5;
     Button btnImportDayi;
-//    Button btnImportEcj;
+    // Button btnImportEcj;
     Button btnImportPhonetic;
-//    Button btnImportScj;
-
+    // Button btnImportScj;
 
     Button btnImportRelated;
 
@@ -102,23 +102,19 @@ public class ImportDialog extends DialogFragment {
         this.setCancelable(false);
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
 
-        getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(android.content.DialogInterface dialog,
-                                 int keyCode, android.view.KeyEvent event) {
-                if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
-                    // To dismiss the fragment when the back-button is pressed.
-                    dismiss();
-                    return true;
-                }
-                // Otherwise, do nothing else
-                else return false;
+        getDialog().setOnKeyListener((dialog, keyCode, event) -> {
+            if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
+                // To dismiss the fragment when the back-button is pressed.
+                dismiss();
+                return true;
             }
+            // Otherwise, do nothing else
+            else
+                return false;
         });
     }
 
@@ -140,12 +136,7 @@ public class ImportDialog extends DialogFragment {
         btnImportRelated = view.findViewById(R.id.btnImportRelated);
         btnImportCancel = view.findViewById(R.id.btnImportCancel);
 
-        btnImportCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        btnImportCancel.setOnClickListener(v -> dismiss());
 
         HashMap<String, String> check = new HashMap<String, String>();
 
@@ -162,14 +153,8 @@ public class ImportDialog extends DialogFragment {
             btnImportPhonetic.setAlpha(Lime.NORMAL_ALPHA_VALUE);
             btnImportPhonetic.setTypeface(null, Typeface.BOLD);
 
-            btnImportPhonetic.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    confirmimportdialog(Lime.IM_PHONETIC);
-                }
-            });
+            btnImportPhonetic.setOnClickListener(v -> confirmimportdialog(Lime.IM_PHONETIC));
         }
-
 
         if (check.get(Lime.DB_TABLE_DAYI) == null) {
             btnImportDayi.setAlpha(Lime.HALF_ALPHA_VALUE);
@@ -179,21 +164,11 @@ public class ImportDialog extends DialogFragment {
             btnImportDayi.setAlpha(Lime.NORMAL_ALPHA_VALUE);
             btnImportDayi.setTypeface(null, Typeface.BOLD);
 
-            btnImportDayi.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    confirmimportdialog(Lime.IM_DAYI);
-                }
-            });
+            btnImportDayi.setOnClickListener(v -> confirmimportdialog(Lime.IM_DAYI));
         }
 
         if (importtext.length() > 1) {
-            btnImportRelated.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    confirmimportdialog(Lime.DB_RELATED);
-                }
-            });
+            btnImportRelated.setOnClickListener(v -> confirmimportdialog(Lime.DB_RELATED));
         } else {
             btnImportRelated.setAlpha(Lime.HALF_ALPHA_VALUE);
             btnImportRelated.setTypeface(null, Typeface.ITALIC);
@@ -205,50 +180,44 @@ public class ImportDialog extends DialogFragment {
 
     public void confirmimportdialog(final String imtype) {
 
-        AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
-
         final EditText input = new EditText(activity);
 
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
+
         if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
-            alertDialog.setTitle(activity.getResources().getString(R.string.import_dialog_related_title));
-            alertDialog.setMessage(importtext);
+            builder.setTitle(activity.getResources().getString(R.string.import_dialog_related_title))
+                    .setMessage(importtext);
         } else {
-            alertDialog.setTitle(activity.getResources().getString(R.string.import_dialog_title));
-            alertDialog.setMessage(importtext + getResources().getString(R.string.import_code_hint));
+            builder.setTitle(activity.getResources().getString(R.string.import_dialog_title))
+                    .setMessage(importtext + getResources().getString(R.string.import_code_hint));
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT);
             input.setLayoutParams(lp);
-            alertDialog.setView(input);
+            builder.setView(input);
         }
 
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getResources().getString(R.string.dialog_confirm),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        if (imtype.equals(Lime.DB_RELATED)) {
-                            importToRelatedTable();
+        builder.setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
+                (dialog, which) -> {
+                    if (imtype.equals(Lime.DB_RELATED)) {
+                        importToRelatedTable();
+                        dismiss();
+                        importdialog.dismiss();
+                    } else {
+                        if (input.getText() != null && !input.getText().toString().isEmpty()) {
+                            importToImTable(imtype, input.getText().toString());
                             dismiss();
                             importdialog.dismiss();
                         } else {
-                            if (input.getText() != null && !input.getText().toString().isEmpty()) {
-                                importToImTable(imtype, input.getText().toString());
-                                dismiss();
-                                importdialog.dismiss();
-                            } else {
-                                Toast.makeText(activity, getResources().getString(R.string.import_code_empty), Toast.LENGTH_SHORT).show();
-                            }
+                            Toast.makeText(activity, getResources().getString(R.string.import_code_empty),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-                });
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_cancel),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+                })
+                .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
+                        (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     @Override

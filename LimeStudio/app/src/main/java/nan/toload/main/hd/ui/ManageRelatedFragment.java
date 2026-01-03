@@ -151,85 +151,67 @@ public class ManageRelatedFragment extends Fragment {
         this.recyclerManageRelated.setAdapter(this.adapter);
 
         this.btnManageRelatedAdd = rootView.findViewById(R.id.btnManageRelatedAdd);
-        this.btnManageRelatedAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ManageRelatedAddDialog dialog = ManageRelatedAddDialog.newInstance();
-                dialog.setHandler(handler);
-                dialog.show(ft, "adddialog");
-            }
+        this.btnManageRelatedAdd.setOnClickListener(v -> {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ManageRelatedAddDialog dialog = ManageRelatedAddDialog.newInstance();
+            dialog.setHandler(handler);
+            dialog.show(ft, "adddialog");
         });
 
         this.btnManageRelatedNext = rootView.findViewById(R.id.btnManageRelatedNext);
         this.btnManageRelatedNext.setEnabled(false);
-        this.btnManageRelatedNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int checkrecord = Lime.IM_MANAGE_DISPLAY_AMOUNT * (page + 1);
-                if (checkrecord < total) {
-                    page++;
-                }
-                searchrelated();
-                // updateGridView(relatedlist);
+        this.btnManageRelatedNext.setOnClickListener(v -> {
+            int checkrecord = Lime.IM_MANAGE_DISPLAY_AMOUNT * (page + 1);
+            if (checkrecord < total) {
+                page++;
             }
+            searchrelated();
+            // updateGridView(relatedlist);
         });
         this.btnManageRelatedPrevious = rootView.findViewById(R.id.btnManageRelatedPrevious);
         this.btnManageRelatedPrevious.setEnabled(false);
-        this.btnManageRelatedPrevious.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (page > 0) {
-                    page--;
-                }
-                searchrelated();
-                // updateGridView(relatedlist);
+        this.btnManageRelatedPrevious.setOnClickListener(v -> {
+            if (page > 0) {
+                page--;
             }
+            searchrelated();
+            // updateGridView(relatedlist);
         });
 
         this.edtManageRelatedSearch = rootView.findViewById(R.id.edtManageRelatedSearch);
-        this.edtManageRelatedSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchreset = false;
-                btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_search));
-            }
+        this.edtManageRelatedSearch.setOnClickListener(v -> {
+            searchreset = false;
+            btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_search));
         });
-        this.edtManageRelatedSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    InputMethodManager imm = (InputMethodManager) getActivity()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(edtManageRelatedSearch.getWindowToken(), 0);
-                }
+        this.edtManageRelatedSearch.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(edtManageRelatedSearch.getWindowToken(), 0);
             }
         });
 
         this.btnManageRelatedSearch = rootView.findViewById(R.id.btnManageRelatedSearch);
-        this.btnManageRelatedSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!searchreset) {
-                    String query = edtManageRelatedSearch.getText().toString();
-                    // hide the soft keyboard before search Jeremy 15,6,4
-                    InputMethodManager imm = (InputMethodManager) getActivity()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(edtManageRelatedSearch.getWindowToken(), 0);
-                    if (query != null && query.length() > 0 &&
-                            (prequery == null || !prequery.equals(query) || !searchreset)) {
-                        query = query.trim();
-                        searchrelated(query);
-                    }
-                    searchreset = true;
-                    btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_reset));
-                } else {
-                    total = 0;
-                    searchrelated(null);
-                    edtManageRelatedSearch.setText("");
-                    searchreset = false;
-                    btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_search));
+        this.btnManageRelatedSearch.setOnClickListener(v -> {
+            if (!searchreset) {
+                String query = edtManageRelatedSearch.getText().toString();
+                // hide the soft keyboard before search Jeremy 15,6,4
+                InputMethodManager imm = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(edtManageRelatedSearch.getWindowToken(), 0);
+                if (query != null && query.length() > 0 &&
+                        (prequery == null || !prequery.equals(query) || !searchreset)) {
+                    query = query.trim();
+                    searchrelated(query);
                 }
+                searchreset = true;
+                btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_reset));
+            } else {
+                total = 0;
+                searchrelated(null);
+                edtManageRelatedSearch.setText("");
+                searchreset = false;
+                btnManageRelatedSearch.setText(getResources().getText(R.string.manage_related_search));
             }
         });
 
