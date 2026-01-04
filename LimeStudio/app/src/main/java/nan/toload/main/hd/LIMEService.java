@@ -124,8 +124,8 @@ public class LIMEService extends InputMethodService implements
     KeyEvent mKeydownEvent = null;
     private LIMEKeyboardView mInputView = null;
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
-    private boolean mFixedCandidateViewOn; // Jeremy'12,5,3
-    private CandidateView mCandidateView = null;
+    boolean mFixedCandidateViewOn; // Jeremy'12,5,3
+    CandidateView mCandidateView = null;
     private CandidateView mCandidateViewInInputView = null;
     private CandidateView mCandidateViewStandAlone = null;
     private CandidateViewContainer mCandidateViewContainer = null;
@@ -145,7 +145,7 @@ public class LIMEService extends InputMethodService implements
     private int mShowArrowKeys; // Jeremy '12,5,22 force recreate keyboard if show arrow keys mode changes.
     private int mSplitKeyboard; // Jeremy '12,5,26 force recreate keyboard if split keyboard settings changes;
                                 // 6/19 changed to int
-    private long mMetaState;
+    long mMetaState;
     private int mImeOptions;
     private int mOrientation;
     private int mHardkeyboardHidden;
@@ -157,7 +157,7 @@ public class LIMEService extends InputMethodService implements
     private Mapping committedCandidate; // Jeremy '12,5,7 renamed from tempMatched
     private StringBuffer tempEnglishWord;
     private List<Mapping> tempEnglishList;
-    private boolean hasPhysicalKeyPressed;
+    boolean hasPhysicalKeyPressed;
     private LinkedList<Mapping> mCandidateList; // Jeremy '12,5,7 renamed from templist
     // private boolean hasSearchPress = false; // Jeremy '11,5,29
     // private boolean hasSearchProcessed = false; // Jeremy '11,5,29
@@ -203,7 +203,7 @@ public class LIMEService extends InputMethodService implements
     // Disable physical keyboard candidate words selection
     private boolean disable_physical_selection = false;
     private String LDComposingBuffer = ""; // Jeremy '11,7,30 for learning continuous typing phrases
-    private LIMEPreferenceManager mLIMEPref;
+    LIMEPreferenceManager mLIMEPref;
     private boolean hasChineseSymbolCandidatesShown = false;
     private boolean hasCandidatesShown = false;
     private androidx.appcompat.app.AlertDialog mOptionsDialog;
@@ -613,106 +613,25 @@ public class LIMEService extends InputMethodService implements
         tempEnglishWord = new StringBuffer();
         tempEnglishList = new LinkedList<>();
 
-        switch (attribute.inputType & EditorInfo.TYPE_MASK_CLASS) {
-            case EditorInfo.TYPE_CLASS_NUMBER: // 0x02
-            case EditorInfo.TYPE_CLASS_DATETIME: // 0x04
-                mEnglishOnly = true;
-                mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, false, true,
-                        false);
-                break;
-            case EditorInfo.TYPE_CLASS_PHONE: // 0x03
-                mEnglishOnly = true;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_PHONE, mImeOptions, false, false, false);
-                break;
-            case EditorInfo.TYPE_CLASS_TEXT: // 0x01
+        InputModeHelper.InputModeConfig config = InputModeHelper.determineInputMode(
+                attribute, mLIMEPref, mImeOptions, mPersistentLanguageMode);
 
-                // Make sure that passwords are not displayed in candidate view
-                int variation = attribute.inputType
-                        & EditorInfo.TYPE_MASK_VARIATION;
-                /*
-                 * if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                 * || variation == EditorInfo.TYPE_TEXT_VARIATION_PERSON_NAME) {
-                 * //mAutoSpace = false;
-                 * } else {
-                 * //mAutoSpace = true;
-                 * }
-                 */
-                if (variation == EditorInfo.TYPE_TEXT_VARIATION_FILTER) {
-                    mPredictionOn = false;
-                }
-                /*
-                 * if ((attribute.inputType & EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT) == 0) {
-                 * //disableAutoCorrect = true;
-                 * }
-                 */
-                // If NO_SUGGESTIONS is set, don't do prediction.
-                if ((attribute.inputType & EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS) != 0) {
-                    mPredictionOn = false;
-                    // disableAutoCorrect = true;
-                }
-                // If it's not multiline and the autoCorrect flag is not set, then
-                // don't correct
-                /*
-                 * if ((attribute.inputType & EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT) == 0
-                 * && (attribute.inputType & EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) == 0) {
-                 * //disableAutoCorrect = true;
-                 * }
-                 */
-                if ((attribute.inputType & EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE) != 0) {
-                    mPredictionOn = false;
-                    mCompletionOn = isFullscreenMode();
-                }
+        mEnglishOnly = config.isEnglishOnly;
+        mPredictionOn = config.isPredictionOn;
+        // Only set completion if fullscreen check passes in existing logic, but helper
+        // sets the hint
+        if (config.isCompletionOn && isFullscreenMode()) {
+            mCompletionOn = true;
+        }
 
-                // Switch keyboard here.
-                if (variation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
-                        || variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
-                        || variation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
-                    mPredictionOn = false;
-                    // isModePassword = true;
-                    mEnglishOnly = true;
-                    // onIM = false;//Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                    mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_EMAIL,
-                            mImeOptions, false, false, false);
-                    break;
-                } else if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                        || variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS) {
-                    mEnglishOnly = true;
-                    // onIM = false; //Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                    mPredictionOn = false;
-                    mKeyboardSwitcher.setKeyboardMode(activeIM,
-                            LIMEKeyboardSwitcher.MODE_EMAIL, mImeOptions, false, false, false);
-                    break;
-                } else if (variation == EditorInfo.TYPE_TEXT_VARIATION_URI) {
-                    mPredictionOn = false;
-                    mEnglishOnly = true;
-                    // onIM = false; //Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                    // isModeURL = true;
-                    mKeyboardSwitcher.setKeyboardMode(activeIM,
-                            LIMEKeyboardSwitcher.MODE_URL, mImeOptions, false, false, false);
-                    break;
-                } else if (variation == EditorInfo.TYPE_TEXT_VARIATION_SHORT_MESSAGE) {
-                    mEnglishOnly = false;
-                    mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_IM, mImeOptions, true, false,
-                            false);
-                    break;
-                }
-            default:
-                if (mPersistentLanguageMode)
-                    mEnglishOnly = mLIMEPref.getLanguageMode(); // Jeremy '12,4,30 restore lanaguage mode from
-                                                                // preference.
+        mKeyboardSwitcher.setKeyboardMode(activeIM, config.keyboardMode, mImeOptions,
+                config.isPhone, config.isNumber, config.isDateTime);
 
-                if (mPersistentLanguageMode && mEnglishOnly) {
-                    mPredictionOn = true;
-                    mEnglishOnly = true;
-                    // onIM = false; //Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                    mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_TEXT,
-                            mImeOptions, false, false, false);
-
-                } else {
-                    mEnglishOnly = false;
-                    initialIMKeyboard(); // '12,4,29 intial chinese IM keybaord
-                }
+        if (!config.isEnglishOnly && !config.isPhone && !config.isNumber && !config.isDateTime
+                && config.keyboardMode != LIMEKeyboardSwitcher.MODE_EMAIL
+                && config.keyboardMode != LIMEKeyboardSwitcher.MODE_URL) {
+            // Logic for initializing Chinese IM keyboard if not special modes
+            initialIMKeyboard();
         }
 
         if (mEnglishOnly && !mPredictionOn) // Jeremy '12,5,20 Only hide candidateview when prediction mode is not on.
@@ -830,100 +749,7 @@ public class LIMEService extends InputMethodService implements
      * option.
      */
     private boolean translateKeyDown(int keyCode, KeyEvent event) {
-        // move to HandleCharacter '10, 3,26
-        // mMetaState = LIMEMetaKeyKeyListener.handleKeyDown(mMetaState,
-        // keyCode, event);
-        // mMetaState =
-        // LIMEMetaKeyKeyListener.adjustMetaAfterKeypress(mMetaState);
-
-        hasPhysicalKeyPressed = true;
-
-        // If user use the physical keyboard then not fixed the candidate view also use
-        // the tranparent background
-        mFixedCandidateViewOn = false;
-        mCandidateView.setTransparentCandidateView(false);
-
-        // hide softkeyboard. Jeremy '12,5,8
-        // Should not hide inputView or the candidateView cannot be shown in first
-        // stroke. Jeremy '15,6,1
-        /*
-         * if (mInputView != null && mInputView.isShown() &&
-         * mLIMEPref.getAutoHideSoftKeyboard()) {
-         * mInputView.closing();
-         * requestHideSelf(0);
-         * }
-         */
-
-        if (DEBUG)
-            Log.i(TAG, "translateKeyDown() LIMEMetaKeyKeyListener.getMetaState(mMetaState) = "
-                    + Integer.toHexString(LIMEMetaKeyKeyListener.getMetaState(mMetaState))
-                    + ", event.getMetaState()" + Integer.toHexString(event.getMetaState()));
-
-        // Jeremy '12,5,28 after honeycomb use the metastate sent form KeyEvent to
-        // proces the shift/cap_lock etc...
-
-        int metaState;
-        if (mLIMEPref.getPhysicalKeyboardType().equals("standard"))
-            metaState = event.getMetaState();
-        else
-            metaState = LIMEMetaKeyKeyListener.getMetaState(mMetaState);
-
-        int c = event.getUnicodeChar(metaState);
-
-        InputConnection ic = getCurrentInputConnection();
-
-        /// Jeremy '12,4,1 XPERIA Pro force translating special keys
-        if (mLIMEPref.getPhysicalKeyboardType().equals("xperiapro")) {
-            boolean isShift = LIMEMetaKeyKeyListener.getMetaState(mMetaState,
-                    LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0;
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_AT:
-                    if (isShift)
-                        c = '/';
-                    else
-                        c = '!';
-                    break;
-                case KeyEvent.KEYCODE_APOSTROPHE:
-                    if (isShift)
-                        c = '"';
-                    else
-                        c = '\'';
-                    break;
-                case KeyEvent.KEYCODE_GRAVE:
-                    if (isShift)
-                        c = '~';
-                    else
-                        c = '`';
-                    break;
-                case KeyEvent.KEYCODE_COMMA:
-                    if (isShift)
-                        c = '?';
-                    else
-                        c = '.';
-                    break;
-                case KeyEvent.KEYCODE_PERIOD:
-                    if (isShift)
-                        c = '>';
-                    else
-                        c = '@';
-                    break;
-
-            }
-        }
-
-        if (c == 0 || ic == null) {
-            return false;
-        }
-
-        // Compact code by Jeremy '10, 3, 27
-        if (keyCode == 59) { // Translate shift as -1
-            c = -1;
-        }
-        if (c != -1 && (c & KeyCharacterMap.COMBINING_ACCENT) != 0) {
-            c = c & KeyCharacterMap.COMBINING_ACCENT_MASK;
-        }
-        onKey(c, null);
-        return true;
+        return HardKeyHelper.translateKeyDown(this, keyCode, event);
     }
 
     /**
