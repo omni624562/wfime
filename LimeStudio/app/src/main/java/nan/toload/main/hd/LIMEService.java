@@ -75,6 +75,7 @@ import nan.toload.main.hd.data.ChineseSymbol;
 import nan.toload.main.hd.data.Mapping;
 import nan.toload.main.hd.global.LIMEPreferenceManager;
 import nan.toload.main.hd.global.LIMEUtilities;
+import nan.toload.main.hd.global.RootMapper;
 import nan.toload.main.hd.keyboard.LIMEBaseKeyboard;
 import nan.toload.main.hd.keyboard.LIMEKeyboard;
 import nan.toload.main.hd.keyboard.LIMEKeyboardBaseView;
@@ -2068,7 +2069,7 @@ public class LIMEService extends InputMethodService implements
                     mComposing.append(keyString);
                     InputConnection ic = getCurrentInputConnection();
                     if (ic != null && mPredictionOn)
-                        ic.setComposingText(keyString, 1);
+                        ic.setComposingText(getComposingDisplayString(keyString), 1);
                 }
             }
 
@@ -2580,9 +2581,80 @@ public class LIMEService extends InputMethodService implements
             hasMappingList = false;
             // Jeremy '11,8,15
             clearSuggestions();
-
         }
 
+    }
+
+    /**
+     * Helper to map raw keys to keyboard labels (roots) for display
+     */
+    private String getComposingDisplayString(String rawString) {
+        StringBuilder sb = new StringBuilder();
+
+        List<LIMEBaseKeyboard.Key> keys = null;
+        if (mInputView != null && mInputView.getKeyboard() != null) {
+            keys = mInputView.getKeyboard().getKeys();
+        }
+
+        // DEBUG LOG
+        // Log.e(TAG, "DEBUG: getComposingDisplayString input='" + rawString + "'
+        // activeIM='" + activeIM + "'");
+
+        for (int i = 0; i < rawString.length(); i++) {
+            char c = rawString.charAt(i);
+            boolean puncMatched = false;
+
+            // Try visual mapping first (if available and valid)
+            if (keys != null) {
+                boolean found = false;
+                // First pass: exact match
+                for (LIMEBaseKeyboard.Key k : keys) {
+                    if (k.codes != null && k.codes.length > 0 && k.codes[0] == c) {
+                        // Use label ONLY if it is not ASCII (assumed to be a Root)
+                        // OR if we are in English mode (but here we usually want roots)
+                        if (k.label != null && k.label.length() > 0 && k.label.charAt(0) > 127) {
+                            sb.append(k.label);
+                            found = true;
+                        }
+                        break;
+                    }
+                }
+                // Second pass: case-insensitive
+                if (!found) {
+                    int lower = Character.toLowerCase(c);
+                    int upper = Character.toUpperCase(c);
+                    if (lower != c || upper != c) {
+                        for (LIMEBaseKeyboard.Key k : keys) {
+                            if (k.codes != null && k.codes.length > 0) {
+                                int code = k.codes[0];
+                                if (code == lower || code == upper) {
+                                    if (k.label != null && k.label.length() > 0 && k.label.charAt(0) > 127) {
+                                        sb.append(k.label);
+                                        found = true;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (found)
+                    continue;
+            }
+
+            // Fallback to RootMapper
+            char mapped = RootMapper.getRoot(activeIM, c);
+            if (mapped == c && c != ' ') {
+                // Log.e(TAG, "DEBUG: RootMapper returned same char for '" + c + "' (activeIM="
+                // + activeIM + ")");
+            } else {
+                // Log.e(TAG, "DEBUG: RootMapper mapped '" + c + "' -> '" + mapped + "'");
+            }
+            sb.append(mapped);
+        }
+        String result = sb.toString();
+        // Log.e(TAG, "DEBUG: Display String Result: " + result);
+        return result;
     }
 
     private void handleBackspace() {
@@ -2599,7 +2671,6 @@ public class LIMEService extends InputMethodService implements
                 // Composing became empty
                 if (ic != null) {
                     // Set empty composing text but DO NOT finish composition yet
-                    // This prevents "p" from being committed if it was composing
                     ic.setComposingText("", 1);
                 }
                 // Clear candidates
@@ -2610,8 +2681,8 @@ public class LIMEService extends InputMethodService implements
                 hasCandidatesShown = false; // Reset flag
             } else {
                 // Composing still has text
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
             }
         } else if (hasCandidatesShown) {
@@ -2644,6 +2715,7 @@ public class LIMEService extends InputMethodService implements
                 try {
                     keyDownUp(KeyEvent.KEYCODE_DEL, false);
                 } catch (Exception ex) {
+                    Log.e(TAG, "Fallback backspace failed: " + ex);
                 }
             }
         }
@@ -3059,8 +3131,9 @@ public class LIMEService extends InputMethodService implements
                                                                                      // mEnglishOnly instead of onIM
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                // InputConnection ic=getCurrentInputConnection();
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (!hasSymbolMapping && !hasNumberMapping // Jeremy '11,10.19 fixed to bypass number key in et26 and
@@ -3072,8 +3145,9 @@ public class LIMEService extends InputMethodService implements
                 // Log.i(TAG,"handlecharacter(), onIM and no number and no symbol mapping");
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                // InputConnection ic=getCurrentInputConnection();
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (!hasSymbolMapping
@@ -3082,8 +3156,9 @@ public class LIMEService extends InputMethodService implements
                     && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                // InputConnection ic=getCurrentInputConnection();
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping
@@ -3094,8 +3169,9 @@ public class LIMEService extends InputMethodService implements
                     && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                // InputConnection ic=getCurrentInputConnection();
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping && !hasNumberMapping && activeIM.equals("array")
@@ -3108,8 +3184,9 @@ public class LIMEService extends InputMethodService implements
                 // mode.
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                // InputConnection ic=getCurrentInputConnection();
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping
@@ -3120,8 +3197,8 @@ public class LIMEService extends InputMethodService implements
                     && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
                 // Fixed: Ensure proper character handling for dayi input method
                 mComposing.append((char) primaryCode);
-                if (ic != null && mPredictionOn)
-                    ic.setComposingText(mComposing, 1);
+                if (ic != null)
+                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 updateCandidates();
 
             } else {
