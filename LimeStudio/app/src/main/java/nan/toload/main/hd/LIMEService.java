@@ -25,6 +25,10 @@
 package nan.toload.main.hd;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -98,6 +102,8 @@ public class LIMEService extends InputMethodService implements
     static final int MY_KEYCODE_WINDOWS_START = 117; // Jeremy '12,4,29 windows start key
     private static final boolean DEBUG = false;
     private static final String TAG = "LIMEService";
+    private static final String CHANNEL_ID = "lime_ime_service";
+    private static final int FOREGROUND_NOTIFICATION_ID = 1001;
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
     // show candidate view in short time.
     private static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
@@ -233,6 +239,10 @@ public class LIMEService extends InputMethodService implements
 
         super.onCreate();
 
+        // Start foreground service to prevent Samsung FreecessHandler from freezing the
+        // IME
+        startForegroundService();
+
         SearchSrv = new SearchServer(this);
         mEnglishOnly = false;
         mEnglishFlagShift = false;
@@ -262,6 +272,72 @@ public class LIMEService extends InputMethodService implements
 
         buildActivatedIMList();
 
+    }
+
+    /**
+     * Start foreground service to prevent Samsung FreecessHandler from freezing the
+     * IME.
+     * This creates a low-priority notification that keeps the service alive.
+     */
+    @SuppressLint("ForegroundServiceType")
+    private void startForegroundService() {
+        try {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(
+                    Context.NOTIFICATION_SERVICE);
+
+            // Create notification channel for Android 8.0+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        getString(R.string.app_name),
+                        NotificationManager.IMPORTANCE_MIN // Minimal importance - no sound, no popup
+                );
+                channel.setDescription("Input Method Service");
+                channel.setShowBadge(false);
+                channel.enableLights(false);
+                channel.enableVibration(false);
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(channel);
+                }
+            }
+
+            // Create intent to open main activity when notification is tapped
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this, 0, notificationIntent,
+                    PendingIntent.FLAG_IMMUTABLE);
+
+            // Build the notification (minimal/silent)
+            Notification.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder = new Notification.Builder(this, CHANNEL_ID);
+            } else {
+                builder = new Notification.Builder(this);
+                builder.setPriority(Notification.PRIORITY_MIN);
+            }
+
+            Notification notification = builder
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText("輸入法服務執行中")
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .build();
+
+            // Start foreground service with type for Android 14+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(FOREGROUND_NOTIFICATION_ID, notification,
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+            } else {
+                startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+            }
+
+            if (DEBUG)
+                Log.i(TAG, "Foreground service started successfully");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start foreground service: " + e.getMessage());
+        }
     }
 
     /**
@@ -465,8 +541,12 @@ public class LIMEService extends InputMethodService implements
 
             if (forceClearComposing) {
                 InputConnection ic = getCurrentInputConnection();
-                if (ic != null)
-                    ic.commitText("", 0);
+                if (ic != null) {
+                    // Use setComposingText("", 0) to clear composing text displayed in editor
+                    // Then finishComposingText() to complete the composition
+                    ic.setComposingText("", 0);
+                    ic.finishComposingText();
+                }
             }
 
             selectedCandidate = null;
@@ -625,7 +705,7 @@ public class LIMEService extends InputMethodService implements
         }
 
         mKeyboardSwitcher.setKeyboardMode(activeIM, config.keyboardMode, mImeOptions,
-                config.isPhone, config.isNumber, config.isDateTime);
+                !config.isEnglishOnly, config.isNumber, config.isDateTime);
 
         if (!config.isEnglishOnly && !config.isPhone && !config.isNumber && !config.isDateTime
                 && config.keyboardMode != LIMEKeyboardSwitcher.MODE_EMAIL
@@ -2507,25 +2587,37 @@ public class LIMEService extends InputMethodService implements
 
     private void handleBackspace() {
         if (DEBUG)
-            Log.i(TAG, "handleBackspace()");
+            Log.i(TAG, "handleBackspace() mComposing='" + mComposing + "', len=" + mComposing.length());
+
         final int length = mComposing.length();
         InputConnection ic = getCurrentInputConnection();
 
-        // Fixed: Simplified backspace logic to ensure it works in all cases
-        if (length > 1) {
-            // Delete one character from composing text
+        if (length >= 1) {
             mComposing.delete(length - 1, length);
-            if (ic != null && mPredictionOn)
-                ic.setComposingText(mComposing, 1);
-            updateCandidates();
-        } else if (length == 1) {
-            // Clear the last character in composing
-            clearComposing(true);
+
+            if (mComposing.length() == 0) {
+                // Composing became empty
+                if (ic != null) {
+                    // Set empty composing text but DO NOT finish composition yet
+                    // This prevents "p" from being committed if it was composing
+                    ic.setComposingText("", 1);
+                }
+                // Clear candidates
+                if (mCandidateView != null) {
+                    mCandidateView.clear();
+                }
+                clearSuggestions(); // Clears internal lists
+                hasCandidatesShown = false; // Reset flag
+            } else {
+                // Composing still has text
+                if (ic != null && mPredictionOn)
+                    ic.setComposingText(mComposing, 1);
+                updateCandidates();
+            }
         } else if (hasCandidatesShown) {
-            // Hide candidate view if no composing text but candidates are shown
             hideCandidateView();
         } else {
-            // No composing text and no candidates - send backspace to editor
+            // No composing text - send backspace to editor
             try {
                 if (mEnglishOnly && mLIMEPref.getEnglishPrediction() && mPredictionOn
                         && (!hasPhysicalKeyPressed || mLIMEPref.getEnglishPredictionOnPhysicalKeyboard())) {
@@ -2534,18 +2626,24 @@ public class LIMEService extends InputMethodService implements
                         updateEnglishPrediction();
                     }
                 }
-                // Always send DEL key event to ensure backspace works
-                keyDownUp(KeyEvent.KEYCODE_DEL, false);
+
+                if (ic != null) {
+                    CharSequence before = ic.getTextBeforeCursor(1, 0);
+
+                    if (before != null && before.length() > 0) {
+                        ic.deleteSurroundingText(1, 0);
+                    } else {
+                        keyDownUp(KeyEvent.KEYCODE_DEL, false);
+                    }
+                } else {
+                    keyDownUp(KeyEvent.KEYCODE_DEL, false);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.i(TAG, "handleBackspace error: " + e);
-                // Fallback: directly send DEL key
                 try {
-                    if (ic != null) {
-                        ic.deleteSurroundingText(1, 0);
-                    }
+                    keyDownUp(KeyEvent.KEYCODE_DEL, false);
                 } catch (Exception ex) {
-                    Log.e(TAG, "Fallback backspace failed: " + ex);
                 }
             }
         }

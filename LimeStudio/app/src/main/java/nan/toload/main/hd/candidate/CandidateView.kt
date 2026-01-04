@@ -1,0 +1,358 @@
+/*
+ * Copyright 2024 The LimeIME Open Source Project
+ */
+
+package nan.toload.main.hd.candidate
+
+import android.content.Context
+import android.graphics.Color as AndroidColor
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.util.AttributeSet
+import android.util.Log
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.AndroidUiDispatcher
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import nan.toload.main.hd.LIMEService
+import nan.toload.main.hd.R
+import nan.toload.main.hd.data.Mapping
+
+open class CandidateView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = R.attr.LIMECandidateView
+) : FrameLayout(context, attrs, defStyle) {
+
+    private var mService: LIMEService? = null
+    private var suggestions by mutableStateOf<List<Mapping>>(emptyList())
+    private var selectedIndex by mutableIntStateOf(-1)
+    
+    // Custom lifecycle and recomposer for Compose support in InputMethodService
+    private val lifecycleOwner = IMELifecycleOwner()
+    private val coroutineScope = CoroutineScope(SupervisorJob() + AndroidUiDispatcher.Main)
+    private var recomposer: Recomposer? = null
+    
+    // Compatibility Fields exposed to CandidateViewContainer (Java)
+    @JvmField var mColorBackground: Int = 0
+    @JvmField var mColorNormalText: Int = 0
+    @JvmField var mDrawableExpandButton: Drawable? = null
+    @JvmField var mDrawableSuggestHighlight: Drawable? = null
+    @JvmField var mDrawableSymbolInput: Drawable? = null
+    @JvmField var mDrawableCloseButton: Drawable? = null
+    
+    // Internal fields for theme
+    private var mColorComposingText: Int = 0
+    private var mColorComposingBackground: Int = 0
+    private var mColorNormalTextHighlight: Int = 0
+    private var mColorComposingCode: Int = 0
+    private var mColorComposingCodeHighlight: Int = 0 
+    private var mColorSpacer: Int = 0
+    private var mColorSelKey: Int = 0
+    private var mColorSelKeyShifted: Int = 0
+    
+    private var embeddedComposingView: TextView? = null
+    private var composeView: ComposeView? = null
+
+    init {
+        // Load styles from R.styleable.LIMECandidateView
+         val a = context.theme.obtainStyledAttributes(
+            attrs, R.styleable.LIMECandidateView, defStyle, R.style.LIMECandidateView
+        )
+
+        try {
+            mDrawableSuggestHighlight = a.getDrawable(R.styleable.LIMECandidateView_suggestHighlight)
+            mDrawableSymbolInput = a.getDrawable(R.styleable.LIMECandidateView_voiceInputIcon)
+            mDrawableExpandButton = a.getDrawable(R.styleable.LIMECandidateView_ExpandButtonIcon)
+            mDrawableCloseButton = a.getDrawable(R.styleable.LIMECandidateView_closeButtonIcon)
+            
+            mColorBackground = a.getColor(
+                R.styleable.LIMECandidateView_candidateBackground,
+                ContextCompat.getColor(context, R.color.third_background_light)
+            )
+            mColorComposingText = a.getColor(
+                R.styleable.LIMECandidateView_composingTextColor,
+                ContextCompat.getColor(context, R.color.second_foreground_light)
+            )
+             mColorComposingBackground = a.getColor(
+                 R.styleable.LIMECandidateView_composingBackgroundColor,
+                 ContextCompat.getColor(context, R.color.composing_background_light)
+             )
+            mColorNormalText = a.getColor(
+                R.styleable.LIMECandidateView_candidateNormalTextColor,
+                ContextCompat.getColor(context, R.color.foreground_light)
+            )
+            mColorNormalTextHighlight = a.getColor(
+                R.styleable.LIMECandidateView_candidateNormalTextHighlightColor,
+                ContextCompat.getColor(context, R.color.foreground_light)
+            )
+            // ... other colors
+            
+        } finally {
+            a.recycle()
+        }
+
+        // Create custom Recomposer that doesn't rely on ViewTreeLifecycleOwner
+        recomposer = Recomposer(AndroidUiDispatcher.Main)
+        coroutineScope.launch {
+            recomposer?.runRecomposeAndApplyChanges()
+        }
+        
+        composeView = ComposeView(context).apply {
+            // Force MATCH_PARENT to get bounded width from parent FrameLayout
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT
+            )
+            // Set our custom recomposer directly - bypasses ViewTree lookup
+            setParentCompositionContext(recomposer)
+            // Also set lifecycle owners on this view for any other components that need it
+            setViewTreeLifecycleOwner(lifecycleOwner)
+            setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+            setContent {
+                CandidateRow()
+            }
+        }
+        addView(composeView)
+    }
+    
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    }
+    
+    override fun onDetachedFromWindow() {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        super.onDetachedFromWindow()
+    }
+    
+    fun destroy() {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        recomposer?.cancel()
+        coroutineScope.cancel()
+    }
+
+    fun setService(service: LIMEService) {
+        mService = service
+    }
+
+    fun setSuggestions(
+        suggestions: List<Mapping>?,
+        completions: Boolean,
+        typedWordValid: Boolean,
+        haveMinimalSuggestion: Boolean
+    ) {
+        this.suggestions = suggestions ?: emptyList()
+        this.selectedIndex = -1
+    }
+
+    fun setSuggestions(
+        suggestions: List<Mapping>?,
+        showNumber: Boolean,
+        displaySelKey: Any
+    ) {
+         setSuggestions(suggestions, showNumber, true, true)
+    }
+
+    fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
+        this.suggestions = suggestions ?: emptyList()
+        this.selectedIndex = selectedIndex
+    }
+
+    fun setSuggestions(
+        suggestions: List<Mapping>?,
+        reset: Boolean
+    ) {
+        setSuggestions(suggestions, false, false, false)
+    }
+    
+    fun clear() {
+        suggestions = emptyList()
+        selectedIndex = -1
+    }
+    
+    fun setEmbeddedComposingView(view: TextView) {
+        this.embeddedComposingView = view
+    }
+    
+    override fun computeHorizontalScrollRange(): Int {
+        // Rough estimate to satisfy Container logic
+        // If list is empty, return 0. If not, return something larger than width to force button show?
+        // Actually Container logic: availableWidth < neededWidth -> show button.
+        // For prototype, let's just assume if we have suggestions, we might need scrolling.
+        return if (suggestions.isNotEmpty()) 10000 else 0
+    }
+    
+    fun isCandidateExpanded(): Boolean {
+        return false // Prototype does not support expanded view yet
+    }
+    
+    fun isEmpty(): Boolean {
+        return suggestions.isEmpty()
+    }
+    
+    fun showCandidatePopup() {
+        // Prototype: just log or do nothing. Original showed a popup window.
+        // Should we implement the popup? 
+        // mService?.doVibrateSound(0)
+    }
+
+    @Composable
+    fun CandidateRow() {
+        // Gboard-style dark background
+        val gboardDark = Color(0xFF2B2B2B)
+        
+        Row(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth()
+                .background(gboardDark)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            suggestions.forEachIndexed { index, mapping ->
+                CandidateItem(
+                    mapping = mapping,
+                    isSelected = index == selectedIndex,
+                    onClick = {
+                        mService?.pickCandidateManually(index)
+                        selectedIndex = index
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun CandidateItem(
+        mapping: Mapping,
+        isSelected: Boolean,
+        onClick: () -> Unit
+    ) {
+        // Gboard-style: light text on dark background
+        val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
+        val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
+        
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = mapping.word ?: "",
+                color = textColor,
+                fontSize = 16.sp, 
+                fontWeight = fontWeight,
+                maxLines = 1
+            )
+        }
+    }
+
+    // Required Stub methods
+    override fun setScrollX(x: Int) {}
+    fun updateFontSize() {}
+    fun setTouchX(x: Int) {}
+    fun takeSuggestionAt(x: Int) {}
+    fun onTouchReal(event: android.view.MotionEvent): Boolean = false
+    
+    fun setComposingText(text: String) {}
+    fun setTransparentCandidateView(transparent: Boolean) {}
+    fun startSymbolInput() {}
+    fun forceHide() {
+        clear()
+    }
+    
+    fun selectNext() {
+        if (suggestions.isNotEmpty()) {
+            selectedIndex = (selectedIndex + 1).coerceAtMost(suggestions.size - 1)
+        }
+    }
+    
+    fun selectPrev() {
+         if (suggestions.isNotEmpty()) {
+            selectedIndex = (selectedIndex - 1).coerceAtLeast(0)
+        }
+    }
+    
+    fun selectNextRow() {
+         // Prototype: equivalent to next page or jump 10?
+         selectNext()
+    }
+    
+    fun selectPrevRow() {
+        selectPrev()
+    }
+    
+    fun takeSelectedSuggestion(): Boolean {
+        if (selectedIndex >= 0 && selectedIndex < suggestions.size) {
+            mService?.pickCandidateManually(selectedIndex)
+            return true
+        }
+        return false
+    }
+}
+
+/**
+ * Custom LifecycleOwner and SavedStateRegistryOwner for Compose support in InputMethodService.
+ * InputMethodService doesn't implement LifecycleOwner, so we need to provide our own.
+ */
+private class IMELifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+    
+    init {
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    }
+    
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
+    
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
+    
+    fun handleLifecycleEvent(event: Lifecycle.Event) {
+        lifecycleRegistry.handleLifecycleEvent(event)
+    }
+}

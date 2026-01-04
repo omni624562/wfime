@@ -25,30 +25,31 @@
   -->
 <resources>
 
-    <dimen name="phone_key_height">80dip</dimen>
-    <dimen name="key_height">84dip</dimen>
-    <dimen name="mini_keyboard_fling_vertical_correction">-84dip</dimen>
-    <dimen name="key_preview_height">180dp</dimen>
+    <!-- Compact keyboard settings for tablet - Gboard-style -->
+    <dimen name="phone_key_height">54dip</dimen>
+    <dimen name="key_height">56dip</dimen>
+    <dimen name="mini_keyboard_fling_vertical_correction">-56dip</dimen>
+    <dimen name="key_preview_height">100dp</dimen>
     <dimen name="spacebar_vertical_correction">4dip</dimen>
     <dimen name="spacebar_preview_top_padding">15dip</dimen>
-    <dimen name="spacebar_preview_text_size">42sp</dimen>
+    <dimen name="spacebar_preview_text_size">36sp</dimen>
 
-    <dimen name="candidate_stripe_height">50sp</dimen>
-    <dimen name="candidate_font_size">45sp</dimen>
-    <dimen name="candidate_number_font_size">21sp</dimen>
-    <dimen name="candidate_vertical_padding">8sp</dimen>
-    <dimen name="keyboard_bottom_padding">0.06in</dimen>
-    <dimen name="key_text_size">36dp</dimen>
-    <dimen name="label_text_size">30dp</dimen>
-    <dimen name="sub_label_text_size">30dp</dimen>
-    <dimen name="small_label_text_size">36dp</dimen>
-    <dimen name="composing_text_size">28sp</dimen>
-    <dimen name="notice_text_size">20sp</dimen>
-    <dimen name="keyboard_vertical_correction">-0.05in</dimen>
+    <dimen name="candidate_stripe_height">36sp</dimen>
+    <dimen name="candidate_font_size">32sp</dimen>
+    <dimen name="candidate_number_font_size">16sp</dimen>
+    <dimen name="candidate_vertical_padding">6sp</dimen>
+    <dimen name="keyboard_bottom_padding">0.03in</dimen>
+    <dimen name="key_text_size">26dp</dimen>
+    <dimen name="label_text_size">22dp</dimen>
+    <dimen name="sub_label_text_size">22dp</dimen>
+    <dimen name="small_label_text_size">26dp</dimen>
+    <dimen name="composing_text_size">22sp</dimen>
+    <dimen name="notice_text_size">16sp</dimen>
+    <dimen name="keyboard_vertical_correction">-0.03in</dimen>
 
-    <dimen name="mini_keyboard_vertical_correction">-0.05in</dimen>
+    <dimen name="mini_keyboard_vertical_correction">-0.03in</dimen>
 
 
     <!-- WB -->
-    <dimen name="wb_key_height">128dip</dimen>
+    <dimen name="wb_key_height">80dip</dimen>
 </resources>
