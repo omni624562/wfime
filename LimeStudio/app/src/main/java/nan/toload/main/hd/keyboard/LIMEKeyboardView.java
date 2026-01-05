@@ -143,6 +143,12 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 	}
 
 	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		requestApplyInsets();
+	}
+
+	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 		// Exclude bottom portion from system gestures for key responsiveness

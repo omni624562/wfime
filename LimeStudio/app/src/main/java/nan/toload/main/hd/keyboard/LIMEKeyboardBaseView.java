@@ -111,9 +111,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
          *                    keys. These codes are useful to correct for
          *                    accidental presses of a key adjacent to the intended
          *                    key.
-         * @param x           x-coordinate pixel of touched event. If onKey is not called by onTouchEvent,
+         * @param x           x-coordinate pixel of touched event. If onKey is not
+         *                    called by onTouchEvent,
          *                    the value should be NOT_A_TOUCH_COORDINATE.
-         * @param y           y-coordinate pixel of touched event. If onKey is not called by onTouchEvent,
+         * @param y           y-coordinate pixel of touched event. If onKey is not
+         *                    called by onTouchEvent,
          *                    the value should be NOT_A_TOUCH_COORDINATE.
          */
         void onKey(int primaryCode, int[] keyCodes, int x, int y);
@@ -153,7 +155,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         void swipeUp();
     }
 
-    //themed context
+    // themed context
     Context mContext;
 
     // Timing constants
@@ -161,17 +163,17 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
     // Miscellaneous constants
     /* package */ static final int NOT_A_KEY = -1;
-    private static final int[] LONG_PRESSABLE_STATE_SET = {android.R.attr.state_long_pressable};
+    private static final int[] LONG_PRESSABLE_STATE_SET = { android.R.attr.state_long_pressable };
     private static final int NUMBER_HINT_VERTICAL_ADJUSTMENT_PIXEL = -1;
 
     // XML attribute
     private int mKeyTextSize;
     private int mKeyTextColorNormal;
-    private int mKeyTextColorPressed; //Jeremy '15,5,13
+    private int mKeyTextColorPressed; // Jeremy '15,5,13
     private int mFunctionKeyTextColorNormal;
-    private int mFunctionKeyTextColorPressed; //Jeremy '15,5,13
-    private int mKeySubLabelTextColorNormal; //Jeremy '12,4,29
-    private int mKeySubLabelTextColorPressed; //Jeremy '15,5,13
+    private int mFunctionKeyTextColorPressed; // Jeremy '15,5,13
+    private int mKeySubLabelTextColorNormal; // Jeremy '12,4,29
+    private int mKeySubLabelTextColorPressed; // Jeremy '15,5,13
     private Typeface mKeyTextStyle = Typeface.DEFAULT;
     private int mLabelTextSize;
     private int mSmallLabelTextSize;
@@ -180,6 +182,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private int mShadowColor;
     private float mShadowRadius;
     private Drawable mKeyBackground;
+    private Drawable mActionKeyBackground;
+    private Drawable mFunctionalKeyBackground;
     private float mBackgroundDimAmount;
     private float mKeyHysteresisDistance;
     private float mVerticalCorrection;
@@ -190,7 +194,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private int mPreviewTopPadding;
 
     private boolean mtHardwareAcceleratedDrawingEnabled = false;
-
 
     // Main keyboard
     private LIMEBaseKeyboard mKeyboard;
@@ -224,7 +227,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private final float mMiniKeyboardSlideAllowance;
     private int mMiniKeyboardTrackerId;
 
-    //key preview animation
+    // key preview animation
     private Animation mKeyPreviewFadeInAnimator;
     private Animation mKeyPreviewFadeOutAnimator;
 
@@ -263,7 +266,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      */
     private Bitmap mBuffer;
     /**
-     * Notes if the keyboard just changed, so that we could possibly reallocate the mBuffer.
+     * Notes if the keyboard just changed, so that we could possibly reallocate the
+     * mBuffer.
      */
     private boolean mKeyboardChanged;
     private Key mInvalidatedKey;
@@ -274,17 +278,19 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private final Paint mPaint;
     private final Rect mPadding;
     private final Rect mClipRegion = new Rect(0, 0, 0, 0);
-    // This map caches key label text height in pixel as value and key label text size as map key.
+    // This map caches key label text height in pixel as value and key label text
+    // size as map key.
     private final HashMap<Integer, Integer> mTextHeightCache = new HashMap<>();
     private final HashMap<Integer, Integer> mTextWidthCache = new HashMap<>();
 
-    private Drawable mPopupHint;//Jeremy /11,8,11
+    private Drawable mPopupHint;// Jeremy /11,8,11
 
-    private boolean isLargeScreen; // Jeremy //11,8,8 used for disable fling selection on minipopup keyboard for larger screen
+    private boolean isLargeScreen; // Jeremy //11,8,8 used for disable fling selection on minipopup keyboard for
+                                   // larger screen
 
     private final UIHandler mHandler = new UIHandler(this);
 
-    //private LIMEPreferenceManager mLIMEPref;
+    // private LIMEPreferenceManager mLIMEPref;
 
     static class UIHandler extends Handler {
         private static final int MSG_POPUP_PREVIEW = 1;
@@ -297,24 +303,27 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         private final WeakReference<LIMEKeyboardBaseView> mLIMEKeyboardBaseViewWeakReference;
 
-        public UIHandler(LIMEKeyboardBaseView keyboardBaseView){
+        public UIHandler(LIMEKeyboardBaseView keyboardBaseView) {
             mLIMEKeyboardBaseViewWeakReference = new WeakReference<LIMEKeyboardBaseView>(keyboardBaseView);
         }
 
         @Override
         public void handleMessage(Message msg) {
             LIMEKeyboardBaseView mLIMEKeyboardBaseView = mLIMEKeyboardBaseViewWeakReference.get();
-            if(mLIMEKeyboardBaseView == null) return;
+            if (mLIMEKeyboardBaseView == null)
+                return;
             switch (msg.what) {
                 case MSG_REPEAT_KEY: {
-                    if(DEBUG) Log.i(TAG, "handleMessage()  MSG_REPEAT_KEY");
+                    if (DEBUG)
+                        Log.i(TAG, "handleMessage()  MSG_REPEAT_KEY");
                     final PointerTracker tracker = (PointerTracker) msg.obj;
                     tracker.repeatKey(msg.arg1);
                     startKeyRepeatTimer(mLIMEKeyboardBaseView.mKeyRepeatInterval, msg.arg1, tracker);
                     break;
                 }
                 case MSG_LONGPRESS_KEY: {
-                    if(DEBUG) Log.i(TAG, "handleMessage()  MSG_LONGPRESS_KEY");
+                    if (DEBUG)
+                        Log.i(TAG, "handleMessage()  MSG_LONGPRESS_KEY");
                     final PointerTracker tracker = (PointerTracker) msg.obj;
                     mLIMEKeyboardBaseView.openPopupIfRequired(msg.arg1, tracker);
                     break;
@@ -323,34 +332,34 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         }
 
         public void startKeyRepeatTimer(long delay, int keyIndex, PointerTracker tracker) {
-            if(DEBUG)
+            if (DEBUG)
                 Log.i(TAG, "UIHandler.startKeyRepeatTimer() delay=" + delay + "keyIndex= " + keyIndex);
             mInKeyRepeat = true;
             sendMessageDelayed(obtainMessage(MSG_REPEAT_KEY, keyIndex, 0, tracker), delay);
         }
 
         public void cancelKeyRepeatTimer() {
-            if(DEBUG)
+            if (DEBUG)
                 Log.i(TAG, "UIHandler.cancelKeyRepeatTimer()");
             mInKeyRepeat = false;
             removeMessages(MSG_REPEAT_KEY);
         }
 
         public boolean isInKeyRepeat() {
-            if(DEBUG)
+            if (DEBUG)
                 Log.i(TAG, "UIHandler.isInKeyRepeat(): " + mInKeyRepeat);
             return mInKeyRepeat;
         }
 
         public void startLongPressTimer(long delay, int keyIndex, PointerTracker tracker) {
-            if(DEBUG)
+            if (DEBUG)
                 Log.i(TAG, "UIHandler.startLongPressTimer() delay=" + delay + "keyIndex= " + keyIndex);
             removeMessages(MSG_LONGPRESS_KEY);
             sendMessageDelayed(obtainMessage(MSG_LONGPRESS_KEY, keyIndex, 0, tracker), delay);
         }
 
         public void cancelLongPressTimer() {
-            if(DEBUG)
+            if (DEBUG)
                 Log.i(TAG, "UIHandler.cancelLongPressTimer()");
             removeMessages(MSG_LONGPRESS_KEY);
         }
@@ -420,20 +429,22 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             return false;
         }
     }
-    private void startKeyPreviewFadeInAnimation()
-    {
-        /* Daniel
-        mKeyPreviewFadeInAnimator.reset();
-        mPreviewText.clearAnimation();
-        mPreviewText.startAnimation(mKeyPreviewFadeInAnimator);
+
+    private void startKeyPreviewFadeInAnimation() {
+        /*
+         * Daniel
+         * mKeyPreviewFadeInAnimator.reset();
+         * mPreviewText.clearAnimation();
+         * mPreviewText.startAnimation(mKeyPreviewFadeInAnimator);
          */
     }
-    private void startKeyPreviewFadeOutAnimation()
-    {
-        /* Daniel
-        mKeyPreviewFadeOutAnimator.reset();
-        mPreviewText.clearAnimation();
-        mPreviewText.startAnimation(mKeyPreviewFadeOutAnimator);
+
+    private void startKeyPreviewFadeOutAnimation() {
+        /*
+         * Daniel
+         * mKeyPreviewFadeOutAnimator.reset();
+         * mPreviewText.clearAnimation();
+         * mPreviewText.startAnimation(mKeyPreviewFadeOutAnimator);
          */
     }
 
@@ -448,7 +459,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         mtHardwareAcceleratedDrawingEnabled = false;
     }
 
-
     public LIMEKeyboardBaseView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
@@ -459,11 +469,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.LIMEKeyboardBaseView, defStyle, R.style.LIMEBaseKeyboard);
-        LayoutInflater inflate =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflate = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int previewLayout = 0;
         int keyTextSize = 0;
-
 
         int n = a.getIndexCount();
 
@@ -473,6 +481,12 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             switch (attr) {
                 case R.styleable.LIMEKeyboardBaseView_keyBackground:
                     mKeyBackground = a.getDrawable(attr);
+                    break;
+                case R.styleable.LIMEKeyboardBaseView_actionKeyBackground:
+                    mActionKeyBackground = a.getDrawable(attr);
+                    break;
+                case R.styleable.LIMEKeyboardBaseView_functionalKeyBackground:
+                    mFunctionalKeyBackground = a.getDrawable(attr);
                     break;
                 case R.styleable.LIMEKeyboardBaseView_keyHysteresisDistance:
                     mKeyHysteresisDistance = a.getDimensionPixelOffset(attr, 0);
@@ -513,11 +527,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 case R.styleable.LIMEKeyboardBaseView_labelTextSize:
                     mLabelTextSize = a.getDimensionPixelSize(attr, 14);
                     break;
-                //Jeremy '11,8,11, Extended for sub-label display
+                // Jeremy '11,8,11, Extended for sub-label display
                 case R.styleable.LIMEKeyboardBaseView_smallLabelTextSize:
                     mSmallLabelTextSize = a.getDimensionPixelSize(attr, 14);
                     break;
-                //Jeremy '11,8,11, Extended for sub-label display
+                // Jeremy '11,8,11, Extended for sub-label display
                 case R.styleable.LIMEKeyboardBaseView_subLabelTextSize:
                     mSubLabelTextSize = a.getDimensionPixelSize(attr, 14);
                     break;
@@ -533,16 +547,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 case R.styleable.LIMEKeyboardBaseView_shadowRadius:
                     mShadowRadius = a.getFloat(attr, 0f);
                     break;
-                case R.styleable.LIMEKeyboardBaseView_spacePreviewTopPadding:  //Jeremy 15,7,13
+                case R.styleable.LIMEKeyboardBaseView_spacePreviewTopPadding: // Jeremy 15,7,13
                     mSpacePreviewTopPadding = a.getDimensionPixelSize(attr, 10);
                     break;
-                case R.styleable.LIMEKeyboardBaseView_previewTopPadding:  //Jeremy 15,7,13
+                case R.styleable.LIMEKeyboardBaseView_previewTopPadding: // Jeremy 15,7,13
                     mPreviewTopPadding = a.getDimensionPixelSize(attr, 0);
                     break;
                 case R.styleable.LIMEKeyboardBaseView_backgroundDimAmount:
                     mBackgroundDimAmount = a.getFloat(attr, 0.5f);
                     break;
-                //case android.R.styleable.
+                // case android.R.styleable.
                 case R.styleable.LIMEKeyboardBaseView_keyTextStyle:
                     int textStyle = a.getInt(attr, 0);
                     switch (textStyle) {
@@ -565,12 +579,12 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         final Resources res = getResources();
 
-        isLargeScreen = true; //large || xlarge;  //Force turn off fling selection now.
+        isLargeScreen = true; // large || xlarge; //Force turn off fling selection now.
 
         mPreviewPopup = new PopupWindow(context);
         if (previewLayout != 0) {
-            mKeyPreviewFadeInAnimator = AnimationUtils.loadAnimation(mContext,R.anim.key_preview_fadein);
-            mKeyPreviewFadeOutAnimator = AnimationUtils.loadAnimation(mContext,R.anim.key_preview_fadeout);
+            mKeyPreviewFadeInAnimator = AnimationUtils.loadAnimation(mContext, R.anim.key_preview_fadein);
+            mKeyPreviewFadeOutAnimator = AnimationUtils.loadAnimation(mContext, R.anim.key_preview_fadeout);
 
             mPreviewTextSizeLarge = (int) res.getDimension(R.dimen.key_preview_text_size_large);
         } else {
@@ -599,51 +613,51 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         mDisambiguateSwipe = res.getBoolean(R.bool.config_swipeDisambiguation);
         mMiniKeyboardSlideAllowance = res.getDimension(R.dimen.mini_keyboard_slide_allowance);
 
-        GestureDetector.SimpleOnGestureListener listener =
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onFling(MotionEvent me1, MotionEvent me2, float velocityX,
-                                           float velocityY) {
-                        final float absX = Math.abs(velocityX);
-                        final float absY = Math.abs(velocityY);
-                        float deltaX = me2.getX() - me1.getX();
-                        float deltaY = me2.getY() - me1.getY();
-                        int travelX = getWidth() / 2; // Half the keyboard width
-                        int travelY = getHeight() / 2; // Half the keyboard height
-                        mSwipeTracker.computeCurrentVelocity(1000);
-                        final float endingVelocityX = mSwipeTracker.getXVelocity();
-                        final float endingVelocityY = mSwipeTracker.getYVelocity();
-                        if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
-                            if (mDisambiguateSwipe && endingVelocityX >= velocityX / 4) {
-                                swipeRight();
-                                return true;
-                            }
-                        } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
-                            if (mDisambiguateSwipe && endingVelocityX <= velocityX / 4) {
-                                swipeLeft();
-                                return true;
-                            }
-                        } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
-                            if (mDisambiguateSwipe && endingVelocityY <= velocityY / 4) {
-                                swipeUp();
-                                return true;
-                            }
-                        } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
-                            if (mDisambiguateSwipe && endingVelocityY >= velocityY / 4) {
-                                swipeDown();
-                                return true;
-                            }
-                        }
-                        return false;
+        GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent me1, MotionEvent me2, float velocityX,
+                    float velocityY) {
+                final float absX = Math.abs(velocityX);
+                final float absY = Math.abs(velocityY);
+                float deltaX = me2.getX() - me1.getX();
+                float deltaY = me2.getY() - me1.getY();
+                int travelX = getWidth() / 2; // Half the keyboard width
+                int travelY = getHeight() / 2; // Half the keyboard height
+                mSwipeTracker.computeCurrentVelocity(1000);
+                final float endingVelocityX = mSwipeTracker.getXVelocity();
+                final float endingVelocityY = mSwipeTracker.getYVelocity();
+                if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
+                    if (mDisambiguateSwipe && endingVelocityX >= velocityX / 4) {
+                        swipeRight();
+                        return true;
                     }
-                };
+                } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
+                    if (mDisambiguateSwipe && endingVelocityX <= velocityX / 4) {
+                        swipeLeft();
+                        return true;
+                    }
+                } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
+                    if (mDisambiguateSwipe && endingVelocityY <= velocityY / 4) {
+                        swipeUp();
+                        return true;
+                    }
+                } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
+                    if (mDisambiguateSwipe && endingVelocityY >= velocityY / 4) {
+                        swipeDown();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
 
         final boolean ignoreMultitouch = true;
         mGestureDetector = new GestureDetector(getContext(), listener, null, ignoreMultitouch);
 
         mGestureDetector.setIsLongpressEnabled(false);
 
-        mHasDistinctMultitouch = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
+        mHasDistinctMultitouch = context.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
         mKeyRepeatInterval = res.getInteger(R.integer.config_key_repeat_interval);
     }
 
@@ -664,7 +678,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     /**
-     * Attaches a keyboard to this view. The keyboard can be switched at any time and the
+     * Attaches a keyboard to this view. The keyboard can be switched at any time
+     * and the
      * view will re-layout itself to accommodate the keyboard.
      * //* @see Keyboard
      *
@@ -675,7 +690,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         // Remove any pending messages, except dismissing preview
         mHandler.cancelKeyTimers();
         mKeyboard = keyboard;
-        //LatinImeLogger.onSetKeyboard(keyboard);
+        // LatinImeLogger.onSetKeyboard(keyboard);
         mKeys = mKeyDetector.setKeyboard(keyboard, -getPaddingLeft(),
                 -getPaddingTop() + mVerticalCorrection);
         mKeyboardVerticalGap = (int) getResources().getDimension(R.dimen.key_bottom_gap);
@@ -684,7 +699,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         }
         requestLayout();
         // Hint to reallocate the buffer if the size changed
-        mOffsetInWindow = null;  //reset offset window.  keyboard changed.
+        mOffsetInWindow = null; // reset offset window. keyboard changed.
         mKeyboardChanged = true;
         invalidateAllKeys();
         computeProximityThreshold(keyboard);
@@ -695,7 +710,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      * Returns the current keyboard being displayed by this view.
      *
      * @return the currently attached keyboard
-     * //* @see #setKeyboard(Keyboard)
+     *         //* @see #setKeyboard(Keyboard)
      */
     public LIMEBaseKeyboard getKeyboard() {
         return mKeyboard;
@@ -731,14 +746,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      * Returns the state of the shift key of the keyboard, if any.
      *
      * @return true if the shift is in a pressed state, false otherwise. If there is
-     * no shift key on the keyboard or there is no keyboard attached, it returns false.
+     *         no shift key on the keyboard or there is no keyboard attached, it
+     *         returns false.
      */
     public boolean isShifted() {
         return mKeyboard != null && mKeyboard.isShifted();
     }
 
     /**
-     * Enables or disables the key feedback popup. This is a popup that shows a magnified
+     * Enables or disables the key feedback popup. This is a popup that shows a
+     * magnified
      * version of the depressed key. By default the preview is enabled.
      *
      * @param previewEnabled whether or not to enable the key feedback popup
@@ -775,8 +792,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     /**
-     * When enabled, calls to {@link OnKeyboardActionListener#onKey} will include key
-     * codes for adjacent keys.  When disabled, only the primary key code will be
+     * When enabled, calls to {@link OnKeyboardActionListener#onKey} will include
+     * key
+     * codes for adjacent keys. When disabled, only the primary key code will be
      * reported.
      *
      * @param enabled whether or not the proximity correction is enabled
@@ -817,21 +835,26 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     /**
-     * Compute the average distance between adjacent keys (horizontally and vertically)
-     * and square it to get the proximity threshold. We use a square here and in computing
+     * Compute the average distance between adjacent keys (horizontally and
+     * vertically)
+     * and square it to get the proximity threshold. We use a square here and in
+     * computing
      * the touch distance from a key's center to avoid taking a square root.
      *
      */
     private void computeProximityThreshold(LIMEBaseKeyboard keyboard) {
-        if (keyboard == null) return;
+        if (keyboard == null)
+            return;
         final Key[] keys = mKeys;
-        if (keys == null) return;
+        if (keys == null)
+            return;
         int length = keys.length;
         int dimensionSum = 0;
         for (Key key : keys) {
             dimensionSum += Math.min(key.width, key.height + mKeyboardVerticalGap) + key.gap;
         }
-        if (dimensionSum < 0 || length == 0) return;
+        if (dimensionSum < 0 || length == 0)
+            return;
         mKeyDetector.setProximityThreshold((int) (dimensionSum * 1.4f / length));
     }
 
@@ -864,10 +887,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             mKeyboardChanged = false;
         }
         final Canvas canvas = mCanvas;
-        //Daniel: this is old usage. will cause crash
-        //canvas.clipRect(mDirtyRect, Op.REPLACE);
+        // Daniel: this is old usage. will cause crash
+        // canvas.clipRect(mDirtyRect, Op.REPLACE);
 
-        if (mKeyboard == null) return;
+        if (mKeyboard == null)
+            return;
 
         final Paint paint = mPaint;
         final Drawable keyBackground = mKeyBackground;
@@ -877,7 +901,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         final int kbdPaddingTop = getPaddingTop();
         final Key[] keys = mKeys;
         final Key invalidKey = mInvalidatedKey;
-
 
         boolean drawSingleKey = false;
         if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
@@ -891,24 +914,46 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             }
         }
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
-        //final int keyCount = keys.length;
+        // final int keyCount = keys.length;
         for (final Key key : keys) {
             if (drawSingleKey && invalidKey != key) {
                 continue;
             }
             int[] drawableState = key.getCurrentDrawableState();
-            keyBackground.setState(drawableState);
 
+            // Use action key background for Enter key if available
+            boolean isActionKey = key.codes != null && key.codes.length > 0
+                    && key.codes[0] == LIMEBaseKeyboard.KEYCODE_ENTER;
+
+            // Identify functional keys (Space, Delete, Shift, Symbol, Done)
+            boolean isFunctionalKey = key.codes != null && key.codes.length > 0 && (key.codes[0] == 32 || // Space
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DELETE ||
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_SHIFT ||
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_MODE_CHANGE ||
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE);
+
+            Drawable currentBackground = keyBackground;
+            if (isActionKey && mActionKeyBackground != null) {
+                currentBackground = mActionKeyBackground;
+            } else if (isFunctionalKey && mFunctionalKeyBackground != null) {
+                currentBackground = mFunctionalKeyBackground;
+            }
+
+            // Drawable currentBackground = (isActionKey && mActionKeyBackground != null) ?
+            // mActionKeyBackground
+            // : keyBackground;
+
+            currentBackground.setState(drawableState);
 
             // Switch the character to uppercase if shift is pressed
             String label = key.label == null ? null : adjustCase(key.label).toString();
 
-            final Rect bounds = keyBackground.getBounds();
+            final Rect bounds = currentBackground.getBounds();
             if (key.width != bounds.right || key.height != bounds.bottom) {
-                keyBackground.setBounds(0, 0, key.width, key.height);
+                currentBackground.setBounds(0, 0, key.width, key.height);
             }
             canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
-            keyBackground.draw(canvas);
+            currentBackground.draw(canvas);
 
             boolean shouldDrawIcon = true;
             if (label != null) {
@@ -916,10 +961,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 final int labelSize;
 
                 /*
-                if (DEBUG)
-                    Log.i(TAG, "onBufferDraw():" + label
-                            + " keySizeScale = " + mKeyboard.getKeySizeScale() + " "
-                            + " labelSizeScale = " + key.getLabelSizeScale());
+                 * if (DEBUG)
+                 * Log.i(TAG, "onBufferDraw():" + label
+                 * + " keySizeScale = " + mKeyboard.getKeySizeScale() + " "
+                 * + " labelSizeScale = " + key.getLabelSizeScale());
                  */
 
                 float keySizeScale = mKeyboard.getKeySizeScale();
@@ -930,18 +975,20 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 String subLabel = "", secondSubLabel = "";
                 if (hasSubLabel) {
                     String labelA[] = label.split("\n");
-                    if (labelA.length > 0) label = labelA[1];
+                    if (labelA.length > 0)
+                        label = labelA[1];
                     subLabel = labelA[0];
 
                     hasSecondSubLabel = subLabel.contains("\t");
                     if (hasSecondSubLabel) {
                         String subLabelA[] = subLabel.split("\t");
-                        if (subLabelA.length > 0) subLabel = subLabelA[0];
+                        if (subLabelA.length > 0)
+                            subLabel = subLabelA[0];
                         secondSubLabel = subLabelA[1];
                     }
                 }
                 if (hasSubLabel) {
-                    if (label.length() > 1) { //Jeremy '12,6,6 shrink the font size for more characters on label
+                    if (label.length() > 1) { // Jeremy '12,6,6 shrink the font size for more characters on label
                         labelSize = (int) (mSmallLabelTextSize * keySizeScale * labelSizeScale * 0.8f);
                         paint.setTypeface(Typeface.DEFAULT_BOLD);
                     } else {
@@ -956,7 +1003,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     paint.setTypeface(mKeyTextStyle);
                 }
                 paint.setTextSize(labelSize);
-
 
                 final int labelHeight;
                 final int labelWidth;
@@ -974,7 +1020,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 }
 
                 // Draw a drop shadow for the text
-                if (mShadowRadius > 0) paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
+                if (mShadowRadius > 0)
+                    paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                 final int centerX = (key.width + padding.left - padding.right) / 2;
                 final int centerY = (key.height + padding.top - padding.bottom) / 2;
                 final int keyColor = key.isFunctionalKey()
@@ -982,7 +1029,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
                 final int subKeyColor = key.isFunctionalKey()
                         ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
-                        :(key.pressed ? mKeySubLabelTextColorPressed : mKeySubLabelTextColorNormal);
+                        : (key.pressed ? mKeySubLabelTextColorPressed : mKeySubLabelTextColorNormal);
 
                 float KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR = 0.55f;
                 float baseline = centerY
@@ -1007,8 +1054,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         mTextWidthCache.put(subLabelSize, subLabelWidth);
                     }
 
-                    //portrait keyboard
-                    if (key.height > key.width || subLabel.length() >2 || hasSecondSubLabel) {
+                    // portrait keyboard
+                    if (key.height > key.width || subLabel.length() > 2 || hasSecondSubLabel) {
                         baseline = (key.height + padding.top - padding.bottom) * 2 / 3
                                 + labelHeight * KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR;
                         float subBaseline = (key.height + padding.top - padding.bottom) / 4
@@ -1028,21 +1075,24 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         paint.setColor(keyColor);
                         canvas.drawText(label, centerX, baseline, paint);
 
-                    } else {    //landscape keyboard
+                    } else { // landscape keyboard
                         paint.setColor(subKeyColor);
-                        //if (subLabel.length() > 2)  // draw sub keys as portrait keys in two rows.
-                        //    paint.setTextSize(subLabelSize * 2 / 3);  //123 EN  in landscape is usually to wide.
-                        /*if (hasSecondSubLabel) {
-                                                    canvas.drawText(subLabel, centerX - subLabelWidth * 2, baseline, paint);
-                                                    paint.setColor(keyColor);
-                                                    canvas.drawText(secondSubLabel, centerX - subLabelWidth, baseline, paint);
-                                                } else*/
+                        // if (subLabel.length() > 2) // draw sub keys as portrait keys in two rows.
+                        // paint.setTextSize(subLabelSize * 2 / 3); //123 EN in landscape is usually to
+                        // wide.
+                        /*
+                         * if (hasSecondSubLabel) {
+                         * canvas.drawText(subLabel, centerX - subLabelWidth * 2, baseline, paint);
+                         * paint.setColor(keyColor);
+                         * canvas.drawText(secondSubLabel, centerX - subLabelWidth, baseline, paint);
+                         * } else
+                         */
                         canvas.drawText(subLabel, centerX - subLabelWidth, baseline, paint);
 
                         paint.setTextSize(labelSize);
                         paint.setTypeface(mKeyTextStyle);
                         paint.setColor(keyColor);
-                        canvas.drawText(label, centerX + labelWidth/2, baseline, paint);
+                        canvas.drawText(label, centerX + labelWidth / 2, baseline, paint);
 
                     }
 
@@ -1051,7 +1101,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     canvas.drawText(label, centerX, baseline, paint);
                 }
                 // Turn off drop shadow
-                if (mShadowRadius > 0) paint.setShadowLayer(0, 0, 0, 0);
+                if (mShadowRadius > 0)
+                    paint.setShadowLayer(0, 0, 0, 0);
 
                 // Usually don't draw icon if label is not null, but we draw icon for the number
                 // hint and popup hint.
@@ -1064,7 +1115,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 else {
                     icon.setState(drawableState);
                 }
-
 
                 // Special handing for the upper-right number hint icons
                 final int drawableWidth;
@@ -1079,7 +1129,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 } else {
 
                     drawableHeight = key.height; // icon.getIntrinsicHeight();
-                    drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight()  ;
+                    drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
                     drawableX = (key.width + padding.left - padding.right - drawableWidth) / 2;
                     drawableY = (key.height + padding.top - padding.bottom - drawableHeight) / 2;
                 }
@@ -1121,8 +1171,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     /**
-     * Requests a redraw of the entire keyboard. Calling {@link #invalidate} is not sufficient
-     * because the keyboard renders the keys to an off-screen buffer and an invalidate() only
+     * Requests a redraw of the entire keyboard. Calling {@link #invalidate} is not
+     * sufficient
+     * because the keyboard renders the keys to an off-screen buffer and an
+     * invalidate() only
      * draws the cached buffer.
      *
      * @see #invalidateKey(Key)
@@ -1134,8 +1186,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     /**
-     * Invalidates a key so that it will be redrawn on the next repaint. Use this method if only
-     * one key is changing it's content. Any changes that affect the position or size of the key
+     * Invalidates a key so that it will be redrawn on the next repaint. Use this
+     * method if only
+     * one key is changing it's content. Any changes that affect the position or
+     * size of the key
      * may not be honored.
      * //* @param key key in the attached {@link //Keyboard}.
      *
@@ -1179,13 +1233,13 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
     private View inflateMiniKeyboardContainer(Key popupKey) {
         int popupKeyboardId = popupKey.popupResId;
-        //LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        // LayoutInflater inflater = (LayoutInflater)
+        // getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View container = LayoutInflater.from(mContext).inflate(mPopupLayout, null);
         if (container == null)
             throw new NullPointerException();
 
-        LIMEKeyboardBaseView miniKeyboard =
-                (LIMEKeyboardBaseView) container.findViewById(R.id.LIMEPopupKeyboard);
+        LIMEKeyboardBaseView miniKeyboard = (LIMEKeyboardBaseView) container.findViewById(R.id.LIMEPopupKeyboard);
         miniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
             public void onKey(int primaryCode, int[] keyCodes, int x, int y) {
                 mKeyboardActionListener.onKey(primaryCode, keyCodes, x, y);
@@ -1233,13 +1287,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     -1, getPaddingLeft() + getPaddingRight(),
                     LIMEKeyboardBaseView.this.mKeyboard.getKeySizeScale());
         } else {
-            keyboard = new LIMEBaseKeyboard(mContext, popupKeyboardId
-                    , LIMEKeyboardBaseView.this.mKeyboard.getKeySizeScale(), 0, 0); //Jeremy '12,5,21 never show arrow keys in popup keyboard
+            keyboard = new LIMEBaseKeyboard(mContext, popupKeyboardId,
+                    LIMEKeyboardBaseView.this.mKeyboard.getKeySizeScale(), 0, 0); // Jeremy '12,5,21 never show arrow
+                                                                                  // keys in popup keyboard
         }
-        //mini keyboard in fling mode override with fling correction. Jeremy '12,5,27
+        // mini keyboard in fling mode override with fling correction. Jeremy '12,5,27
         if (!isLargeScreen || keyboard.getKeys().size() == 1)
-            miniKeyboard.mVerticalCorrection =
-                    getResources().getDimension(R.dimen.mini_keyboard_fling_vertical_correction);
+            miniKeyboard.mVerticalCorrection = getResources()
+                    .getDimension(R.dimen.mini_keyboard_fling_vertical_correction);
         miniKeyboard.setKeyboard(keyboard);
         miniKeyboard.setPopupParent(this);
 
@@ -1250,27 +1305,36 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private static boolean isOneRowKeys(List<Key> keys) {
-        if (keys.size() == 0) return false;
+        if (keys.size() == 0)
+            return false;
         final int edgeFlags = keys.get(0).edgeFlags;
-        // HACK: The first key of mini keyboard which was inflated from xml and has multiple rows,
-        // does not have both top and bottom edge flags on at the same time.  On the other hand,
-        // the first key of mini keyboard that was created with popupCharacters must have both top
+        // HACK: The first key of mini keyboard which was inflated from xml and has
+        // multiple rows,
+        // does not have both top and bottom edge flags on at the same time. On the
+        // other hand,
+        // the first key of mini keyboard that was created with popupCharacters must
+        // have both top
         // and bottom edge flags on.
-        // When you want to use one row mini-keyboard from xml file, make sure that the row has
+        // When you want to use one row mini-keyboard from xml file, make sure that the
+        // row has
         // both top and bottom edge flags set.
         return (edgeFlags & LIMEBaseKeyboard.EDGE_TOP) != 0 && (edgeFlags & LIMEBaseKeyboard.EDGE_BOTTOM) != 0;
     }
 
     /**
-     * Called when a key is long pressed. By default this will open any popup keyboard associated
+     * Called when a key is long pressed. By default this will open any popup
+     * keyboard associated
      * with this key through the attributes popupLayout and popupCharacters.
      *
      * @param popupKey the key that was long pressed
-     * @return true if the long press is handled, false otherwise. Subclasses should call the
-     * method on the base class if the subclass doesn't wish to handle the call.
+     * @return true if the long press is handled, false otherwise. Subclasses should
+     *         call the
+     *         method on the base class if the subclass doesn't wish to handle the
+     *         call.
      */
     protected boolean onLongPress(Key popupKey) {
-        // TODO if popupKey.popupCharacters has only one letter, send it as key without opening
+        // TODO if popupKey.popupCharacters has only one letter, send it as key without
+        // opening
         // mini keyboard.
 
         if (popupKey.popupResId == 0)
@@ -1288,25 +1352,27 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         }
 
         // Get width of a key in the mini popup keyboard = "miniKeyWidth".
-        // On the other hand, "popupKey.width" is width of the pressed key on the main keyboard.
+        // On the other hand, "popupKey.width" is width of the pressed key on the main
+        // keyboard.
         // We adjust the position of mini popup keyboard with the edge key in it:
-        //  a) When we have the leftmost key in popup keyboard directly above the pressed key
-        //     Right edges of both keys should be aligned for consistent default selection
-        //  b) When we have the rightmost key in popup keyboard directly above the pressed key
-        //     Left edges of both keys should be aligned for consistent default selection
+        // a) When we have the leftmost key in popup keyboard directly above the pressed
+        // key
+        // Right edges of both keys should be aligned for consistent default selection
+        // b) When we have the rightmost key in popup keyboard directly above the
+        // pressed key
+        // Left edges of both keys should be aligned for consistent default selection
         final List<Key> miniKeys = mMiniKeyboard.getKeyboard().getKeys();
         final int miniKeyWidth = miniKeys.size() > 0 ? miniKeys.get(0).width : 0;
 
         // HACK: Have the leftmost number in the popup characters right above the key
-        boolean isNumberAtLeftmost =
-                hasMultiplePopupChars(popupKey) && isNumberAtLeftmostPopupChar(popupKey);
+        boolean isNumberAtLeftmost = hasMultiplePopupChars(popupKey) && isNumberAtLeftmostPopupChar(popupKey);
         int popupX = popupKey.x + mWindowOffset[0];
         popupX += getPaddingLeft();
         if (isNumberAtLeftmost) {
-            popupX += popupKey.width - miniKeyWidth;  // adjustment for a) described above
+            popupX += popupKey.width - miniKeyWidth; // adjustment for a) described above
             popupX -= container.getPaddingLeft();
         } else {
-            popupX += miniKeyWidth;  // adjustment for b) described above
+            popupX += miniKeyWidth; // adjustment for b) described above
             popupX -= container.getMeasuredWidth();
             popupX += container.getPaddingRight();
         }
@@ -1328,7 +1394,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         mMiniKeyboard.setPopupOffset(adjustedX, y);
         mMiniKeyboard.setShifted(isShifted());
         // Mini keyboard needs no pop-up key preview displayed.
-        mMiniKeyboard.setPreviewEnabled(isLargeScreen && miniKeys.size() > 1);  // no fling on large screen
+        mMiniKeyboard.setPreviewEnabled(isLargeScreen && miniKeys.size() > 1); // no fling on large screen
         mMiniKeyboardPopup.setContentView(container);
         mMiniKeyboardPopup.setWidth(container.getMeasuredWidth());
         mMiniKeyboardPopup.setHeight(container.getMeasuredHeight());
@@ -1337,7 +1403,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         // Inject down event on the key to mini keyboard.
         long eventTime = SystemClock.uptimeMillis();
         mMiniKeyboardPopupTime = eventTime;
-        if (!isLargeScreen || miniKeys.size() == 1) {   // disable fling on large screen; //Jeremy enable fling when popup keyboard only has 1 key '12,5,20
+        if (!isLargeScreen || miniKeys.size() == 1) { // disable fling on large screen; //Jeremy enable fling when popup
+                                                      // keyboard only has 1 key '12,5,20
             MotionEvent downEvent = generateMiniKeyboardMotionEvent(MotionEvent.ACTION_DOWN, popupKey.x
                     + popupKey.width / 2, popupKey.y + popupKey.height / 2, eventTime);
             mMiniKeyboard.onTouchEvent(downEvent);
@@ -1354,13 +1421,13 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
     private boolean shouldDrawIconFully(Key key) {
         return (hasPopupKeyboard(key));
-        //return isNumberAtEdgeOfPopupChars(key) || isLatinF1Key(key);
-        //|| LIMEKeyboard.hasPuncOrSmileysPopup(key);
+        // return isNumberAtEdgeOfPopupChars(key) || isLatinF1Key(key);
+        // || LIMEKeyboard.hasPuncOrSmileysPopup(key);
 
     }
 
     private boolean shouldDrawLabelAndIcon(Key key) {
-        return hasPopupKeyboard(key) ||  key.icon != null;
+        return hasPopupKeyboard(key) || key.icon != null;
 
     }
 
@@ -1373,7 +1440,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 && isAsciiDigit(key.popupCharacters.charAt(0));
     }
 
-   private static boolean isAsciiDigit(char c) {
+    private static boolean isAsciiDigit(char c) {
         return (c < 0x80) && Character.isDigit(c);
     }
 
@@ -1389,8 +1456,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         // Create pointer trackers until we can get 'id+1'-th tracker, if needed.
         for (int i = pointers.size(); i <= id; i++) {
-            final PointerTracker tracker =
-                    new PointerTracker(i, mHandler, mKeyDetector, this, getResources());
+            final PointerTracker tracker = new PointerTracker(i, mHandler, mKeyDetector, this, getResources());
             if (keys != null)
                 tracker.setKeyboard(keys, mKeyHysteresisDistance);
             if (listener != null)
@@ -1402,10 +1468,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private void onDownEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if(DEBUG)
-            Log.i(TAG,"onDownEvent() eventTime = " + eventTime);
+        if (DEBUG)
+            Log.i(TAG, "onDownEvent() eventTime = " + eventTime);
         if (tracker.isOnModifierKey(x, y)) {
-            // Before processing a down event of modifier key, all pointers already being tracked
+            // Before processing a down event of modifier key, all pointers already being
+            // tracked
             // should be released.
             mPointerQueue.releaseAllPointersExcept(null, eventTime);
         }
@@ -1414,11 +1481,12 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private void onUpEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if(DEBUG)
-            Log.i(TAG,"onUpEvent() eventTime = " + eventTime);
+        if (DEBUG)
+            Log.i(TAG, "onUpEvent() eventTime = " + eventTime);
 
         if (tracker.isModifier()) {
-            // Before processing an up event of modifier key, all pointers already being tracked
+            // Before processing an up event of modifier key, all pointers already being
+            // tracked
             // should be released.
             mPointerQueue.releaseAllPointersExcept(tracker, eventTime);
         } else {
@@ -1434,21 +1502,22 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         mPointerQueue.remove(tracker);
     }
 
-
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent me) {
-        if(DEBUG)
-            Log.i(TAG,"onTouchEvent()");
+        if (DEBUG)
+            Log.i(TAG, "onTouchEvent()");
         final int action = me.getActionMasked();
         final int pointerCount = me.getPointerCount();
         final int oldPointerCount = mOldPointerCount;
         mOldPointerCount = pointerCount;
 
-        if(DEBUG)
-            Log.i(TAG,"onTouchEvent() pointerCount = "+ pointerCount + ", oldPointerCount" + oldPointerCount);
+        if (DEBUG)
+            Log.i(TAG, "onTouchEvent() pointerCount = " + pointerCount + ", oldPointerCount" + oldPointerCount);
 
-        // TODO: cleanup this code into a multi-touch to single-touch event converter class?
-        // If the device does not have distinct multi-touch support panel, ignore all multi-touch
+        // TODO: cleanup this code into a multi-touch to single-touch event converter
+        // class?
+        // If the device does not have distinct multi-touch support panel, ignore all
+        // multi-touch
         // events except a transition from/to single-touch.
         if (!mHasDistinctMultitouch && pointerCount > 1 && oldPointerCount > 1) {
             return true;
@@ -1457,7 +1526,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         // Track the last few movements to look for spurious swipes.
         mSwipeTracker.addMovement(me);
 
-        // Gesture detector must be enabled only when mini-keyboard is not on the screen.
+        // Gesture detector must be enabled only when mini-keyboard is not on the
+        // screen.
         if (mMiniKeyboard == null
                 && mGestureDetector != null && mGestureDetector.onTouchEvent(me)) {
             mHandler.cancelKeyTimers();
@@ -1472,7 +1542,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         // Needs to be called after the gesture detector gets a turn, as it may have
         // displayed the mini keyboard
-        if (mMiniKeyboard != null && (!isLargeScreen || mMiniKeyboard.getKeyboard().getKeys().size() == 1)) {  //Jeremy enable fling when popup keyboard only has 1 key '12,5,20
+        if (mMiniKeyboard != null && (!isLargeScreen || mMiniKeyboard.getKeyboard().getKeys().size() == 1)) { // Jeremy
+                                                                                                              // enable
+                                                                                                              // fling
+                                                                                                              // when
+                                                                                                              // popup
+                                                                                                              // keyboard
+                                                                                                              // only
+                                                                                                              // has 1
+                                                                                                              // key
+                                                                                                              // '12,5,20
             final int miniKeyboardPointerIndex = me.findPointerIndex(mMiniKeyboardTrackerId);
             if (miniKeyboardPointerIndex >= 0 && miniKeyboardPointerIndex < pointerCount) {
                 final int miniKeyboardX = (int) me.getX(miniKeyboardPointerIndex);
@@ -1491,7 +1570,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 return true;
             }
             final PointerTracker tracker = getPointerTracker(id);
-            // Key repeating timer will be canceled if 2 or more keys are in action, and current
+            // Key repeating timer will be canceled if 2 or more keys are in action, and
+            // current
             // event (UP or DOWN) is non-modifier key.
             if (pointerCount > 1 && !tracker.isModifier()) {
                 mHandler.cancelKeyRepeatTimer();
@@ -1499,8 +1579,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             // Up event will pass through.
         }
 
-        // TODO: cleanup this code into a multi-touch to single-touch event converter class?
-        // Translate mutli-touch event to single-touch events on the device that has no distinct
+        // TODO: cleanup this code into a multi-touch to single-touch event converter
+        // class?
+        // Translate mutli-touch event to single-touch events on the device that has no
+        // distinct
         // multi-touch panel.
         if (!mHasDistinctMultitouch) {
             // Use only main (id=0) pointer tracker.
@@ -1548,8 +1630,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private void onCancelEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if(DEBUG)
-            Log.i(TAG,"onCancelEvent() eventTime = " + eventTime);
+        if (DEBUG)
+            Log.i(TAG, "onCancelEvent() eventTime = " + eventTime);
 
         tracker.onCancelEvent(x, y, eventTime);
         mPointerQueue.remove(tracker);
@@ -1572,8 +1654,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     public void closing() {
-        if(DEBUG)
-            Log.i(TAG,"closing()");
+        if (DEBUG)
+            Log.i(TAG, "closing()");
 
         mHandler.cancelAllMessages();
         dismissPopupKeyboard();

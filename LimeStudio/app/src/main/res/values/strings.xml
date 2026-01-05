@@ -238,5 +238,6 @@
     <string name="smart_chinese_input">smart_chinese_input</string>
     <string name="preference_smart_chinese_input">開啟中文智慧選字</string>
     <string name="preference_smart_chinese_input_message">部份輸入法可能會影響中英混打功能</string>
+    <string name="label_symbol_mode">\?123</string>
 
 </resources>

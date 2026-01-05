@@ -138,6 +138,8 @@
     <style name="LIMEKeyboardLayout.Dark" parent="LIMEKeyboardLayout">
         <item name="android:background">@drawable/keyboard_background_dark</item>
         <item name="android:keyBackground">@drawable/btn_keyboard_key_dark</item>
+        <item name="actionKeyBackground">@drawable/btn_keyboard_action_key_dark</item>
+        <item name="functionalKeyBackground">@drawable/btn_flat_keyboard_functional_key_dark</item>
     </style>
 
     <style name="LIMEKeyboardLayout.Pink" parent="LIMEKeyboardLayout">

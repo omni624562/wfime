@@ -5,8 +5,8 @@
     android:insetTop="6dp"
     android:insetBottom="6dp">
     <shape android:shape="rectangle">
-        <corners android:radius="12dp" />
-        <solid android:color="@color/second_background_dark" />
+        <corners android:radius="25dp" />
+        <solid android:color="@color/action_key_color" />
         <padding
             android:bottom="1dp"
             android:left="1dp"
