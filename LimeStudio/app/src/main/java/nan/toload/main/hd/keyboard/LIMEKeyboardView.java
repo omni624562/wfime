@@ -71,7 +71,8 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 			Log.i(TAG, "onLongPress, keycode = " + key.codes[0]
 					+ "; spaceDragDiff = " + ((LIMEKeyboard) this.getKeyboard()).getSpaceDragDiff()
 					+ "; key_height = " + mKeyHeight);
-		if (key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE) {
+		if (key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE
+				|| key.codes[0] == -9) { // -9 is Globe/Switch English
 			InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showInputMethodPicker();
 			return true;
