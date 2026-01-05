@@ -56,7 +56,7 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
         if (DEBUG)
             Log.i(TAG, "initViews()");
         if (mCandidateView == null) {
-            mButtonRightExpand = findViewById(R.id.candidate_right_parent);
+            mButtonRightExpand = findViewById(R.id.candidate_right);
             mRightButton = findViewById(R.id.candidate_right);
 
             if (mRightButton != null) {

@@ -2582,13 +2582,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             }
         }
 
-        Mapping hasMore = new Mapping();
-        hasMore.setCode("has_more_records");
-        hasMore.setWord("...");
-        hasMore.setHasMoreRecordsMarkRecord();
-
-        if (!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT))
-            result.add(hasMore);
+        // Removed "..." indicator - now using horizontal scroll in CandidateView
+        // Mapping hasMore = new Mapping();
+        // hasMore.setCode("has_more_records");
+        // hasMore.setWord("...");
+        // hasMore.setHasMoreRecordsMarkRecord();
+        // if (!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT))
+        // result.add(hasMore);
 
         if (DEBUG || probePerformance)
             Log.i(TAG, "buildQueryResult():query_code:" + query_code + " query_code.length:" + query_code.length()
@@ -2690,13 +2690,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                             result.add(munit);
                             rsize++;
                         } while (cursor.moveToNext());
-                        Mapping temp = new Mapping();
-                        temp.setCode("has_more_records");
-                        temp.setWord("...");
-                        temp.setHasMoreRecordsMarkRecord();
-
-                        if ((!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT)))
-                            result.add(temp);
+                        // Removed "..." indicator - now using horizontal scroll in CandidateView
+                        // Mapping temp = new Mapping();
+                        // temp.setCode("has_more_records");
+                        // temp.setWord("...");
+                        // temp.setHasMoreRecordsMarkRecord();
+                        // if ((!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT)))
+                        // result.add(temp);
                     }
                     cursor.close();
                 }

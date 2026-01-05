@@ -22,8 +22,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Recomposer
@@ -31,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AndroidUiDispatcher
@@ -40,6 +44,7 @@ import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -56,6 +61,7 @@ import kotlinx.coroutines.launch
 import nan.toload.main.hd.LIMEService
 import nan.toload.main.hd.R
 import nan.toload.main.hd.data.Mapping
+import nan.toload.main.hd.global.LIMEPreferenceManager
 
 open class CandidateView @JvmOverloads constructor(
     context: Context,
@@ -92,6 +98,16 @@ open class CandidateView @JvmOverloads constructor(
     
     private var embeddedComposingView: TextView? = null
     private var composeView: ComposeView? = null
+    
+    // Preference manager for font size setting
+    private val mLIMEPref: LIMEPreferenceManager by lazy {
+        LIMEPreferenceManager(context)
+    }
+    
+    // Base font size from resources (18sp)
+    private val baseCandidateFontSizePx: Float by lazy {
+        context.resources.getDimension(R.dimen.candidate_font_size)
+    }
 
     init {
         // Load styles from R.styleable.LIMECandidateView
@@ -240,23 +256,62 @@ open class CandidateView @JvmOverloads constructor(
     fun CandidateRow() {
         // Gboard-style dark background
         val gboardDark = Color(0xFF2B2B2B)
+        val scrollState = rememberScrollState()
         
-        Row(
+        // Reset scroll position when suggestions change
+        LaunchedEffect(suggestions) {
+            scrollState.scrollTo(0)
+        }
+        
+        // Check if we're at the end of scroll
+        val isAtEnd = remember {
+            derivedStateOf {
+                scrollState.value >= scrollState.maxValue
+            }
+        }
+        
+        // Parent XML layout now provides bounded width - horizontal scroll works
+        Box(
             modifier = Modifier
-                .fillMaxHeight()
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .background(gboardDark)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            suggestions.forEachIndexed { index, mapping ->
-                CandidateItem(
-                    mapping = mapping,
-                    isSelected = index == selectedIndex,
-                    onClick = {
-                        mService?.pickCandidateManually(index)
-                        selectedIndex = index
-                    }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .horizontalScroll(scrollState)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                suggestions.forEachIndexed { index, mapping ->
+                    CandidateItem(
+                        mapping = mapping,
+                        isSelected = index == selectedIndex,
+                        onClick = {
+                            mService?.pickCandidateManually(index)
+                            selectedIndex = index
+                        }
+                    )
+                }
+            }
+            
+            // Fade edge indicator on right side when more content is available
+            if (suggestions.isNotEmpty() && !isAtEnd.value) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .width(24.dp)
+                        .fillMaxHeight()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    gboardDark
+                                )
+                            )
+                        )
                 )
             }
         }
@@ -272,6 +327,13 @@ open class CandidateView @JvmOverloads constructor(
         val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
         val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
         
+        // Read font size from dimension resource and apply user's font_size preference scale
+        val fontSizeScale = mLIMEPref.fontSize  // e.g. 0.8, 1.0, 1.2
+        val scaledFontSizePx = baseCandidateFontSizePx * fontSizeScale
+        val candidateFontSize = with(LocalDensity.current) {
+            scaledFontSizePx.toSp()
+        }
+        
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -282,7 +344,7 @@ open class CandidateView @JvmOverloads constructor(
             Text(
                 text = mapping.word ?: "",
                 color = textColor,
-                fontSize = 16.sp, 
+                fontSize = candidateFontSize, 
                 fontWeight = fontWeight,
                 maxLines = 1
             )

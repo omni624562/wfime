@@ -38,7 +38,8 @@
         android:textColor="@color/second_foreground_light"
         android:textSize="@dimen/composing_text_size" />
 
-    <LinearLayout
+    <!-- Use FrameLayout instead of LinearLayout with weight to provide bounded width for Compose -->
+    <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@color/third_background_light">
@@ -46,26 +47,19 @@
         <view xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/candidates"
             class="nan.toload.main.hd.candidate.CandidateView"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/candidate_stripe_height"
-            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/candidate_expand_button_width"
             android:background="@color/third_background_light" />
 
-        <LinearLayout
-            android:id="@+id/candidate_right_parent"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+        <ImageButton
+            android:id="@+id/candidate_right"
+            android:layout_width="@dimen/candidate_expand_button_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
             android:clickable="true"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/candidate_right"
-                android:layout_width="@dimen/candidate_expand_button_width"
-                android:layout_height="fill_parent"
-                android:clickable="true"
-                android:contentDescription="@string/more_cand"
-                android:src="@drawable/ic_suggest_expander" />
-        </LinearLayout>
-    </LinearLayout>
+            android:contentDescription="@string/more_cand"
+            android:src="@drawable/ic_suggest_expander" />
+    </FrameLayout>
 
 </nan.toload.main.hd.candidate.CandidateViewContainer>

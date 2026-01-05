@@ -39,7 +39,7 @@
     <dimen name="candidate_vertical_padding">6sp</dimen>
     <dimen name="candidate_number_font_size">12sp</dimen>
     <dimen name="candidate_expand_button_width">36sp</dimen>
-    <dimen name="candidate_font_size">22sp</dimen>
+    <dimen name="candidate_font_size">16sp</dimen>
     <dimen name="keyboard_bottom_padding">0.03in</dimen>
     <dimen name="key_text_size">18dp</dimen>
     <dimen name="label_text_size">13dp</dimen>

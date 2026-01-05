@@ -183,8 +183,7 @@
             limehd:codes="-9"
             limehd:isModifier="true"
             limehd:keyLabel="123\nEN"
-            limehd:keyWidth="10%p"
-            limehd:popupKeyboard="@xml/popup_symbol_mode" />
+            limehd:keyWidth="10%p" />
         <Key
             limehd:codes="32"
             limehd:isRepeatable="true"
