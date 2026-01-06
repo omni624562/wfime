@@ -107,8 +107,10 @@ public class KeyboardObj {
     }
 
     public String getEngkb(boolean showNumberRow) {
-        if (showNumberRow) return "lime_english_number";
-        else return "lime_english";
+        if (showNumberRow)
+            return "lime_number";
+        else
+            return "lime";
     }
 
     public String getEngshiftkb() {
@@ -120,8 +122,10 @@ public class KeyboardObj {
     }
 
     public String getEngshiftkb(boolean showNumberRow) {
-        if (showNumberRow) return "lime_english_number_shift";
-        else return "lime_english_shift";
+        if (showNumberRow)
+            return "lime_number_shift";
+        else
+            return "lime_shift";
     }
 
     public String getSymbolkb() {
@@ -171,6 +175,5 @@ public class KeyboardObj {
     public void setExtendedshiftkb(String extendedshiftkb) {
         this.extendedshiftkb = extendedshiftkb;
     }
-
 
 }
