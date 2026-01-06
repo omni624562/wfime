@@ -1638,7 +1638,11 @@ public class LIMEService extends InputMethodService implements
             // Simplified: Always handle shift for software keyboard
             if (DEBUG)
                 Log.i(TAG, "OnKey():KEYCODE_SHIFT calling handleShift()");
-            handleShift();
+
+            // Jeremy '24,1,7: Prevent double-toggle if Shift was already handled in onPress
+            if (!hasShiftPress) {
+                handleShift();
+            }
         } else if (primaryCode == LIMEBaseKeyboard.KEYCODE_DONE) {// long press on options and shift
             handleClose();
             // Jeremy '12,5,21 process the arrow keys on soft keyboard
@@ -3419,13 +3423,15 @@ public class LIMEService extends InputMethodService implements
         // keyboard)
         hasPhysicalKeyPressed = false;
 
-        if (hasDistinctMultitouch && primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
+        // Jeremy '24,1,7: Enable shift handling on press for all touch modes to support
+        // stable hybrid behavior
+        if (primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
             if (DEBUG)
-                Log.i(TAG, "onPress():KEYCODE_SHIFT with multitouch, calling handleShift()");
+                Log.i(TAG, "onPress():KEYCODE_SHIFT, calling handleShift()");
             hasShiftPress = true;
             hasShiftCombineKeyPressed = false;
             handleShift();
-        } else if (hasDistinctMultitouch && hasShiftPress) {
+        } else if (hasShiftPress) {
             hasShiftCombineKeyPressed = true;
         }
         doVibrateSound(primaryCode);
@@ -3474,13 +3480,14 @@ public class LIMEService extends InputMethodService implements
     public void onRelease(int primaryCode) {
         if (DEBUG)
             Log.i(TAG, "onRelease(): code = " + primaryCode);
-        if (hasDistinctMultitouch && primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
+        // Jeremy '24,1,7: Enable shift release handling for all touch modes
+        if (primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
             hasShiftPress = false;
             if (hasShiftCombineKeyPressed) {
                 hasShiftCombineKeyPressed = false;
                 updateShiftKeyState(getCurrentInputEditorInfo());
             }
-        } else if (hasDistinctMultitouch && !hasShiftPress) {
+        } else if (!hasShiftPress) {
             updateShiftKeyState(getCurrentInputEditorInfo());
 
         }
