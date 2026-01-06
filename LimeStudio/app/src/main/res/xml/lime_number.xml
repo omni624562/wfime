@@ -173,16 +173,15 @@
 
     <Row limehd:rowEdgeFlags="bottom">
         <Key
-            limehd:codes="-3"
+            limehd:codes="-2"
             limehd:isModifier="true"
-            limehd:keyEdgeFlags="left"
-            limehd:keyIcon="@drawable/sym_keyboard_done_light"
-            limehd:keyWidth="15%p" />
-        <Key
-            limehd:codes="-9"
-            limehd:isModifier="true"
-            limehd:keyLabel="EN"
+            limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="10%p" />
+        <Key
+            limehd:codes="-100"
+            limehd:keyIcon="@drawable/ic_emoji_white"
+            limehd:keyWidth="10%p"
+            limehd:popupKeyboard="@xml/popup_smileys" />
         <Key
             limehd:codes="44"
             limehd:keyLabel=","
@@ -191,16 +190,12 @@
             limehd:codes="32"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_flat_keyboard_space"
-            limehd:keyWidth="30%p" />
+            limehd:keyWidth="45%p" />
         <Key
             limehd:codes="46"
             limehd:keyLabel="."
             limehd:keyWidth="10%p"
             limehd:popupKeyboard="@xml/popup_c_punctuation" />
-        <Key
-            limehd:codes="-2"
-            limehd:isModifier="true"
-            limehd:keyLabel="@string/label_symbol_key" />
         <Key
             limehd:codes="10"
             limehd:isModifier="true"
