@@ -108,6 +108,7 @@ public class LIMEService extends InputMethodService implements
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
     // show candidate view in short time.
     private static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
+    private static final long SHIFT_LOCK_TIMEOUT = 500; // Jeremy '24,1,7: Double-tap timeout for caps lock
     private static final int POS_SETTINGS = 0;
     private static final int POS_HANCONVERT = 1; // Jeremy '11,9,17
     private static final int POS_KEYBOARD = 2;
@@ -187,6 +188,7 @@ public class LIMEService extends InputMethodService implements
 
     // To keep key press time
     // private long keyPressTime = 0;
+    private long mLastShiftTime = 0; // Jeremy '24,1,7: For shift double-tap check
     private boolean hasWinPress = false; // Jeremy '12,4,29 windows start key on standard windows keyboard
     // private boolean hasCtrlProcessed = false; // Jeremy '11,6.18
     private boolean hasDistinctMultitouch;// Jeremy '11,8,3
@@ -3267,11 +3269,13 @@ public class LIMEService extends InputMethodService implements
     }
 
     private void checkToggleCapsLock() {
-
+        long now = System.currentTimeMillis();
         if (mInputView.getKeyboard().isShifted()) {
-            toggleCapsLock();
+            if (now - mLastShiftTime < SHIFT_LOCK_TIMEOUT) {
+                toggleCapsLock();
+            }
         }
-
+        mLastShiftTime = now;
     }
 
     private void toggleCapsLock() {
