@@ -174,15 +174,20 @@
 
     <Row limehd:rowEdgeFlags="bottom">
         <Key
-            limehd:codes="-9"
+            limehd:codes="-2"
             limehd:isModifier="true"
-            limehd:keyLabel="123\nEN"
+            limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="10%p" />
+        <Key
+            limehd:codes="-100"
+            limehd:keyIcon="@drawable/ic_emoji_white"
+            limehd:keyWidth="10%p"
+            limehd:popupKeyboard="@xml/popup_smileys" />
         <Key
             limehd:codes="32"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_flat_keyboard_space"
-            limehd:keyWidth="45%p" />
+            limehd:keyWidth="35%p" />
         <Key
             limehd:codes="60"
             limehd:keyLabel="&lt;"
