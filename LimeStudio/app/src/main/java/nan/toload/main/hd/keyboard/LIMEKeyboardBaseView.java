@@ -596,7 +596,27 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         mMiniKeyboardParent = this;
         mMiniKeyboardPopup = new PopupWindow(context);
-        mMiniKeyboardPopup.setBackgroundDrawable(null);
+        // Jeremy '24,1,6: Fix user issue where tapping outside symbol popup doesn't
+        // close it.
+        // Needs a valid background (even transparent) to intercept outside touches.
+        mMiniKeyboardPopup
+                .setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        mMiniKeyboardPopup.setOutsideTouchable(true);
+        mMiniKeyboardPopup.setFocusable(true); // FIX: Enable focusable to consume outside touch events (prevent
+                                               // pass-through)
+
+        mMiniKeyboardPopup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                // Jeremy '24,1,6: Force state reset when popup is dismissed by outside touch.
+                // Critical: Must set mMiniKeyboard to null to stop drawing the dimming overlay.
+                mMiniKeyboard = null;
+                mMiniKeyboardOriginX = 0;
+                mMiniKeyboardOriginY = 0;
+                invalidateAllKeys();
+            }
+        });
+
         mMiniKeyboardPopup.setAnimationStyle(R.style.MiniKeyboardAnimation);
 
         mPaint = new Paint();
