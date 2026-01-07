@@ -247,8 +247,9 @@ public class LIMEKeyboardSwitcher {
                 LIMEKeyboard keyboard = new LIMEKeyboard(
                         mThemedContext, id.mXml, id.mMode, mKeySizeScale,
                         mLIMEPref.getShowArrowKeys(), // Jeremy '12,5,21 add the show arrow keys option
-                        mLIMEPref.getSplitKeyboard() // Jeremy '12,5,27 add the split keyboard option
-                );
+                        mLIMEPref.getSplitKeyboard(),
+                        mService.getMaxWidth() // Jeremy '26,1,7 Pass max width to prevent overflow
+                ); // Jeremy '12,5,27 add the split keyboard option
                 keyboard.setKeyboardSwitcher(this);
                 if (id.mEnableShiftLock) {
                     keyboard.enableShiftLock();

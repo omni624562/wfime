@@ -778,7 +778,7 @@ public class LIMEBaseKeyboard {
      */
     public LIMEBaseKeyboard(Context context, int xmlLayoutResId, float keySizeScale, int showArrowKeys,
             int splitKeyboard) {
-        this(context, xmlLayoutResId, 0, keySizeScale, showArrowKeys, splitKeyboard);
+        this(context, xmlLayoutResId, 0, keySizeScale, showArrowKeys, splitKeyboard, 0);
     }
 
     /**
@@ -792,9 +792,30 @@ public class LIMEBaseKeyboard {
      */
     public LIMEBaseKeyboard(Context context, int xmlLayoutResId, int modeId, float keySizeScale, int showArrowKeys,
             int splitKeyboard) {
+        this(context, xmlLayoutResId, modeId, keySizeScale, showArrowKeys, splitKeyboard, 0);
+    }
+
+    /**
+     * Creates a keyboard from the given xml key layout file. Weeds out rows
+     * that have a keyboard mode defined but don't match the specified mode.
+     *
+     * @param context        the application or service context
+     * @param xmlLayoutResId the resource file that contains the keyboard layout and
+     *                       keys.
+     * @param modeId         keyboard mode identifier
+     */
+    public LIMEBaseKeyboard(Context context, int xmlLayoutResId, int modeId, float keySizeScale, int showArrowKeys,
+            int splitKeyboard, int displayWidth) {
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
-        mDisplayWidth = dm.widthPixels;
-        mDisplayHeight = dm.heightPixels;
+        // Jeremy '26,1,7: Allow overriding display width (e.g. from service max width)
+        // to prevent landscape overflow
+        if (displayWidth > 0) {
+            mDisplayWidth = displayWidth;
+            mDisplayHeight = dm.heightPixels; // Assume height ignores keyboard height? or full screen.
+        } else {
+            mDisplayWidth = dm.widthPixels;
+            mDisplayHeight = dm.heightPixels;
+        }
 
         if (DEBUG)
             Log.i(TAG, "LIMEBaseKeyboard() mDisplayWidth = " + mDisplayWidth + ". mDisplayHeight" + mDisplayHeight);
@@ -812,6 +833,7 @@ public class LIMEBaseKeyboard {
         mLandScape = mDisplayWidth > mDisplayHeight;
 
         TypedArray a = context.getTheme().obtainStyledAttributes(// R.style.LIMEBaseKeyboardLight,
+                                                                 // R.styleable.LIMEBaseKeyboard);
                                                                  // R.styleable.LIMEBaseKeyboard);
                 null, R.styleable.LIMEBaseKeyboard, R.attr.LIMEBaseKeyboardStyle, R.style.LIMEBaseKeyboard);
 
