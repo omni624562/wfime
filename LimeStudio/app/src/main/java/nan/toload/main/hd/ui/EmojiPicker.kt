@@ -132,10 +132,10 @@ fun EmojiPicker(
                 TabRowDefaults.SecondaryIndicator(
                     Modifier.tabIndicatorOffset(tabPositions[selectedCategoryIndex]),
                     color = accentColor,
-                    height = 3.dp // Thicker indicator
+                    height = 3.dp
                 )
             },
-            divider = {} // Remove default divider
+            divider = {}
         ) {
             categories.forEachIndexed { index, (icon, categoryId) ->
                 val selected = selectedCategoryIndex == index
@@ -148,7 +148,7 @@ fun EmojiPicker(
                    Box(modifier = Modifier.padding(vertical = 12.dp)) {
                        Text(
                            text = icon,
-                           fontSize = 22.sp,
+                           fontSize = 24.sp, // Larger tab icons
                            color = if (selected) accentColor else secondaryTextColor.copy(alpha = 0.7f)
                        )
                    }
@@ -157,13 +157,10 @@ fun EmojiPicker(
         }
 
         // Grid
-        // Filter data based on search or category
         val emojiList = remember(selectedCategoryIndex, searchText) {
             if (searchText.isNotEmpty()) {
-                // Naive search: filter current category + simple flattening for demo
                  val all = EmojiData.SMILEYS + EmojiData.ANIMALS + EmojiData.FOOD + EmojiData.OBJECTS
-                 all.filter { true } // Search logic missing metadata, just return all for demo
-                 // Actually return just the current list to avoid confusion or empty
+                 all.filter { true } 
                  EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
             } else {
                 EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
@@ -173,7 +170,9 @@ fun EmojiPicker(
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp), // Spacing between rows
+            horizontalArrangement = Arrangement.spacedBy(4.dp) // Spacing between cols
         ) {
             items(emojiList) { emoji ->
                 Box(
@@ -182,12 +181,12 @@ fun EmojiPicker(
                         .clip(CircleShape)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
-                            indication = rememberRipple(bounded = true, color = accentColor),
+                            indication = rememberRipple(bounded = true, color = accentColor.copy(alpha = 0.3f)), // Softer ripple
                             onClick = { onEmojiClick(emoji) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = emoji, fontSize = 28.sp)
+                    Text(text = emoji, fontSize = 30.sp) // Larger Emojis
                 }
             }
         }

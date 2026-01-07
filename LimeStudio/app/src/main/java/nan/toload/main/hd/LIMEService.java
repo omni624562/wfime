@@ -504,16 +504,11 @@ public class LIMEService extends InputMethodService implements
 
     @Override
     public boolean onEvaluateFullscreenMode() {
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        float displayHeight = dm.heightPixels;
-        // If the display is more than X inches high, don't go to fullscreen mode
-        float max = getResources().getDimension(R.dimen.max_height_for_fullscreen);
-        if (DEBUG)
-            Log.i(TAG, "onEvaluateFullScreenMode() DisplayHeight:" + displayHeight + " limit:" + max
-                    + "super.onEvaluateFullscreenMode():" + super.onEvaluateFullscreenMode());
-        // Jeremy '12,4,30 Turn off evaluation only for tablet and xhdpi phones
-        // (required horizontal >900pts)
-        return !(displayHeight > max && this.getMaxWidth() > 900) && super.onEvaluateFullscreenMode();
+        // Always return false to disable the fullscreen extraction mode.
+        // This fixes layout issues in landscape on modern devices and ensures
+        // the keyboard behaves consistently (overlaying/resizing) rather than
+        // taking over the entire screen with a separate text input box.
+        return false;
     }
 
     /**
