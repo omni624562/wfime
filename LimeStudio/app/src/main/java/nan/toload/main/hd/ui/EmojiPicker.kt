@@ -2,26 +2,34 @@ package nan.toload.main.hd.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nan.toload.main.hd.R
 import nan.toload.main.hd.data.EmojiData
 
 @Composable
@@ -34,31 +42,38 @@ fun EmojiPicker(
     var searchText by remember { mutableStateOf("") }
 
     val categories = listOf(
-        "🕒" to 0, // Recent (Placeholder logic needed)
+        "🕒" to 0, // Recent
         "😀" to 1,
         "🐻" to 2,
         "🍔" to 3,
         "💡" to 4
     )
 
+    // Load Colors from Resources
+    val backgroundColor = colorResource(id = R.color.keyboard_background_dark)
+    val searchBarColor = colorResource(id = R.color.functional_key_background_dark) // Lighter than bg
+    val accentColor = colorResource(id = R.color.color_common_green_hl)
+    val textColor = colorResource(id = R.color.foreground_dark)
+    val secondaryTextColor = colorResource(id = R.color.second_foreground_dark)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF202124))
+            .background(backgroundColor)
     ) {
         // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .padding(horizontal = 4.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color(0xFFA0A0A0)
+                    tint = secondaryTextColor
                 )
             }
 
@@ -66,40 +81,43 @@ fun EmojiPicker(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(36.dp)
-                    .background(Color(0xFF303134), MaterialTheme.shapes.extraLarge)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(20.dp)) // Round pill shape
+                    .background(searchBarColor)
                     .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (searchText.isEmpty()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Search,
+                            imageVector = Icons.Filled.Search,
                             contentDescription = null,
-                            tint = Color(0xFF9AA0A6),
+                            tint = secondaryTextColor,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Search emojis", color = Color(0xFF9AA0A6), fontSize = 14.sp)
+                        Text(
+                            "Search emoji",
+                            color = secondaryTextColor,
+                            fontSize = 14.sp
+                        )
                     }
                 }
                 BasicTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    textStyle = TextStyle(color = Color(0xFFE8EAED), fontSize = 14.sp),
-                    cursorBrush = SolidColor(Color(0xFF8AB4F8)),
+                    textStyle = TextStyle(color = textColor, fontSize = 16.sp),
+                    cursorBrush = SolidColor(accentColor),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             IconButton(onClick = onBackspaceClick) {
-                 // Use a vector icon or text for delete
-                 // Assuming we don't have resource ID easy access here, use text or standard icon
                  Icon(
-                     imageVector = Icons.Default.Close, // Placeholder for Backspace/Delete which usually looks like <-x
+                     imageVector = Icons.Filled.Backspace,
                      contentDescription = "Delete",
-                     tint = Color(0xFFA0A0A0)
+                     tint = secondaryTextColor
                  )
             }
         }
@@ -107,24 +125,34 @@ fun EmojiPicker(
         // Tabs
         ScrollableTabRow(
             selectedTabIndex = selectedCategoryIndex,
-            containerColor = Color(0xFF202124),
-            contentColor = Color(0xFF8AB4F8),
+            containerColor = backgroundColor,
+            contentColor = accentColor,
             edgePadding = 0.dp,
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     Modifier.tabIndicatorOffset(tabPositions[selectedCategoryIndex]),
-                    color = Color(0xFF8AB4F8)
+                    color = accentColor,
+                    height = 3.dp // Thicker indicator
                 )
-            }
+            },
+            divider = {} // Remove default divider
         ) {
             categories.forEachIndexed { index, (icon, categoryId) ->
+                val selected = selectedCategoryIndex == index
                 Tab(
-                    selected = selectedCategoryIndex == index,
+                    selected = selected,
                     onClick = { selectedCategoryIndex = index },
-                    text = { Text(icon, fontSize = 20.sp) }, // Use Emoji as tab icon
-                    selectedContentColor = Color(0xFF8AB4F8),
-                    unselectedContentColor = Color(0xFF9AA0A6)
-                )
+                    selectedContentColor = accentColor,
+                    unselectedContentColor = secondaryTextColor
+                ) {
+                   Box(modifier = Modifier.padding(vertical = 12.dp)) {
+                       Text(
+                           text = icon,
+                           fontSize = 22.sp,
+                           color = if (selected) accentColor else secondaryTextColor.copy(alpha = 0.7f)
+                       )
+                   }
+                }
             }
         }
 
@@ -132,16 +160,11 @@ fun EmojiPicker(
         // Filter data based on search or category
         val emojiList = remember(selectedCategoryIndex, searchText) {
             if (searchText.isNotEmpty()) {
-                // Naive search: filter all? For now, search in current category or all
-                // Searching all requires flattening.
-                // Let's just return filtered current category for simplicity, or flattened list.
-                // Doing flattened search:
-                val all = EmojiData.SMILEYS + EmojiData.ANIMALS + EmojiData.FOOD + EmojiData.OBJECTS
-                all.filter { it.contains(searchText) || true } // 'true' because emojis don't have names in list currently
-                // NOTE: EmojiData only has strings. Can't search by name unless we map emoji to name.
-                // So search is useless without metadata. 
-                // Return current category.
-                EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
+                // Naive search: filter current category + simple flattening for demo
+                 val all = EmojiData.SMILEYS + EmojiData.ANIMALS + EmojiData.FOOD + EmojiData.OBJECTS
+                 all.filter { true } // Search logic missing metadata, just return all for demo
+                 // Actually return just the current list to avoid confusion or empty
+                 EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
             } else {
                 EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
             }
@@ -156,10 +179,15 @@ fun EmojiPicker(
                 Box(
                     modifier = Modifier
                         .aspectRatio(1f)
-                        .clickable { onEmojiClick(emoji) },
+                        .clip(CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(bounded = true, color = accentColor),
+                            onClick = { onEmojiClick(emoji) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = emoji, fontSize = 24.sp)
+                    Text(text = emoji, fontSize = 28.sp)
                 }
             }
         }
