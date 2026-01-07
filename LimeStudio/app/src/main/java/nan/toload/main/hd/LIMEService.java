@@ -218,6 +218,10 @@ public class LIMEService extends InputMethodService implements
     private androidx.appcompat.app.AlertDialog mOptionsDialog;
     private int mKeyboardThemeIndex = -1;
 
+    // Jeremy '24,1,7: Emoji Picker Support (Compose)
+    private android.widget.FrameLayout mInputViewContainer;
+    private android.view.View mEmojiKeyboardView; // ComposeView
+
     // Helper classes for better code organization
     private IMSwitchHelper mIMSwitchHelper;
     private OptionsDialogHelper mOptionsDialogHelper;
@@ -405,9 +409,62 @@ public class LIMEService extends InputMethodService implements
             if (DEBUG)
                 Log.i(TAG, "Fixed candiateView in on, return nInputViewContainer ");
             return mCandidateInInputView;
-        } else
-            return mInputView;
+        } else {
+            // Jeremy '24,1,7: Wrap input view and emoji view in a FrameLayout for Compose
+            // integration
+            if (mInputViewContainer == null) {
+                mInputViewContainer = new android.widget.FrameLayout(this);
+                mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            mInputViewContainer.removeAllViews();
 
+            if (mInputView != null) {
+                if (mInputView.getParent() != null)
+                    ((android.view.ViewGroup) mInputView.getParent()).removeView(mInputView);
+                mInputViewContainer.addView(mInputView);
+            }
+
+            if (mEmojiKeyboardView == null) {
+                // Use ComposeBridge to create the Compose View
+                mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
+                mEmojiKeyboardView.setVisibility(View.GONE);
+            }
+            if (mEmojiKeyboardView.getParent() != null)
+                ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
+            mInputViewContainer.addView(mEmojiKeyboardView);
+
+            return mInputViewContainer;
+        }
+
+    }
+
+    public void toggleEmojiVisibility() {
+        if (mEmojiKeyboardView == null)
+            return;
+
+        if (mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+            closeEmojiPicker();
+        } else {
+            mEmojiKeyboardView.setVisibility(View.VISIBLE);
+            if (mInputView != null)
+                mInputView.setVisibility(View.GONE);
+            if (mCandidateViewContainer != null && !mFixedCandidateViewOn)
+                hideCandidateView();
+        }
+    }
+
+    public void closeEmojiPicker() {
+        if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+            mEmojiKeyboardView.setVisibility(View.GONE);
+            if (mInputView != null)
+                mInputView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void handleComposeBackspace() {
+        handleBackspace();
     }
 
     /**
@@ -944,6 +1001,12 @@ public class LIMEService extends InputMethodService implements
                 // that back should dismiss, so we first allow it to do that.
 
                 if (event.getRepeatCount() == 0) {
+                    // Jeremy '24,1,7: Handle emoji view back
+                    if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+                        closeEmojiPicker();
+                        return true;
+                    }
+
                     if (mInputView != null && mInputView.handleBack()) {
                         Log.i(TAG, "KEYCODE_BACK mInputView handled the backed key");
                         return true;
@@ -1655,7 +1718,7 @@ public class LIMEService extends InputMethodService implements
         } else if (primaryCode == LIMEBaseKeyboard.KEYCODE_LEFT) {
             keyDownUp(KeyEvent.KEYCODE_DPAD_LEFT, hasCandidatesShown);
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_OPTIONS) {
-            handleOptions();
+            toggleEmojiVisibility();
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_SPACE_LONGPRESS) {
             handleOptions();
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_SYMBOL_KEYBOARD) {
