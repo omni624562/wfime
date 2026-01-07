@@ -1727,7 +1727,12 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "handleOptions()");
         MaterialAlertDialogBuilder builder;
 
-        builder = new MaterialAlertDialogBuilder(this);
+        // Wrap the service context with the app theme to satisfy
+        // MaterialAlertDialogBuilder requirements
+        // Jeremy '24,1,7: Fix for crash "The style on this component requires your app
+        // theme to be Theme.AppCompat"
+        ContextThemeWrapper themedContext = new ContextThemeWrapper(this, R.style.AppTheme);
+        builder = new MaterialAlertDialogBuilder(themedContext);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_dark);

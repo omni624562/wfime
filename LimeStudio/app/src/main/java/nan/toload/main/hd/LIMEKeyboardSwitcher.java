@@ -440,10 +440,10 @@ public class LIMEKeyboardSwitcher {
 
             LIMEKeyboard keyboard = getKeyboard(kid);
 
-            // Jeremy '24,1,7: Dynamic Space Bar Label (Gboard Style)
-            // Update the space key label to show the current input method name
+            // Jeremy '24,1,7: Dynamic Space Bar Label & Dayi Hints
             List<nan.toload.main.hd.keyboard.LIMEBaseKeyboard.Key> keys = keyboard.getKeys();
             for (nan.toload.main.hd.keyboard.LIMEBaseKeyboard.Key key : keys) {
+                // 1. Space Bar Label
                 if (key.codes[0] == nan.toload.main.hd.keyboard.LIMEBaseKeyboard.KEYCODE_SPACE) {
                     key.icon = null; // Remove the underscore icon
                     if (isIm) {
@@ -451,8 +451,8 @@ public class LIMEKeyboardSwitcher {
                     } else {
                         key.label = "English";
                     }
-                    break;
                 }
+
             }
 
             // mCurrentId = kid;
