@@ -28,32 +28,31 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- Gboard-style candidate bar: dark, compact, full width -->
-    <LinearLayout
+    <!-- Use FrameLayout instead of LinearLayout with weight to provide bounded width for Compose -->
+    <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="36dp"
-        android:background="#2B2B2B"
-        android:orientation="horizontal">
+        android:background="#2B2B2B">
 
         <nan.toload.main.hd.candidate.CandidateView
             android:id="@+id/candidatesView"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:gravity="center_vertical" />
 
         <!-- Small expand button on the right -->
         <ImageButton
             android:id="@+id/candidate_right"
             android:layout_width="40dp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
             android:background="@android:color/transparent"
             android:clickable="true"
             android:contentDescription="@string/more_cand"
-            android:src="@drawable/ic_suggest_expander"
+            android:src="@drawable/btn_expand_white_selector"
             android:visibility="gone" />
 
-    </LinearLayout>
+    </FrameLayout>
 
     <nan.toload.main.hd.keyboard.LIMEKeyboardView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/keyboard"

@@ -138,6 +138,8 @@
     <style name="LIMEKeyboardLayout.Dark" parent="LIMEKeyboardLayout">
         <item name="android:background">@drawable/keyboard_background_dark</item>
         <item name="android:keyBackground">@drawable/btn_keyboard_key_dark</item>
+        <item name="actionKeyBackground">@drawable/btn_keyboard_action_key_dark</item>
+        <item name="functionalKeyBackground">@drawable/btn_flat_keyboard_functional_key_dark</item>
     </style>
 
     <style name="LIMEKeyboardLayout.Pink" parent="LIMEKeyboardLayout">
@@ -423,7 +425,7 @@
         <item name="suggestHighlight">@drawable/ic_suggest_scroll_background_hl</item>
         <item name="voiceInputIcon">@drawable/ic_emoji_vector</item>
         <item name="candidateBackground">@color/background_dark</item>
-        <item name="ExpandButtonIcon">@drawable/btn_expand_dark</item>
+        <item name="ExpandButtonIcon">@drawable/btn_expand_white_selector</item>
         <!-- color of  different types of candidates   -->
         <item name="candidateNormalTextColor">@color/candidate_foreground_dark</item>
         <item name="candidateNormalTextHighlightColor">@color/candidate_foreground_dark</item>

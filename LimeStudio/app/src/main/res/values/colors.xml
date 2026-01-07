@@ -51,15 +51,19 @@
 
 
     <!-- colors for dark theme -->
-    <color name="keyboard_background_dark">#FF373737</color>
-    <color name="background_dark">#FF141414</color>
-    <color name="second_background_dark">#FF212121</color>
-    <color name="composing_background_dark">#E0141414</color>
+    <color name="keyboard_background_dark">#FF121212</color>
+    <color name="background_dark">#FF121212</color>
+    <color name="second_background_dark">#FF424242</color>
+    <color name="functional_key_background_dark">#FF2F2F2F</color>
+    <color name="composing_background_dark">#E0121212</color>
 
-    <color name="foreground_dark">#FFF7F7F7</color>
-    <color name="candidate_foreground_dark">#FFCFD8DC</color>
-    <color name="second_foreground_dark">#FF6B6B6B</color>
-    <color name="third_foreground_dark">#FF717171</color>
+    <color name="foreground_dark">#FFFFFFFF</color>
+    <color name="candidate_foreground_dark">#FFFFFFFF</color>
+    <color name="key_background_pressed_dark">#FF454545</color>
+    <color name="second_foreground_dark">#FF9E9E9E</color>
+    <color name="third_foreground_dark">#FF9E9E9E</color>
+    
+    <color name="action_key_color">#FF70C0B0</color>
 
 
     <!-- colors for pink theme -->

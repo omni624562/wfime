@@ -56,7 +56,7 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
         if (DEBUG)
             Log.i(TAG, "initViews()");
         if (mCandidateView == null) {
-            mButtonRightExpand = findViewById(R.id.candidate_right_parent);
+            mButtonRightExpand = findViewById(R.id.candidate_right);
             mRightButton = findViewById(R.id.candidate_right);
 
             if (mRightButton != null) {
@@ -80,20 +80,28 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
             int neededWidth = mCandidateView.computeHorizontalScrollRange();
 
             if (DEBUG)
-                Log.i(TAG, "requestLayout() availableWidth:" + availableWidth + " neededWidth:" + neededWidth);
+                if (DEBUG)
+                    Log.i(TAG, "requestLayout() availableWidth:" + availableWidth + " neededWidth:" + neededWidth);
 
-            boolean showExpandButton = availableWidth < neededWidth;
-            boolean showSymbolInputButton = mCandidateView.isEmpty();
+            // Jeremy '24,1,6: Remove expand button entirely as requested by user ("looks
+            // bad")
+            boolean showExpandButton = false;
+
+            // Jeremy '24,1,6 Remove top-right emoji button as requested (redundant with
+            // bottom row)
+            boolean showSymbolInputButton = false;
+
+            // Logic below naturally hides it if both are false
             if (mCandidateView.isCandidateExpanded())
-                showExpandButton = true;
+                showExpandButton = false; // Ensure it stays hidden even if expanded
 
             if (mRightButton != null) {
-                mRightButton.setImageDrawable(showSymbolInputButton ? mCandidateView.mDrawableSymbolInput
-                        : mCandidateView.mDrawableExpandButton);
+                mRightButton.setImageDrawable(null); // Clear drawable
             }
 
             if (mButtonRightExpand != null) {
-                mButtonRightExpand.setVisibility((showSymbolInputButton || showExpandButton) ? VISIBLE : GONE);
+                // Should be GONE since both flags are false
+                mButtonRightExpand.setVisibility(GONE);
             }
         }
         super.requestLayout();

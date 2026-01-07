@@ -1,5 +1,4 @@
 
-
 /*
  *
  *  *
@@ -43,16 +42,14 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
     private View mButtonExpandLayout;
     private CandidateView mCandidateView;
 
-
     public CandidateViewContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
-
 
     }
 
     public void initViews() {
         if (mCandidateView == null) {
-            mButtonExpandLayout = findViewById(R.id.candidate_right_parent);
+            mButtonExpandLayout = findViewById(R.id.candidate_right);
             mButtonExpand = findViewById(R.id.candidate_right);
             if (mButtonExpand != null) {
                 mButtonExpand.setOnTouchListener(this);
@@ -94,6 +91,5 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
         }
         return false;
     }
-
 
 }

@@ -71,7 +71,8 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 			Log.i(TAG, "onLongPress, keycode = " + key.codes[0]
 					+ "; spaceDragDiff = " + ((LIMEKeyboard) this.getKeyboard()).getSpaceDragDiff()
 					+ "; key_height = " + mKeyHeight);
-		if (key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE) {
+		if (key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE
+				|| key.codes[0] == -9) { // -9 is Globe/Switch English
 			InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showInputMethodPicker();
 			return true;
@@ -140,6 +141,12 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		// Extend keyboard height to cover bottom inset area for key functionality
 		setMeasuredDimension(getMeasuredWidth(), getMeasuredHeight() + mBottomInset);
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		requestApplyInsets();
 	}
 
 	@Override

@@ -108,6 +108,7 @@ public class LIMEService extends InputMethodService implements
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
     // show candidate view in short time.
     private static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
+    private static final long SHIFT_LOCK_TIMEOUT = 500; // Jeremy '24,1,7: Double-tap timeout for caps lock
     private static final int POS_SETTINGS = 0;
     private static final int POS_HANCONVERT = 1; // Jeremy '11,9,17
     private static final int POS_KEYBOARD = 2;
@@ -187,6 +188,7 @@ public class LIMEService extends InputMethodService implements
 
     // To keep key press time
     // private long keyPressTime = 0;
+    private long mLastShiftTime = 0; // Jeremy '24,1,7: For shift double-tap check
     private boolean hasWinPress = false; // Jeremy '12,4,29 windows start key on standard windows keyboard
     // private boolean hasCtrlProcessed = false; // Jeremy '11,6.18
     private boolean hasDistinctMultitouch;// Jeremy '11,8,3
@@ -1636,7 +1638,11 @@ public class LIMEService extends InputMethodService implements
             // Simplified: Always handle shift for software keyboard
             if (DEBUG)
                 Log.i(TAG, "OnKey():KEYCODE_SHIFT calling handleShift()");
-            handleShift();
+
+            // Jeremy '24,1,7: Prevent double-toggle if Shift was already handled in onPress
+            if (!hasShiftPress) {
+                handleShift();
+            }
         } else if (primaryCode == LIMEBaseKeyboard.KEYCODE_DONE) {// long press on options and shift
             handleClose();
             // Jeremy '12,5,21 process the arrow keys on soft keyboard
@@ -1721,7 +1727,12 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "handleOptions()");
         MaterialAlertDialogBuilder builder;
 
-        builder = new MaterialAlertDialogBuilder(this);
+        // Wrap the service context with the app theme to satisfy
+        // MaterialAlertDialogBuilder requirements
+        // Jeremy '24,1,7: Fix for crash "The style on this component requires your app
+        // theme to be Theme.AppCompat"
+        ContextThemeWrapper themedContext = new ContextThemeWrapper(this, R.style.AppTheme);
+        builder = new MaterialAlertDialogBuilder(themedContext);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_dark);
@@ -3267,11 +3278,13 @@ public class LIMEService extends InputMethodService implements
     }
 
     private void checkToggleCapsLock() {
-
+        long now = System.currentTimeMillis();
         if (mInputView.getKeyboard().isShifted()) {
-            toggleCapsLock();
+            if (now - mLastShiftTime < SHIFT_LOCK_TIMEOUT) {
+                toggleCapsLock();
+            }
         }
-
+        mLastShiftTime = now;
     }
 
     private void toggleCapsLock() {
@@ -3415,13 +3428,15 @@ public class LIMEService extends InputMethodService implements
         // keyboard)
         hasPhysicalKeyPressed = false;
 
-        if (hasDistinctMultitouch && primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
+        // Jeremy '24,1,7: Enable shift handling on press for all touch modes to support
+        // stable hybrid behavior
+        if (primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
             if (DEBUG)
-                Log.i(TAG, "onPress():KEYCODE_SHIFT with multitouch, calling handleShift()");
+                Log.i(TAG, "onPress():KEYCODE_SHIFT, calling handleShift()");
             hasShiftPress = true;
             hasShiftCombineKeyPressed = false;
             handleShift();
-        } else if (hasDistinctMultitouch && hasShiftPress) {
+        } else if (hasShiftPress) {
             hasShiftCombineKeyPressed = true;
         }
         doVibrateSound(primaryCode);
@@ -3470,13 +3485,14 @@ public class LIMEService extends InputMethodService implements
     public void onRelease(int primaryCode) {
         if (DEBUG)
             Log.i(TAG, "onRelease(): code = " + primaryCode);
-        if (hasDistinctMultitouch && primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
+        // Jeremy '24,1,7: Enable shift release handling for all touch modes
+        if (primaryCode == LIMEBaseKeyboard.KEYCODE_SHIFT) {
             hasShiftPress = false;
             if (hasShiftCombineKeyPressed) {
                 hasShiftCombineKeyPressed = false;
                 updateShiftKeyState(getCurrentInputEditorInfo());
             }
-        } else if (hasDistinctMultitouch && !hasShiftPress) {
+        } else if (!hasShiftPress) {
             updateShiftKeyState(getCurrentInputEditorInfo());
 
         }

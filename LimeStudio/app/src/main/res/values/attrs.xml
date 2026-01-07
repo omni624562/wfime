@@ -38,6 +38,8 @@
              possible states: normal, pressed, checkable, checkable+pressed, checkable+checked,
              checkable+checked+pressed. -->
         <attr name="keyBackground" format="reference" />
+        <attr name="actionKeyBackground" format="reference" />
+        <attr name="functionalKeyBackground" format="reference" />
 
         <!-- Size of the text for character keys. -->
         <attr name="keyTextSize" format="dimension" />

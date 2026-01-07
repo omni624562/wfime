@@ -257,13 +257,7 @@
             android:entryValues="@array/im_reverse_lookup_codes"
             android:key="ecj_im_reverselookup"
             android:title="@string/ecj_reverse_lookup_list" />
-        <ListPreference
-            android:defaultValue="none"
-            android:dialogTitle="@string/im_reverse_lookup_list"
-            android:entries="@array/im_reverse_lookup"
-            android:entryValues="@array/im_reverse_lookup_codes"
-            android:key="dayi_im_reverselookup"
-            android:title="@string/dayi_reverse_lookup_list" />
+
         <ListPreference
             android:defaultValue="none"
             android:dialogTitle="@string/im_reverse_lookup_list"

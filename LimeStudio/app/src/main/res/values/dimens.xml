@@ -33,15 +33,15 @@
 
     <!-- Compact keyboard settings for phone - Gboard-style -->
     <dimen name="max_height_for_fullscreen">1.4in</dimen>
-    <dimen name="phone_key_height">52dip</dimen>
-    <dimen name="key_height">42dip</dimen>
+    <dimen name="phone_key_height">55dip</dimen>
+    <dimen name="key_height">55dip</dimen>
     <dimen name="candidate_stripe_height">28sp</dimen>
     <dimen name="candidate_vertical_padding">6sp</dimen>
     <dimen name="candidate_number_font_size">12sp</dimen>
     <dimen name="candidate_expand_button_width">36sp</dimen>
-    <dimen name="candidate_font_size">22sp</dimen>
+    <dimen name="candidate_font_size">16sp</dimen>
     <dimen name="keyboard_bottom_padding">0.03in</dimen>
-    <dimen name="key_text_size">18dp</dimen>
+    <dimen name="key_text_size">22dp</dimen>
     <dimen name="label_text_size">13dp</dimen>
     <dimen name="sub_label_text_size">13dp</dimen>
     <dimen name="small_label_text_size">16dp</dimen>
