@@ -33,15 +33,28 @@
 
 package nan.toload.main.hd.limesettings;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
-import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.preference.DialogPreference;
+
+/**
+ * Custom multi-selection preference for AndroidX Preference library.
+ *
+ * NOTE: This class is currently UNUSED (commented out in preference.xml).
+ * If you plan to use this class, it requires additional implementation:
+ * - Create a PreferenceDialogFragmentCompat subclass for the dialog UI
+ * - Override showDialog() method to display the custom dialog fragment
+ * - Update the dialog building logic to work with FragmentManager
+ *
+ * For reference, see AndroidX Preference library documentation:
+ * https://developer.android.com/reference/androidx/preference/PreferenceDialogFragmentCompat
+ */
 public class MultiListPreference extends DialogPreference {
     /**
      * Tag for logging!
@@ -321,7 +334,16 @@ public class MultiListPreference extends DialogPreference {
         return (this.state.clone());
     }
 
-    @Override // here we set the multichoiceitem content
+    /**
+     * Legacy method from android.preference.DialogPreference (removed in AndroidX).
+     * This method is kept for reference but is NOT functional in AndroidX.
+     *
+     * To use this preference, you must create a PreferenceDialogFragmentCompat subclass
+     * that implements the dialog UI using FragmentManager instead of this method.
+     *
+     * @see androidx.preference.PreferenceDialogFragmentCompat
+     */
+    @Deprecated
     public void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         if (DEBUG)
             Log.d(TAG, "onPrepareDialogBuilder()");
@@ -370,7 +392,16 @@ public class MultiListPreference extends DialogPreference {
     }
 
 
-    @Override // called when OK (true) or Cancel (false) are pushed
+    /**
+     * Legacy method from android.preference.DialogPreference (removed in AndroidX).
+     * This method is kept for reference but is NOT functional in AndroidX.
+     *
+     * To use this preference, you must create a PreferenceDialogFragmentCompat subclass
+     * that implements the dialog result handling using FragmentManager instead of this method.
+     *
+     * @see androidx.preference.PreferenceDialogFragmentCompat
+     */
+    @Deprecated
     public void onDialogClosed(boolean positiveResult) {
         if (DEBUG)
             Log.d(TAG, "onDialogClosed(): " + positiveResult);

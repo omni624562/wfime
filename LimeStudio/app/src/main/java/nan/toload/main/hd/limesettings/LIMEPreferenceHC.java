@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.preference.PreferenceFragment;
 import android.util.Log;
 
 import nan.toload.main.hd.DBServer;

@@ -25,6 +25,7 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="lime_preference"
     android:summary="LIME Preference Configuration"
     android:title="LIME Preference">
