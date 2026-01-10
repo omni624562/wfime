@@ -88,7 +88,6 @@ public class MultiListPreference extends DialogPreference {
      */
     private String defaultValue = null;
 
-
     @SuppressWarnings("ResourceType")
     public MultiListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -97,15 +96,14 @@ public class MultiListPreference extends DialogPreference {
 
         TypedArray in = context.obtainStyledAttributes(
                 attrs,
-                new int[]{
+                new int[] {
                         // "android:entries", just like ListPreference
                         android.R.attr.entries,
                         // "android:entryValues", these are defaults ONLY
                         android.R.attr.entryValues,
                         // "android:defaultValue"
                         android.R.attr.defaultValue
-                }
-        );
+                });
 
         this.entry = in.getTextArray(0);
 
@@ -299,6 +297,35 @@ public class MultiListPreference extends DialogPreference {
     }
 
     /**
+     * Set the state and persist it to SharedPreferences.
+     * This is the method that should be called from PreferenceDialogFragmentCompat.
+     *
+     * @param state New state array.
+     * @return Success or failure flag.
+     */
+    public boolean setValueAndPersist(boolean[] state) {
+        if (DEBUG)
+            Log.d(TAG, "setValueAndPersist()");
+
+        if (setValue(state)) {
+            String persistValue = (String) b2ds(state);
+
+            if (persistValue == null || persistValue.isEmpty()) {
+                persistValue = (this.defaultValue == null) ? "0" : this.defaultValue;
+            }
+
+            if (DEBUG)
+                Log.d(TAG, "setValueAndPersist(): Persisting: " + persistValue);
+
+            if (persistString(persistValue)) {
+                notifyChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Set the state to something new, state must be previously initialized.
      *
      * @param state New state, given by delimeted index.
@@ -335,10 +362,26 @@ public class MultiListPreference extends DialogPreference {
     }
 
     /**
+     * Get the persisted value from SharedPreferences.
+     * This method provides access to the protected getPersistedString() method
+     * for use by PreferenceDialogFragmentCompat subclasses.
+     *
+     * @param defaultValue Default value to return if no persisted value exists.
+     * @return The persisted string value, or defaultValue if none exists.
+     */
+    public String getPersistedValue(String defaultValue) {
+        if (DEBUG)
+            Log.d(TAG, "getPersistedValue()");
+
+        return getPersistedString(defaultValue);
+    }
+
+    /**
      * Legacy method from android.preference.DialogPreference (removed in AndroidX).
      * This method is kept for reference but is NOT functional in AndroidX.
      *
-     * To use this preference, you must create a PreferenceDialogFragmentCompat subclass
+     * To use this preference, you must create a PreferenceDialogFragmentCompat
+     * subclass
      * that implements the dialog UI using FragmentManager instead of this method.
      *
      * @see androidx.preference.PreferenceDialogFragmentCompat
@@ -350,11 +393,9 @@ public class MultiListPreference extends DialogPreference {
 
         // try to restore state from persisted value
         if (this.entry != null || this.state != null) {
-            int size = (
-                    (this.entry == null)
-                            ? this.state.length
-                            : this.entry.length
-            );
+            int size = ((this.entry == null)
+                    ? this.state.length
+                    : this.entry.length);
 
             boolean[] persistedState = ds2b(this.getPersistedString(null), size);
 
@@ -365,7 +406,6 @@ public class MultiListPreference extends DialogPreference {
                     Log.d(TAG, "onPrepareDialogBuilder(): Persisted state restored.");
             }
         }
-
 
         // build the dialog
         builder
@@ -386,18 +426,17 @@ public class MultiListPreference extends DialogPreference {
 
                                 that.state[which] = isChecked;
                             }
-                        }
-                )
-        ;
+                        });
     }
-
 
     /**
      * Legacy method from android.preference.DialogPreference (removed in AndroidX).
      * This method is kept for reference but is NOT functional in AndroidX.
      *
-     * To use this preference, you must create a PreferenceDialogFragmentCompat subclass
-     * that implements the dialog result handling using FragmentManager instead of this method.
+     * To use this preference, you must create a PreferenceDialogFragmentCompat
+     * subclass
+     * that implements the dialog result handling using FragmentManager instead of
+     * this method.
      *
      * @see androidx.preference.PreferenceDialogFragmentCompat
      */
@@ -416,14 +455,11 @@ public class MultiListPreference extends DialogPreference {
                     Toast.makeText(
                             this.getContext(),
                             USING_DEFAULT,
-                            Toast.LENGTH_SHORT
-                    ).show();
+                            Toast.LENGTH_SHORT).show();
 
-                    out = (
-                            (this.defaultValue == null)
-                                    ? "0" // XXX: lol, hax
-                                    : this.defaultValue
-                    );
+                    out = ((this.defaultValue == null)
+                            ? "0" // XXX: lol, hax
+                            : this.defaultValue);
                 }
 
                 if (DEBUG)
@@ -439,4 +475,3 @@ public class MultiListPreference extends DialogPreference {
         }
     }
 }
-

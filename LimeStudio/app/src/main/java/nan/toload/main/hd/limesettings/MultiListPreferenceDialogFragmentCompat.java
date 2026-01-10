@@ -82,18 +82,39 @@ public class MultiListPreferenceDialogFragmentCompat extends PreferenceDialogFra
         if (savedInstanceState == null) {
             // Initialize from preference
             MultiListPreference preference = getMultiListPreference();
-            boolean[] value = preference.getValue();
-            mCurrentState = value != null ? value.clone() : null;
+            CharSequence[] entries = preference.getEntries();
 
-            // Try to restore from persisted string if state is null
-            if (mCurrentState == null) {
-                CharSequence[] entries = preference.getEntries();
-                if (entries != null) {
+            if (entries != null) {
+                // Try to restore from persisted string first
+                String persistedValue = preference.getPersistedValue(null);
+
+                if (persistedValue != null && !persistedValue.isEmpty()) {
+                    // Parse persisted value
                     mCurrentState = new boolean[entries.length];
+                    String[] indices = persistedValue.split(MultiListPreference.CHOICE_DELIMITER);
+                    for (String indexStr : indices) {
+                        try {
+                            int index = Integer.parseInt(indexStr.trim());
+                            if (index >= 0 && index < mCurrentState.length) {
+                                mCurrentState[index] = true;
+                            }
+                        } catch (NumberFormatException e) {
+                            if (DEBUG) {
+                                Log.w(TAG, "onCreate(): Invalid index in persisted value: " + indexStr);
+                            }
+                        }
+                    }
+                    if (DEBUG) {
+                        Log.d(TAG, "onCreate(): Restored state from persisted value: " + persistedValue);
+                    }
+                } else {
+                    // Fall back to preference value or default
+                    boolean[] value = preference.getValue();
+                    mCurrentState = value != null ? value.clone() : new boolean[entries.length];
                 }
             }
         } else {
-            // Restore from saved instance state
+            // Restore from saved instance state (configuration change)
             mCurrentState = savedInstanceState.getBooleanArray(SAVE_STATE_VALUES);
         }
 
@@ -167,24 +188,21 @@ public class MultiListPreferenceDialogFragmentCompat extends PreferenceDialogFra
                 }
             }
 
-            // Convert boolean array to delimited string
-            String value = booleanArrayToDelimitedString(mCurrentState);
-
-            // If nothing selected, use default
-            if (!hasSelection || value.isEmpty()) {
+            // If nothing selected, default to first item
+            if (!hasSelection) {
                 Toast.makeText(requireContext(),
                         MultiListPreference.USING_DEFAULT,
                         Toast.LENGTH_SHORT).show();
-                value = "0"; // Default to first item
+                mCurrentState[0] = true; // Default to first item
             }
 
             if (DEBUG) {
-                Log.d(TAG, "onDialogClosed(): Saving value: " + value);
+                Log.d(TAG, "onDialogClosed(): Saving state");
             }
 
             // Notify change listeners and persist if allowed
             if (preference.callChangeListener(mCurrentState)) {
-                preference.setValue(mCurrentState);
+                preference.setValueAndPersist(mCurrentState);
             }
         }
     }
