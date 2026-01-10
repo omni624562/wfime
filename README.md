@@ -58,6 +58,33 @@ cd nanime-main/LimeStudio
 ./gradlew assembleRelease
 ```
 
+### 📁 Project Structure
+
+This repository is organized as a **monorepo** containing the Android project and related resources:
+
+```
+nanime-main/                    # Git repository root
+├── LimeStudio/                 # ⭐ Android project (open this in Android Studio)
+│   ├── app/                    # Application source code
+│   │   └── src/main/java/      # Java/Kotlin source files
+│   ├── build.gradle            # Project build configuration
+│   ├── settings.gradle         # Gradle settings
+│   └── gradlew                 # Gradle wrapper
+│
+├── Database/                   # Dictionary database files
+├── Resources/                  # Static resources
+│
+├── README.md                   # Project documentation
+├── CHANGELOG.md                # Version history
+├── CONTRIBUTING.md             # Contribution guidelines
+└── SECURITY_ANALYSIS.md        # Security audit
+```
+
+**📌 Important for Developers:**
+- **For Android development:** Open `LimeStudio/` directory in Android Studio
+- **For database/resource management:** Work in the root `nanime-main/` directory
+- **For Git operations:** Execute commands from root `nanime-main/` directory
+
 ### 🛠️ Technology Stack
 
 **Languages & Frameworks:**
@@ -196,6 +223,33 @@ git clone https://github.com/omni624562/nanime-main.git
 cd nanime-main/LimeStudio
 ./gradlew assembleRelease
 ```
+
+### 📁 專案結構
+
+本儲存庫採用 **monorepo** 組織結構，包含 Android 專案和相關資源：
+
+```
+nanime-main/                    # Git 儲存庫根目錄
+├── LimeStudio/                 # ⭐ Android 專案（在 Android Studio 中開啟此目錄）
+│   ├── app/                    # 應用程式原始碼
+│   │   └── src/main/java/      # Java/Kotlin 原始檔案
+│   ├── build.gradle            # 專案建置配置
+│   ├── settings.gradle         # Gradle 設定
+│   └── gradlew                 # Gradle wrapper
+│
+├── Database/                   # 詞庫資料庫檔案
+├── Resources/                  # 靜態資源
+│
+├── README.md                   # 專案文件
+├── CHANGELOG.md                # 版本歷史
+├── CONTRIBUTING.md             # 貢獻指南
+└── SECURITY_ANALYSIS.md        # 安全稽核
+```
+
+**📌 開發者注意事項：**
+- **Android 開發：** 在 Android Studio 中開啟 `LimeStudio/` 目錄
+- **資料庫/資源管理：** 在根目錄 `nanime-main/` 中作業
+- **Git 操作：** 從根目錄 `nanime-main/` 執行指令
 
 ### 🛠️ 技術架構
 
