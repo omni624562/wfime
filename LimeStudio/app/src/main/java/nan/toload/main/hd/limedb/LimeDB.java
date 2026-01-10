@@ -212,6 +212,98 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             "艸|月|雨|米|木|立|(力/虫)|足|口|女|舟|金|耳|竹";
     private final static String CJ_KEY = "qwertyuiopasdfghjklzxcvbnm";
     private final static String CJ_CHAR = "手|田|水|口|廿|卜|山|戈|人|心|日|尸|木|火|土|竹|十|大|中|重|難|金|女|月|弓|一";
+
+    // ==================== Security: Table Name Validation ====================
+    // SQL Injection Prevention: Whitelist of valid table names
+    // See SECURITY_ANALYSIS.md for detailed security analysis
+    private static final java.util.Set<String> VALID_TABLE_NAMES = new java.util.HashSet<>(java.util.Arrays.asList(
+        // Main IM tables
+        Lime.DB_TABLE_CUSTOM,
+        Lime.DB_TABLE_DAYI,
+        Lime.DB_TABLE_PHONETIC,
+        Lime.DB_TABLE_IMTABLE2,
+        Lime.DB_TABLE_IMTABLE3,
+        Lime.DB_TABLE_IMTABLE4,
+        Lime.DB_TABLE_IMTABLE5,
+        Lime.DB_TABLE_IMTABLE6,
+        Lime.DB_TABLE_IMTABLE7,
+        Lime.DB_TABLE_IMTABLE8,
+        Lime.DB_TABLE_IMTABLE9,
+        Lime.DB_TABLE_IMTABLE10,
+        // System tables
+        Lime.DB_IM,
+        Lime.DB_RELATED,
+        Lime.DB_KEYBOARD,
+        // Additional known IM types
+        "array", "cj", "ez", "hs", "hs1", "hs2", "hs3",
+        "dayiuni", "dayiunibig5", "dayiunip", "dayiunipbig5",
+        "phoneticbig5", "phoneticadv", "phoneticadvbig5", "phoneticcomplete", "phoneticcompletebig5",
+        // Backup tables (with _user suffix)
+        "custom_user", "dayi_user", "phonetic_user",
+        "imtable2_user", "imtable3_user", "imtable4_user", "imtable5_user",
+        "imtable6_user", "imtable7_user", "imtable8_user", "imtable9_user", "imtable10_user",
+        "array_user", "cj_user", "ez_user", "hs_user"
+    ));
+
+    /**
+     * Validates table name to prevent SQL injection attacks.
+     *
+     * Security: This method provides critical SQL injection protection by validating
+     * table names against a whitelist before use in SQL queries.
+     *
+     * @param tableName The table name to validate
+     * @return true if the table name is valid and safe to use
+     * @throws IllegalArgumentException if the table name is invalid
+     */
+    private static boolean isValidTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Table name cannot be null or empty");
+        }
+
+        String cleanedName = tableName.trim().toLowerCase(Locale.ROOT);
+
+        // First check whitelist
+        if (VALID_TABLE_NAMES.contains(cleanedName)) {
+            return true;
+        }
+
+        // Allow pattern: valid_name_user (user backup tables)
+        if (cleanedName.endsWith("_user")) {
+            String baseName = cleanedName.substring(0, cleanedName.length() - 5);
+            if (VALID_TABLE_NAMES.contains(baseName)) {
+                return true;
+            }
+        }
+
+        // Additional pattern validation for safety
+        // Allow only alphanumeric and underscores, max 64 chars
+        if (!cleanedName.matches("^[a-z][a-z0-9_]{0,63}$")) {
+            throw new IllegalArgumentException(
+                "Invalid table name format: " + tableName +
+                " (must be alphanumeric with underscores, max 64 chars)"
+            );
+        }
+
+        // If pattern is valid but not in whitelist, log warning but allow
+        // This allows for future table additions while maintaining security
+        Log.w(TAG, "Table name not in whitelist but matches pattern: " + tableName);
+        return true;
+    }
+
+    /**
+     * Validates and sanitizes table name for use in SQL queries.
+     *
+     * @param tableName The table name to validate
+     * @return The validated table name (trimmed and lowercased)
+     * @throws IllegalArgumentException if the table name is invalid
+     */
+    private static String validateTableName(String tableName) {
+        if (!isValidTableName(tableName)) {
+            throw new IllegalArgumentException("Invalid table name: " + tableName);
+        }
+        return tableName.trim().toLowerCase(Locale.ROOT);
+    }
+
     private static final boolean probePerformance = false;
     private static SQLiteDatabase db = null; // Jeremy '12,5,1 add static modifier. Shared db instance for dbserver and
                                              // searchserver

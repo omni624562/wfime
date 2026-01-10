@@ -24,6 +24,7 @@
 
 package nan.toload.main.hd;
 
+// TODO: Replace ProgressDialog with Material3 components (deprecated since API 26)
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -84,6 +85,9 @@ public class MainActivity extends AppCompatActivity
     private ConnectivityManager connManager;
     private LIMEPreferenceManager mLIMEPref;
 
+    // TODO: Replace ProgressDialog with Material3 AlertDialog + CircularProgressIndicator
+    // ProgressDialog is deprecated since API 26, but replacement requires custom layout
+    @SuppressWarnings("deprecation")
     private ProgressDialog progress;
     private MainActivityHandler handler;
 
@@ -98,15 +102,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            finish();
-            System.exit(0);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,6 +195,14 @@ public class MainActivity extends AppCompatActivity
             String table = getIntent().getStringExtra(ARG_ADD_WORD);
             showImeAddWordDialog(table);
         }
+
+        // Handle back button press using OnBackPressedDispatcher (Android 13+ predictive back support)
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
     }
 
     private void showImeAddWordDialog(String table) {

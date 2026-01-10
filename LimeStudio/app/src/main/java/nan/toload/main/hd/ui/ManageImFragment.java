@@ -25,6 +25,7 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
+// TODO: Replace ProgressDialog with Material3 components (deprecated since API 26)
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -109,6 +110,7 @@ public class ManageImFragment extends Fragment {
 
     private LimeDB datasource;
 
+    @SuppressWarnings("deprecation")
     private ProgressDialog progress;
     private LIMEPreferenceManager mLIMEPref;
 
