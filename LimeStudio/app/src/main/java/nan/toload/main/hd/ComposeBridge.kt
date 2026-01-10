@@ -90,17 +90,17 @@ object ComposeBridge {
     /**
      * Creates a Manage IM view using Jetpack Compose.
      *
+     * All word management operations (add, edit, delete) are handled within the Compose UI.
+     *
      * @param context Android context
      * @param viewModelStoreOwner Owner of the ViewModelStore (typically the Activity or Fragment)
      * @param table Database table name for the input method
-     * @param callbacks Callbacks for handling word management events
      * @return View containing the Manage IM UI
      */
     fun createManageImView(
         context: Context,
         viewModelStoreOwner: ViewModelStoreOwner,
-        table: String,
-        callbacks: ManageImCallbacks
+        table: String
     ): View {
         return ComposeView(context).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
@@ -109,19 +109,8 @@ object ComposeBridge {
                 val factory = ManageImViewModelFactory(context, table)
                 val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[ManageImViewModel::class.java]
 
-                // Observe UI state
-                val uiState by viewModel.uiState.collectAsState()
-
                 MaterialTheme {
-                    ManageImScreen(
-                        uiState = uiState,
-                        onSearchQueryChange = { query -> viewModel.updateSearchQuery(query) },
-                        onSearchClick = { viewModel.performSearch() },
-                        onWordClick = { word -> callbacks.onWordClick(word) },
-                        onAddClick = { callbacks.onAddClick(table) },
-                        onPreviousPageClick = { viewModel.previousPage() },
-                        onNextPageClick = { viewModel.nextPage() }
-                    )
+                    ManageImScreen(viewModel = viewModel)
                 }
             }
         }
@@ -137,24 +126,5 @@ object ComposeBridge {
          * @param position The position of the selected item
          */
         fun onNavigationDrawerItemSelected(position: Int)
-    }
-
-    /**
-     * Callback interface for Manage IM events.
-     */
-    interface ManageImCallbacks {
-        /**
-         * Called when a word is clicked (for editing).
-         *
-         * @param word The word that was clicked
-         */
-        fun onWordClick(word: Word)
-
-        /**
-         * Called when the add button is clicked.
-         *
-         * @param table The table name
-         */
-        fun onAddClick(table: String)
     }
 }

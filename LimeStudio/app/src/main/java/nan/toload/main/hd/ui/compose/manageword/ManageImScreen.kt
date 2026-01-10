@@ -37,6 +37,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import nan.toload.main.hd.R
 import nan.toload.main.hd.data.Word
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 /**
  * Composable screen for managing input method words.
@@ -59,20 +61,16 @@ import nan.toload.main.hd.data.Word
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageImScreen(
-    uiState: ManageImUiState,
-    onSearchQueryChange: (String) -> Unit,
-    onSearchClick: () -> Unit,
-    onWordClick: (Word) -> Unit,
-    onAddClick: () -> Unit,
-    onPreviousPageClick: () -> Unit,
-    onNextPageClick: () -> Unit
+    viewModel: ManageImViewModel
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.manage_im_management)) },
                 actions = {
-                    IconButton(onClick = onAddClick) {
+                    IconButton(onClick = { viewModel.showAddDialog() }) {
                         Icon(Icons.Default.Add, contentDescription = "Add word")
                     }
                 }
@@ -87,8 +85,8 @@ fun ManageImScreen(
             // Search bar
             SearchBar(
                 query = uiState.searchQuery,
-                onQueryChange = onSearchQueryChange,
-                onSearch = onSearchClick,
+                onQueryChange = { viewModel.updateSearchQuery(it) },
+                onSearch = { viewModel.performSearch() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -114,7 +112,7 @@ fun ManageImScreen(
                     items(uiState.words) { word ->
                         WordItem(
                             word = word,
-                            onClick = { onWordClick(word) }
+                            onClick = { viewModel.showEditDialog(word) }
                         )
                     }
                 }
@@ -126,11 +124,37 @@ fun ManageImScreen(
                 totalPages = uiState.totalPages,
                 totalRecords = uiState.totalRecords,
                 pageSize = uiState.pageSize,
-                onPreviousClick = onPreviousPageClick,
-                onNextClick = onNextPageClick,
+                onPreviousClick = { viewModel.previousPage() },
+                onNextClick = { viewModel.nextPage() },
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+
+    // Add Word Dialog
+    if (uiState.showAddDialog) {
+        WordDialog(
+            mode = WordDialogMode.ADD,
+            onDismiss = { viewModel.hideAddDialog() },
+            onSave = { code, word, score ->
+                viewModel.addWord(code, word, score)
+            }
+        )
+    }
+
+    // Edit Word Dialog
+    uiState.editingWord?.let { word ->
+        WordDialog(
+            mode = WordDialogMode.EDIT,
+            word = word,
+            onDismiss = { viewModel.hideEditDialog() },
+            onSave = { code, wordText, score ->
+                viewModel.updateWord(word.id, code, wordText, score)
+            },
+            onDelete = {
+                viewModel.removeWord(word.id)
+            }
+        )
     }
 }
 

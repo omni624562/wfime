@@ -62,7 +62,7 @@ import nan.toload.main.hd.ui.ManageRelatedFragment;
 import nan.toload.main.hd.ui.SetupImFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements ComposeBridge.NavigationDrawerCallbacks, ComposeBridge.ManageImCallbacks {
+        implements ComposeBridge.NavigationDrawerCallbacks {
     public static final String ARG_ADD_WORD = "arg_add_word";
     private static final int STORAGE_PERMISSION_CODE = 0;
     // private static final int STORAGE_PERMISSION_CODE = android.permission.;
@@ -312,8 +312,7 @@ public class MainActivity extends AppCompatActivity
                 android.view.View manageImView = ComposeBridge.INSTANCE.createManageImView(
                         this,
                         this,
-                        table,
-                        this
+                        table
                 );
                 container.addView(manageImView);
             }
@@ -403,16 +402,4 @@ public class MainActivity extends AppCompatActivity
     public void initialDefaultPreference() {
     }
 
-    // ManageImCallbacks implementation
-    @Override
-    public void onWordClick(nan.toload.main.hd.data.Word word) {
-        // TODO: Show edit dialog in Phase 4.3
-        android.widget.Toast.makeText(this, "Edit: " + word.getWord(), android.widget.Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onAddClick(String table) {
-        // TODO: Show add dialog in Phase 4.3
-        android.widget.Toast.makeText(this, "Add word to " + table, android.widget.Toast.LENGTH_SHORT).show();
-    }
 }

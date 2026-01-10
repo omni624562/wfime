@@ -48,6 +48,8 @@ import nan.toload.main.hd.limedb.LimeDB
  * @param pageSize Number of records per page
  * @param isLoading Whether data is currently being loaded
  * @param searchRoot Whether to search only word roots (true) or full words (false)
+ * @param showAddDialog Whether to show the add word dialog
+ * @param editingWord Word being edited (null if not editing)
  */
 data class ManageImUiState(
     val words: List<Word> = emptyList(),
@@ -57,7 +59,9 @@ data class ManageImUiState(
     val totalRecords: Int = 0,
     val pageSize: Int = Lime.IM_MANAGE_DISPLAY_AMOUNT,
     val isLoading: Boolean = false,
-    val searchRoot: Boolean = true
+    val searchRoot: Boolean = true,
+    val showAddDialog: Boolean = false,
+    val editingWord: Word? = null
 )
 
 /**
@@ -185,6 +189,36 @@ class ManageImViewModel(
     }
 
     /**
+     * Shows the add word dialog.
+     */
+    fun showAddDialog() {
+        _uiState.update { it.copy(showAddDialog = true) }
+    }
+
+    /**
+     * Hides the add word dialog.
+     */
+    fun hideAddDialog() {
+        _uiState.update { it.copy(showAddDialog = false) }
+    }
+
+    /**
+     * Shows the edit word dialog for a specific word.
+     *
+     * @param word The word to edit
+     */
+    fun showEditDialog(word: Word) {
+        _uiState.update { it.copy(editingWord = word) }
+    }
+
+    /**
+     * Hides the edit word dialog.
+     */
+    fun hideEditDialog() {
+        _uiState.update { it.copy(editingWord = null) }
+    }
+
+    /**
      * Adds a new word to the database.
      *
      * @param code Input code
@@ -196,6 +230,7 @@ class ManageImViewModel(
             limeDb.addOrUpdateMappingRecord(table, code, word.trim(), score)
             // Reload current page
             withContext(Dispatchers.Main) {
+                hideAddDialog()
                 loadWords()
             }
         }
@@ -214,6 +249,7 @@ class ManageImViewModel(
             limeDb.addOrUpdateMappingRecord(table, code, word.trim(), score)
             // Reload current page
             withContext(Dispatchers.Main) {
+                hideEditDialog()
                 loadWords()
             }
         }
@@ -229,6 +265,7 @@ class ManageImViewModel(
             limeDb.removeById(table, id.toString())
             // Reload current page
             withContext(Dispatchers.Main) {
+                hideEditDialog()
                 loadWords()
             }
         }
