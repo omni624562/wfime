@@ -24,8 +24,7 @@
 
 package nan.toload.main.hd;
 
-// TODO: Replace ProgressDialog with Material3 components (deprecated since API 26)
-import android.app.ProgressDialog;
+import nan.toload.main.hd.ui.LoadingDialogHelper;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -85,10 +84,8 @@ public class MainActivity extends AppCompatActivity
     private ConnectivityManager connManager;
     private LIMEPreferenceManager mLIMEPref;
 
-    // TODO: Replace ProgressDialog with Material3 AlertDialog + CircularProgressIndicator
-    // ProgressDialog is deprecated since API 26, but replacement requires custom layout
-    @SuppressWarnings("deprecation")
-    private ProgressDialog progress;
+    // Material3 loading dialog (replacement for deprecated ProgressDialog)
+    private LoadingDialogHelper progress;
     private MainActivityHandler handler;
 
     @Override
@@ -120,7 +117,7 @@ public class MainActivity extends AppCompatActivity
 
         handler = new MainActivityHandler(this);
 
-        progress = new ProgressDialog(this);
+        progress = new LoadingDialogHelper(this);
         progress.setMax(100);
         progress.setCancelable(false);
 
@@ -365,7 +362,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void updateProgress(int value) {
-        if (!progress.isShowing()) {
+        if (progress.isShowing()) {
             progress.setProgress(value);
         }
     }
