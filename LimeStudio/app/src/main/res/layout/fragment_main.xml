@@ -22,7 +22,8 @@
   ~  */
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -35,6 +36,8 @@
     <TextView
         android:id="@+id/section_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</RelativeLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_main.xml -->
+</androidx.constraintlayout.widget.ConstraintLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_main.xml -->
