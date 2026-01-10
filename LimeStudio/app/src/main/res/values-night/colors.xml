@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material Design 3 Dark Color Scheme for LIME IME
+  Automatically applied when device is in dark mode
+  Based on Material You theming system
+-->
+<resources>
+    <!-- Primary colors -->
+    <color name="md_theme_primary">#6CDBAC</color>
+    <color name="md_theme_onPrimary">#003826</color>
+    <color name="md_theme_primaryContainer">#005138</color>
+    <color name="md_theme_onPrimaryContainer">#89F8C7</color>
+
+    <!-- Secondary colors -->
+    <color name="md_theme_secondary">#B3CCBD</color>
+    <color name="md_theme_onSecondary">#1F352B</color>
+    <color name="md_theme_secondaryContainer">#354B40</color>
+    <color name="md_theme_onSecondaryContainer">#CFE9D9</color>
+
+    <!-- Tertiary colors -->
+    <color name="md_theme_tertiary">#A5CCE0</color>
+    <color name="md_theme_onTertiary">#073543</color>
+    <color name="md_theme_tertiaryContainer">#244C5B</color>
+    <color name="md_theme_onTertiaryContainer">#C1E8FC</color>
+
+    <!-- Error colors -->
+    <color name="md_theme_error">#FFB4AB</color>
+    <color name="md_theme_onError">#690005</color>
+    <color name="md_theme_errorContainer">#93000A</color>
+    <color name="md_theme_onErrorContainer">#FFDAD6</color>
+
+    <!-- Background and Surface -->
+    <color name="md_theme_background">#191C1A</color>
+    <color name="md_theme_onBackground">#E1E3DE</color>
+    <color name="md_theme_surface">#191C1A</color>
+    <color name="md_theme_onSurface">#E1E3DE</color>
+    <color name="md_theme_surfaceVariant">#404943</color>
+    <color name="md_theme_onSurfaceVariant">#BFC9C1</color>
+
+    <!-- Outline -->
+    <color name="md_theme_outline">#89938B</color>
+    <color name="md_theme_outlineVariant">#404943</color>
+
+    <!-- Inverse colors -->
+    <color name="md_theme_inverseSurface">#E1E3DE</color>
+    <color name="md_theme_inverseOnSurface">#2E312E</color>
+    <color name="md_theme_inversePrimary">#006C4C</color>
+
+    <!-- Scrim -->
+    <color name="md_theme_scrim">#000000</color>
+</resources>
+
