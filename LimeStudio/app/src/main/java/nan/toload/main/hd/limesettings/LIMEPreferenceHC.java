@@ -104,6 +104,20 @@ public class LIMEPreferenceHC extends androidx.appcompat.app.AppCompatActivity {
         }
 
         @Override
+        public void onDisplayPreferenceDialog(@androidx.annotation.NonNull androidx.preference.Preference preference) {
+            // Handle MultiListPreference with custom dialog fragment
+            if (preference instanceof MultiListPreference) {
+                final androidx.fragment.app.DialogFragment dialogFragment = MultiListPreferenceDialogFragmentCompat
+                        .newInstance(preference.getKey());
+                dialogFragment.setTargetFragment(this, 0);
+                dialogFragment.show(getParentFragmentManager(),
+                        "MultiListPreferenceDialogFragmentCompat");
+            } else {
+                super.onDisplayPreferenceDialog(preference);
+            }
+        }
+
+        @Override
         public void onResume() {
             super.onResume();
             getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
