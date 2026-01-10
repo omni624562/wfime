@@ -45,11 +45,11 @@
             android:paddingTop="10dp"
             android:paddingBottom="15dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBackToPreviousPage"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/l3_im_setting_back"></Button>
+                android:text="@string/l3_im_setting_back"></com.google.android.material.button.MaterialButton>
         </LinearLayout>
 
         <LinearLayout
@@ -186,17 +186,17 @@
             android:paddingTop="10dp"
             android:paddingBottom="15dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLoadMapping"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/l3_im_setting_button_load"></Button>
+                android:text="@string/l3_im_setting_button_load"></com.google.android.material.button.MaterialButton>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnResetMapping"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/l3_im_setting_button_reset"></Button>
+                android:text="@string/l3_im_setting_button_reset"></com.google.android.material.button.MaterialButton>
         </LinearLayout>
 
         <!-- Setup Keyboard -->
@@ -244,11 +244,11 @@
             android:paddingTop="10dp"
             android:paddingBottom="15dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSelectKeyboard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/l3_im_setting_button_select"></Button>
+                android:text="@string/l3_im_setting_button_select"></com.google.android.material.button.MaterialButton>
         </LinearLayout>
 
     </LinearLayout>

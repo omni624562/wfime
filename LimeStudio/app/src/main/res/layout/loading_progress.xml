@@ -27,13 +27,13 @@
     android:layout_height="fill_parent"
     android:padding="10dp">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_cancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="@string/lime_loading_cancel"></Button>
+        android:text="@string/lime_loading_cancel"></com.google.android.material.button.MaterialButton>
 
 
     <TextView

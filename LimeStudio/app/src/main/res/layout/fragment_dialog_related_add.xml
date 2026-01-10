@@ -57,7 +57,7 @@
                 android:orientation="horizontal"
                 android:padding="10dp">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnManageAddScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:textColor="@android:color/white" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnManageMinusScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
                 android:text="@string/manage_related_cword"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtManageRelatedWord"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,14 +112,14 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageRelatedCancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/manage_related_cancel" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageRelatedSave"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

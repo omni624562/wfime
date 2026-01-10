@@ -38,9 +38,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -93,7 +92,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
+    private RecyclerView mDrawerRecyclerView;
     private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 0;
@@ -105,7 +104,7 @@ public class NavigationDrawerFragment extends Fragment {
     private String[] menulist;
 
     private LimeDB datasource;
-    private ArrayAdapter adapter;
+    private NavigationDrawerAdapter adapter;
 
     public NavigationDrawerFragment() {
     }
@@ -153,7 +152,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         datasource = new LimeDB(this.getActivity());
 
-        mDrawerListView = (ListView) inflater.inflate(
+        mDrawerRecyclerView = (RecyclerView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
 
         // Add top padding to avoid overlap with status bar
@@ -162,18 +161,14 @@ public class NavigationDrawerFragment extends Fragment {
         if (resourceId > 0) {
             statusBarHeight = getResources().getDimensionPixelSize(resourceId);
         }
-        mDrawerListView.setPadding(
-                mDrawerListView.getPaddingLeft(),
+        mDrawerRecyclerView.setPadding(
+                mDrawerRecyclerView.getPaddingLeft(),
                 statusBarHeight,
-                mDrawerListView.getPaddingRight(),
-                mDrawerListView.getPaddingBottom());
+                mDrawerRecyclerView.getPaddingRight(),
+                mDrawerRecyclerView.getPaddingBottom());
 
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
+        // Set up LayoutManager
+        mDrawerRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Load Menu Item
         List<Im> imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
@@ -190,14 +185,11 @@ public class NavigationDrawerFragment extends Fragment {
             checkcount++;
         }
 
-        adapter = new ArrayAdapter<>(
-                getActivity(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1, menulist);
+        adapter = new NavigationDrawerAdapter(menulist, position -> selectItem(position));
+        adapter.setSelectedPosition(mCurrentSelectedPosition);
 
-        mDrawerListView.setAdapter(adapter);
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        return mDrawerListView;
+        mDrawerRecyclerView.setAdapter(adapter);
+        return mDrawerRecyclerView;
     }
 
     public boolean isDrawerOpen() {
@@ -289,8 +281,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
-        if (mDrawerListView != null) {
-            mDrawerListView.setItemChecked(position, true);
+        if (adapter != null) {
+            adapter.setSelectedPosition(position);
         }
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -407,7 +399,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void updateMenuItems() {
 
-        if (mDrawerListView != null) {
+        if (mDrawerRecyclerView != null) {
 
             List<Im> imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
             int menuCount = imlist.size() + 2;
@@ -423,13 +415,9 @@ public class NavigationDrawerFragment extends Fragment {
                 checkCount++;
             }
 
-            adapter = new ArrayAdapter<>(
-                    getActivity(),
-                    android.R.layout.simple_list_item_activated_1,
-                    android.R.id.text1, menulist);
-
-            mDrawerListView.setAdapter(adapter);
-            adapter.setNotifyOnChange(true);
+            adapter = new NavigationDrawerAdapter(menulist, position -> selectItem(position));
+            adapter.setSelectedPosition(mCurrentSelectedPosition);
+            mDrawerRecyclerView.setAdapter(adapter);
 
         }
     }
