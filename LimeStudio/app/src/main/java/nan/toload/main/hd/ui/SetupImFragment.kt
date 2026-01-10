@@ -5,8 +5,6 @@
 package nan.toload.main.hd.ui
 
 import android.app.Activity
-// TODO: Replace ProgressDialog with Material3 components (deprecated since API 26)
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -69,8 +67,8 @@ class SetupImFragment : Fragment() {
     
     // Basic
     private lateinit var handler: SetupImHandler
-    @Suppress("DEPRECATION")
-    private lateinit var progress: ProgressDialog
+    // Material3 loading dialog (replacement for deprecated ProgressDialog)
+    private lateinit var progress: LoadingDialogHelper
     private var connManager: ConnectivityManager? = null
     private lateinit var datasource: LimeDB
     private lateinit var DBSrv: DBServer
@@ -115,9 +113,9 @@ class SetupImFragment : Fragment() {
     ): View {
         datasource = LimeDB(activityRef)
         handler = SetupImHandler(this)
-        
-        progress = ProgressDialog(activityRef)
-        progress.max = 100
+
+        progress = LoadingDialogHelper(activityRef)
+        progress.setMax(100)
         progress.setCancelable(false)
 
         DBSrv = DBServer(activityRef)
@@ -450,30 +448,29 @@ class SetupImFragment : Fragment() {
     }
 
     fun showProgress(spinnerStyle: Boolean, message: String?) {
-        if (progress.isShowing) progress.dismiss()
+        if (progress.isShowing()) progress.dismiss()
 
-        progress = ProgressDialog(activityRef)
-        progress.setCancelable(false)
-        progress.setProgressStyle(if (spinnerStyle) ProgressDialog.STYLE_SPINNER else ProgressDialog.STYLE_HORIZONTAL)
+        // Set progress style: spinner (indeterminate) or horizontal (determinate)
+        progress.setIndeterminate(spinnerStyle)
         message?.let { progress.setMessage(it) }
-        if (!spinnerStyle) progress.progress = 0
+        if (!spinnerStyle) progress.setProgress(0f)
 
         progress.show()
     }
 
     fun cancelProgress() {
-        if (progress.isShowing) {
+        if (progress.isShowing()) {
             progress.dismiss()
             handler.initialImButtons()
         }
     }
 
     fun setProgressIndeterminate(flag: Boolean) {
-        progress.isIndeterminate = flag
+        progress.setIndeterminate(flag)
     }
 
     fun updateProgress(value: Int) {
-        progress.progress = value
+        progress.setProgress(value)
     }
 
     fun updateProgress(value: String) {

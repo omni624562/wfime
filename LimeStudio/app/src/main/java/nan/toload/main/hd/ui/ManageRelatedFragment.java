@@ -25,8 +25,6 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
-// TODO: Replace ProgressDialog with Material3 components (deprecated since API 26)
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -98,8 +96,8 @@ public class ManageRelatedFragment extends Fragment {
 
     private LimeDB datasource;
 
-    @SuppressWarnings("deprecation")
-    private ProgressDialog progress;
+    // Material3 loading dialog (replacement for deprecated ProgressDialog)
+    private LoadingDialogHelper progress;
     private LIMEPreferenceManager mLIMEPref;
 
     // AD
@@ -132,7 +130,7 @@ public class ManageRelatedFragment extends Fragment {
 
         this.handler = new ManageRelatedHandler(this);
 
-        this.progress = new ProgressDialog(this.activity);
+        this.progress = new LoadingDialogHelper(this.activity);
         this.progress.setCancelable(false);
         this.progress.setMessage(getResources().getString(R.string.manage_related_loading));
         mLIMEPref = new LIMEPreferenceManager(activity);
@@ -297,7 +295,7 @@ public class ManageRelatedFragment extends Fragment {
             this.handler.removeCallbacks(ManageRelatedthread);
         }
         if (this.progress.isShowing()) {
-            this.progress.cancel();
+            this.progress.dismiss();
         }
         this.relatedlist = null;
         this.SearchSrv.initialCache();
@@ -311,7 +309,7 @@ public class ManageRelatedFragment extends Fragment {
 
     public void cancelProgress() {
         if (this.progress.isShowing()) {
-            this.progress.cancel();
+            this.progress.dismiss();
         }
     }
 
