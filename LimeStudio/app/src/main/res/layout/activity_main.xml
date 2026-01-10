@@ -63,7 +63,7 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Navigation Drawer with Compose -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="@dimen/navigation_drawer_width"
@@ -71,13 +71,11 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true">
 
-        <!-- Keep the existing fragment inside NavigationView for now -->
-        <fragment
-            android:id="@+id/navigation_drawer"
-            android:name="nan.toload.main.hd.NavigationDrawerFragment"
+        <!-- Container for Compose navigation drawer -->
+        <FrameLayout
+            android:id="@+id/navigation_drawer_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/fragment_navigation_drawer" />
+            android:layout_height="match_parent" />
 
     </com.google.android.material.navigation.NavigationView>
 

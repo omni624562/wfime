@@ -62,17 +62,15 @@ import nan.toload.main.hd.ui.ManageRelatedFragment;
 import nan.toload.main.hd.ui.SetupImFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements ComposeBridge.NavigationDrawerCallbacks, ComposeBridge.ManageImCallbacks {
     public static final String ARG_ADD_WORD = "arg_add_word";
     private static final int STORAGE_PERMISSION_CODE = 0;
     // private static final int STORAGE_PERMISSION_CODE = android.permission.;
 
     /**
-     * ccc
-     * Fragment managing the behaviors, interactions and presentation of the
-     * navigation drawer.
+     * DrawerLayout for managing navigation drawer state.
      */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+    private androidx.drawerlayout.widget.DrawerLayout mDrawerLayout;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -133,14 +131,15 @@ public class MainActivity extends AppCompatActivity
         // initial imlist
         initialImList();
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.navigation_drawer);
-        // mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                findViewById(R.id.drawer_layout));
+        // Set up Compose navigation drawer
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        android.widget.FrameLayout navDrawerContainer = findViewById(R.id.navigation_drawer_container);
+        android.view.View navDrawerView = ComposeBridge.INSTANCE.createNavigationDrawerView(
+                this,
+                this,
+                this
+        );
+        navDrawerContainer.addView(navDrawerView);
 
         // Handle Import Text from other application
         Intent intent = getIntent();
@@ -280,18 +279,24 @@ public class MainActivity extends AppCompatActivity
         // update the main content by replacing fragments
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (position == 0) {
+        android.widget.FrameLayout container = findViewById(R.id.container);
 
+        if (position == 0) {
+            // Use Fragment for Setup (will migrate in future phase)
+            container.removeAllViews();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, SetupImFragment.newInstance(position), "SetupImFragment")
                     .addToBackStack("SetupImFragment")
                     .commit();
         } else if (position == 1) {
+            // Use Fragment for Manage Related (will migrate in future phase)
+            container.removeAllViews();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, ManageRelatedFragment.newInstance(position), "ManageRelatedFragment")
                     .addToBackStack("ManageRelatedFragment")
                     .commit();
         } else {
+            // Use Compose for Manage IM
             if (imlist == null || imlist.isEmpty()) {
                 imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
             }
@@ -299,11 +304,18 @@ public class MainActivity extends AppCompatActivity
             if (!imlist.isEmpty()) {
                 int number = position - 2;
                 String table = imlist.get(number).getCode();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, ManageImFragment.newInstance(position, table, false),
-                                "ManageImFragment_" + table)
-                        .addToBackStack("ManageImFragment_" + table)
-                        .commit();
+
+                // Clear fragments and use Compose view
+                fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                container.removeAllViews();
+
+                android.view.View manageImView = ComposeBridge.INSTANCE.createManageImView(
+                        this,
+                        this,
+                        table,
+                        this
+                );
+                container.addView(manageImView);
             }
         }
     }
@@ -336,7 +348,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+        if (mDrawerLayout != null && !mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
@@ -389,5 +401,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void initialDefaultPreference() {
+    }
+
+    // ManageImCallbacks implementation
+    @Override
+    public void onWordClick(nan.toload.main.hd.data.Word word) {
+        // TODO: Show edit dialog in Phase 4.3
+        android.widget.Toast.makeText(this, "Edit: " + word.getWord(), android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onAddClick(String table) {
+        // TODO: Show add dialog in Phase 4.3
+        android.widget.Toast.makeText(this, "Add word to " + table, android.widget.Toast.LENGTH_SHORT).show();
     }
 }
