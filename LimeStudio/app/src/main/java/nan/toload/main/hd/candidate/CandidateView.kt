@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +24,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -261,8 +265,14 @@ open class CandidateView @JvmOverloads constructor(
     fun CandidateRow() {
         // Gboard-style dark background
         val gboardDark = Color(0xFF2B2B2B)
-        val composingBg = Color(0xFF3A3A3A)
         val scrollState = rememberScrollState()
+        
+        // Read font size from dimension resource and apply user's font_size preference scale
+        val fontSizeScale = mLIMEPref.fontSize
+        val scaledFontSizePx = baseCandidateFontSizePx * fontSizeScale
+        val candidateFontSize = with(LocalDensity.current) {
+            scaledFontSizePx.toSp()
+        }
         
         // Reset scroll position when suggestions change
         LaunchedEffect(suggestions) {
@@ -276,37 +286,19 @@ open class CandidateView @JvmOverloads constructor(
             }
         }
         
-        // Use Column to stack composing text above candidates
-        Column(
+        // Use Box for fixed positioning - candidates always at bottom, composing always at top
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .background(gboardDark)
         ) {
-            // Composing text row (only show when there's composing text)
-            if (_composingText.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(composingBg)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = _composingText,
-                        color = Color(0xFF4FC3F7),  // Light blue for composing text
-                        fontSize = 16.sp,
-                        maxLines = 1
-                    )
-                }
-            }
-            
-            // Candidate row (takes remaining space)
+            // Candidate row - ALWAYS at bottom (fixed position)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .height(40.dp)  // Fixed height for candidates
+                    .align(Alignment.BottomStart)
             ) {
                 Row(
                     modifier = Modifier
@@ -346,6 +338,29 @@ open class CandidateView @JvmOverloads constructor(
                     )
                 }
             }
+            
+            // Composing text - ALWAYS at top (fixed position, only visible when text present)
+            if (_composingText.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .wrapContentWidth()
+                        .wrapContentHeight()
+                        .padding(start = 8.dp, top = 4.dp)
+                        .background(
+                            color = Color(0xFF505050),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = _composingText,
+                        color = Color(0xFF4FC3F7),
+                        fontSize = candidateFontSize,
+                        maxLines = 1
+                    )
+                }
+            }
         }
     }
 
@@ -370,7 +385,7 @@ open class CandidateView @JvmOverloads constructor(
             modifier = Modifier
                 .fillMaxHeight()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 2.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(

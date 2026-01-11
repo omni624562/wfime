@@ -36,7 +36,8 @@
         android:gravity="top"
         android:minWidth="0dip"
         android:textColor="@color/second_foreground_light"
-        android:textSize="@dimen/composing_text_size" />
+        android:textSize="@dimen/composing_text_size"
+        android:visibility="gone" />
 
     <!-- Use FrameLayout instead of LinearLayout with weight to provide bounded width for Compose -->
     <FrameLayout
