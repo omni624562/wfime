@@ -17,12 +17,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.derivedStateOf
@@ -72,6 +75,7 @@ open class CandidateView @JvmOverloads constructor(
     private var mService: LIMEService? = null
     private var suggestions by mutableStateOf<List<Mapping>>(emptyList())
     private var selectedIndex by mutableIntStateOf(-1)
+    private var _composingText by mutableStateOf("")
     
     // Custom lifecycle and recomposer for Compose support in InputMethodService
     private val lifecycleOwner = IMELifecycleOwner()
@@ -224,6 +228,7 @@ open class CandidateView @JvmOverloads constructor(
     fun clear() {
         suggestions = emptyList()
         selectedIndex = -1
+        _composingText = ""
     }
     
     fun setEmbeddedComposingView(view: TextView) {
@@ -256,6 +261,7 @@ open class CandidateView @JvmOverloads constructor(
     fun CandidateRow() {
         // Gboard-style dark background
         val gboardDark = Color(0xFF2B2B2B)
+        val composingBg = Color(0xFF3A3A3A)
         val scrollState = rememberScrollState()
         
         // Reset scroll position when suggestions change
@@ -270,49 +276,75 @@ open class CandidateView @JvmOverloads constructor(
             }
         }
         
-        // Parent XML layout now provides bounded width - horizontal scroll works
-        Box(
+        // Use Column to stack composing text above candidates
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .background(gboardDark)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .horizontalScroll(scrollState)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                suggestions.forEachIndexed { index, mapping ->
-                    CandidateItem(
-                        mapping = mapping,
-                        isSelected = index == selectedIndex,
-                        onClick = {
-                            mService?.pickCandidateManually(index)
-                            selectedIndex = index
-                        }
+            // Composing text row (only show when there's composing text)
+            if (_composingText.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .background(composingBg)
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(
+                        text = _composingText,
+                        color = Color(0xFF4FC3F7),  // Light blue for composing text
+                        fontSize = 16.sp,
+                        maxLines = 1
                     )
                 }
             }
             
-            // Fade edge indicator on right side when more content is available
-            if (suggestions.isNotEmpty() && !isAtEnd.value) {
-                Box(
+            // Candidate row (takes remaining space)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Row(
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .width(24.dp)
+                        .fillMaxWidth()
                         .fillMaxHeight()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    gboardDark
+                        .horizontalScroll(scrollState)
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    suggestions.forEachIndexed { index, mapping ->
+                        CandidateItem(
+                            mapping = mapping,
+                            isSelected = index == selectedIndex,
+                            onClick = {
+                                mService?.pickCandidateManually(index)
+                                selectedIndex = index
+                            }
+                        )
+                    }
+                }
+                
+                // Fade edge indicator on right side when more content is available
+                if (suggestions.isNotEmpty() && !isAtEnd.value) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(24.dp)
+                            .fillMaxHeight()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        gboardDark
+                                    )
                                 )
                             )
-                        )
-                )
+                    )
+                }
             }
         }
     }
@@ -358,7 +390,9 @@ open class CandidateView @JvmOverloads constructor(
     fun takeSuggestionAt(x: Int) {}
     fun onTouchReal(event: android.view.MotionEvent): Boolean = false
     
-    fun setComposingText(text: String) {}
+    fun setComposingText(text: String) {
+        _composingText = text
+    }
     fun setTransparentCandidateView(transparent: Boolean) {}
     fun startSymbolInput() {}
     fun forceHide() {
