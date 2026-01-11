@@ -22,8 +22,26 @@
   ~  */
   -->
 
-<!-- Updated to use XML drawable instead of PNG for consistent styling -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/sym_flat_keyboard_space_hl" android:state_pressed="true" />
-    <item android:drawable="@drawable/sym_flat_keyboard_space" />
-</selector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="1dp"
+    android:insetRight="1dp"
+    android:insetTop="0dp"
+    android:insetBottom="0dp">
+    <shape android:shape="rectangle">
+        <corners android:radius="4dp" />
+        <solid android:color="@color/second_background_light_fl" />
+        <padding
+            android:bottom="1dp"
+            android:left="1dp"
+            android:right="1dp"
+            android:top="1dp" />
+        <size
+            android:width="30dp"
+            android:height="46dp" />
+
+        <stroke
+            android:width="2dp"
+            android:color="@color/keyboard_background_light" />
+
+    </shape>
+</inset>
