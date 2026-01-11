@@ -2165,7 +2165,10 @@ public class LIMEService extends InputMethodService implements
                         java.util.Iterator<Mapping> iterator = list.iterator();
                         while (iterator.hasNext()) {
                             Mapping m = iterator.next();
-                            if (m.getWord().equalsIgnoreCase(finalKeyString)) {
+                            // Remove if word matches raw input OR if word is identical to code (raw code
+                            // fallback)
+                            if (m.getWord().equalsIgnoreCase(finalKeyString) ||
+                                    (m.getCode() != null && m.getWord().equalsIgnoreCase(m.getCode()))) {
                                 iterator.remove();
                             }
                         }
