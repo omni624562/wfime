@@ -83,8 +83,10 @@ public class MainActivity extends AppCompatActivity
     private ConnectivityManager connManager;
     private LIMEPreferenceManager mLIMEPref;
 
-    // TODO: Replace ProgressDialog with Material3 AlertDialog + CircularProgressIndicator
-    // ProgressDialog is deprecated since API 26, but replacement requires custom layout
+    // TODO: Replace ProgressDialog with Material3 AlertDialog +
+    // CircularProgressIndicator
+    // ProgressDialog is deprecated since API 26, but replacement requires custom
+    // layout
     @SuppressWarnings("deprecation")
     private ProgressDialog progress;
     private MainActivityHandler handler;
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Enable Dynamic Colors for Material You (Android 12+)
@@ -115,6 +116,16 @@ public class MainActivity extends AppCompatActivity
         // Set up Toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Set up drawer toggle - clicking hamburger icon opens/closes drawer
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        toolbar.setNavigationOnClickListener(v -> {
+            if (mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
+            } else {
+                mDrawerLayout.openDrawer(androidx.core.view.GravityCompat.START);
+            }
+        });
 
         handler = new MainActivityHandler(this);
 
@@ -132,13 +143,11 @@ public class MainActivity extends AppCompatActivity
         initialImList();
 
         // Set up Compose navigation drawer
-        mDrawerLayout = findViewById(R.id.drawer_layout);
         android.widget.FrameLayout navDrawerContainer = findViewById(R.id.navigation_drawer_container);
         android.view.View navDrawerView = ComposeBridge.INSTANCE.createNavigationDrawerView(
                 this,
                 this,
-                this
-        );
+                this);
         navDrawerContainer.addView(navDrawerView);
 
         // Handle Import Text from other application
@@ -195,13 +204,17 @@ public class MainActivity extends AppCompatActivity
             showImeAddWordDialog(table);
         }
 
-        // Handle back button press using OnBackPressedDispatcher (Android 13+ predictive back support)
+        // Handle back button press using OnBackPressedDispatcher (Android 13+
+        // predictive back support)
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 finish();
             }
         });
+
+        // Load initial fragment (position 0 = Setup)
+        onNavigationDrawerItemSelected(0);
     }
 
     private void showImeAddWordDialog(String table) {
@@ -312,8 +325,7 @@ public class MainActivity extends AppCompatActivity
                 android.view.View manageImView = ComposeBridge.INSTANCE.createManageImView(
                         this,
                         this,
-                        table
-                );
+                        table);
                 container.addView(manageImView);
             }
         }
@@ -356,6 +368,27 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_preference) {
+            // Open settings activity
+            Intent intent = new Intent(this, nan.toload.main.hd.limesettings.LIMEPreferenceHC.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_help) {
+            // Show help dialog
+            nan.toload.main.hd.ui.HelpDialog helpDialog = new nan.toload.main.hd.ui.HelpDialog();
+            helpDialog.show(getSupportFragmentManager(), "helpDialog");
+            return true;
+        } else if (id == R.id.action_reset) {
+            // Reset functionality
+            showToastMessage(getString(R.string.action_reset), Toast.LENGTH_SHORT);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void showToastMessage(String msg, int length) {

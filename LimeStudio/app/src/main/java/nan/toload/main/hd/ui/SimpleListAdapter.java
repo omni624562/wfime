@@ -82,6 +82,11 @@ public class SimpleListAdapter extends RecyclerView.Adapter<SimpleListAdapter.Vi
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (mItems != null && position < mItems.length) {
             holder.textView.setText(mItems[position]);
+            // Set text color based on theme for dark mode support
+            int textColor = androidx.core.content.ContextCompat.getColor(
+                    holder.itemView.getContext(),
+                    com.google.android.material.R.color.m3_default_color_primary_text);
+            holder.textView.setTextColor(textColor);
         }
 
         holder.itemView.setOnClickListener(v -> {

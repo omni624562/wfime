@@ -30,9 +30,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -130,7 +133,8 @@ class SetupImFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                MaterialTheme {
+                val colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                MaterialTheme(colorScheme = colorScheme) {
                     SetupScreen()
                 }
             }
@@ -152,7 +156,8 @@ class SetupImFragment : Fragment() {
             Text(
                 text = uiState.version,
                 modifier = Modifier.align(Alignment.End),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             // Setup Wizard Section
@@ -173,11 +178,13 @@ class SetupImFragment : Fragment() {
             if (uiState.showSystemSettings) {
                 Text(
                     text = stringResource(R.string.setup_im_system_settings),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = stringResource(R.string.setup_im_system_settings_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Button(
                     onClick = { LIMEUtilities.showInputMethodSettingsPage(activityRef.applicationContext) },
@@ -190,7 +197,8 @@ class SetupImFragment : Fragment() {
             if (uiState.showImPicker) {
                  Text(
                     text = stringResource(R.string.setup_im_system_impicker_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                  Button(
                     onClick = { 
@@ -206,7 +214,8 @@ class SetupImFragment : Fragment() {
             if (uiState.showPermissionGrant) {
                 Text(
                     text = stringResource(R.string.setup_im_grant_permission),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                  Button(
                     onClick = { 
@@ -233,11 +242,13 @@ class SetupImFragment : Fragment() {
             Text(
                 text = stringResource(R.string.setup_im_database),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_database_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
             
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -262,11 +273,13 @@ class SetupImFragment : Fragment() {
             // Import
             Text(
                 text = stringResource(R.string.setup_im_import),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_import_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
              Row(modifier = Modifier.fillMaxWidth()) {
                 val customLabel = uiState.customTableImportLabel ?: stringResource(R.string.setup_im_import_standard)
@@ -303,11 +316,13 @@ class SetupImFragment : Fragment() {
             // Download (Pre-built tables)
             Text(
                 text = stringResource(R.string.setup_im_download),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_download_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
