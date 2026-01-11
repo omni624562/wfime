@@ -23,13 +23,13 @@
   -->
 
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="1dp"
-    android:insetRight="1dp"
-    android:insetTop="0dp"
-    android:insetBottom="0dp">
+    android:insetLeft="3dp"
+    android:insetRight="3dp"
+    android:insetTop="3dp"
+    android:insetBottom="3dp">
     <shape android:shape="rectangle">
-        <corners android:radius="4dp" />
-        <solid android:color="@color/second_background_light_fl" />
+        <corners android:radius="8dp" />
+        <solid android:color="@color/key_background_pressed_dark" />
         <padding
             android:bottom="1dp"
             android:left="1dp"
@@ -38,10 +38,5 @@
         <size
             android:width="30dp"
             android:height="46dp" />
-
-        <stroke
-            android:width="2dp"
-            android:color="@color/keyboard_background_light" />
-
     </shape>
 </inset>

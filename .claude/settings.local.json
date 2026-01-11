@@ -21,7 +21,15 @@
       "Bash(gradlew assembleDebug:*)",
       "Bash(.gradlew.bat:*)",
       "Bash(grep:*)",
-      "Bash(gh pr list:*)"
+      "Bash(gh pr list:*)",
+      "Bash(find:*)",
+      "Bash(for file in btn_flat_keyboard_function_key_normal_light.xml btn_flat_keyboard_function_key_pressed_light.xml btn_flat_keyboard_key_preview_light.xml btn_flat_keyboard_normal_key_pressed_light.xml)",
+      "Bash(do sed -i 's/radius=\"\"7dp\"\"/radius=\"\"10dp\"\"/g' \"$file\")",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(cmd /c \"cd c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio && gradlew.bat assembleDebug\")",
+      "Bash(git restore:*)"
     ]
   }
 }
