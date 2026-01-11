@@ -52,7 +52,7 @@
     <dimen name="mini_keyboard_vertical_correction">-0.03in</dimen>
     <dimen name="mini_keyboard_fling_vertical_correction">-42dip</dimen>
     <dimen name="mini_keyboard_slide_allowance">0.553in</dimen>
-    <dimen name="spacebar_vertical_correction">4dip</dimen>
+    <dimen name="spacebar_vertical_correction">0dip</dimen>
     <dimen name="spacebar_preview_top_padding">18dp</dimen>
     <dimen name="spacebar_preview_text_size">18sp</dimen>
     <dimen name="preview_top_padding">0dip</dimen>
