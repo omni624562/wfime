@@ -4583,6 +4583,33 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
+    public Keyboard getImKeyboard(String code) {
+        if (!checkDBConnection())
+            return null;
+
+        String query = Lime.DB_IM_COLUMN_CODE + " = '" + code + "' AND " +
+                Lime.DB_IM_COLUMN_TITLE + " = '" + Lime.IM_TYPE_KEYBOARD + "'";
+        Cursor cursor = db.query(Lime.DB_IM, null, query, null, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String keyboardCode = cursor.getString(cursor.getColumnIndex(Lime.DB_IM_COLUMN_KEYBOARD));
+            cursor.close();
+
+            // Get the full keyboard object
+            List<Keyboard> keyboards = getKeyboard();
+            for (Keyboard kb : keyboards) {
+                if (kb.getCode().equals(keyboardCode)) {
+                    return kb;
+                }
+            }
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        return null;
+    }
+
     public int hasRelated(String pword, String cword) {
 
         try {

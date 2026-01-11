@@ -82,6 +82,22 @@ fun ManageImScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // Keyboard selection button
+            OutlinedButton(
+                onClick = { viewModel.showKeyboardDialog() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = if (uiState.currentKeyboard.isNotEmpty()) {
+                        uiState.currentKeyboard
+                    } else {
+                        stringResource(R.string.manage_im_keyboard)
+                    }
+                )
+            }
+
             // Search bar
             SearchBar(
                 query = uiState.searchQuery,
@@ -154,6 +170,17 @@ fun ManageImScreen(
             onDelete = {
                 viewModel.removeWord(word.id)
             }
+        )
+    }
+
+    // Keyboard Selection Dialog
+    if (uiState.showKeyboardDialog) {
+        KeyboardSelectionDialog(
+            keyboards = uiState.availableKeyboards,
+            onKeyboardSelected = { keyboard ->
+                viewModel.selectKeyboard(keyboard)
+            },
+            onDismiss = { viewModel.hideKeyboardDialog() }
         )
     }
 }

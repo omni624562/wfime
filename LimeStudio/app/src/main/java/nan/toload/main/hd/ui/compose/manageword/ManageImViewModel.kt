@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nan.toload.main.hd.Lime
+import nan.toload.main.hd.data.Keyboard
 import nan.toload.main.hd.data.Word
 import nan.toload.main.hd.limedb.LimeDB
 
@@ -50,6 +51,9 @@ import nan.toload.main.hd.limedb.LimeDB
  * @param searchRoot Whether to search only word roots (true) or full words (false)
  * @param showAddDialog Whether to show the add word dialog
  * @param editingWord Word being edited (null if not editing)
+ * @param showKeyboardDialog Whether to show the keyboard selection dialog
+ * @param availableKeyboards List of available keyboard layouts
+ * @param currentKeyboard Currently selected keyboard description
  */
 data class ManageImUiState(
     val words: List<Word> = emptyList(),
@@ -61,7 +65,10 @@ data class ManageImUiState(
     val isLoading: Boolean = false,
     val searchRoot: Boolean = true,
     val showAddDialog: Boolean = false,
-    val editingWord: Word? = null
+    val editingWord: Word? = null,
+    val showKeyboardDialog: Boolean = false,
+    val availableKeyboards: List<Keyboard> = emptyList(),
+    val currentKeyboard: String = ""
 )
 
 /**
@@ -89,6 +96,7 @@ class ManageImViewModel(
     init {
         // Load initial data
         loadWords()
+        loadKeyboards()
     }
 
     /**
@@ -267,6 +275,56 @@ class ManageImViewModel(
             withContext(Dispatchers.Main) {
                 hideEditDialog()
                 loadWords()
+            }
+        }
+    }
+
+    /**
+     * Loads available keyboard layouts from database.
+     */
+    private fun loadKeyboards() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val keyboards = limeDb.getKeyboard()
+            // Get current keyboard for this IM
+            val currentKb = limeDb.getImKeyboard(table)
+
+            withContext(Dispatchers.Main) {
+                _uiState.update {
+                    it.copy(
+                        availableKeyboards = keyboards,
+                        currentKeyboard = currentKb?.desc ?: ""
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Shows the keyboard selection dialog.
+     */
+    fun showKeyboardDialog() {
+        _uiState.update { it.copy(showKeyboardDialog = true) }
+    }
+
+    /**
+     * Hides the keyboard selection dialog.
+     */
+    fun hideKeyboardDialog() {
+        _uiState.update { it.copy(showKeyboardDialog = false) }
+    }
+
+    /**
+     * Selects a keyboard layout for this input method.
+     *
+     * @param keyboard Selected keyboard layout
+     */
+    fun selectKeyboard(keyboard: Keyboard) {
+        viewModelScope.launch(Dispatchers.IO) {
+            limeDb.setImKeyboard(table, keyboard)
+
+            withContext(Dispatchers.Main) {
+                _uiState.update { it.copy(currentKeyboard = keyboard.desc) }
+                hideKeyboardDialog()
             }
         }
     }
