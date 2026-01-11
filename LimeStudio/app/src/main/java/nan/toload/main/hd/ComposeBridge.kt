@@ -16,6 +16,9 @@ import nan.toload.main.hd.ui.compose.NavigationViewModelFactory
 import nan.toload.main.hd.ui.compose.manageword.ManageImScreen
 import nan.toload.main.hd.ui.compose.manageword.ManageImViewModel
 import nan.toload.main.hd.ui.compose.manageword.ManageImViewModelFactory
+import nan.toload.main.hd.ui.compose.settings.SettingsScreen
+import nan.toload.main.hd.ui.compose.settings.SettingsViewModel
+import nan.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
 import nan.toload.main.hd.data.Word
 import android.view.KeyEvent
 
@@ -111,6 +114,33 @@ object ComposeBridge {
 
                 MaterialTheme {
                     ManageImScreen(viewModel = viewModel)
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates a Settings view using Jetpack Compose.
+     *
+     * All preference operations are handled within the Compose UI with reactive state management.
+     *
+     * @param context Android context
+     * @param viewModelStoreOwner Owner of the ViewModelStore (typically the Activity)
+     * @return View containing the Settings UI
+     */
+    fun createSettingsView(
+        context: Context,
+        viewModelStoreOwner: ViewModelStoreOwner
+    ): View {
+        return ComposeView(context).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                // Create ViewModel
+                val factory = SettingsViewModelFactory(context)
+                val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[SettingsViewModel::class.java]
+
+                MaterialTheme {
+                    SettingsScreen(viewModel = viewModel)
                 }
             }
         }
