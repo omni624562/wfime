@@ -80,6 +80,7 @@ open class CandidateView @JvmOverloads constructor(
     private var suggestions by mutableStateOf<List<Mapping>>(emptyList())
     private var selectedIndex by mutableIntStateOf(-1)
     private var _composingText by mutableStateOf("")
+    private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
     
     // Custom lifecycle and recomposer for Compose support in InputMethodService
     private val lifecycleOwner = IMELifecycleOwner()
@@ -233,6 +234,11 @@ open class CandidateView @JvmOverloads constructor(
         suggestions = emptyList()
         selectedIndex = -1
         _composingText = ""
+        _rawKeycode = ""
+    }
+    
+    fun setRawKeycode(keycode: String) {
+        _rawKeycode = keycode
     }
     
     fun setEmbeddedComposingView(view: TextView) {
@@ -301,6 +307,19 @@ open class CandidateView @JvmOverloads constructor(
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Show raw keycode as first item (if not empty)
+                if (_rawKeycode.isNotEmpty()) {
+                    RawKeycodeItem(
+                        keycode = _rawKeycode,
+                        fontSize = candidateFontSize,
+                        onClick = {
+                            // Input raw keycode directly
+                            mService?.commitTyped(_rawKeycode)
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                
                 suggestions.forEachIndexed { index, mapping ->
                     CandidateItem(
                         mapping = mapping,
@@ -362,6 +381,34 @@ open class CandidateView @JvmOverloads constructor(
                 color = textColor,
                 fontSize = candidateFontSize, 
                 fontWeight = fontWeight,
+                maxLines = 1
+            )
+        }
+    }
+
+    @Composable
+    fun RawKeycodeItem(
+        keycode: String,
+        fontSize: androidx.compose.ui.unit.TextUnit,
+        onClick: () -> Unit
+    ) {
+        // Distinct style: bordered box with different background
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .clickable(onClick = onClick)
+                .background(
+                    color = Color(0xFF3A3A3A), // Slightly lighter than gboardDark
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = keycode,
+                color = Color(0xFF80DEEA), // Cyan color to distinguish from candidates
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
         }

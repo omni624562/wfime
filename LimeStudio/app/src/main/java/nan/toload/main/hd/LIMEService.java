@@ -1404,6 +1404,25 @@ public class LIMEService extends InputMethodService implements
     }
 
     /**
+     * Public method to commit raw text directly (e.g., raw keycode from
+     * CandidateView).
+     * Clears composing state and hides candidate view after committing.
+     */
+    public void commitTyped(String text) {
+        if (text == null || text.isEmpty())
+            return;
+
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            ic.commitText(text, 1);
+        }
+
+        // Clear composing state
+        clearComposing(true);
+        hideComposingPopup();
+    }
+
+    /**
      * Helper function to commit any text being composed in to the editor.
      */
     private void commitTyped(InputConnection ic) {
@@ -2779,6 +2798,11 @@ public class LIMEService extends InputMethodService implements
 
         // Update composing text display (now using floating popup)
         showComposingPopup(result);
+
+        // Pass raw keycode to CandidateView for display as first item
+        if (mCandidateView != null) {
+            mCandidateView.setRawKeycode(rawString);
+        }
 
         // Clear composing text from input field (we display it in CandidateView
         // instead)
