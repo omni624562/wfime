@@ -71,6 +71,7 @@ import nan.toload.main.hd.R;
 import nan.toload.main.hd.candidate.CandidateInInputViewContainer;
 import nan.toload.main.hd.candidate.CandidateView;
 import nan.toload.main.hd.candidate.CandidateViewContainer;
+import nan.toload.main.hd.candidate.ComposingTextPopup;
 import nan.toload.main.hd.data.ChineseSymbol;
 import nan.toload.main.hd.data.Mapping;
 import nan.toload.main.hd.global.LIMEPreferenceManager;
@@ -137,6 +138,7 @@ public class LIMEService extends InputMethodService implements
     private CandidateView mCandidateViewInInputView = null;
     private CandidateView mCandidateViewStandAlone = null;
     private CandidateViewContainer mCandidateViewContainer = null;
+    private ComposingTextPopup mComposingPopup = null;
     private CompletionInfo[] mCompletions;
     private StringBuilder mComposing = new StringBuilder();
     private boolean mPredictionOn;
@@ -440,6 +442,36 @@ public class LIMEService extends InputMethodService implements
 
     }
 
+    private void initComposingPopup() {
+        if (mComposingPopup == null) {
+            mComposingPopup = new ComposingTextPopup(this);
+        }
+    }
+
+    private void showComposingPopup(String text) {
+        // Ensure popup operations run on main thread (may be called from background
+        // thread)
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (mComposingPopup != null) {
+                mComposingPopup.updateComposingText(text);
+                View anchor = mInputViewContainer != null ? mInputViewContainer
+                        : (mCandidateInInputView != null ? mCandidateInInputView : mInputView);
+                if (anchor != null && text != null && !text.isEmpty()) {
+                    mComposingPopup.show(anchor, 16, 8);
+                }
+            }
+        });
+    }
+
+    private void hideComposingPopup() {
+        // Ensure popup operations run on main thread
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (mComposingPopup != null) {
+                mComposingPopup.hide();
+            }
+        });
+    }
+
     public void toggleEmojiVisibility() {
         if (mEmojiKeyboardView == null)
             return;
@@ -573,6 +605,8 @@ public class LIMEService extends InputMethodService implements
             mCandidateList.clear();
         if (mCandidateView != null)
             mCandidateView.clear();
+
+        hideComposingPopup();
     }
 
     /**
@@ -635,13 +669,14 @@ public class LIMEService extends InputMethodService implements
             }
 
         }
+        hideComposingPopup();
     }
 
     /**
      * Jeremy '15,7,8 to avoid candidateView shift up and down when it's not fixed.
      * 
-     * NOTE: Removed custom insets logic to let Android 16+ handle it automatically.
-     * The keyboard view extends into bottom inset via onMeasure.
+     * NOTE: Composing text now uses PopupWindow, so transparency insets are no
+     * longer needed.
      */
     @Override
     public void onComputeInsets(InputMethodService.Insets outInsets) {
@@ -669,6 +704,7 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "onStartInputView()");
         super.onStartInputView(attribute, restarting);
         initOnStartInput(attribute);
+        initComposingPopup();
     }
 
     /**
@@ -2304,7 +2340,7 @@ public class LIMEService extends InputMethodService implements
                                 return; // terminate thread here, since it is interrupted and more recent
                                         // getMappingByCode will update the suggestions.
                             }
-                            mCandidateView.setComposingText(keynameString);
+                            showComposingPopup(keynameString);
                         }
                     }
                 }
@@ -2741,11 +2777,8 @@ public class LIMEService extends InputMethodService implements
         String result = sb.toString();
         // Log.e(TAG, "DEBUG: Display String Result: " + result);
 
-        // Update CandidateView with composing text (display above candidate bar instead
-        // of input field)
-        if (mCandidateView != null) {
-            mCandidateView.setComposingText(result);
-        }
+        // Update composing text display (now using floating popup)
+        showComposingPopup(result);
 
         // Clear composing text from input field (we display it in CandidateView
         // instead)

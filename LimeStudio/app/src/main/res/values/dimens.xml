@@ -35,7 +35,7 @@
     <dimen name="max_height_for_fullscreen">1.75in</dimen>
     <dimen name="phone_key_height">52dip</dimen>
     <dimen name="key_height">52dip</dimen>
-    <dimen name="candidate_stripe_height">70dp</dimen>
+    <dimen name="candidate_stripe_height">40dp</dimen>
     <dimen name="candidate_vertical_padding">6sp</dimen>
     <dimen name="candidate_number_font_size">12sp</dimen>
     <dimen name="candidate_expand_button_width">36sp</dimen>

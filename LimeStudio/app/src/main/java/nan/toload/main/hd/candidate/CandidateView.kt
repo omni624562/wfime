@@ -286,80 +286,49 @@ open class CandidateView @JvmOverloads constructor(
             }
         }
         
-        // Use Box for fixed positioning - candidates always at bottom, composing always at top
+        // Candidates-only layout (composing text now in separate PopupWindow)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(gboardDark)
+                .background(gboardDark) // Opaque candidate background
         ) {
-            // Candidate row - ALWAYS at bottom (fixed position)
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)  // Fixed height for candidates
-                    .align(Alignment.BottomStart)
+                    .fillMaxHeight()
+                    .horizontalScroll(scrollState)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .horizontalScroll(scrollState)
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    suggestions.forEachIndexed { index, mapping ->
-                        CandidateItem(
-                            mapping = mapping,
-                            isSelected = index == selectedIndex,
-                            onClick = {
-                                mService?.pickCandidateManually(index)
-                                selectedIndex = index
-                            }
-                        )
-                    }
-                }
-                
-                // Fade edge indicator on right side when more content is available
-                if (suggestions.isNotEmpty() && !isAtEnd.value) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .width(24.dp)
-                            .fillMaxHeight()
-                            .background(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        gboardDark
-                                    )
-                                )
-                            )
+                suggestions.forEachIndexed { index, mapping ->
+                    CandidateItem(
+                        mapping = mapping,
+                        isSelected = index == selectedIndex,
+                        onClick = {
+                            mService?.pickCandidateManually(index)
+                            selectedIndex = index
+                        }
                     )
                 }
             }
             
-            // Composing text - ALWAYS at top (fixed position, only visible when text present)
-            if (_composingText.isNotEmpty()) {
+            // Fade edge indicator on right side when more content is available
+            if (suggestions.isNotEmpty() && !isAtEnd.value) {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .wrapContentWidth()
-                        .wrapContentHeight()
-                        .padding(start = 8.dp, top = 4.dp)
+                        .align(Alignment.CenterEnd)
+                        .width(24.dp)
+                        .fillMaxHeight()
                         .background(
-                            color = Color(0xFF505050),
-                            shape = RoundedCornerShape(4.dp)
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    gboardDark
+                                )
+                            )
                         )
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = _composingText,
-                        color = Color(0xFF4FC3F7),
-                        fontSize = candidateFontSize,
-                        maxLines = 1
-                    )
-                }
+                )
             }
         }
     }

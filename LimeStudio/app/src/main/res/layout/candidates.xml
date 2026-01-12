@@ -43,7 +43,7 @@
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/third_background_light">
+        android:background="@android:color/transparent">
 
         <view xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/candidates"
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/candidate_stripe_height"
             android:layout_marginEnd="@dimen/candidate_expand_button_width"
-            android:background="@color/third_background_light" />
+            android:background="@android:color/transparent" />
 
         <ImageButton
             android:id="@+id/candidate_right"
