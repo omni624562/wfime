@@ -22,101 +22,100 @@
   ~  */
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="nan.toload.main.hd.ManageRelatedFragment">
+    android:padding="5dp"
+    tools:context="nan.toload.main.hd.ui.ManageRelatedFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="5dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/edtManageRelatedSearch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_column="2"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btnManageRelatedSearch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="11"
-                android:text="@string/manage_related_search"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/btnManageRelatedAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="11"
-                android:text="@string/manage_related_add"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerManageRelated"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Search Bar -->
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/edtManageRelatedSearch"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:hint="@string/manage_related_search"
+        app:layout_constraintEnd_toStartOf="@id/btnManageRelatedSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintBottom_toBottomOf="@id/btnManageRelatedSearch" />
 
-        <Button
-            android:id="@+id/btnManageRelatedPrevious"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/manage_related_previous"
-            android:textStyle="bold" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageRelatedSearch"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:text="@string/manage_related_search"
+        app:layout_constraintEnd_toStartOf="@id/btnManageRelatedAdd"
+        app:layout_constraintStart_toEndOf="@id/edtManageRelatedSearch"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageRelatedAdd"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:text="@string/manage_related_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnManageRelatedSearch"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/txtNavigationInfo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="8pt" />
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerManageRelated"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toTopOf="@id/btnManageRelatedPrevious"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnManageRelatedSearch" />
 
-        <Button
-            android:id="@+id/btnManageRelatedNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/manage_related_next"
-            android:textStyle="bold" />
+    <!-- Navigation Bar -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageRelatedPrevious"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/manage_related_previous"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/txtNavigationInfo"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-    </LinearLayout>
-</LinearLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_manage_related.xml -->
+    <TextView
+        android:id="@+id/txtNavigationInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="0"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/btnManageRelatedPrevious"
+        app:layout_constraintEnd_toStartOf="@id/btnManageRelatedNext"
+        app:layout_constraintStart_toEndOf="@id/btnManageRelatedPrevious"
+        app:layout_constraintTop_toTopOf="@id/btnManageRelatedPrevious" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageRelatedNext"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/manage_related_next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/txtNavigationInfo" />
+
+</androidx.constraintlayout.widget.ConstraintLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_manage_related.xml -->

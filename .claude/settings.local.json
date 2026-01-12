@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: improve Android 16 compliance and security\n\nThis commit addresses critical Android 16 compliance issues and documents\nsecurity vulnerabilities to prepare the app for modern Android standards.\n\nChanges:\n- Remove System.exit\\(0\\) call in MainActivity \\(violates Android lifecycle\\)\n- Replace deprecated onKeyDown\\(\\) with OnBackPressedDispatcher API\n- Add predictive back gesture support \\(Android 13+\\)\n- Mark ProgressDialog usage as technical debt with @SuppressWarnings\n- Add TODO comments for future Material3 migration\n- Document SQL injection risks in SECURITY_ANALYSIS.md\n\nBenefits:\n- Proper Android lifecycle management\n- Predictive back animation support\n- Clear technical debt tracking\n- Security vulnerability documentation\n- Improved maintainability\n\nThe app now achieves 92% Android 16 compliance \\(up from 85%\\).\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh issue create:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(gh pr close:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(tee:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(gradlew assembleDebug:*)",
+      "Bash(.gradlew.bat:*)",
+      "Bash(grep:*)",
+      "Bash(gh pr list:*)",
+      "Bash(find:*)",
+      "Bash(for file in btn_flat_keyboard_function_key_normal_light.xml btn_flat_keyboard_function_key_pressed_light.xml btn_flat_keyboard_key_preview_light.xml btn_flat_keyboard_normal_key_pressed_light.xml)",
+      "Bash(do sed -i 's/radius=\"\"7dp\"\"/radius=\"\"10dp\"\"/g' \"$file\")",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(cmd /c \"cd c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio && gradlew.bat assembleDebug\")",
+      "Bash(git restore:*)"
+    ]
+  }
+}

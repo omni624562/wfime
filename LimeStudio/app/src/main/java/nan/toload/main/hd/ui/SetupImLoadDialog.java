@@ -42,11 +42,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -64,7 +65,7 @@ import nan.toload.main.hd.global.LIMEPreferenceManager;
 import nan.toload.main.hd.global.LIMEProgressListener;
 import nan.toload.main.hd.global.LIMEUtilities;
 import nan.toload.main.hd.limedb.LimeDB;
-import nan.toload.main.hd.limesettings.LIMESelectFileAdapter;
+import nan.toload.main.hd.limesettings.LIMESelectFileRecyclerAdapter;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -108,8 +109,8 @@ public class SetupImLoadDialog extends DialogFragment {
     private Activity activity;
     private LIMEPreferenceManager mLIMEPref;
     // Select File
-    private LIMESelectFileAdapter adapter;
-    private ListView listview;
+    private LIMESelectFileRecyclerAdapter adapter;
+    private RecyclerView listview;
     private LinearLayout toplayout;
     private Thread loadthread;
 
@@ -356,24 +357,29 @@ public class SetupImLoadDialog extends DialogFragment {
         button.setOnClickListener(v -> dialog.dismiss());
 
         listview = dialog.findViewById(R.id.listview_loading_target);
+        listview.setLayoutManager(new LinearLayoutManager(activity));
         toplayout = dialog.findViewById(R.id.linearlayout_loading_confirm_top);
+
         // Use app-specific directory instead of deprecated external storage
         File startDir = activity.getExternalFilesDir(null);
         if (startDir == null)
             startDir = activity.getFilesDir();
-        listview.setAdapter(getAdapter(startDir));
 
-        createNavigationButtons(startDir);
-        listview.setOnItemClickListener((arg0, arg1, position, arg3) -> {
+        flist = getAvailableFiles(startDir.getAbsolutePath());
+        adapter = new LIMESelectFileRecyclerAdapter(activity, flist, position -> {
             File f = flist.get(position);
             if (f.isDirectory()) {
-                listview.setAdapter(getAdapter(f));
+                flist = getAvailableFiles(f.getAbsolutePath());
+                adapter.updateItems(flist);
                 createNavigationButtons(f);
             } else {
                 getAvailableFiles(f.getAbsolutePath());
                 dialog.dismiss();
             }
         });
+        listview.setAdapter(adapter);
+
+        createNavigationButtons(startDir);
         dialog.show();
     }
 
@@ -402,7 +408,7 @@ public class SetupImLoadDialog extends DialogFragment {
                 b.setOnClickListener(arg0 -> {
                     createNavigationButtons(new File(actpath));
                     flist = getAvailableFiles(actpath);
-                    listview.setAdapter(getAdapter(flist));
+                    adapter.updateItems(flist);
                 });
 
                 toplayout.addView(b);
@@ -416,21 +422,12 @@ public class SetupImLoadDialog extends DialogFragment {
             b.setOnClickListener(arg0 -> {
                 createNavigationButtons(new File("/"));
                 flist = getAvailableFiles("/");
-                listview.setAdapter(getAdapter(flist));
+                adapter.updateItems(flist);
             });
             toplayout.addView(b);
             flist = getAvailableFiles("/");
-            listview.setAdapter(getAdapter(flist));
+            adapter.updateItems(flist);
         }
-    }
-
-    public LIMESelectFileAdapter getAdapter(List<File> list) {
-        return new LIMESelectFileAdapter(activity, list);
-    }
-
-    public LIMESelectFileAdapter getAdapter(File path) {
-        flist = getAvailableFiles(path.getAbsolutePath());
-        return new LIMESelectFileAdapter(activity, flist);
     }
 
     public void downloadAndLoadIm(String code, String type) {

@@ -61,17 +61,15 @@ import nan.toload.main.hd.ui.ManageRelatedFragment;
 import nan.toload.main.hd.ui.SetupImFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements ComposeBridge.NavigationDrawerCallbacks {
     public static final String ARG_ADD_WORD = "arg_add_word";
     private static final int STORAGE_PERMISSION_CODE = 0;
     // private static final int STORAGE_PERMISSION_CODE = android.permission.;
 
     /**
-     * ccc
-     * Fragment managing the behaviors, interactions and presentation of the
-     * navigation drawer.
+     * DrawerLayout for managing navigation drawer state.
      */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+    private androidx.drawerlayout.widget.DrawerLayout mDrawerLayout;
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -99,7 +97,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Enable Dynamic Colors for Material You (Android 12+)
@@ -114,6 +111,16 @@ public class MainActivity extends AppCompatActivity
         // Set up Toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Set up drawer toggle - clicking hamburger icon opens/closes drawer
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        toolbar.setNavigationOnClickListener(v -> {
+            if (mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
+            } else {
+                mDrawerLayout.openDrawer(androidx.core.view.GravityCompat.START);
+            }
+        });
 
         handler = new MainActivityHandler(this);
 
@@ -130,14 +137,13 @@ public class MainActivity extends AppCompatActivity
         // initial imlist
         initialImList();
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.navigation_drawer);
-        // mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                findViewById(R.id.drawer_layout));
+        // Set up Compose navigation drawer
+        android.widget.FrameLayout navDrawerContainer = findViewById(R.id.navigation_drawer_container);
+        android.view.View navDrawerView = ComposeBridge.INSTANCE.createNavigationDrawerView(
+                this,
+                this,
+                this);
+        navDrawerContainer.addView(navDrawerView);
 
         // Handle Import Text from other application
         Intent intent = getIntent();
@@ -193,13 +199,17 @@ public class MainActivity extends AppCompatActivity
             showImeAddWordDialog(table);
         }
 
-        // Handle back button press using OnBackPressedDispatcher (Android 13+ predictive back support)
+        // Handle back button press using OnBackPressedDispatcher (Android 13+
+        // predictive back support)
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 finish();
             }
         });
+
+        // Load initial fragment (position 0 = Setup)
+        onNavigationDrawerItemSelected(0);
     }
 
     private void showImeAddWordDialog(String table) {
@@ -277,18 +287,24 @@ public class MainActivity extends AppCompatActivity
         // update the main content by replacing fragments
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (position == 0) {
+        android.widget.FrameLayout container = findViewById(R.id.container);
 
+        if (position == 0) {
+            // Use Fragment for Setup (will migrate in future phase)
+            container.removeAllViews();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, SetupImFragment.newInstance(position), "SetupImFragment")
                     .addToBackStack("SetupImFragment")
                     .commit();
         } else if (position == 1) {
+            // Use Fragment for Manage Related (will migrate in future phase)
+            container.removeAllViews();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, ManageRelatedFragment.newInstance(position), "ManageRelatedFragment")
                     .addToBackStack("ManageRelatedFragment")
                     .commit();
         } else {
+            // Use Compose for Manage IM
             if (imlist == null || imlist.isEmpty()) {
                 imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
             }
@@ -296,11 +312,16 @@ public class MainActivity extends AppCompatActivity
             if (!imlist.isEmpty()) {
                 int number = position - 2;
                 String table = imlist.get(number).getCode();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, ManageImFragment.newInstance(position, table, false),
-                                "ManageImFragment_" + table)
-                        .addToBackStack("ManageImFragment_" + table)
-                        .commit();
+
+                // Clear fragments and use Compose view
+                fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                container.removeAllViews();
+
+                android.view.View manageImView = ComposeBridge.INSTANCE.createManageImView(
+                        this,
+                        this,
+                        table);
+                container.addView(manageImView);
             }
         }
     }
@@ -333,7 +354,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+        if (mDrawerLayout != null && !mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
@@ -342,6 +363,27 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_preference) {
+            // Open settings activity
+            Intent intent = new Intent(this, nan.toload.main.hd.limesettings.LIMEPreferenceHC.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_help) {
+            // Show help dialog
+            nan.toload.main.hd.ui.HelpDialog helpDialog = new nan.toload.main.hd.ui.HelpDialog();
+            helpDialog.show(getSupportFragmentManager(), "helpDialog");
+            return true;
+        } else if (id == R.id.action_reset) {
+            // Reset functionality
+            showToastMessage(getString(R.string.action_reset), Toast.LENGTH_SHORT);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void showToastMessage(String msg, int length) {
@@ -387,4 +429,5 @@ public class MainActivity extends AppCompatActivity
 
     public void initialDefaultPreference() {
     }
+
 }

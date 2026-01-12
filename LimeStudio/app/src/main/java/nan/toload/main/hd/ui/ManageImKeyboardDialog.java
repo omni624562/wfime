@@ -30,11 +30,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -42,15 +41,13 @@ import nan.toload.main.hd.R;
 import nan.toload.main.hd.data.Keyboard;
 import nan.toload.main.hd.limedb.LimeDB;
 
-public class ManageImKeyboardDialog extends DialogFragment implements
-        AdapterView.OnItemClickListener {
+public class ManageImKeyboardDialog extends DialogFragment {
 
     private Activity activity;
     private View view;
 
-
     private List<Keyboard> keyboardlist;
-    private ListView listSelectKeyboard;
+    private RecyclerView listSelectKeyboard;
 
     private LimeDB datasource;
     private String code;
@@ -87,7 +84,6 @@ public class ManageImKeyboardDialog extends DialogFragment implements
         this.setCancelable(false);
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -95,14 +91,15 @@ public class ManageImKeyboardDialog extends DialogFragment implements
         getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(android.content.DialogInterface dialog,
-                                 int keyCode, android.view.KeyEvent event) {
+                    int keyCode, android.view.KeyEvent event) {
                 if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
                     // To dismiss the fragment when the back-button is pressed.
                     dismiss();
                     return true;
                 }
                 // Otherwise, do nothing else
-                else return false;
+                else
+                    return false;
             }
         });
     }
@@ -117,6 +114,7 @@ public class ManageImKeyboardDialog extends DialogFragment implements
         view = inflater.inflate(R.layout.fragment_dialog_keyboard, container, false);
 
         listSelectKeyboard = view.findViewById(R.id.listSelectKeyboard);
+        listSelectKeyboard.setLayoutManager(new LinearLayoutManager(activity));
 
         return view;
     }
@@ -125,45 +123,26 @@ public class ManageImKeyboardDialog extends DialogFragment implements
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        String[] listitems = new String[]{};
-
-        //datasource.open();
         keyboardlist = datasource.getKeyboard();
-        //datasource.close();
 
-        listitems = new String[keyboardlist.size()];
+        String[] listitems = new String[keyboardlist.size()];
         for (int i = 0; i < keyboardlist.size(); i++) {
             listitems[i] = keyboardlist.get(i).getDesc();
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, listitems);
+        SimpleListAdapter adapter = new SimpleListAdapter(listitems, position -> {
+            Keyboard keyboard = keyboardlist.get(position);
+            datasource.setImKeyboard(code, keyboard);
+            handler.updateKeyboardButton(keyboard.getCode());
+            dismiss();
+        });
 
         listSelectKeyboard.setAdapter(adapter);
-        listSelectKeyboard.setOnItemClickListener(this);
-
     }
 
     @Override
     public void onSaveInstanceState(Bundle icicle) {
         super.onSaveInstanceState(icicle);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        Keyboard keyboard = keyboardlist.get(position);
-        datasource.setImKeyboard(this.code, keyboard);
-
-        //try {
-        //datasource.open();
-        //datasource.close();
-		/*} catch (SQLException e) {
-			e.printStackTrace();
-		}*/
-
-        handler.updateKeyboardButton(keyboard.getCode());
-        this.dismiss();
     }
 
     public void setHandler(ManageImHandler handler, String code) {

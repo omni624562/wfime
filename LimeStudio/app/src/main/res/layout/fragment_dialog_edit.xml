@@ -57,7 +57,7 @@
                 android:orientation="horizontal"
                 android:padding="10dp">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnManageAddScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:textColor="@android:color/white" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnManageMinusScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
                 android:text="@string/manage_word_code"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtManageImWordCode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -107,7 +107,7 @@
                 android:text="@string/manage_word_word"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtManageImWordWord"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,21 +125,21 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageImWordCancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/manage_im_cancel" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageImWordRemove"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/manage_im_remove" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageImWordUpdate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

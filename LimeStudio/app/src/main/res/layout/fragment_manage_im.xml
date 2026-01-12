@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ /*
   ~  *
@@ -22,128 +23,122 @@
   ~  */
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="nan.toload.main.hd.ManageIMFragment">
+    android:padding="5dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="5dp">
-
-        <Button
-            android:id="@+id/btnManageImKeyboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:padding="5dp"
-            android:text="@string/manage_im_keyboard"
-            android:textStyle="bold" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ToggleButton
-                android:id="@+id/toggleManageIm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="1"
-                android:checked="false"
-                android:textOff="@string/manage_im_root"
-                android:textOn="@string/manage_im_word"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/edtManageImSearch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_column="2"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btnManageImSearch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="11"
-                android:text="@string/manage_im_search"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/btnManageImAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="11"
-                android:text="@string/manage_im_add"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp" />
-
-        <GridView
-            android:id="@+id/gridManageIm"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:choiceMode="multipleChoice"
-            android:clickable="true"
-            android:columnWidth="150dp"
-            android:gravity="center"
-            android:horizontalSpacing="2dp"
-            android:numColumns="auto_fit"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="2dp">
-
-        </GridView>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Top Bar: Keyboard Selector -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageImKeyboard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:text="@string/manage_im_keyboard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/btnManageImPrevious"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/manage_im_previous"
-            android:textStyle="bold" />
+    <!-- Toggle Button Logic -->
+    <!-- Keeping generic ToggleButton ID for compatibility or replacing if refactoring Java simultaneously -->
+    <!-- The Java code uses ToggleButton toggleManageIm. We can keep it or swap to MaterialToggleGroup -->
+    <!-- For minimal Java breakage, let's keep the ToggleButton but style it hidden if we use a better UI, 
+         OR just use the ToggleButton for now but constrained. -->
+    
+    <ToggleButton
+        android:id="@+id/toggleManageIm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textOff="@string/manage_im_root"
+        android:textOn="@string/manage_im_word"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnManageImKeyboard" />
 
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/edtManageImSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:hint="@string/manage_im_search"
+        app:layout_constraintBottom_toBottomOf="@id/toggleManageIm"
+        app:layout_constraintEnd_toStartOf="@id/btnManageImSearch"
+        app:layout_constraintStart_toEndOf="@id/toggleManageIm"
+        app:layout_constraintTop_toTopOf="@id/toggleManageIm" />
 
-        <TextView
-            android:id="@+id/txtNavigationInfo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="8pt" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageImSearch"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/manage_im_search"
+        app:layout_constraintBottom_toBottomOf="@id/toggleManageIm"
+        app:layout_constraintEnd_toStartOf="@id/btnManageImAdd"
+        app:layout_constraintTop_toTopOf="@id/toggleManageIm" />
 
-        <Button
-            android:id="@+id/btnManageImNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/manage_im_next"
-            android:textStyle="bold" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageImAdd"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:text="@string/manage_im_add"
+        app:layout_constraintBottom_toBottomOf="@id/toggleManageIm"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/toggleManageIm" />
 
-    </LinearLayout>
-</LinearLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_manage_im.xml -->
+    <TextView
+        android:id="@+id/txtNavigationInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="0-0 of 0"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toggleManageIm" />
+
+    <!-- RecyclerView (replacing GridView) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/gridManageIm"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintBottom_toTopOf="@id/btnManageImPrevious"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtNavigationInfo" />
+
+    <!-- Navigation Buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageImPrevious"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/manage_im_previous"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnManageImNext"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnManageImNext"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/manage_im_next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnManageImPrevious"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

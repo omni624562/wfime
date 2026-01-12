@@ -25,6 +25,7 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="lime_preference"
     android:summary="LIME Preference Configuration"
     android:title="LIME Preference">
@@ -40,13 +41,14 @@
             android:key="keyboard_theme"
             android:title="@string/keyboard_themes" />
         />
-        <!-- <nan.toload.main.hd.limesettings.MultiListPreference
-                 android:key="keyboard_state"
-                 android:title="@string/keyboard_list"
-                 android:entries="@array/keyboard"
-                 android:entryValues="@array/keyboard_defaultstate"
-                 android:defaultValue="0;1;2;3;4;5;6;7;8;9;10;11"
-                 android:dialogTitle="@string/keyboard_list" />-->
+        <nan.toload.main.hd.limesettings.MultiListPreference
+            android:key="keyboard_state"
+            android:title="@string/keyboard_list"
+            android:entries="@array/keyboard"
+            android:entryValues="@array/keyboard_defaultstate"
+            android:defaultValue="0;1;2;3;4;5;6;7;8;9;10;11"
+            android:dialogTitle="@string/keyboard_list" />
+
 
         <SwitchPreferenceCompat
             android:defaultValue="true"

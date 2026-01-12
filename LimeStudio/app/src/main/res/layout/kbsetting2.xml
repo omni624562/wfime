@@ -40,7 +40,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSetupPhonetic"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
                 android:padding="5dp"
                 android:text="@string/l3_manage_phonetic" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSetupDayi"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSetupCustom"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

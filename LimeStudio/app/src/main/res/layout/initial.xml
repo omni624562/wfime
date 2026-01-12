@@ -85,23 +85,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStoreDevice"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_store_device"></Button>
+                    android:text="@string/l3_initial_btn_store_device"></com.google.android.material.button.MaterialButton>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStoreSdcard"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_store_sdcard"></Button>
+                    android:text="@string/l3_initial_btn_store_sdcard"></com.google.android.material.button.MaterialButton>
             </TableRow>
         </TableLayout>
 
@@ -117,14 +117,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnInitPreloadDB"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_load_preload_db"></Button>
+                    android:text="@string/l3_initial_btn_load_preload_db"></com.google.android.material.button.MaterialButton>
             </TableRow>
 
             <TableRow
@@ -132,14 +132,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnInitPhoneticOnlyDB"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_load_phonetic_only_db"></Button>
+                    android:text="@string/l3_initial_btn_load_phonetic_only_db"></com.google.android.material.button.MaterialButton>
             </TableRow>
 
             <TableRow
@@ -147,13 +147,13 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnInitPhoneticHsOnlyDB"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
-                    android:padding="5dp"></Button>
+                    android:padding="5dp"></com.google.android.material.button.MaterialButton>
             </TableRow>
 
             <TableRow
@@ -161,14 +161,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnInitEmptyDB"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_load_empty_db"></Button>
+                    android:text="@string/l3_initial_btn_load_empty_db"></com.google.android.material.button.MaterialButton>
             </TableRow>
 
             <TableRow
@@ -176,14 +176,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnResetDB"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_btn_reset_db"></Button>
+                    android:text="@string/l3_initial_btn_reset_db"></com.google.android.material.button.MaterialButton>
             </TableRow>
         </TableLayout>
 
@@ -197,23 +197,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBackupDB"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_backup_database"></Button>
+                    android:text="@string/l3_initial_backup_database"></com.google.android.material.button.MaterialButton>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRestoreDB"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_restore_database"></Button>
+                    android:text="@string/l3_initial_restore_database"></com.google.android.material.button.MaterialButton>
             </TableRow>
         </TableLayout>
 
@@ -227,23 +227,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCloudBackupDB"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_cloud_backup_database"></Button>
+                    android:text="@string/l3_initial_cloud_backup_database"></com.google.android.material.button.MaterialButton>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCloudRestoreDB"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_initial_cloud_restore_database"></Button>
+                    android:text="@string/l3_initial_cloud_restore_database"></com.google.android.material.button.MaterialButton>
             </TableRow>
         </TableLayout>
 
@@ -268,23 +268,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_reserved1"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:enabled="false"
-                    android:padding="5dp"></Button>
+                    android:padding="5dp"></com.google.android.material.button.MaterialButton>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_reserved2"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:enabled="false"
-                    android:padding="5dp"></Button>
+                    android:padding="5dp"></com.google.android.material.button.MaterialButton>
 
             </TableRow>
         </TableLayout>

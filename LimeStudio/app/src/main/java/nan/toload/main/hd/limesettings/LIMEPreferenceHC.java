@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.preference.PreferenceFragment;
 import android.util.Log;
 
 import nan.toload.main.hd.DBServer;
@@ -102,6 +101,20 @@ public class LIMEPreferenceHC extends androidx.appcompat.app.AppCompatActivity {
             ctx = requireContext();
             mLIMEPref = new LIMEPreferenceManager(ctx);
             DBSrv = new DBServer(ctx);
+        }
+
+        @Override
+        public void onDisplayPreferenceDialog(@androidx.annotation.NonNull androidx.preference.Preference preference) {
+            // Handle MultiListPreference with custom dialog fragment
+            if (preference instanceof MultiListPreference) {
+                final androidx.fragment.app.DialogFragment dialogFragment = MultiListPreferenceDialogFragmentCompat
+                        .newInstance(preference.getKey());
+                dialogFragment.setTargetFragment(this, 0);
+                dialogFragment.show(getParentFragmentManager(),
+                        "MultiListPreferenceDialogFragmentCompat");
+            } else {
+                super.onDisplayPreferenceDialog(preference);
+            }
         }
 
         @Override
