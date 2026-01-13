@@ -185,8 +185,7 @@
         <Key
             limehd:codes="-100"
             limehd:keyIcon="@drawable/ic_emoji_white"
-            limehd:keyWidth="10%p"
-            limehd:popupKeyboard="@xml/popup_smileys" />
+            limehd:keyWidth="10%p" />
         <Key
             limehd:codes="32"
             limehd:isRepeatable="true"
