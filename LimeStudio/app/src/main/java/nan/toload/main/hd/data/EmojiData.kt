@@ -839,6 +839,70 @@ object EmojiData {
         Emoji("🛒", listOf("shopping cart"))
     )
 
+    val FLAGS = listOf(
+        Emoji("🏳️", listOf("white flag")),
+        Emoji("🏴", listOf("black flag")),
+        Emoji("🏁", listOf("checkered flag")),
+        Emoji("🚩", listOf("triangular flag")),
+        Emoji("🏳️‍🌈", listOf("rainbow flag", "pride")),
+        Emoji("🏴‍☠️", listOf("pirate flag")),
+        Emoji("🇦🇫", listOf("afghanistan")),
+        Emoji("🇦🇱", listOf("albania")),
+        Emoji("🇩🇿", listOf("algeria")),
+        Emoji("🇦🇷", listOf("argentina")),
+        Emoji("🇦🇺", listOf("australia")),
+        Emoji("🇦🇹", listOf("austria")),
+        Emoji("🇧🇪", listOf("belgium")),
+        Emoji("🇧🇷", listOf("brazil")),
+        Emoji("🇨🇦", listOf("canada")),
+        Emoji("🇨🇱", listOf("chile")),
+        Emoji("🇨🇳", listOf("china")),
+        Emoji("🇨🇴", listOf("colombia")),
+        Emoji("🇭🇷", listOf("croatia")),
+        Emoji("🇨🇿", listOf("czech republic")),
+        Emoji("🇩🇰", listOf("denmark")),
+        Emoji("🇪🇬", listOf("egypt")),
+        Emoji("🇫🇮", listOf("finland")),
+        Emoji("🇫🇷", listOf("france")),
+        Emoji("🇩🇪", listOf("germany")),
+        Emoji("🇬🇷", listOf("greece")),
+        Emoji("🇭🇰", listOf("hong kong")),
+        Emoji("🇭🇺", listOf("hungary")),
+        Emoji("🇮🇳", listOf("india")),
+        Emoji("🇮🇩", listOf("indonesia")),
+        Emoji("🇮🇪", listOf("ireland")),
+        Emoji("🇮🇱", listOf("israel")),
+        Emoji("🇮🇹", listOf("italy")),
+        Emoji("🇯🇵", listOf("japan")),
+        Emoji("🇰🇷", listOf("south korea", "korea")),
+        Emoji("🇲🇾", listOf("malaysia")),
+        Emoji("🇲🇽", listOf("mexico")),
+        Emoji("🇳🇱", listOf("netherlands")),
+        Emoji("🇳🇿", listOf("new zealand")),
+        Emoji("🇳🇴", listOf("norway")),
+        Emoji("🇵🇰", listOf("pakistan")),
+        Emoji("🇵🇭", listOf("philippines")),
+        Emoji("🇵🇱", listOf("poland")),
+        Emoji("🇵🇹", listOf("portugal")),
+        Emoji("🇷🇴", listOf("romania")),
+        Emoji("🇷🇺", listOf("russia")),
+        Emoji("🇸🇦", listOf("saudi arabia")),
+        Emoji("🇸🇬", listOf("singapore")),
+        Emoji("🇿🇦", listOf("south africa")),
+        Emoji("🇪🇸", listOf("spain")),
+        Emoji("🇸🇪", listOf("sweden")),
+        Emoji("🇨🇭", listOf("switzerland")),
+        Emoji("🇹🇼", listOf("taiwan")),
+        Emoji("🇹🇭", listOf("thailand")),
+        Emoji("🇹🇳", listOf("tunisia")),
+        Emoji("🇹🇷", listOf("turkey")),
+        Emoji("🇺🇦", listOf("ukraine")),
+        Emoji("🇦🇪", listOf("united arab emirates", "uae")),
+        Emoji("🇬🇧", listOf("united kingdom", "uk", "britain")),
+        Emoji("🇺🇸", listOf("united states", "usa", "america")),
+        Emoji("🇻🇳", listOf("vietnam"))
+    )
+
     fun getListByCategory(categoryIndex: Int): List<Emoji> {
         return when (categoryIndex) {
             1 -> SMILEYS
@@ -847,6 +911,7 @@ object EmojiData {
             4 -> FOOD_DRINK
             5 -> TRAVEL_PLACES
             6 -> OBJECTS
+            7 -> FLAGS
             else -> SMILEYS
         }
     }

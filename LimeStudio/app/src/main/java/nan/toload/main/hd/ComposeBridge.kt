@@ -95,8 +95,8 @@ object ComposeBridge {
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setViewTreeViewModelStoreOwner(lifecycleOwner)
 
-            // Set explicit layout parameters with fixed height
-            val heightDp = 280
+            // Set explicit layout parameters with height matching Gboard
+            val heightDp = 400  // Adjusted height as per user request
             val density = context.resources.displayMetrics.density
             val heightPx = (heightDp * density).toInt()
             android.util.Log.d("EMOJI_DEBUG", "Setting layout params: height=${heightDp}dp (${heightPx}px)")

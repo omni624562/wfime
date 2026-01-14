@@ -571,6 +571,15 @@ public class LIMEService extends InputMethodService implements
             if (mFixedCandidateViewOn && mCandidateInInputView != null) {
                 Log.d("EMOJI_DEBUG", "Hiding mCandidateInInputView (fixed mode)");
                 mCandidateInInputView.setVisibility(View.GONE);
+
+                // Also hide all children of CandidateInInputView to prevent any overlap
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        group.getChildAt(i).setVisibility(View.GONE);
+                        Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: " + group.getChildAt(i).getClass().getSimpleName());
+                    }
+                }
             } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
                 Log.d("EMOJI_DEBUG", "Hiding candidate view");
                 hideCandidateView();
@@ -581,6 +590,12 @@ public class LIMEService extends InputMethodService implements
             mEmojiKeyboardView.setZ(Float.MAX_VALUE); // Force to highest Z-order
             mEmojiKeyboardView.bringToFront(); // Force to front
             mEmojiKeyboardView.invalidate();   // Force redraw
+
+            // Force measure and layout (240dp to leave space for keyboard controls)
+            int widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(mInputViewContainer.getWidth(), android.view.View.MeasureSpec.EXACTLY);
+            int heightSpec = android.view.View.MeasureSpec.makeMeasureSpec((int)(240 * getResources().getDisplayMetrics().density), android.view.View.MeasureSpec.EXACTLY);
+            mEmojiKeyboardView.measure(widthSpec, heightSpec);
+            mEmojiKeyboardView.layout(0, 0, mEmojiKeyboardView.getMeasuredWidth(), mEmojiKeyboardView.getMeasuredHeight());
 
             // Force layout update
             mInputViewContainer.requestLayout();
