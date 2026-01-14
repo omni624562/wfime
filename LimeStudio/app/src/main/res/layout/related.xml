@@ -22,27 +22,34 @@
   ~  */
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:minHeight="48dp">
 
     <TextView
         android:id="@+id/txtWord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:text="W"
-        android:textSize="10pt" />
+        android:textSize="10pt"
+        app:layout_constraintBottom_toTopOf="@+id/txtFreq"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/txtFreq"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/txtWord"
-        android:layout_centerHorizontal="true"
         android:paddingTop="5dp"
         android:text="c"
-        android:textSize="8pt" />
-</RelativeLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/word.xml -->
+        android:textSize="8pt"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtWord" />
+</androidx.constraintlayout.widget.ConstraintLayout><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/word.xml -->

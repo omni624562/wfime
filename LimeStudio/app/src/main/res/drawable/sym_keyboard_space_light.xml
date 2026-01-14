@@ -22,8 +22,8 @@
   ~  */
   -->
 
+<!-- Updated to use XML drawable instead of PNG for consistent styling -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/sym_flat_keyboard_space_hl" android:state_pressed="true" />
     <item android:drawable="@drawable/sym_flat_keyboard_space" />
-
 </selector>

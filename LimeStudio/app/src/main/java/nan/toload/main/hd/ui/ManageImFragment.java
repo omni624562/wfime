@@ -25,24 +25,23 @@
 package nan.toload.main.hd.ui;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.GridView;
+import com.google.android.material.textfield.TextInputEditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class ManageImFragment extends Fragment {
     private static final String ARG_SECTION_CODE = "section_code";
 
     private SearchServer SearchSrv = null;
-    private GridView gridManageIm;
+    private RecyclerView gridManageIm;
 
     private ToggleButton toggleManageIm;
 
@@ -86,7 +85,7 @@ public class ManageImFragment extends Fragment {
     private Button btnManageImPrevious;
     private Button btnManageImNext;
 
-    private EditText edtManageImSearch;
+    private TextInputEditText edtManageImSearch;
     private TextView txtNavigationInfo;
 
     private List<Im> imkeyboardlist;
@@ -103,13 +102,14 @@ public class ManageImFragment extends Fragment {
     private String table;
     private Activity activity;
     private ManageImHandler handler;
-    private ManageImAdapter adapter;
+    private ManageImRecyclerAdapter adapter;
 
     private Thread manageimthread;
 
     private LimeDB datasource;
 
-    private ProgressDialog progress;
+    // Material3 loading dialog (replacement for deprecated ProgressDialog)
+    private LoadingDialogHelper progress;
     private LIMEPreferenceManager mLIMEPref;
 
     // Vpon AD
@@ -155,26 +155,15 @@ public class ManageImFragment extends Fragment {
          * e.printStackTrace();
          * }
          */
-        this.progress = new ProgressDialog(this.activity);
+        this.progress = new LoadingDialogHelper(this.activity);
         this.progress.setCancelable(false);
         this.progress.setMessage(getResources().getString(R.string.manage_im_loading));
 
         this.gridManageIm = rootView.findViewById(R.id.gridManageIm);
-        this.gridManageIm.setOnItemClickListener((parent, view, position, id) -> {
-            // try {
-            // datasource.open();
-            Word w = datasource.getWord(table, id);
-            // datasource.close();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+        this.gridManageIm.setLayoutManager(new GridLayoutManager(activity, 3));
 
-            // Create and show the dialog.
-            ManageImEditDialog dialog = ManageImEditDialog.newInstance(table);
-            dialog.setHandler(handler, w);
-            dialog.show(ft, "editdialog");
-            // } catch (SQLException e) {
-            // e.printStackTrace();
-            // }
-        });
+        // Listener will be passed to adapter in updateGridView or initialization
+        // Logic moved to adapter creation
 
         this.btnManageImAdd = rootView.findViewById(R.id.btnManageImAdd);
         this.btnManageImAdd.setOnClickListener(v -> {
@@ -357,7 +346,7 @@ public class ManageImFragment extends Fragment {
             this.handler.removeCallbacks(manageimthread);
         }
         if (this.progress.isShowing()) {
-            this.progress.cancel();
+            this.progress.dismiss();
         }
         this.wordlist = null;
         this.SearchSrv.initialCache();
@@ -371,7 +360,7 @@ public class ManageImFragment extends Fragment {
 
     public void cancelProgress() {
         if (this.progress.isShowing()) {
-            this.progress.cancel();
+            this.progress.dismiss();
         }
     }
 
@@ -393,21 +382,27 @@ public class ManageImFragment extends Fragment {
 
         if (total > 0) {
             if (this.adapter == null) {
-                this.adapter = new ManageImAdapter(this.activity, wordlist);
+                this.adapter = new ManageImRecyclerAdapter(this.activity, wordlist, w -> {
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ManageImEditDialog dialog = ManageImEditDialog.newInstance(table);
+                    dialog.setHandler(handler, w);
+                    dialog.show(ft, "editdialog");
+                });
                 this.gridManageIm.setAdapter(this.adapter);
             } else {
                 this.adapter.setList(wordlist);
                 this.adapter.notifyDataSetChanged();
-                this.gridManageIm.setSelection(0);
+                this.gridManageIm.scrollToPosition(0);
             }
         } else {
             if (this.adapter == null) {
-                this.adapter = new ManageImAdapter(this.activity, new ArrayList());
+                this.adapter = new ManageImRecyclerAdapter(this.activity, new ArrayList<>(), null);
+                this.gridManageIm.setAdapter(this.adapter);
             } else {
-                this.adapter.setList(new ArrayList());
+                this.adapter.setList(new ArrayList<>());
             }
             this.adapter.notifyDataSetChanged();
-            this.gridManageIm.setSelection(0);
+            this.gridManageIm.scrollToPosition(0);
             Toast.makeText(activity, R.string.no_search_result, Toast.LENGTH_SHORT).show();
         }
 

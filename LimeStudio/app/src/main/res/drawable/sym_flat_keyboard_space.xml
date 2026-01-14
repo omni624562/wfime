@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ /*
   ~  *
   ~  **    Copyright 2015, The LimeIME Open Source Project
@@ -22,15 +22,8 @@
   ~  */
   -->
 
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:clipToPadding="false"
-    android:background="#c888"
-    android:choiceMode="singleChoice"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"
-    tools:context="nan.toload.main.hd.NavigationDrawerFragment" /><!-- From: file:/C:/Data/Development/Android/Studio/LIMEIMEAS/app/src/main/res/layout/fragment_navigation_drawer.xml -->
+<!-- Transparent spacebar icon - keyBackground provides the visual appearance -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>

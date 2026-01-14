@@ -22,18 +22,21 @@
   ~  */
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/candidatePopupLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/third_background_light"
-    android:baselineAligned="true"
-    android:orientation="vertical">
+    android:background="@color/third_background_light">
 
     <ScrollView
         android:id="@+id/sv"
-        android:layout_width="fill_parent"
-        android:layout_height="100dp">
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/closeButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <view xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/candidatePopup"
@@ -46,12 +49,14 @@
     <ImageButton
         android:id="@+id/closeButton"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_gravity="bottom|end"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:background="@android:color/transparent"
         android:clickable="true"
         android:contentDescription="@string/close_cand"
-        android:src="@drawable/btn_close" />
-</LinearLayout>
+        android:src="@drawable/btn_close"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sv" />
+</androidx.constraintlayout.widget.ConstraintLayout>

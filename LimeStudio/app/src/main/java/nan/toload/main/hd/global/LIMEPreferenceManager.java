@@ -27,7 +27,7 @@ package nan.toload.main.hd.global;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import java.util.HashMap;
 import java.util.List;

@@ -79,23 +79,23 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSetupPhonetic"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_manage_phonetic"></Button>
+                    android:text="@string/l3_manage_phonetic"></com.google.android.material.button.MaterialButton>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSetupDayi"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_manage_dayi"></Button>
+                    android:text="@string/l3_manage_dayi"></com.google.android.material.button.MaterialButton>
             </TableRow>
 
             <TableRow
@@ -108,14 +108,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSetupCustom"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_weight="1"
                     android:padding="5dp"
-                    android:text="@string/l3_manage_default"></Button>
+                    android:text="@string/l3_manage_default"></com.google.android.material.button.MaterialButton>
             </TableRow>
         </TableLayout>
     </LinearLayout>

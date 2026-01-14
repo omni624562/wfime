@@ -22,64 +22,74 @@
   ~  */
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:padding="10dp">
-
-    <Button
-        android:id="@+id/btn_cancel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/lime_loading_cancel"></Button>
-
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/txtLoadingStatus"
-        android:layout_alignStart="@+id/progressBar"
-        android:layout_alignLeft="@+id/progressBar"
-        android:text="@string/lime_setting_loading"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="28sp" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:indeterminate="false"
-        android:max="100"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:progress="0"></ProgressBar>
-
-    <TextView
-        android:id="@+id/txtLoadingStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/progressBar"
-        android:layout_centerHorizontal="true"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:text="0%"
-        android:textIsSelectable="false"
-        android:textSize="36sp"></TextView>
 
     <TextView
         android:id="@+id/txtLoadingIm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView1"
-        android:layout_centerHorizontal="true"
         android:paddingBottom="10dp"
         android:text="Large Text"
-        android:textSize="42sp" />
+        android:textSize="42sp"
+        app:layout_constraintBottom_toTopOf="@+id/textView1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/lime_setting_loading"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toTopOf="@+id/txtLoadingStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtLoadingIm" />
+
+    <TextView
+        android:id="@+id/txtLoadingStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="0%"
+        android:textIsSelectable="false"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView1" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:max="100"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:progress="0"
+        app:layout_constraintBottom_toTopOf="@+id/btn_cancel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtLoadingStatus" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/lime_loading_cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

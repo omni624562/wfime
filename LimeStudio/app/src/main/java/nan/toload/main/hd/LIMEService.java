@@ -71,6 +71,7 @@ import nan.toload.main.hd.R;
 import nan.toload.main.hd.candidate.CandidateInInputViewContainer;
 import nan.toload.main.hd.candidate.CandidateView;
 import nan.toload.main.hd.candidate.CandidateViewContainer;
+import nan.toload.main.hd.candidate.ComposingTextPopup;
 import nan.toload.main.hd.data.ChineseSymbol;
 import nan.toload.main.hd.data.Mapping;
 import nan.toload.main.hd.global.LIMEPreferenceManager;
@@ -137,6 +138,7 @@ public class LIMEService extends InputMethodService implements
     private CandidateView mCandidateViewInInputView = null;
     private CandidateView mCandidateViewStandAlone = null;
     private CandidateViewContainer mCandidateViewContainer = null;
+    private ComposingTextPopup mComposingPopup = null;
     private CompletionInfo[] mCompletions;
     private StringBuilder mComposing = new StringBuilder();
     private boolean mPredictionOn;
@@ -440,6 +442,36 @@ public class LIMEService extends InputMethodService implements
 
     }
 
+    private void initComposingPopup() {
+        if (mComposingPopup == null) {
+            mComposingPopup = new ComposingTextPopup(this);
+        }
+    }
+
+    private void showComposingPopup(String text) {
+        // Ensure popup operations run on main thread (may be called from background
+        // thread)
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (mComposingPopup != null) {
+                mComposingPopup.updateComposingText(text);
+                View anchor = mInputViewContainer != null ? mInputViewContainer
+                        : (mCandidateInInputView != null ? mCandidateInInputView : mInputView);
+                if (anchor != null && text != null && !text.isEmpty()) {
+                    mComposingPopup.show(anchor, 16, 8);
+                }
+            }
+        });
+    }
+
+    private void hideComposingPopup() {
+        // Ensure popup operations run on main thread
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            if (mComposingPopup != null) {
+                mComposingPopup.hide();
+            }
+        });
+    }
+
     public void toggleEmojiVisibility() {
         if (mEmojiKeyboardView == null)
             return;
@@ -573,6 +605,8 @@ public class LIMEService extends InputMethodService implements
             mCandidateList.clear();
         if (mCandidateView != null)
             mCandidateView.clear();
+
+        hideComposingPopup();
     }
 
     /**
@@ -635,13 +669,14 @@ public class LIMEService extends InputMethodService implements
             }
 
         }
+        hideComposingPopup();
     }
 
     /**
      * Jeremy '15,7,8 to avoid candidateView shift up and down when it's not fixed.
      * 
-     * NOTE: Removed custom insets logic to let Android 16+ handle it automatically.
-     * The keyboard view extends into bottom inset via onMeasure.
+     * NOTE: Composing text now uses PopupWindow, so transparency insets are no
+     * longer needed.
      */
     @Override
     public void onComputeInsets(InputMethodService.Insets outInsets) {
@@ -669,6 +704,7 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "onStartInputView()");
         super.onStartInputView(attribute, restarting);
         initOnStartInput(attribute);
+        initComposingPopup();
     }
 
     /**
@@ -1368,6 +1404,25 @@ public class LIMEService extends InputMethodService implements
     }
 
     /**
+     * Public method to commit raw text directly (e.g., raw keycode from
+     * CandidateView).
+     * Clears composing state and hides candidate view after committing.
+     */
+    public void commitTyped(String text) {
+        if (text == null || text.isEmpty())
+            return;
+
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            ic.commitText(text, 1);
+        }
+
+        // Clear composing state
+        clearComposing(true);
+        hideComposingPopup();
+    }
+
+    /**
      * Helper function to commit any text being composed in to the editor.
      */
     private void commitTyped(InputConnection ic) {
@@ -1493,8 +1548,8 @@ public class LIMEService extends InputMethodService implements
                                     Log.i(TAG, "commitTyped(): new mComposing:'" + mComposing + "'");
                                 if (mComposing.length() > 0) { // Jeremy '12,7,11 only fetch remaining composing when
                                                                // length >0
-                                    if (ic != null && mPredictionOn)
-                                        ic.setComposingText(mComposing, 1);
+                                    // if (ic != null && mPredictionOn)
+                                    // ic.setComposingText(mComposing, 1);
                                     shouldUpdateCandidates = true;
                                 }
                             }
@@ -2136,9 +2191,11 @@ public class LIMEService extends InputMethodService implements
                     keyString = keyString.substring(0, 5);
                     mComposing = new StringBuilder();
                     mComposing.append(keyString);
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null && mPredictionOn)
-                        ic.setComposingText(getComposingDisplayString(keyString), 1);
+                    // InputConnection ic = getCurrentInputConnection();
+                    // if (ic != null && mPredictionOn)
+                    // ic.setComposingText(getComposingDisplayString(keyString), 1);
+                    // Just update CandidateView composing text
+                    getComposingDisplayString(keyString);
                 }
             }
 
@@ -2155,6 +2212,21 @@ public class LIMEService extends InputMethodService implements
                                 SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, getAllRecords));
                     } catch (RemoteException e) {
                         e.printStackTrace();
+                    }
+
+                    // Filter out the raw code (composing text) if it appears as a candidate
+                    // This fixes the issue where "nh1" shows up as the first candidate
+                    if (list.size() > 0) {
+                        java.util.Iterator<Mapping> iterator = list.iterator();
+                        while (iterator.hasNext()) {
+                            Mapping m = iterator.next();
+                            // Remove if word matches raw input OR if word is identical to code (raw code
+                            // fallback)
+                            if (m.getWord().equalsIgnoreCase(finalKeyString) ||
+                                    (m.getCode() != null && m.getWord().equalsIgnoreCase(m.getCode()))) {
+                                iterator.remove();
+                            }
+                        }
                     }
                     // try {
                     // sleep(0);
@@ -2287,7 +2359,7 @@ public class LIMEService extends InputMethodService implements
                                 return; // terminate thread here, since it is interrupted and more recent
                                         // getMappingByCode will update the suggestions.
                             }
-                            mCandidateView.setComposingText(keynameString);
+                            showComposingPopup(keynameString);
                         }
                     }
                 }
@@ -2723,6 +2795,25 @@ public class LIMEService extends InputMethodService implements
         }
         String result = sb.toString();
         // Log.e(TAG, "DEBUG: Display String Result: " + result);
+
+        // Update composing text display (now using floating popup)
+        showComposingPopup(result);
+
+        // Pass raw keycode to CandidateView for display as first item
+        if (mCandidateView != null) {
+            mCandidateView.setRawKeycode(rawString);
+        }
+
+        // Clear composing text from input field (we display it in CandidateView
+        // instead)
+        // Use BatchEdit to ensure atomic update.
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            ic.beginBatchEdit();
+            ic.setComposingText("", 0);
+            ic.endBatchEdit();
+        }
+
         return result;
     }
 
@@ -2750,8 +2841,10 @@ public class LIMEService extends InputMethodService implements
                 hasCandidatesShown = false; // Reset flag
             } else {
                 // Composing still has text
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
             }
         } else if (hasCandidatesShown) {
@@ -3201,8 +3294,10 @@ public class LIMEService extends InputMethodService implements
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (!hasSymbolMapping && !hasNumberMapping // Jeremy '11,10.19 fixed to bypass number key in et26 and
@@ -3215,8 +3310,10 @@ public class LIMEService extends InputMethodService implements
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (!hasSymbolMapping
@@ -3226,8 +3323,10 @@ public class LIMEService extends InputMethodService implements
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping
@@ -3239,8 +3338,10 @@ public class LIMEService extends InputMethodService implements
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping && !hasNumberMapping && activeIM.equals("array")
@@ -3254,8 +3355,10 @@ public class LIMEService extends InputMethodService implements
                 mComposing.append((char) primaryCode);
                 // InputConnection ic=getCurrentInputConnection();
                 // InputConnection ic=getCurrentInputConnection();
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
             } else if (hasSymbolMapping
@@ -3266,8 +3369,10 @@ public class LIMEService extends InputMethodService implements
                     && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
                 // Fixed: Ensure proper character handling for dayi input method
                 mComposing.append((char) primaryCode);
-                if (ic != null)
-                    ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // if (ic != null)
+                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
                 updateCandidates();
 
             } else {

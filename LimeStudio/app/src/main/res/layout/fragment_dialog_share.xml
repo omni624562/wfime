@@ -49,14 +49,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnShareDayi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/im_dayi" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSharePhonetic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnShareRelated"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
 
     </ScrollView>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShareCancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

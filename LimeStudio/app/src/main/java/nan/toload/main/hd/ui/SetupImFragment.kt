@@ -5,7 +5,6 @@
 package nan.toload.main.hd.ui
 
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -29,9 +28,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +70,8 @@ class SetupImFragment : Fragment() {
     
     // Basic
     private lateinit var handler: SetupImHandler
-    private lateinit var progress: ProgressDialog
+    // Material3 loading dialog (replacement for deprecated ProgressDialog)
+    private lateinit var progress: LoadingDialogHelper
     private var connManager: ConnectivityManager? = null
     private lateinit var datasource: LimeDB
     private lateinit var DBSrv: DBServer
@@ -113,9 +116,9 @@ class SetupImFragment : Fragment() {
     ): View {
         datasource = LimeDB(activityRef)
         handler = SetupImHandler(this)
-        
-        progress = ProgressDialog(activityRef)
-        progress.max = 100
+
+        progress = LoadingDialogHelper(activityRef)
+        progress.setMax(100)
         progress.setCancelable(false)
 
         DBSrv = DBServer(activityRef)
@@ -128,7 +131,8 @@ class SetupImFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                MaterialTheme {
+                val colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                MaterialTheme(colorScheme = colorScheme) {
                     SetupScreen()
                 }
             }
@@ -150,7 +154,8 @@ class SetupImFragment : Fragment() {
             Text(
                 text = uiState.version,
                 modifier = Modifier.align(Alignment.End),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             // Setup Wizard Section
@@ -171,11 +176,13 @@ class SetupImFragment : Fragment() {
             if (uiState.showSystemSettings) {
                 Text(
                     text = stringResource(R.string.setup_im_system_settings),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = stringResource(R.string.setup_im_system_settings_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Button(
                     onClick = { LIMEUtilities.showInputMethodSettingsPage(activityRef.applicationContext) },
@@ -188,7 +195,8 @@ class SetupImFragment : Fragment() {
             if (uiState.showImPicker) {
                  Text(
                     text = stringResource(R.string.setup_im_system_impicker_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                  Button(
                     onClick = { 
@@ -204,7 +212,8 @@ class SetupImFragment : Fragment() {
             if (uiState.showPermissionGrant) {
                 Text(
                     text = stringResource(R.string.setup_im_grant_permission),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                  Button(
                     onClick = { 
@@ -231,11 +240,13 @@ class SetupImFragment : Fragment() {
             Text(
                 text = stringResource(R.string.setup_im_database),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 10.dp)
+                modifier = Modifier.padding(top = 10.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_database_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
             
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -260,11 +271,13 @@ class SetupImFragment : Fragment() {
             // Import
             Text(
                 text = stringResource(R.string.setup_im_import),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_import_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
              Row(modifier = Modifier.fillMaxWidth()) {
                 val customLabel = uiState.customTableImportLabel ?: stringResource(R.string.setup_im_import_standard)
@@ -301,11 +314,13 @@ class SetupImFragment : Fragment() {
             // Download (Pre-built tables)
             Text(
                 text = stringResource(R.string.setup_im_download),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.setup_im_download_description),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -448,30 +463,29 @@ class SetupImFragment : Fragment() {
     }
 
     fun showProgress(spinnerStyle: Boolean, message: String?) {
-        if (progress.isShowing) progress.dismiss()
+        if (progress.isShowing()) progress.dismiss()
 
-        progress = ProgressDialog(activityRef)
-        progress.setCancelable(false)
-        progress.setProgressStyle(if (spinnerStyle) ProgressDialog.STYLE_SPINNER else ProgressDialog.STYLE_HORIZONTAL)
+        // Set progress style: spinner (indeterminate) or horizontal (determinate)
+        progress.setIndeterminate(spinnerStyle)
         message?.let { progress.setMessage(it) }
-        if (!spinnerStyle) progress.progress = 0
+        if (!spinnerStyle) progress.setProgress(0f)
 
         progress.show()
     }
 
     fun cancelProgress() {
-        if (progress.isShowing) {
+        if (progress.isShowing()) {
             progress.dismiss()
             handler.initialImButtons()
         }
     }
 
     fun setProgressIndeterminate(flag: Boolean) {
-        progress.isIndeterminate = flag
+        progress.setIndeterminate(flag)
     }
 
     fun updateProgress(value: Int) {
-        progress.progress = value
+        progress.setProgress(value)
     }
 
     fun updateProgress(value: String) {

@@ -16,14 +16,21 @@ import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +79,8 @@ open class CandidateView @JvmOverloads constructor(
     private var mService: LIMEService? = null
     private var suggestions by mutableStateOf<List<Mapping>>(emptyList())
     private var selectedIndex by mutableIntStateOf(-1)
+    private var _composingText by mutableStateOf("")
+    private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
     
     // Custom lifecycle and recomposer for Compose support in InputMethodService
     private val lifecycleOwner = IMELifecycleOwner()
@@ -224,6 +233,12 @@ open class CandidateView @JvmOverloads constructor(
     fun clear() {
         suggestions = emptyList()
         selectedIndex = -1
+        _composingText = ""
+        _rawKeycode = ""
+    }
+    
+    fun setRawKeycode(keycode: String) {
+        _rawKeycode = keycode
     }
     
     fun setEmbeddedComposingView(view: TextView) {
@@ -258,6 +273,13 @@ open class CandidateView @JvmOverloads constructor(
         val gboardDark = Color(0xFF2B2B2B)
         val scrollState = rememberScrollState()
         
+        // Read font size from dimension resource and apply user's font_size preference scale
+        val fontSizeScale = mLIMEPref.fontSize
+        val scaledFontSizePx = baseCandidateFontSizePx * fontSizeScale
+        val candidateFontSize = with(LocalDensity.current) {
+            scaledFontSizePx.toSp()
+        }
+        
         // Reset scroll position when suggestions change
         LaunchedEffect(suggestions) {
             scrollState.scrollTo(0)
@@ -270,12 +292,12 @@ open class CandidateView @JvmOverloads constructor(
             }
         }
         
-        // Parent XML layout now provides bounded width - horizontal scroll works
+        // Candidates-only layout (composing text now in separate PopupWindow)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(gboardDark)
+                .background(gboardDark) // Opaque candidate background
         ) {
             Row(
                 modifier = Modifier
@@ -285,6 +307,19 @@ open class CandidateView @JvmOverloads constructor(
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Show raw keycode as first item (if not empty)
+                if (_rawKeycode.isNotEmpty()) {
+                    RawKeycodeItem(
+                        keycode = _rawKeycode,
+                        fontSize = candidateFontSize,
+                        onClick = {
+                            // Input raw keycode directly
+                            mService?.commitTyped(_rawKeycode)
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                
                 suggestions.forEachIndexed { index, mapping ->
                     CandidateItem(
                         mapping = mapping,
@@ -338,7 +373,7 @@ open class CandidateView @JvmOverloads constructor(
             modifier = Modifier
                 .fillMaxHeight()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 2.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -351,6 +386,34 @@ open class CandidateView @JvmOverloads constructor(
         }
     }
 
+    @Composable
+    fun RawKeycodeItem(
+        keycode: String,
+        fontSize: androidx.compose.ui.unit.TextUnit,
+        onClick: () -> Unit
+    ) {
+        // Distinct style: bordered box with different background
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .clickable(onClick = onClick)
+                .background(
+                    color = Color(0xFF3A3A3A), // Slightly lighter than gboardDark
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = keycode,
+                color = Color(0xFF80DEEA), // Cyan color to distinguish from candidates
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
+    }
+
     // Required Stub methods
     override fun setScrollX(x: Int) {}
     fun updateFontSize() {}
@@ -358,7 +421,9 @@ open class CandidateView @JvmOverloads constructor(
     fun takeSuggestionAt(x: Int) {}
     fun onTouchReal(event: android.view.MotionEvent): Boolean = false
     
-    fun setComposingText(text: String) {}
+    fun setComposingText(text: String) {
+        _composingText = text
+    }
     fun setTransparentCandidateView(transparent: Boolean) {}
     fun startSymbolInput() {}
     fun forceHide() {
