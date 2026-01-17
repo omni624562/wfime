@@ -415,7 +415,8 @@ public class LIMEService extends InputMethodService implements
             if (DEBUG)
                 Log.i(TAG, "Fixed candiateView in on, return nInputViewContainer ");
 
-            // Create emoji picker even in fixed candidate mode (stored but not added to mCandidateInInputView)
+            // Create emoji picker even in fixed candidate mode (stored but not added to
+            // mCandidateInInputView)
             if (mEmojiKeyboardView == null) {
                 Log.d("EMOJI_DEBUG", "Creating emoji picker view via ComposeBridge (fixed mode)");
                 mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
@@ -456,7 +457,8 @@ public class LIMEService extends InputMethodService implements
                 ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
             mInputViewContainer.addView(mEmojiKeyboardView);
 
-            Log.d("EMOJI_DEBUG", "Container setup complete (fixed mode). Children: " + mInputViewContainer.getChildCount());
+            Log.d("EMOJI_DEBUG",
+                    "Container setup complete (fixed mode). Children: " + mInputViewContainer.getChildCount());
             return mInputViewContainer;
         } else {
             // Jeremy '24,1,7: Wrap input view and emoji view in a FrameLayout for Compose
@@ -505,7 +507,8 @@ public class LIMEService extends InputMethodService implements
             }
             Log.d("EMOJI_DEBUG", "Adding emoji picker to container");
             mInputViewContainer.addView(mEmojiKeyboardView);
-            Log.d("EMOJI_DEBUG", "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
+            Log.d("EMOJI_DEBUG",
+                    "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
 
             return mInputViewContainer;
         }
@@ -553,7 +556,8 @@ public class LIMEService extends InputMethodService implements
         }
 
         Log.d("EMOJI_DEBUG", "mEmojiKeyboardView exists, current visibility: " + mEmojiKeyboardView.getVisibility());
-        Log.d("EMOJI_DEBUG", "View.VISIBLE=" + View.VISIBLE + ", View.GONE=" + View.GONE + ", View.INVISIBLE=" + View.INVISIBLE);
+        Log.d("EMOJI_DEBUG",
+                "View.VISIBLE=" + View.VISIBLE + ", View.GONE=" + View.GONE + ", View.INVISIBLE=" + View.INVISIBLE);
 
         if (mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
             Log.d("EMOJI_DEBUG", "Emoji picker is VISIBLE, closing it...");
@@ -577,7 +581,8 @@ public class LIMEService extends InputMethodService implements
                     android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
                     for (int i = 0; i < group.getChildCount(); i++) {
                         group.getChildAt(i).setVisibility(View.GONE);
-                        Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: " + group.getChildAt(i).getClass().getSimpleName());
+                        Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: "
+                                + group.getChildAt(i).getClass().getSimpleName());
                     }
                 }
             } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
@@ -589,13 +594,16 @@ public class LIMEService extends InputMethodService implements
             mEmojiKeyboardView.setVisibility(View.VISIBLE);
             mEmojiKeyboardView.setZ(Float.MAX_VALUE); // Force to highest Z-order
             mEmojiKeyboardView.bringToFront(); // Force to front
-            mEmojiKeyboardView.invalidate();   // Force redraw
+            mEmojiKeyboardView.invalidate(); // Force redraw
 
             // Force measure and layout (240dp to leave space for keyboard controls)
-            int widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(mInputViewContainer.getWidth(), android.view.View.MeasureSpec.EXACTLY);
-            int heightSpec = android.view.View.MeasureSpec.makeMeasureSpec((int)(240 * getResources().getDisplayMetrics().density), android.view.View.MeasureSpec.EXACTLY);
+            int widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(mInputViewContainer.getWidth(),
+                    android.view.View.MeasureSpec.EXACTLY);
+            int heightSpec = android.view.View.MeasureSpec.makeMeasureSpec(
+                    (int) (240 * getResources().getDisplayMetrics().density), android.view.View.MeasureSpec.EXACTLY);
             mEmojiKeyboardView.measure(widthSpec, heightSpec);
-            mEmojiKeyboardView.layout(0, 0, mEmojiKeyboardView.getMeasuredWidth(), mEmojiKeyboardView.getMeasuredHeight());
+            mEmojiKeyboardView.layout(0, 0, mEmojiKeyboardView.getMeasuredWidth(),
+                    mEmojiKeyboardView.getMeasuredHeight());
 
             // Force layout update
             mInputViewContainer.requestLayout();
@@ -616,8 +624,8 @@ public class LIMEService extends InputMethodService implements
                 for (int i = 0; i < mInputViewContainer.getChildCount(); i++) {
                     android.view.View child = mInputViewContainer.getChildAt(i);
                     Log.d("EMOJI_DEBUG", "  Child " + i + ": " + child.getClass().getSimpleName() +
-                          " visibility=" + child.getVisibility() +
-                          " z=" + child.getZ());
+                            " visibility=" + child.getVisibility() +
+                            " z=" + child.getZ());
                 }
             }
         }
@@ -3008,10 +3016,33 @@ public class LIMEService extends InputMethodService implements
                 }
 
                 if (ic != null) {
-                    CharSequence before = ic.getTextBeforeCursor(1, 0);
+                    // Get a larger chunk of text to properly handle multi-codepoint emojis
+                    CharSequence before = ic.getTextBeforeCursor(32, 0);
 
                     if (before != null && before.length() > 0) {
-                        ic.deleteSurroundingText(1, 0);
+                        // Use BreakIterator to find the previous grapheme cluster boundary
+                        // This correctly handles multi-codepoint emojis (skin tones, ZWJ sequences,
+                        // etc.)
+                        java.text.BreakIterator breakIterator = java.text.BreakIterator.getCharacterInstance();
+                        breakIterator.setText(before.toString());
+
+                        // Move to the end of the text
+                        int end = before.length();
+
+                        // Find the previous character boundary
+                        int start = breakIterator.preceding(end);
+                        if (start == java.text.BreakIterator.DONE) {
+                            start = 0;
+                        }
+
+                        // Delete from start to end (the entire grapheme cluster)
+                        int deleteCount = end - start;
+                        if (deleteCount > 0) {
+                            ic.deleteSurroundingText(deleteCount, 0);
+                        } else {
+                            // Fallback to simple delete
+                            ic.deleteSurroundingText(1, 0);
+                        }
                     } else {
                         keyDownUp(KeyEvent.KEYCODE_DEL, false);
                     }

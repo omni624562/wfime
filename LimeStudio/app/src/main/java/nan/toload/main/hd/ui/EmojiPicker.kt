@@ -11,22 +11,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,33 +33,30 @@ fun EmojiPicker(
     onBackClick: () -> Unit,
     onBackspaceClick: () -> Unit
 ) {
-    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Recent
-    var searchText by remember { mutableStateOf("") }
+    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     val context = LocalContext.current
 
     // Recent Emojis State
     var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
 
-    // Categories (icons only for top bar)
+    // Categories (icons only - simple design)
     val categories = listOf(
-        "🕒" to "最近使用的表情符號",
-        "😀" to "表情符號",
-        "👋" to "人物",
-        "🐻" to "動物與自然",
-        "🍔" to "食物與飲料",
-        "🚗" to "旅遊與地點",
-        "💡" to "物品",
-        "🏳️" to "旗幟"
+        "😀", // Smileys
+        "👋", // People
+        "🐻", // Animals
+        "🍔", // Food
+        "🚗", // Travel
+        "💡", // Objects
+        "🏆", // Activities
+        "🔣", // Symbols
+        "🏳️"  // Flags
     )
 
-    // Gboard-like Dark Theme Colors
-    val backgroundColor = Color(0xFF2D2F31)
-    val searchBarColor = Color(0xFF3C4043)
-    val accentColor = Color(0xFF8AB4F8)
-    val textColor = Color(0xFFE8EAED)
-    val secondaryTextColor = Color(0xFF9AA0A6)
-    val bottomBarColor = Color(0xFF2D2F31)
-    val selectedCategoryBg = Color(0xFF3C4043)
+    // Dark Theme Colors
+    val backgroundColor = Color(0xFF2B2B2B)
+    val accentColor = Color(0xFF4CAF50) // Green underline
+    val secondaryTextColor = Color(0xFF9E9E9E)
+    val bottomBarColor = Color(0xFF1F1F1F)
 
     // Helper to add to recent
     fun addToRecent(emoji: String) {
@@ -76,96 +65,62 @@ fun EmojiPicker(
         saveRecentEmojis(context, newList)
     }
 
-    // Get display emojis based on search and category
-    val displayEmojis = remember(selectedCategoryIndex, searchText, recentEmojis) {
-        if (searchText.isNotEmpty()) {
-            val query = searchText.lowercase()
-            val allEmojis = (1..7).flatMap { EmojiData.getListByCategory(it) }
-            allEmojis.filter { emoji ->
-                emoji.keywords.any { it.contains(query) }
-            }
-        } else {
-            if (selectedCategoryIndex == 0 && recentEmojis.isNotEmpty()) {
-                recentEmojis.map { Emoji(it, emptyList()) }
-            } else {
-                val categoryId = if (selectedCategoryIndex == 0) 1 else selectedCategoryIndex
-                EmojiData.getListByCategory(categoryId)
-            }
-        }
+    // Get display emojis based on category
+    val displayEmojis = remember(selectedCategoryIndex, recentEmojis) {
+        val categoryId = selectedCategoryIndex + 1 // Categories are 1-indexed in EmojiData
+        EmojiData.getListByCategory(categoryId)
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight()  // Fill available height like Gboard
+            .fillMaxHeight()
             .background(backgroundColor)
-            .navigationBarsPadding()  // Handle system navigation bar insets properly
+            .padding(bottom = 10.dp)  // Space between content and navigation bar
     ) {
-        // Top Bar: Back + Search + Category Icons (Gboard style)
+        // Top Bar: Category Icons with green underline indicator
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .padding(horizontal = 4.dp),
+                .height(52.dp)
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Back button
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = secondaryTextColor,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Search bar removed as per user request
-
-            // Category Icons (horizontal scroll-like row)
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                categories.forEachIndexed { index, (icon, _) ->
+            categories.forEachIndexed { index, icon ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clickable { selectedCategoryIndex = index }
+                        .padding(horizontal = 2.dp)
+                ) {
+                    Text(
+                        text = icon,
+                        fontSize = 24.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    // Green underline for selected category
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .clickable { selectedCategoryIndex = index }
+                            .width(28.dp)
+                            .height(3.dp)
                             .background(
-                                if (selectedCategoryIndex == index) selectedCategoryBg
-                                else Color.Transparent
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = icon,
-                            fontSize = 18.sp
-                        )
-                    }
+                                if (selectedCategoryIndex == index) accentColor
+                                else Color.Transparent,
+                                shape = RoundedCornerShape(1.5.dp)
+                            )
+                    )
                 }
             }
         }
 
-        // Category Title
-        if (searchText.isEmpty()) {
-            Text(
-                text = categories[selectedCategoryIndex].second,
-                color = secondaryTextColor,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)
-            )
-        }
-
-        // Emoji Grid (scrollable)
+        // Emoji Grid (scrollable) - 6 columns like reference
         LazyVerticalGrid(
-            columns = GridCells.Fixed(8),
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp)
+            columns = GridCells.Fixed(6),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(displayEmojis) { emoji ->
                 EmojiGridItem(
@@ -177,7 +132,65 @@ fun EmojiPicker(
                 )
             }
         }
-        // Bottom bar removed as per user request
+
+        // Bottom Bar: ABC (left) | spacer | ⌫ (right)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            color = bottomBarColor
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // ABC - Back to keyboard
+                TextButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Text(
+                        text = "ABC",
+                        color = secondaryTextColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Backspace ⌫
+                IconButton(
+                    onClick = onBackspaceClick,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Text(
+                        text = "⌫",
+                        fontSize = 24.sp,
+                        color = secondaryTextColor
+                    )
+                }
+            }
+        }
+
+        // Black separator bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(Color.Black)
+        )
+
+        // Space for system IME navigation bar (⬇️ 🌐)
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .background(Color(0xFF1A1A1A))  // Slightly darker than bottom bar
+        )
     }
 }
 
