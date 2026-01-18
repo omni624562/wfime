@@ -31,7 +31,8 @@ import nan.toload.main.hd.data.EmojiData
 fun EmojiPicker(
     onEmojiClick: (String) -> Unit,
     onBackClick: () -> Unit,
-    onBackspaceClick: () -> Unit
+    onBackspaceClick: () -> Unit,
+    bottomPaddingDp: Int = 0
 ) {
     var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     val context = LocalContext.current
@@ -76,9 +77,10 @@ fun EmojiPicker(
             .fillMaxWidth()
             .fillMaxHeight()
             .background(backgroundColor)
-            .padding(bottom = 10.dp)  // Space between content and navigation bar
+            // Apply bottom padding to the whole column so the bottom bar sits ABOVE the system nav bar
+            .padding(bottom = bottomPaddingDp.dp) 
     ) {
-        // Top Bar: Category Icons with green underline indicator
+        // Top Bar: Category Icons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,13 +116,13 @@ fun EmojiPicker(
             }
         }
 
-        // Emoji Grid (scrollable) - 6 columns like reference
+        // Emoji Grid
         LazyVerticalGrid(
-            columns = GridCells.Fixed(6),
+            columns = GridCells.Fixed(8),
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
+                .padding(horizontal = 4.dp),
+            contentPadding = PaddingValues(vertical = 4.dp)
         ) {
             items(displayEmojis) { emoji ->
                 EmojiGridItem(
@@ -133,11 +135,13 @@ fun EmojiPicker(
             }
         }
 
-        // Bottom Bar: ABC (left) | spacer | ⌫ (right)
+        // Custom Bottom Bar: ABC (left) | ⌫ (right)
+        // This will sit at the bottom of the Column (content area), 
+        // but ABOVE the system padding we added to the Column.
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
+                .height(36.dp),
             color = bottomBarColor
         ) {
             Row(
@@ -150,47 +154,29 @@ fun EmojiPicker(
                 // ABC - Back to keyboard
                 TextButton(
                     onClick = onBackClick,
-                    modifier = Modifier.height(40.dp)
+                    modifier = Modifier.height(32.dp)
                 ) {
                     Text(
                         text = "ABC",
                         color = secondaryTextColor,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
-
                 // Backspace ⌫
                 IconButton(
                     onClick = onBackspaceClick,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Text(
                         text = "⌫",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         color = secondaryTextColor
                     )
                 }
             }
         }
-
-        // Black separator bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .background(Color.Black)
-        )
-
-        // Space for system IME navigation bar (⬇️ 🌐)
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(Color(0xFF1A1A1A))  // Slightly darker than bottom bar
-        )
     }
 }
 

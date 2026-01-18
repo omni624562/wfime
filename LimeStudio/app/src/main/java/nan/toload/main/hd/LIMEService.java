@@ -592,23 +592,16 @@ public class LIMEService extends InputMethodService implements
 
             // THEN: Show emoji picker
             mEmojiKeyboardView.setVisibility(View.VISIBLE);
-            mEmojiKeyboardView.setZ(Float.MAX_VALUE); // Force to highest Z-order
             mEmojiKeyboardView.bringToFront(); // Force to front
             mEmojiKeyboardView.invalidate(); // Force redraw
 
-            // Force measure and layout (240dp to leave space for keyboard controls)
-            int widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(mInputViewContainer.getWidth(),
-                    android.view.View.MeasureSpec.EXACTLY);
-            int heightSpec = android.view.View.MeasureSpec.makeMeasureSpec(
-                    (int) (240 * getResources().getDisplayMetrics().density), android.view.View.MeasureSpec.EXACTLY);
-            mEmojiKeyboardView.measure(widthSpec, heightSpec);
-            mEmojiKeyboardView.layout(0, 0, mEmojiKeyboardView.getMeasuredWidth(),
-                    mEmojiKeyboardView.getMeasuredHeight());
+            // Use the height from ComposeView's layoutParams (set in ComposeBridge)
+            // Don't override with hardcoded value
+            mEmojiKeyboardView.requestLayout();
 
             // Force layout update
             mInputViewContainer.requestLayout();
             mInputViewContainer.invalidate();
-            mEmojiKeyboardView.requestLayout();
 
             Log.d("EMOJI_DEBUG", "Emoji picker should now be visible!");
             Log.d("EMOJI_DEBUG", "mEmojiKeyboardView visibility after: " + mEmojiKeyboardView.getVisibility());

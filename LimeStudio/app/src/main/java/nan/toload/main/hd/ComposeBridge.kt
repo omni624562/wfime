@@ -42,6 +42,18 @@ import nan.toload.main.hd.data.Word
 import android.view.KeyEvent
 
 /**
+ * Helper function to get navigation bar height
+ */
+private fun getNavigationBarHeight(context: Context): Int {
+    val resourceId = context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+    return if (resourceId > 0) {
+        context.resources.getDimensionPixelSize(resourceId)
+    } else {
+        0
+    }
+}
+
+/**
  * Bridge object for creating Compose-based views that can be integrated into Java code.
  */
 object ComposeBridge {
@@ -95,8 +107,9 @@ object ComposeBridge {
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setViewTreeViewModelStoreOwner(lifecycleOwner)
 
-            // Set explicit layout parameters with height matching Gboard
-            val heightDp = 400  // Adjusted height as per user request
+            // Set explicit layout parameters
+            // 52dp (category) + ~220dp (emoji grid) + 36dp (bottom bar) + 40dp (system nav padding) = ~348dp
+            val heightDp = 350
             val density = context.resources.displayMetrics.density
             val heightPx = (heightDp * density).toInt()
             android.util.Log.d("EMOJI_DEBUG", "Setting layout params: height=${heightDp}dp (${heightPx}px)")
@@ -108,8 +121,10 @@ object ComposeBridge {
             // Set background to ensure visibility (for debugging)
             android.util.Log.d("EMOJI_DEBUG", "Setting background color to #1F1F1F")
             setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
-
-            android.util.Log.d("EMOJI_DEBUG", "Setting Compose content with EmojiPicker")
+            
+            val systemBarPaddingDp = 40 // Estimated height of the LIME/System bottom bar
+            
+            android.util.Log.d("EMOJI_DEBUG", "Setting Compose content with EmojiPicker, padding=$systemBarPaddingDp")
             setContent {
                 android.util.Log.d("EMOJI_DEBUG", "Composing EmojiPicker UI")
                 MaterialTheme {
@@ -126,7 +141,8 @@ object ComposeBridge {
                             android.util.Log.d("EMOJI_DEBUG", "Backspace clicked")
                             // Simulate Backspace
                             service.handleComposeBackspace()
-                        }
+                        },
+                        bottomPaddingDp = systemBarPaddingDp
                     )
                 }
             }
