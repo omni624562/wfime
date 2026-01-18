@@ -637,6 +637,15 @@ public class LIMEService extends InputMethodService implements
             if (mFixedCandidateViewOn && mCandidateInInputView != null) {
                 Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode)");
                 mCandidateInInputView.setVisibility(View.VISIBLE);
+
+                // Restore children visibility
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        group.getChildAt(i).setVisibility(View.VISIBLE);
+                        Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
+                    }
+                }
             }
         } else {
             Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
