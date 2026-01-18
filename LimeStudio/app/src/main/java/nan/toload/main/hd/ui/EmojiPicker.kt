@@ -26,6 +26,9 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import nan.toload.main.hd.data.Emoji
 import nan.toload.main.hd.data.EmojiData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun EmojiPicker(
@@ -40,22 +43,23 @@ fun EmojiPicker(
     // Recent Emojis State
     var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
 
-    // Categories (icons only - simple design)
-    val categories = listOf(
-        "😀", // Smileys
-        "👋", // People
-        "🐻", // Animals
-        "🍔", // Food
-        "🚗", // Travel
-        "💡", // Objects
-        "🏆", // Activities
-        "🔣", // Symbols
-        "🏳️"  // Flags
+    // Categories (using Material Icons to match Gboard style)
+    val categories: List<ImageVector> = listOf(
+        Icons.Filled.Mood,                // Smileys
+        Icons.Filled.EmojiPeople,         // People
+        Icons.Filled.EmojiNature,         // Animals & Nature (Bee + Flower)
+        Icons.Filled.EmojiFoodBeverage,   // Food (Cup)
+        Icons.Filled.EmojiTransportation, // Travel (Building + Car)
+        Icons.Filled.EmojiEvents,         // Activities (Trophy)
+        Icons.Filled.EmojiObjects,        // Objects (Lightbulb)
+        Icons.Filled.EmojiSymbols,        // Symbols (Music + Percent)
+        Icons.Filled.EmojiFlags           // Flags
     )
 
     // Dark Theme Colors
     val backgroundColor = Color(0xFF2B2B2B)
     val accentColor = Color(0xFF4CAF50) // Green underline
+    val iconColor = Color(0xFFE2E2E2) // Light gray/white for icons
     val secondaryTextColor = Color(0xFF9E9E9E)
     val bottomBarColor = Color(0xFF1F1F1F)
 
@@ -84,27 +88,31 @@ fun EmojiPicker(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 12.dp),
+                .height(48.dp) // Slightly reduced height
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            categories.forEachIndexed { index, icon ->
+            categories.forEachIndexed { index, icon: ImageVector ->
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .clickable { selectedCategoryIndex = index }
                         .padding(horizontal = 2.dp)
+                        .weight(1f) // Distribute space evenly
                 ) {
-                    Text(
-                        text = icon,
-                        fontSize = 24.sp,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (selectedCategoryIndex == index) iconColor else secondaryTextColor,
+                        modifier = Modifier
+                            .size(30.dp) // Increased from 24dp
+                            .padding(bottom = 6.dp) // Reduced padding slightly
                     )
                     // Green underline for selected category
                     Box(
                         modifier = Modifier
-                            .width(28.dp)
+                            .width(30.dp) // Match new icon width
                             .height(3.dp)
                             .background(
                                 if (selectedCategoryIndex == index) accentColor
