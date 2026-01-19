@@ -63,9 +63,9 @@ class ComposingTextPopup(private val context: Context) {
             val paddingV = dpToPx(4)
             setPadding(paddingH, paddingV, paddingH, paddingV)
             
-            // Set background with rounded corners
+            // Set background with rounded corners (60% opacity for transparency)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#505050"))
+                setColor(Color.parseColor("#99505050"))
                 cornerRadius = dpToPx(4).toFloat()
             }
             
