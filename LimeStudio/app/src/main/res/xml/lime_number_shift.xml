@@ -179,13 +179,13 @@
             limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="10%p" />
         <Key
-            limehd:codes="-100"
-            limehd:keyIcon="@drawable/ic_emoji_white"
-            limehd:keyWidth="10%p" />
-        <Key
             limehd:codes="-10"
             limehd:isModifier="true"
             limehd:keyLabel="中"
+            limehd:keyWidth="10%p" />
+        <Key
+            limehd:codes="-100"
+            limehd:keyIcon="@drawable/ic_emoji_white"
             limehd:keyWidth="10%p" />
         <Key
             limehd:codes="32"
