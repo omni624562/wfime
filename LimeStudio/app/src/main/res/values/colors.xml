@@ -39,7 +39,7 @@
     <color name="second_background_light">#FFE1E1E1</color>
     <color name="second_background_light_fl">#FFFBFBFB</color>
     <color name="third_background_light">#FFFAFAFA</color>
-    <color name="composing_background_light">#E0E1E1E1</color>
+    <color name="composing_background_light">#99E1E1E1</color>
 
 
     <color name="candidate_spacer">#FF101010</color>
@@ -55,7 +55,7 @@
     <color name="background_dark">#FF121212</color>
     <color name="second_background_dark">#FF424242</color>
     <color name="functional_key_background_dark">#FF2F2F2F</color>
-    <color name="composing_background_dark">#E0121212</color>
+    <color name="composing_background_dark">#99121212</color>
 
     <color name="foreground_dark">#FFFFFFFF</color>
     <color name="candidate_foreground_dark">#FFFFFFFF</color>
@@ -70,7 +70,7 @@
     <color name="pink_hl">#FFC74A72</color>
     <color name="keyboard_background_pink">#FFFAD5E5</color>
     <color name="candidate_background_pink">#FFFEF3F7</color>
-    <color name="composing_background_pink">#E0FAD5E5</color>
+    <color name="composing_background_pink">#99FAD5E5</color>
     <color name="second_background_pink">#FFF49AC1</color>
     <color name="second_background_pink_hl">#FFF173AC</color>
 
@@ -78,7 +78,7 @@
     <color name="tech_blue_hl">#FF4167B0</color>
     <color name="keyboard_background_tech_blue">#FFC5DBEC</color>
     <color name="candidate_background_tech_blue">#FFD8E7F3</color>
-    <color name="composing_background_tech_blue">#E0B2CFE6</color>
+    <color name="composing_background_tech_blue">#99B2CFE6</color>
     <color name="second_background_tech_blue">#FF9BC5E4</color>
     <color name="second_background_tech_blue_hl">#FF6699CC</color>
     <color name="foreground_tech_blue">#FF314453</color>
@@ -88,7 +88,7 @@
     <color name="fashion_purple_hl">#FF45196F</color>
     <color name="keyboard_background_fashion_purple">#FFB0ACD5</color>
     <color name="candidate_background_fashion_purple">#FFEFEDFF</color>
-    <color name="composing_background_fashion_purple">#E0B0ACD4</color>
+    <color name="composing_background_fashion_purple">#99B0ACD4</color>
     <color name="second_background_fashion_purple">#FFB28ABF</color>
     <color name="second_background_fashion_purple_hl">#FF8F53A1</color>
     <color name="foreground_fashion_purple">#FFEEEEEE</color>
@@ -98,7 +98,7 @@
     <color name="relax_green_hl">#FF006838</color>
     <color name="keyboard_background_relax_green">#FF8DC63F</color>
     <color name="candidate_background_relax_green">#FFF2F5D5</color>
-    <color name="composing_background_relax_green">#E0D7DF23</color>
+    <color name="composing_background_relax_green">#99D7DF23</color>
     <color name="second_background_relax_green">#FF39B54A</color>
     <color name="second_background_relax_green_hl">#FF009444</color>
     <color name="foreground_relax_green">#FF003A17</color>
