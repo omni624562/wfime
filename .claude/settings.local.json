@@ -29,7 +29,9 @@
       "Bash(done)",
       "Bash(gradlew.bat assembleDebug:*)",
       "Bash(cmd /c \"cd c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio && gradlew.bat assembleDebug\")",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(gradlew.bat clean:*)",
+      "Bash(adb install:*)"
     ]
   }
 }

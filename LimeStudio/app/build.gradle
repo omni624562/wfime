@@ -24,6 +24,7 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
     signingConfigs {
@@ -43,7 +44,7 @@ android {
         }
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "boolean", "DEBUG_LOGGING", "false"
         }
     }
@@ -60,15 +61,16 @@ android {
         buildConfig true
         compose true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
     namespace 'nan.toload.main.hd'
     lint {
         abortOnError false
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -101,7 +103,8 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:5.11.0'
     
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.10"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1"
 
     // Jetpack Compose
     def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
@@ -116,6 +119,7 @@ dependencies {
     // Integration with Activities
     implementation 'androidx.activity:activity-compose:1.8.2'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.6.1'
     implementation 'androidx.compose.material:material-icons-extended'
 }
 

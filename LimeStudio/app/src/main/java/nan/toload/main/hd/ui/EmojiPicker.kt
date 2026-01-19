@@ -1,194 +1,281 @@
 package nan.toload.main.hd.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Backspace
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nan.toload.main.hd.R
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import nan.toload.main.hd.data.Emoji
 import nan.toload.main.hd.data.EmojiData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun EmojiPicker(
     onEmojiClick: (String) -> Unit,
     onBackClick: () -> Unit,
-    onBackspaceClick: () -> Unit
+    onBackspaceClick: () -> Unit,
+    bottomPaddingDp: Int = 0
 ) {
-    var selectedCategoryIndex by remember { mutableIntStateOf(1) } // Default to Smileys
-    var searchText by remember { mutableStateOf("") }
+    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
+    val context = LocalContext.current
 
-    val categories = listOf(
-        "🕒" to 0, // Recent
-        "😀" to 1,
-        "🐻" to 2,
-        "🍔" to 3,
-        "💡" to 4
+    // Recent Emojis State
+    var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
+
+    // Categories (using Material Icons to match Gboard style)
+    val categories: List<ImageVector> = listOf(
+        Icons.Filled.Mood,                // Smileys
+        Icons.Filled.EmojiPeople,         // People
+        Icons.Filled.EmojiNature,         // Animals & Nature (Bee + Flower)
+        Icons.Filled.EmojiFoodBeverage,   // Food (Cup)
+        Icons.Filled.EmojiTransportation, // Travel (Building + Car)
+        Icons.Filled.EmojiEvents,         // Activities (Trophy)
+        Icons.Filled.EmojiObjects,        // Objects (Lightbulb)
+        Icons.Filled.EmojiSymbols,        // Symbols (Music + Percent)
+        Icons.Filled.EmojiFlags           // Flags
     )
 
-    // Load Colors from Resources
-    val backgroundColor = colorResource(id = R.color.keyboard_background_dark)
-    val searchBarColor = colorResource(id = R.color.functional_key_background_dark) // Lighter than bg
-    val accentColor = colorResource(id = R.color.color_common_green_hl)
-    val textColor = colorResource(id = R.color.foreground_dark)
-    val secondaryTextColor = colorResource(id = R.color.second_foreground_dark)
+    // Dark Theme Colors
+    val backgroundColor = Color(0xFF2B2B2B)
+    val accentColor = Color(0xFF4CAF50) // Green underline
+    val iconColor = Color(0xFFE2E2E2) // Light gray/white for icons
+    val secondaryTextColor = Color(0xFF9E9E9E)
+    val bottomBarColor = Color(0xFF1F1F1F)
+
+    // Helper to add to recent
+    fun addToRecent(emoji: String) {
+        val newList = (listOf(emoji) + recentEmojis.filter { it != emoji }).take(30)
+        recentEmojis = newList
+        saveRecentEmojis(context, newList)
+    }
+
+    // Get display emojis based on category
+    val displayEmojis = remember(selectedCategoryIndex, recentEmojis) {
+        val categoryId = selectedCategoryIndex + 1 // Categories are 1-indexed in EmojiData
+        EmojiData.getListByCategory(categoryId)
+    }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .fillMaxHeight()
             .background(backgroundColor)
+            // Apply bottom padding to the whole column so the bottom bar sits ABOVE the system nav bar
+            .padding(bottom = bottomPaddingDp.dp) 
     ) {
-        // Top Bar
+        // Top Bar: Category Icons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .height(48.dp) // Slightly reduced height
+                .padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = secondaryTextColor
-                )
-            }
-
-            // Search Bar
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(20.dp)) // Round pill shape
-                    .background(searchBarColor)
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                if (searchText.isEmpty()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = null,
-                            tint = secondaryTextColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Search emoji",
-                            color = secondaryTextColor,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-                BasicTextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
-                    textStyle = TextStyle(color = textColor, fontSize = 16.sp),
-                    cursorBrush = SolidColor(accentColor),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            IconButton(onClick = onBackspaceClick) {
-                 Icon(
-                     imageVector = Icons.Filled.Backspace,
-                     contentDescription = "Delete",
-                     tint = secondaryTextColor
-                 )
-            }
-        }
-
-        // Tabs
-        ScrollableTabRow(
-            selectedTabIndex = selectedCategoryIndex,
-            containerColor = backgroundColor,
-            contentColor = accentColor,
-            edgePadding = 0.dp,
-            indicator = { tabPositions ->
-                TabRowDefaults.SecondaryIndicator(
-                    Modifier.tabIndicatorOffset(tabPositions[selectedCategoryIndex]),
-                    color = accentColor,
-                    height = 3.dp
-                )
-            },
-            divider = {}
-        ) {
-            categories.forEachIndexed { index, (icon, categoryId) ->
-                val selected = selectedCategoryIndex == index
-                Tab(
-                    selected = selected,
-                    onClick = { selectedCategoryIndex = index },
-                    selectedContentColor = accentColor,
-                    unselectedContentColor = secondaryTextColor
-                ) {
-                   Box(modifier = Modifier.padding(vertical = 12.dp)) {
-                       Text(
-                           text = icon,
-                           fontSize = 24.sp, // Larger tab icons
-                           color = if (selected) accentColor else secondaryTextColor.copy(alpha = 0.7f)
-                       )
-                   }
-                }
-            }
-        }
-
-        // Grid
-        val emojiList = remember(selectedCategoryIndex, searchText) {
-            if (searchText.isNotEmpty()) {
-                 val all = EmojiData.SMILEYS + EmojiData.ANIMALS + EmojiData.FOOD + EmojiData.OBJECTS
-                 all.filter { true } 
-                 EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
-            } else {
-                EmojiData.getListByCategory(categories[selectedCategoryIndex].second).toList()
-            }
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp), // Spacing between rows
-            horizontalArrangement = Arrangement.spacedBy(4.dp) // Spacing between cols
-        ) {
-            items(emojiList) { emoji ->
-                Box(
+            categories.forEachIndexed { index, icon: ImageVector ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(CircleShape)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = rememberRipple(bounded = true, color = accentColor.copy(alpha = 0.3f)), // Softer ripple
-                            onClick = { onEmojiClick(emoji) }
-                        ),
-                    contentAlignment = Alignment.Center
+                        .clickable { selectedCategoryIndex = index }
+                        .padding(horizontal = 2.dp)
+                        .weight(1f) // Distribute space evenly
                 ) {
-                    Text(text = emoji, fontSize = 30.sp) // Larger Emojis
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (selectedCategoryIndex == index) iconColor else secondaryTextColor,
+                        modifier = Modifier
+                            .size(30.dp) // Increased from 24dp
+                            .padding(bottom = 6.dp) // Reduced padding slightly
+                    )
+                    // Green underline for selected category
+                    Box(
+                        modifier = Modifier
+                            .width(30.dp) // Match new icon width
+                            .height(3.dp)
+                            .background(
+                                if (selectedCategoryIndex == index) accentColor
+                                else Color.Transparent,
+                                shape = RoundedCornerShape(1.5.dp)
+                            )
+                    )
+                }
+            }
+        }
+
+        // Emoji Grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(8),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp),
+            contentPadding = PaddingValues(vertical = 4.dp)
+        ) {
+            items(displayEmojis) { emoji ->
+                EmojiGridItem(
+                    emoji = emoji,
+                    onEmojiClick = { char ->
+                        onEmojiClick(char)
+                        addToRecent(char)
+                    }
+                )
+            }
+        }
+
+        // Custom Bottom Bar: ABC (left) | ⌫ (right)
+        // This will sit at the bottom of the Column (content area), 
+        // but ABOVE the system padding we added to the Column.
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp),
+            color = bottomBarColor
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // ABC - Back to keyboard
+                TextButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(
+                        text = "ABC",
+                        color = secondaryTextColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Backspace ⌫
+                IconButton(
+                    onClick = onBackspaceClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Text(
+                        text = "⌫",
+                        fontSize = 20.sp,
+                        color = secondaryTextColor
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+fun EmojiGridItem(
+    emoji: Emoji,
+    onEmojiClick: (String) -> Unit
+) {
+    var showSkinTonePopup by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .padding(2.dp)
+            .clip(CircleShape)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onEmojiClick(emoji.char) },
+                    onLongPress = {
+                        if (emoji.hasSkinTone) {
+                            showSkinTonePopup = true
+                        }
+                    }
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = emoji.char, fontSize = 28.sp)
+
+        if (showSkinTonePopup) {
+            SkinTonePopup(
+                baseEmoji = emoji.char,
+                onDismiss = { showSkinTonePopup = false },
+                onSkinToneSelected = { variant ->
+                    onEmojiClick(variant)
+                    showSkinTonePopup = false
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun SkinTonePopup(
+    baseEmoji: String,
+    onDismiss: () -> Unit,
+    onSkinToneSelected: (String) -> Unit
+) {
+    val variants = remember(baseEmoji) {
+        val list = mutableListOf(baseEmoji)
+        list.addAll(EmojiData.SKIN_TONES.map { tone -> baseEmoji + tone })
+        list
+    }
+
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val offsetPx = with(density) { androidx.compose.ui.unit.IntOffset(0, (-60).dp.roundToPx()) }
+
+    Popup(
+        alignment = Alignment.TopCenter,
+        offset = offsetPx,
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true)
+    ) {
+        Row(
+            modifier = Modifier
+                .background(Color(0xFF2F2F2F), RoundedCornerShape(8.dp))
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            variants.forEach { variant ->
+                Text(
+                    text = variant,
+                    fontSize = 30.sp,
+                    modifier = Modifier.clickable { onSkinToneSelected(variant) }
+                )
+            }
+        }
+    }
+}
+
+// Persistence Helpers
+private const val PREF_NAME = "emoji_prefs"
+private const val KEY_RECENT = "recent_emojis"
+
+fun loadRecentEmojis(context: Context): List<String> {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    val saved = prefs.getString(KEY_RECENT, "") ?: ""
+    return if (saved.isEmpty()) emptyList() else saved.split(",")
+}
+
+fun saveRecentEmojis(context: Context, emojis: List<String>) {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putString(KEY_RECENT, emojis.joinToString(",")).apply()
 }

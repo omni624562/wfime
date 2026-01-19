@@ -407,35 +407,108 @@ public class LIMEService extends InputMethodService implements
 
         initialViewAndSwitcher(true); // Jeremy '12,4,29. will do buildactivekeyboardlist in init startInput
 
+        Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
+        Log.d("EMOJI_DEBUG", "mFixedCandidateViewOn = " + mFixedCandidateViewOn);
+
         if (mFixedCandidateViewOn) {
+            Log.d("EMOJI_DEBUG", "Taking mFixedCandidateViewOn path - creating emoji picker separately");
             if (DEBUG)
                 Log.i(TAG, "Fixed candiateView in on, return nInputViewContainer ");
-            return mCandidateInInputView;
-        } else {
-            // Jeremy '24,1,7: Wrap input view and emoji view in a FrameLayout for Compose
-            // integration
+
+            // Create emoji picker even in fixed candidate mode (stored but not added to
+            // mCandidateInInputView)
+            if (mEmojiKeyboardView == null) {
+                Log.d("EMOJI_DEBUG", "Creating emoji picker view via ComposeBridge (fixed mode)");
+                mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
+                mEmojiKeyboardView.setVisibility(View.GONE);
+                Log.d("EMOJI_DEBUG", "Emoji picker created and hidden");
+            }
+
+            // Create a wrapper container for mCandidateInInputView + emoji picker
             if (mInputViewContainer == null) {
+                Log.d("EMOJI_DEBUG", "Creating wrapper container for fixed mode");
                 mInputViewContainer = new android.widget.FrameLayout(this);
                 mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
                         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                         android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+
+                // Set up lifecycle owner for Compose views
+                Log.d("EMOJI_DEBUG", "Setting up lifecycle owner for container");
+                nan.toload.main.hd.ComposeLifecycleOwner lifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
+                lifecycleOwner.performRestore(null);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
+                androidx.lifecycle.ViewTreeLifecycleOwner.set(mInputViewContainer, lifecycleOwner);
+                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mInputViewContainer, lifecycleOwner);
+                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mInputViewContainer, lifecycleOwner);
+                Log.d("EMOJI_DEBUG", "Lifecycle owner set on container");
+            }
+            mInputViewContainer.removeAllViews();
+
+            // Add both candidate view and emoji picker to container
+            if (mCandidateInInputView != null) {
+                if (mCandidateInInputView.getParent() != null)
+                    ((android.view.ViewGroup) mCandidateInInputView.getParent()).removeView(mCandidateInInputView);
+                mInputViewContainer.addView(mCandidateInInputView);
+            }
+
+            if (mEmojiKeyboardView.getParent() != null)
+                ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
+            mInputViewContainer.addView(mEmojiKeyboardView);
+
+            Log.d("EMOJI_DEBUG",
+                    "Container setup complete (fixed mode). Children: " + mInputViewContainer.getChildCount());
+            return mInputViewContainer;
+        } else {
+            // Jeremy '24,1,7: Wrap input view and emoji view in a FrameLayout for Compose
+            // integration
+            Log.d("EMOJI_DEBUG", "=== onCreateInputView: Setting up input container ===");
+            if (mInputViewContainer == null) {
+                Log.d("EMOJI_DEBUG", "Creating new FrameLayout for input container");
+                mInputViewContainer = new android.widget.FrameLayout(this);
+                mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+
+                // Set up lifecycle owner for Compose views
+                Log.d("EMOJI_DEBUG", "Setting up lifecycle owner for container (else branch)");
+                nan.toload.main.hd.ComposeLifecycleOwner lifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
+                lifecycleOwner.performRestore(null);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
+                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
+                androidx.lifecycle.ViewTreeLifecycleOwner.set(mInputViewContainer, lifecycleOwner);
+                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mInputViewContainer, lifecycleOwner);
+                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mInputViewContainer, lifecycleOwner);
+                Log.d("EMOJI_DEBUG", "Lifecycle owner set on container (else branch)");
             }
             mInputViewContainer.removeAllViews();
 
             if (mInputView != null) {
+                Log.d("EMOJI_DEBUG", "Adding keyboard view to container");
                 if (mInputView.getParent() != null)
                     ((android.view.ViewGroup) mInputView.getParent()).removeView(mInputView);
                 mInputViewContainer.addView(mInputView);
             }
 
             if (mEmojiKeyboardView == null) {
+                Log.d("EMOJI_DEBUG", "Creating emoji picker view via ComposeBridge");
                 // Use ComposeBridge to create the Compose View
                 mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
+                Log.d("EMOJI_DEBUG", "Emoji picker view created, setting to GONE");
                 mEmojiKeyboardView.setVisibility(View.GONE);
+            } else {
+                Log.d("EMOJI_DEBUG", "Emoji picker view already exists, reusing");
             }
-            if (mEmojiKeyboardView.getParent() != null)
+            if (mEmojiKeyboardView.getParent() != null) {
+                Log.d("EMOJI_DEBUG", "Removing emoji picker from old parent");
                 ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
+            }
+            Log.d("EMOJI_DEBUG", "Adding emoji picker to container");
             mInputViewContainer.addView(mEmojiKeyboardView);
+            Log.d("EMOJI_DEBUG",
+                    "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
 
             return mInputViewContainer;
         }
@@ -473,25 +546,109 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void toggleEmojiVisibility() {
-        if (mEmojiKeyboardView == null)
+        Log.d("EMOJI_DEBUG", "=== toggleEmojiVisibility() called ===");
+
+        if (mEmojiKeyboardView == null) {
+            Log.e("EMOJI_DEBUG", "ERROR: mEmojiKeyboardView is NULL!");
+            Log.d("EMOJI_DEBUG", "mInputViewContainer: " + (mInputViewContainer != null ? "exists" : "NULL"));
+            Log.d("EMOJI_DEBUG", "mInputView: " + (mInputView != null ? "exists" : "NULL"));
             return;
+        }
+
+        Log.d("EMOJI_DEBUG", "mEmojiKeyboardView exists, current visibility: " + mEmojiKeyboardView.getVisibility());
+        Log.d("EMOJI_DEBUG",
+                "View.VISIBLE=" + View.VISIBLE + ", View.GONE=" + View.GONE + ", View.INVISIBLE=" + View.INVISIBLE);
 
         if (mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+            Log.d("EMOJI_DEBUG", "Emoji picker is VISIBLE, closing it...");
             closeEmojiPicker();
         } else {
-            mEmojiKeyboardView.setVisibility(View.VISIBLE);
-            if (mInputView != null)
+            Log.d("EMOJI_DEBUG", "Emoji picker is HIDDEN, showing it...");
+
+            // FIRST: Hide other views to prevent overlap
+            if (mInputView != null) {
+                Log.d("EMOJI_DEBUG", "Hiding mInputView");
                 mInputView.setVisibility(View.GONE);
-            if (mCandidateViewContainer != null && !mFixedCandidateViewOn)
+            }
+
+            // Hide candidate view BEFORE showing emoji picker
+            if (mFixedCandidateViewOn && mCandidateInInputView != null) {
+                Log.d("EMOJI_DEBUG", "Hiding mCandidateInInputView (fixed mode)");
+                mCandidateInInputView.setVisibility(View.GONE);
+
+                // Also hide all children of CandidateInInputView to prevent any overlap
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        group.getChildAt(i).setVisibility(View.GONE);
+                        Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: "
+                                + group.getChildAt(i).getClass().getSimpleName());
+                    }
+                }
+            } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
+                Log.d("EMOJI_DEBUG", "Hiding candidate view");
                 hideCandidateView();
+            }
+
+            // THEN: Show emoji picker
+            mEmojiKeyboardView.setVisibility(View.VISIBLE);
+            mEmojiKeyboardView.bringToFront(); // Force to front
+            mEmojiKeyboardView.invalidate(); // Force redraw
+
+            // Use the height from ComposeView's layoutParams (set in ComposeBridge)
+            // Don't override with hardcoded value
+            mEmojiKeyboardView.requestLayout();
+
+            // Force layout update
+            mInputViewContainer.requestLayout();
+            mInputViewContainer.invalidate();
+
+            Log.d("EMOJI_DEBUG", "Emoji picker should now be visible!");
+            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView visibility after: " + mEmojiKeyboardView.getVisibility());
+            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView height: " + mEmojiKeyboardView.getHeight());
+            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView width: " + mEmojiKeyboardView.getWidth());
+            if (mCandidateInInputView != null) {
+                Log.d("EMOJI_DEBUG", "mCandidateInInputView visibility: " + mCandidateInInputView.getVisibility());
+            }
+
+            // Debug: Check all children in container
+            if (mInputViewContainer != null) {
+                Log.d("EMOJI_DEBUG", "Container children count: " + mInputViewContainer.getChildCount());
+                for (int i = 0; i < mInputViewContainer.getChildCount(); i++) {
+                    android.view.View child = mInputViewContainer.getChildAt(i);
+                    Log.d("EMOJI_DEBUG", "  Child " + i + ": " + child.getClass().getSimpleName() +
+                            " visibility=" + child.getVisibility() +
+                            " z=" + child.getZ());
+                }
+            }
         }
     }
 
     public void closeEmojiPicker() {
+        Log.d("EMOJI_DEBUG", "=== closeEmojiPicker() called ===");
         if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+            Log.d("EMOJI_DEBUG", "Closing emoji picker");
             mEmojiKeyboardView.setVisibility(View.GONE);
-            if (mInputView != null)
+            if (mInputView != null) {
+                Log.d("EMOJI_DEBUG", "Showing keyboard again");
                 mInputView.setVisibility(View.VISIBLE);
+            }
+            // Restore candidate view in fixed mode
+            if (mFixedCandidateViewOn && mCandidateInInputView != null) {
+                Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode)");
+                mCandidateInInputView.setVisibility(View.VISIBLE);
+
+                // Restore children visibility
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        group.getChildAt(i).setVisibility(View.VISIBLE);
+                        Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
+                    }
+                }
+            }
+        } else {
+            Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
         }
     }
 
@@ -2861,10 +3018,33 @@ public class LIMEService extends InputMethodService implements
                 }
 
                 if (ic != null) {
-                    CharSequence before = ic.getTextBeforeCursor(1, 0);
+                    // Get a larger chunk of text to properly handle multi-codepoint emojis
+                    CharSequence before = ic.getTextBeforeCursor(32, 0);
 
                     if (before != null && before.length() > 0) {
-                        ic.deleteSurroundingText(1, 0);
+                        // Use BreakIterator to find the previous grapheme cluster boundary
+                        // This correctly handles multi-codepoint emojis (skin tones, ZWJ sequences,
+                        // etc.)
+                        java.text.BreakIterator breakIterator = java.text.BreakIterator.getCharacterInstance();
+                        breakIterator.setText(before.toString());
+
+                        // Move to the end of the text
+                        int end = before.length();
+
+                        // Find the previous character boundary
+                        int start = breakIterator.preceding(end);
+                        if (start == java.text.BreakIterator.DONE) {
+                            start = 0;
+                        }
+
+                        // Delete from start to end (the entire grapheme cluster)
+                        int deleteCount = end - start;
+                        if (deleteCount > 0) {
+                            ic.deleteSurroundingText(deleteCount, 0);
+                        } else {
+                            // Fallback to simple delete
+                            ic.deleteSurroundingText(1, 0);
+                        }
                     } else {
                         keyDownUp(KeyEvent.KEYCODE_DEL, false);
                     }
