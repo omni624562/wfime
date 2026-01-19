@@ -179,19 +179,23 @@
             limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="10%p" />
         <Key
+            limehd:codes="-100"
+            limehd:keyIcon="@drawable/ic_emoji_white"
+            limehd:keyWidth="10%p" />
+        <Key
             limehd:codes="-10"
             limehd:isModifier="true"
             limehd:keyLabel="中"
             limehd:keyWidth="10%p" />
         <Key
-            limehd:codes="44"
-            limehd:keyLabel=","
-            limehd:keyWidth="10%p" />
-        <Key
             limehd:codes="32"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_flat_keyboard_space"
-            limehd:keyWidth="45%p" />
+            limehd:keyWidth="35%p" />
+        <Key
+            limehd:codes="44"
+            limehd:keyLabel=","
+            limehd:keyWidth="10%p" />
         <Key
             limehd:codes="59"
             limehd:keyLabel=";"
