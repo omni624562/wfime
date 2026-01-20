@@ -158,23 +158,27 @@
             limehd:keyLabel="EN"
             limehd:keyWidth="10%p" />
         <Key
-            limehd:codes="44"
-            limehd:keyLabel=","
+            limehd:codes="-10"
+            limehd:isModifier="true"
+            limehd:keyLabel="中"
+            limehd:keyWidth="10%p" />
+        <Key
+            limehd:codes="-100"
+            limehd:keyIcon="@drawable/ic_emoji_white"
             limehd:keyWidth="10%p" />
         <Key
             limehd:codes="32"
             limehd:iconPreview="@drawable/sym_keyboard_feedback_space"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_keyboard_space_light"
-            limehd:keyWidth="45%p" />
+            limehd:keyWidth="35%p" />
+        <Key
+            limehd:codes="44"
+            limehd:keyLabel=","
+            limehd:keyWidth="10%p" />
         <Key
             limehd:codes="8230"
             limehd:keyLabel="…"
-            limehd:keyWidth="10%p" />
-        <Key
-            limehd:codes="-10"
-            limehd:isModifier="true"
-            limehd:keyLabel="中"
             limehd:keyWidth="10%p" />
         <Key
             limehd:codes="10"

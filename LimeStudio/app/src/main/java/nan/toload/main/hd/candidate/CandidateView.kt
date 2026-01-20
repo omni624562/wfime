@@ -241,7 +241,7 @@ open class CandidateView @JvmOverloads constructor(
         _rawKeycode = keycode
     }
     
-    fun setEmbeddedComposingView(view: TextView) {
+    fun setEmbeddedComposingView(view: TextView?) {
         this.embeddedComposingView = view
     }
     
