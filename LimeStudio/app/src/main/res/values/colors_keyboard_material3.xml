@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material Design 3 Keyboard Colors - Light Theme
+  Maps legacy keyboard colors to Material3 design tokens
+
+  These colors automatically adapt to Material You dynamic theming on Android 12+
+  Dark theme variants are in values-night/colors_keyboard_material3.xml
+-->
+<resources>
+    <!--
+        Keyboard Background Colors
+        Uses Material3 surface tokens for proper elevation and contrast
+    -->
+    <color name="keyboard_background_material3">@color/md_theme_surface</color>
+    <color name="keyboard_second_background_material3">@color/md_theme_surfaceVariant</color>
+    <color name="keyboard_third_background_material3">@color/md_theme_surface</color>
+    <color name="keyboard_functional_background_material3">@color/md_theme_surfaceVariant</color>
+
+    <!--
+        Composing Text Popup Background
+        Uses 60% alpha on surface variant for semi-transparent effect
+    -->
+    <color name="keyboard_composing_background_material3">#99DBE5DD</color> <!-- md_theme_surfaceVariant @ 60% -->
+
+    <!--
+        Keyboard Foreground Colors (Text)
+        Uses Material3 onSurface tokens for proper text contrast
+    -->
+    <color name="keyboard_foreground_material3">@color/md_theme_onSurface</color>
+    <color name="keyboard_second_foreground_material3">@color/md_theme_onSurfaceVariant</color>
+    <color name="keyboard_third_foreground_material3">@color/md_theme_onSurfaceVariant</color>
+
+    <!--
+        Candidate & Selection Colors
+        Uses Material3 primary and outline tokens
+    -->
+    <color name="keyboard_candidate_spacer_material3">@color/md_theme_outline</color>
+    <color name="keyboard_selection_keys_material3">#CC006C4C</color> <!-- md_theme_primary @ 80% -->
+    <color name="keyboard_action_key_material3">@color/md_theme_primary</color>
+
+    <!--
+        Key Press State
+        Uses primary container for pressed state
+    -->
+    <color name="keyboard_key_pressed_material3">@color/md_theme_primaryContainer</color>
+</resources>

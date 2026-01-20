@@ -24,7 +24,19 @@
   ~  */
   -->
 <resources>
-    <!--common colors-->
+    <!--
+        WFIME Color System
+
+        This file contains legacy color definitions for keyboard themes.
+        For Material3 UI colors, see colors_material3.xml
+        For Material3 keyboard colors, see colors_keyboard_material3.xml
+    -->
+
+    <!--
+        Common Utility Colors
+        These are semantic colors used across themes
+        ✅ Keep - Not replaced by Material3
+    -->
     <color name="color_white">#FFFFFFFF</color>
     <color name="color_black">#FF000000</color>
     <color name="color_transparent">#00FFFFFF</color>
@@ -33,7 +45,11 @@
     <color name="color_common_orange_hl">#FFFBB732</color>
     <color name="color_common_light_orange_hl">#FFF29238</color>
 
-    <!-- colors for light theme -->
+    <!--
+        Light Theme Keyboard Colors (Legacy)
+        ⚠️ These are legacy colors for non-Material3 themes
+        Material3 light theme uses colors_keyboard_material3.xml
+    -->
 
     <color name="keyboard_background_light">#FFC8C8C8</color>
     <color name="second_background_light">#FFE1E1E1</color>
@@ -65,6 +81,13 @@
     
     <color name="action_key_color">#FF70C0B0</color>
 
+
+    <!--
+        Custom Theme Colors
+        User customization themes (Pink, Tech Blue, Fashion Purple, Relax Green)
+        ✅ Keep - These provide user choice and personalization
+        📌 Not migrated to Material3 to preserve unique theme identities
+    -->
 
     <!-- colors for pink theme -->
     <color name="pink_hl">#FFC74A72</color>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material Design 3 Keyboard Colors - Dark Theme
+  Maps legacy keyboard colors to Material3 design tokens for dark mode
+
+  These colors automatically apply when system dark mode is enabled
+  Provides proper contrast and elevation for dark theme keyboards
+-->
+<resources>
+    <!--
+        Keyboard Background Colors
+        Uses Material3 dark surface tokens
+    -->
+    <color name="keyboard_background_material3">@color/md_theme_surface</color>
+    <color name="keyboard_second_background_material3">@color/md_theme_surfaceVariant</color>
+    <color name="keyboard_third_background_material3">@color/md_theme_surface</color>
+    <color name="keyboard_functional_background_material3">@color/md_theme_surfaceVariant</color>
+
+    <!--
+        Composing Text Popup Background
+        Uses 60% alpha on dark surface for semi-transparent effect
+    -->
+    <color name="keyboard_composing_background_material3">#99191C1A</color> <!-- md_theme_surface (dark) @ 60% -->
+
+    <!--
+        Keyboard Foreground Colors (Text)
+        Uses Material3 onSurface tokens for light text on dark backgrounds
+    -->
+    <color name="keyboard_foreground_material3">@color/md_theme_onSurface</color>
+    <color name="keyboard_second_foreground_material3">@color/md_theme_onSurfaceVariant</color>
+    <color name="keyboard_third_foreground_material3">@color/md_theme_onSurfaceVariant</color>
+
+    <!--
+        Candidate & Selection Colors
+        Uses Material3 primary (lighter in dark mode) and outline tokens
+    -->
+    <color name="keyboard_candidate_spacer_material3">@color/md_theme_outline</color>
+    <color name="keyboard_selection_keys_material3">#CC6CDBAC</color> <!-- md_theme_primary (dark) @ 80% -->
+    <color name="keyboard_action_key_material3">@color/md_theme_primary</color>
+
+    <!--
+        Key Press State
+        Uses primary container for pressed state (darker in dark mode)
+    -->
+    <color name="keyboard_key_pressed_material3">@color/md_theme_primaryContainer</color>
+</resources>

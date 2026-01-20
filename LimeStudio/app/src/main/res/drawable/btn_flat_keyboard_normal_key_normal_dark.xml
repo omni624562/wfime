@@ -6,7 +6,7 @@
     android:insetBottom="3dp">
     <shape android:shape="rectangle">
         <corners android:radius="8dp" />
-        <solid android:color="@color/second_background_dark" />
+        <solid android:color="@color/keyboard_second_background_material3" />
         <padding
             android:bottom="1dp"
             android:left="1dp"

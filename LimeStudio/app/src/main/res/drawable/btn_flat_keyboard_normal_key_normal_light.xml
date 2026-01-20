@@ -29,7 +29,7 @@
     android:insetBottom="0dp">
     <shape android:shape="rectangle">
         <corners android:radius="4dp" />
-        <solid android:color="@color/third_background_light" />
+        <solid android:color="@color/keyboard_third_background_material3" />
         <padding
             android:bottom="1dp"
             android:left="1dp"
@@ -41,7 +41,7 @@
 
         <stroke
             android:width="2dp"
-            android:color="@color/keyboard_background_light" />
+            android:color="@color/keyboard_background_material3" />
 
     </shape>
 </inset>
