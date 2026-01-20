@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import nan.toload.main.hd.ComposeBridge;
 import nan.toload.main.hd.DBServer;
 import nan.toload.main.hd.R;
 import nan.toload.main.hd.SearchServer;
@@ -66,7 +67,7 @@ public class LIMEPreferenceHC extends androidx.appcompat.app.AppCompatActivity {
         // Enable Edge-to-Edge
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        // Create simple frame layout for fragment
+        // Create simple frame layout for Compose
         setContentView(R.layout.activity_settings_m3);
 
         com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.settings_toolbar);
@@ -78,103 +79,70 @@ public class LIMEPreferenceHC extends androidx.appcompat.app.AppCompatActivity {
 
         this.SearchSrv = new SearchServer(this);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.settings_container, new PrefsFragment())
-                    .commit();
+        // Use Compose Settings Screen instead of Fragment
+        android.widget.FrameLayout container = findViewById(R.id.settings_container);
+        if (container != null) {
+            android.view.View settingsView = ComposeBridge.INSTANCE.createSettingsView(this, this);
+            container.addView(settingsView);
         }
+
+        // Set up preference change listener for keyboard type handling
+        setupPreferenceChangeListener();
     }
 
-    public static class PrefsFragment extends androidx.preference.PreferenceFragmentCompat
-            implements OnSharedPreferenceChangeListener {
-        private final boolean DEBUG = false;
-        private final String TAG = "LIMEPreferenceHC";
-        private Context ctx = null;
-        private DBServer DBSrv = null;
-        private LIMEPreferenceManager mLIMEPref = null;
+    /**
+     * Set up preference change listener to handle phonetic keyboard type changes.
+     * This logic was previously in PrefsFragment.onSharedPreferenceChanged()
+     */
+    private void setupPreferenceChangeListener() {
+        LIMEPreferenceManager mLIMEPref = new LIMEPreferenceManager(this);
+        DBServer DBSrv = new DBServer(this);
 
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.preference, rootKey);
+        SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key != null && key.equals("phonetic_keyboard_type")) {
+                    String selectedPhoneticKeyboardType = mLIMEPref.getPhoneticKeyboardType();
+                    try {
+                        KeyboardObj kobj = DBSrv.getKeyboardObj("phonetic");
 
-            ctx = requireContext();
-            mLIMEPref = new LIMEPreferenceManager(ctx);
-            DBSrv = new DBServer(ctx);
-        }
-
-        @Override
-        public void onDisplayPreferenceDialog(@androidx.annotation.NonNull androidx.preference.Preference preference) {
-            // Handle MultiListPreference with custom dialog fragment
-            if (preference instanceof MultiListPreference) {
-                final androidx.fragment.app.DialogFragment dialogFragment = MultiListPreferenceDialogFragmentCompat
-                        .newInstance(preference.getKey());
-                dialogFragment.setTargetFragment(this, 0);
-                dialogFragment.show(getParentFragmentManager(),
-                        "MultiListPreferenceDialogFragmentCompat");
-            } else {
-                super.onDisplayPreferenceDialog(preference);
-            }
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-            getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
-        }
-
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (DEBUG)
-                Log.i(TAG, "onSharedPreferenceChanged(), key:" + key);
-
-            if (key.equals("phonetic_keyboard_type")) {
-                String selectedPhoneticKeyboardType = mLIMEPref.getPhoneticKeyboardType();
-                try {
-                    KeyboardObj kobj = DBSrv.getKeyboardObj("phonetic");
-
-                    if (selectedPhoneticKeyboardType.equals("standard")) {
-                        kobj = DBSrv.getKeyboardObj("phonetic");
-                    } else if (selectedPhoneticKeyboardType.equals("eten")) {
-                        kobj = DBSrv.getKeyboardObj("phoneticet41");
-                    } else if (selectedPhoneticKeyboardType.equals("eten26")) {
-                        if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
-                            kobj = DBSrv.getKeyboardObj("limenum");
-                        } else {
-                            kobj = DBSrv.getKeyboardObj("lime");
+                        if (selectedPhoneticKeyboardType.equals("standard")) {
+                            kobj = DBSrv.getKeyboardObj("phonetic");
+                        } else if (selectedPhoneticKeyboardType.equals("eten")) {
+                            kobj = DBSrv.getKeyboardObj("phoneticet41");
+                        } else if (selectedPhoneticKeyboardType.equals("eten26")) {
+                            if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
+                                kobj = DBSrv.getKeyboardObj("limenum");
+                            } else {
+                                kobj = DBSrv.getKeyboardObj("lime");
+                            }
+                        } else if (selectedPhoneticKeyboardType.equals("eten26_symbol")) {
+                            kobj = DBSrv.getKeyboardObj("et26");
+                        } else if (selectedPhoneticKeyboardType.equals("hsu")) {
+                            if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
+                                kobj = DBSrv.getKeyboardObj("limenum");
+                            } else {
+                                kobj = DBSrv.getKeyboardObj("lime");
+                            }
+                        } else if (selectedPhoneticKeyboardType.equals("hsu_symbol")) {
+                            kobj = DBSrv.getKeyboardObj("hsu");
                         }
-                    } else if (selectedPhoneticKeyboardType.equals("eten26_symbol")) {
-                        kobj = DBSrv.getKeyboardObj("et26");
-                    } else if (selectedPhoneticKeyboardType.equals("hsu")) { // Jeremy '12,7,6 Add HSU english keyboard
-                                                                             // support
-                        if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
-                            kobj = DBSrv.getKeyboardObj("limenum");
-                        } else {
-                            kobj = DBSrv.getKeyboardObj("lime");
+                        if (kobj != null && DBSrv != null) {
+                            DBSrv.setIMKeyboard("phonetic", kobj.getDescription(), kobj.getCode());
                         }
-                    } else if (selectedPhoneticKeyboardType.equals("hsu_symbol")) {
-                        kobj = DBSrv.getKeyboardObj("hsu");
+                    } catch (RemoteException e) {
+                        Log.e("LIMEPreferenceHC", "Failed to update phonetic keyboard: " + e.getMessage());
+                        e.printStackTrace();
                     }
-                    if (kobj != null && DBSrv != null) {
-                        DBSrv.setIMKeyboard("phonetic", kobj.getDescription(), kobj.getCode());
-                    }
-
-                    if (DEBUG && DBSrv != null)
-                        Log.i(TAG, "onSharedPreferenceChanged() PhoneticIMInfo.kyeboard:" +
-                                DBSrv.getImInfo("phonetic", "keyboard"));
-                } catch (RemoteException e) {
-                    Log.i(TAG, "onSharedPreferenceChanged(), WriteIMinfo for selected phonetic keyboard failed!!");
-                    e.printStackTrace();
                 }
+                // Trigger backup manager for preference changes
+                BackupManager backupManager = new BackupManager(LIMEPreferenceHC.this);
+                backupManager.dataChanged();
             }
-            BackupManager backupManager = new BackupManager(ctx);
-            backupManager.dataChanged(); // Jeremy '12,4,29 call backup manager to backup the changes.
-        }
+        });
     }
+
+    // PrefsFragment removed - now using Compose SettingsScreen
+    // Preference change logic moved to setupPreferenceChangeListener()
 }
