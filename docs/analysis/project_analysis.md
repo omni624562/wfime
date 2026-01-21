@@ -1,60 +1,71 @@
-# WFIME (Wheat Fields Input Method Editor) Project Analysis
+# WFIME Project Analysis & Roadmap | 專案分析與路線圖
 
-## Overview
-**WFIME** is an Android Input Method Editor (IME) based on the open-source LIME IME project. It is optimized for specific user habits, specifically retaining **Dayi (大易)** and **Phonetic (注音)** input methods.
+**Analysis Date:** 2026-01-21
+**Branch:** `main`
+**Version:** `2026.01.20`
 
-## Project Structure
-The project follows a standard Android project structure:
+---
 
-- **Root Directory**:
-  - `LimeStudio/`: Main Android project directory.
-  - `Database/`: Contains SQLite database files (`.db`) and archives (`.zip`) for input methods (Dayi, Phonetic).
-  - `README.md`: Project documentation.
-  - `app-release.apk`: Pre-built release APK.
+## 1. Current Branch Status | 目前分支狀態
 
-- **Android Module (`LimeStudio/app`)**:
-  - `src/main/java/nan/toload/main/hd/`: Source code package.
-  - `src/main/res/`: Reources (layouts, drawables, values).
-  - `src/main/AndroidManifest.xml`: App manifest defining components.
+The `main` branch is stable and includes recent modernizations:
+- **Material 3 UI**: Full integration for keyboard styling (light/dark themes).
+- **Android 16 Compliance**: Target SDK 36, `OnBackPressedDispatcher` migration complete.
+- **Documentation**: Comprehensive documentation infrastructure in `docs/`.
 
-## Technical Stack & Configuration
+### Active Feature Branches (Unmerged) | 活躍功能分支（未合併）
+- `feature/ui-adjustments`: Contains critical fixes for **Keyboard Auto-Close/Flicker** and **Compose CandidateView** improvements.
+- `feature/optimization`: Largely redundant (merged preference migration), likely safe to delete after verification.
 
-### Build System (Gradle)
-- **Agp Version**: 8.13.2
-- **Kotlin Version**: 1.9.22
-- **Compile SDK**: 36
-- **Target SDK**: 36
-- **Min SDK**: 30 (Android 11)
+---
 
-### Key Dependencies
-- **Language**: Kotlin & Java
-- **UI Frameworks**:
-  - **Jetpack Compose**: Used for modern UI components (Material 3).
-  - **XML Layouts**: Likely used for legacy parts or preference screens (implied by `LIMEPreferenceHC`).
-- **AndroidX Libraries**: Core, AppCompat, Activity, ConstraintLayout, CoordinatorLayout, DrawerLayout, Preference.
-- **Testing**: JUnit 4, Mockito, Robolectric, Espresso.
+## 2. Technical Debt & Modernization Analysis | 技術債與現代化分析
 
-## Core Components
-Based on `AndroidManifest.xml`:
+### Critical (Immediate Action) | 關鍵（立即行動）
+1.  **Legacy List Components**:
+    - **Issue**: Extensive use of `ListView` (NavigationDrawer, settings) and `GridView` (Management screens).
+    - **Impact**: Performance degradation and lack of modern scrolling features.
+    - **Plan**: Migrate to `RecyclerView`.
 
-1.  **LIMEService** (`.LIMEService`):
-    - **Type**: `InputMethodService`
-    - **Function**: The core engine of the keyboard. It handles key events, candidate selection, and input logic.
-    - **Permissions**: `BIND_INPUT_METHOD` (Required for IMEs), `FOREGROUND_SERVICE_SPECIAL_USE`.
+2.  **UI Components outdated**:
+    - **Issue**: Standard `Button` and `EditText` usage throughout fragments.
+    - **Modernization**: Replace with `MaterialButton` and `TextInputLayout` / `TextInputEditText`.
 
-2.  **MainActivity** (`nan.toload.main.hd.MainActivity`):
-    - **Type**: `Activity` (Launcher)
-    - **Function**: Likely the entry point for the user to see app info or initial setup instructions.
+3.  **Layout Architecture**:
+    - **Issue**: Deeply nested `LinearLayout` hierarchies and overuse of `RelativeLayout`.
+    - **Impact**: Rendering performance overhead.
+    - **Plan**: Flatten UI using `ConstraintLayout`.
 
-3.  **LIMEPreferenceHC** (`.limesettings.LIMEPreferenceHC`):
-    - **Type**: `Activity`
-    - **Function**: Settings screen for configuring the keyboard (Preferences).
+4.  **Hardware Keyboard Compatibility**:
+    - **Issue**: `HardKeyHelper.java` and `LIMEKeyboardSwitcher` rely on older event handling.
+    - **Plan**: Review against Android 13+ hardware keyboard support APIs.
 
-## Data Management
-The `Database/` directory suggests the app uses pre-populated SQLite databases for character mappings:
-- `dayi.db` / `dayiuni.db`: Dayi input method data.
-- `phonetic.db` / `phoneticcomplete.db`: Phonetic input method data.
-Permissions `READ_USER_DICTIONARY` and `WRITE_USER_DICTIONARY` indicate it also interacts with the system user dictionary.
+### Cleanup Candidates | 清理候選
+- **ProgressDialog**: Mostly replaced by `LoadingDialog` (Compose), but code comments indicate some wrapper methods remain for API compatibility. These should be deprecated/removed.
+- **System.exit()**: Removed from main flow, but verify no debug/testing remnants exist.
+- **Lint Suppressions**: 13 locations with `@Suppress` / `@SuppressLint` (e.g., `ForegroundServiceType`, `InflateParams`) need review to see if underlying issues can be fixed.
 
-## Summary
-This is a mature Android project transitioning to modern Android development practices (adopting Kotlin and Jetpack Compose) while maintaining core IME functionality. It targets recent Android versions (SDK 36) and focuses on providing a clean, specialized input experience for Dayi and Phonetic users.
+---
+
+## 3. Architecture Optimization Opportunities | 架構優化機會
+
+### Jetpack Compose Migration
+- **Current State**: ~15% adoption (CandidateView, EmojiPicker, LoadingDialog).
+- **Target**:
+    - **Phase 1**: Convert Setup/Settings screens to Compose.
+    - **Phase 2**: Convert Main Activity UI to Compose (scaffold).
+    - **Phase 3**: Custom Keyboard View (Long-term goal, possibly keep legacy View for performance if needed).
+
+### Input Method Service
+- **Refactoring**: `LIMEService.java` is large (170KB+).
+- **Optimization**: Extract logic into distinct managers (ServiceLifecycleManager, InputConnectionManager) to improve testability.
+
+---
+
+## 4. Recommended Next Steps | 建議後續步驟
+
+1.  **Merge `feature/ui-adjustments`**: Bring in the keyboard flicker fixes.
+2.  **UI Cleanup Sprint**:
+    - Replace all `Button` -> `MaterialButton`.
+    - Replace `ListView` -> `RecyclerView` in Navigation Drawer.
+3.  **ConstraintLayout Migration**: Tackle `fragment_manage_im.xml` first (highest complexity).
