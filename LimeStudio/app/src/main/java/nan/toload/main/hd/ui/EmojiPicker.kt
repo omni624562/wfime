@@ -39,6 +39,7 @@ fun EmojiPicker(
 ) {
     var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     val context = LocalContext.current
+    EmojiData.initialize(context) // Load emojis from JSON
 
     // Recent Emojis State
     var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
@@ -200,7 +201,7 @@ fun EmojiGridItem(
             .aspectRatio(1f)
             .padding(2.dp)
             .clip(CircleShape)
-            .pointerInput(Unit) {
+            .pointerInput(emoji) {
                 detectTapGestures(
                     onTap = { onEmojiClick(emoji.char) },
                     onLongPress = {
