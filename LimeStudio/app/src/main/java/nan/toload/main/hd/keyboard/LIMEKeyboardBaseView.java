@@ -1453,6 +1453,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private boolean shouldDrawIconFully(Key key) {
+        // Exclude emoji key (KEYCODE_OPTIONS = -100) from drawing icon fully,
+        // even if it has a popup keyboard. This ensures consistent 55% scaling.
+        if (key.codes != null && key.codes.length > 0 && key.codes[0] == -100) {
+            return false;
+        }
         return (hasPopupKeyboard(key));
         // return isNumberAtEdgeOfPopupChars(key) || isLatinF1Key(key);
         // || LIMEKeyboard.hasPuncOrSmileysPopup(key);
