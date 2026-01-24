@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Whitelist-based validation for 30+ database tables | 基於白名單的驗證，涵蓋 30+ 個資料庫表
   - Pattern validation fallback with security logging | 帶安全日誌的模式驗證備援機制
   - `isValidTableName()` and `validateTableName()` security methods | `isValidTableName()` 和 `validateTableName()` 安全方法
-  - See [SECURITY_ANALYSIS.md](SECURITY_ANALYSIS.md) for details | 詳見 [SECURITY_ANALYSIS.md](SECURITY_ANALYSIS.md)
+  - See [docs/SECURITY_ANALYSIS.md](docs/SECURITY_ANALYSIS.md) for details | 詳見 [docs/SECURITY_ANALYSIS.md](docs/SECURITY_ANALYSIS.md)
 - **Security Documentation** - Comprehensive security audit and vulnerability analysis | **安全文件** - 全面的安全稽核和漏洞分析
   - SQL injection vulnerability documentation | SQL 注入漏洞文件
   - Attack scenario examples | 攻擊場景範例

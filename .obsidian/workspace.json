@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "784999962bafeb43",
+        "id": "25805ad323ea7820",
         "type": "tabs",
         "children": [
           {
-            "id": "4aef4686eeebbbfc",
+            "id": "b050bab7e30dc4d6",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "docs/README.md",
                 "mode": "source",
                 "source": false
               },
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "docs/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
+                "file": "docs/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -156,7 +156,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md",
+                "file": "docs/README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -183,8 +183,30 @@
       "bases:Create new base": false
     }
   },
-  "active": "4aef4686eeebbbfc",
+  "active": "b050bab7e30dc4d6",
   "lastOpenFiles": [
+    "docs/archive/PHASE4_PROGRESS.md",
+    "docs/SECURITY_ANALYSIS.md",
+    "README.md",
+    "SECURITY_ANALYSIS.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "PHASE4_PROGRESS.md",
+    "docs/README.md",
+    "docs/archive/analysis/task.md",
+    "docs/archive/analysis/project_analysis.md",
+    "docs/archive/analysis",
+    "docs/archive/Device-Testing-Guide-Phase1-3.md",
+    "docs/archive/Git-Workflow-Status.md",
+    "docs/archive/Material3-Progress-Summary.md",
+    "docs/archive/Phase3-4-Fast-Track-Summary.md",
+    "docs/archive/Phase2-Component-Audit.md",
+    "docs/archive/Phase1.3-Testing-Guide.md",
+    "docs/archive/Phase1-Integration-Analysis.md",
+    "docs/archive/Phase3-Completion-Report.md",
+    "docs/archive/Phase1-Completion-Report.md",
+    "docs/archive/Material3-5-Percent-Completion-Plan.md",
+    "docs/archive",
     "LimeStudio/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/nan/toload/main/hd/ui/compose/theme/ThemeKt.dex",
     "LimeStudio/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/nan/toload/main/hd/ui/compose/theme",
     "LimeStudio/app/build/intermediates/java_res/debug/processDebugJavaRes/out/nan/toload/main/hd/ui/compose/theme",
@@ -193,12 +215,6 @@
     "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/limesettings/LIMEPreferenceHC.class",
     "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/limesettings/LIMEPreferenceHC$1.class",
     "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/LIMEService.class",
-    "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/LIMEService$KeyboardTheme.class",
-    "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/LIMEService$3.class",
-    "LimeStudio/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/nan/toload/main/hd/LIMEService$2.class",
-    "docs/AGENT_SKILLS_USAGE.md",
-    "README.md",
-    "SECURITY_ANALYSIS.md",
-    "PHASE4_PROGRESS.md"
+    "docs/AGENT_SKILLS_USAGE.md"
   ]
 }
