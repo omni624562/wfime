@@ -92,4 +92,23 @@ object EmojiData {
             else -> SMILEYS
         }
     }
+
+    /**
+     * Applies a skin tone modifier to a base emoji string.
+     * Handles complex ZWJ sequences by inserting the tone before the first ZWJ set.
+     */
+    fun applySkinTone(baseEmoji: String, tone: String): String {
+        // Check for ZWJ (Zero Width Joiner - \u200D)
+        val zwjIndex = baseEmoji.indexOf("\u200D")
+        
+        return if (zwjIndex != -1) {
+            // If ZWJ exists, insert tone before it.
+            // Example: Woman (1F469) + ZWJ (200D) + Medical (2695)
+            // Result: Woman (1F469) + Tone + ZWJ (200D) + Medical (2695)
+            baseEmoji.substring(0, zwjIndex) + tone + baseEmoji.substring(zwjIndex)
+        } else {
+            // Simple emoji (e.g. Thumbs Up), just append
+            baseEmoji + tone
+        }
+    }
 }

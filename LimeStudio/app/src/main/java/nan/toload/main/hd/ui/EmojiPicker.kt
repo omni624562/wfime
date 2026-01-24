@@ -1,6 +1,7 @@
 package nan.toload.main.hd.ui
 
 import android.content.Context
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,7 +30,12 @@ import nan.toload.main.hd.data.EmojiData
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EmojiPicker(
     onEmojiClick: (String) -> Unit,
@@ -71,10 +77,12 @@ fun EmojiPicker(
         saveRecentEmojis(context, newList)
     }
 
-    // Get display emojis based on category
-    val displayEmojis = remember(selectedCategoryIndex, recentEmojis) {
-        val categoryId = selectedCategoryIndex + 1 // Categories are 1-indexed in EmojiData
-        EmojiData.getListByCategory(categoryId)
+    val pagerState = rememberPagerState(pageCount = { categories.size })
+    val coroutineScope = rememberCoroutineScope()
+
+    // Sync selectedCategoryIndex with pager state for tab highlighting
+    LaunchedEffect(pagerState.currentPage) {
+        selectedCategoryIndex = pagerState.currentPage
     }
 
     Column(
@@ -98,7 +106,12 @@ fun EmojiPicker(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .clickable { selectedCategoryIndex = index }
+                        .clickable { 
+                            selectedCategoryIndex = index
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        }
                         .padding(horizontal = 2.dp)
                         .weight(1f) // Distribute space evenly
                 ) {
@@ -125,22 +138,34 @@ fun EmojiPicker(
             }
         }
 
-        // Emoji Grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(8),
+        // Emoji Pager
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 4.dp),
-            contentPadding = PaddingValues(vertical = 4.dp)
-        ) {
-            items(displayEmojis) { emoji ->
-                EmojiGridItem(
-                    emoji = emoji,
-                    onEmojiClick = { char ->
-                        onEmojiClick(char)
-                        addToRecent(char)
-                    }
-                )
+                .fillMaxWidth()
+        ) { page ->
+            // Get display emojis for this specific page
+            val emojisForPage = remember(page, recentEmojis) {
+                EmojiData.getListByCategory(page + 1) // Categories are 1-indexed
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(6),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 4.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(emojisForPage) { emoji ->
+                    EmojiGridItem(
+                        emoji = emoji,
+                        onEmojiClick = { char ->
+                            onEmojiClick(char)
+                            addToRecent(char)
+                        }
+                    )
+                }
             }
         }
 
@@ -200,7 +225,7 @@ fun EmojiGridItem(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(2.dp)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(8.dp)) // Changed from CircleShape to visible corners for indicator
             .pointerInput(emoji) {
                 detectTapGestures(
                     onTap = { onEmojiClick(emoji.char) },
@@ -213,7 +238,25 @@ fun EmojiGridItem(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(text = emoji.char, fontSize = 28.sp)
+        Text(text = emoji.char, fontSize = 36.sp)
+
+        // Visual indicator for emojis with skin tone support (small triangle in bottom-right)
+        if (emoji.hasSkinTone) {
+            Canvas(modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(4.dp)
+                .size(8.dp) // Increased size slightly for visibility
+            ) {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(size.width, size.height) // Bottom right
+                    lineTo(size.width, 0f)          // Top right
+                    lineTo(0f, size.height)         // Bottom left
+                    close()
+                }
+                // Use LightGray with higher alpha for better visibility on dark background
+                drawPath(path, color = Color.LightGray.copy(alpha = 0.8f))
+            }
+        }
 
         if (showSkinTonePopup) {
             SkinTonePopup(
@@ -236,7 +279,7 @@ fun SkinTonePopup(
 ) {
     val variants = remember(baseEmoji) {
         val list = mutableListOf(baseEmoji)
-        list.addAll(EmojiData.SKIN_TONES.map { tone -> baseEmoji + tone })
+        list.addAll(EmojiData.SKIN_TONES.map { tone -> EmojiData.applySkinTone(baseEmoji, tone) })
         list
     }
 

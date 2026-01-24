@@ -1147,8 +1147,21 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     drawableX = 0;
                     drawableY = NUMBER_HINT_VERTICAL_ADJUSTMENT_PIXEL;
                 } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -100) { // KEYCODE_OPTIONS
-                    // Special handling for Emoji Key: Scale to 55% of key height (approx 28dp)
-                    // to visual match Gboard style and avoid filling the whole key.
+                                                                                                // (Emoji)
+                    // Emoji Key: Scale to 55% of key height for consistency with Translate icon
+                    float scaleFactor = 0.55f;
+                    drawableHeight = (int) (key.height * scaleFactor);
+
+                    // Maintain aspect ratio if intrinsic dimensions are available
+                    if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
+                        drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
+                    } else {
+                        drawableWidth = drawableHeight;
+                    }
+                    drawableX = (key.width + padding.left - padding.right - drawableWidth) / 2;
+                    drawableY = (key.height + padding.top - padding.bottom - drawableHeight) / 2;
+                } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -10) { // Language Switch
+                    // Language Switch Key: Scale to 55% of key height to match text label size
                     float scaleFactor = 0.55f;
                     drawableHeight = (int) (key.height * scaleFactor);
                     // Maintain aspect ratio if intrinsic dimensions are available

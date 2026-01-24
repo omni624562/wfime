@@ -474,7 +474,14 @@ public class LIMEKeyboardSwitcher {
                 }
                 // 2. IM Switch Key Label (keycode -10)
                 if (key.codes[0] == -10) {
-                    key.label = getActiveIMSingleChar();
+                    if (isIm && !isSymbol) {
+                        key.label = getActiveIMSingleChar();
+                        key.icon = null;
+                    } else {
+                        // Use Translation Icon for Symbol/English mode
+                        key.label = null;
+                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.ic_translate);
+                    }
                 }
 
             }

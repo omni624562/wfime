@@ -38,8 +38,10 @@ import nan.toload.main.hd.ui.compose.manageword.ManageImViewModelFactory
 import nan.toload.main.hd.ui.compose.settings.SettingsScreen
 import nan.toload.main.hd.ui.compose.settings.SettingsViewModel
 import nan.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
+
 import nan.toload.main.hd.data.Word
 import android.view.KeyEvent
+import nan.toload.main.hd.ui.compose.theme.LimeTheme
 
 /**
  * Helper function to get navigation bar height
@@ -127,7 +129,7 @@ object ComposeBridge {
             android.util.Log.d("EMOJI_DEBUG", "Setting Compose content with EmojiPicker, padding=$systemBarPaddingDp")
             setContent {
                 android.util.Log.d("EMOJI_DEBUG", "Composing EmojiPicker UI")
-                MaterialTheme {
+                LimeTheme {
                     EmojiPicker(
                         onEmojiClick = { emoji ->
                             android.util.Log.d("EMOJI_DEBUG", "Emoji clicked: $emoji")
@@ -173,7 +175,7 @@ object ComposeBridge {
                 // Observe UI state
                 val uiState by viewModel.uiState.collectAsState()
 
-                MaterialTheme {
+                LimeTheme {
                     NavigationDrawerScreen(
                         menuItems = uiState.menuItems,
                         selectedPosition = uiState.selectedPosition,
@@ -209,7 +211,7 @@ object ComposeBridge {
                 val factory = ManageImViewModelFactory(context, table)
                 val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[ManageImViewModel::class.java]
 
-                MaterialTheme {
+                LimeTheme {
                     ManageImScreen(viewModel = viewModel)
                 }
             }
@@ -236,7 +238,7 @@ object ComposeBridge {
                 val factory = SettingsViewModelFactory(context)
                 val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[SettingsViewModel::class.java]
 
-                MaterialTheme {
+                LimeTheme {
                     SettingsScreen(viewModel = viewModel)
                 }
             }
