@@ -39,28 +39,31 @@
         android:textSize="@dimen/composing_text_size"
         android:visibility="gone" />
 
-    <!-- Use FrameLayout instead of LinearLayout with weight to provide bounded width for Compose -->
-    <FrameLayout
+    <!-- Use LinearLayout to arrange CandidateView and buttons horizontally -->
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent">
+        android:background="@android:color/transparent"
+        android:orientation="horizontal">
 
         <view xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/candidates"
             class="nan.toload.main.hd.candidate.CandidateView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="@dimen/candidate_stripe_height"
-            android:layout_marginEnd="@dimen/candidate_expand_button_width"
+            android:layout_weight="1"
             android:background="@android:color/transparent" />
+
+
 
         <ImageButton
             android:id="@+id/candidate_right"
             android:layout_width="@dimen/candidate_expand_button_width"
             android:layout_height="match_parent"
-            android:layout_gravity="end"
             android:clickable="true"
             android:contentDescription="@string/more_cand"
+            android:background="@android:color/transparent"
             android:src="@drawable/ic_suggest_expander" />
-    </FrameLayout>
+    </LinearLayout>
 
 </nan.toload.main.hd.candidate.CandidateViewContainer>

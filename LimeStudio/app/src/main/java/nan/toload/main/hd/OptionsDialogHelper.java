@@ -47,7 +47,6 @@ public class OptionsDialogHelper {
     public static final int POS_KEYBOARD = 2;
     public static final int POS_METHOD = 3;
     public static final int POS_SPLIT_KEYBOARD = 4;
-    public static final int POS_VOICEINPUT = 5;
 
     private final LIMEPreferenceManager mLIMEPref;
     private final Resources mResources;
@@ -172,8 +171,6 @@ public class OptionsDialogHelper {
         CharSequence hanConvert = mResources.getString(R.string.han_convert_option_list);
         CharSequence itemSwitchIM = mResources.getString(R.string.keyboard_list);
         CharSequence itemSwitchSystemIM = mResources.getString(R.string.input_method);
-        CharSequence itemVoiceInput = mResources.getString(R.string.voice_input);
-
         CharSequence itemSplitKeyboard = mResources.getString(
                 getSplitKeyboardMenuTextResId(splitKeyboardState));
 
@@ -181,12 +178,12 @@ public class OptionsDialogHelper {
         if (hasSplitOption) {
             items = new CharSequence[] {
                     itemSettings, hanConvert, itemSwitchIM,
-                    itemSwitchSystemIM, itemSplitKeyboard, itemVoiceInput
+                    itemSwitchSystemIM, itemSplitKeyboard
             };
         } else {
             items = new CharSequence[] {
                     itemSettings, hanConvert, itemSwitchIM,
-                    itemSwitchSystemIM, itemVoiceInput
+                    itemSwitchSystemIM
             };
         }
 

@@ -220,6 +220,12 @@
     <string name="help_dialog_title">使用說明</string>
     <string name="help_dialog_detail">
         \n** 若輸入法運作異常請嘗試透過 [回復原始設定] 功能進行資料及設定的修正。\n
+        \n版本更新資訊 (2026.02.28)\n
+        1. [移除] 語音輸入功能：移除語音輸入按鈕、VoiceInputActivity 及相關資源，簡化輸入法介面。\n
+        2. [測試] 新增單元測試：為 LimeDB 資料表名稱驗證（30 項）、IMSwitchHelper 切換邏輯（17 項）、OptionsDialogHelper 選單狀態（19 項）共 66 個測試案例並全數通過。\n\n
+        \n版本更新資訊 (2026.02.05)\n
+        1. 繪文字鍵盤修復 (Emoji Picker)：解決輸入中文後繪文字鍵盤無法顯示及輸入被覆蓋的問題。\n
+        2. 系統優化：改善輸入法服務穩定性與程式碼整理。\n\n
         \n版本更新資訊 (2026.01.03)\n
         1. 介面全面現代化：升級至 Material Design 3，支援動態色彩與 Edge-to-Edge 全螢幕顯示。\n
         2. 平板電腦支援：解除螢幕方向鎖定，支援橫向操作模式。\n

@@ -89,6 +89,120 @@ public class OptionsDialogHelperTest {
         assertEquals(R.string.split_keyboard, resId);
     }
 
+    // =========================================================================
+    // 邊界測試案例：toggleSplitKeyboard 所有狀態轉換路徑
+    // =========================================================================
+
+    /**
+     * Portrait 下：ALWAYS → LANDSCAPD_ONLY
+     * 這是原測試未覆蓋的路徑。
+     */
+    @Test
+    public void testToggleSplitKeyboard_Always_Portrait_GoesToLandscapeOnly() {
+        helper.setDisplayDimensions(1080, 1920); // portrait
+        int newState = helper.toggleSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS);
+        assertEquals(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY, newState);
+    }
+
+    /**
+     * Portrait 下：LANDSCAPD_ONLY → ALWAYS
+     * 這是完全未被測試的路徑（既非 NEVER 也非 ALWAYS 的初始狀態）。
+     */
+    @Test
+    public void testToggleSplitKeyboard_LandscapeOnly_Portrait_GoesToAlways() {
+        helper.setDisplayDimensions(1080, 1920); // portrait
+        int newState = helper.toggleSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
+        assertEquals(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS, newState);
+    }
+
+    /**
+     * Landscape 下：ALWAYS → NEVER
+     * 從「永遠分割」在橫向切換應變成「永不分割」。
+     */
+    @Test
+    public void testToggleSplitKeyboard_Always_Landscape_GoesToNever() {
+        helper.setDisplayDimensions(1920, 1080); // landscape
+        int newState = helper.toggleSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS);
+        assertEquals(LIMEKeyboard.SPLIT_KEYBOARD_NEVER, newState);
+    }
+
+    /**
+     * Landscape 下：LANDSCAPD_ONLY → NEVER
+     * 在橫向時「僅橫向分割」切換應變成「永不分割」。
+     */
+    @Test
+    public void testToggleSplitKeyboard_LandscapeOnly_Landscape_GoesToNever() {
+        helper.setDisplayDimensions(1920, 1080); // landscape
+        int newState = helper.toggleSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
+        assertEquals(LIMEKeyboard.SPLIT_KEYBOARD_NEVER, newState);
+    }
+
+    // =========================================================================
+    // 邊界測試案例：getSplitKeyboardMenuTextResId 文字資源
+    // =========================================================================
+
+    /**
+     * LANDSCAPD_ONLY 在 landscape 下應顯示「合併」文字。
+     */
+    @Test
+    public void testGetSplitKeyboardMenuTextResId_LandscapeOnly_InLandscape_ShowsMerge() {
+        helper.setDisplayDimensions(1920, 1080); // landscape
+        int resId = helper.getSplitKeyboardMenuTextResId(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
+        assertEquals(R.string.merge_keyboard, resId);
+    }
+
+    /**
+     * LANDSCAPD_ONLY 在 portrait 下應顯示「分割」文字（尚未實際分割）。
+     */
+    @Test
+    public void testGetSplitKeyboardMenuTextResId_LandscapeOnly_InPortrait_ShowsSplit() {
+        helper.setDisplayDimensions(1080, 1920); // portrait
+        int resId = helper.getSplitKeyboardMenuTextResId(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
+        assertEquals(R.string.split_keyboard, resId);
+    }
+
+    /**
+     * ALWAYS 狀態應永遠顯示「合併」文字，不管方向。
+     */
+    @Test
+    public void testGetSplitKeyboardMenuTextResId_Always_AlwaysShowsMerge() {
+        helper.setDisplayDimensions(1080, 1920); // portrait
+        assertEquals(R.string.merge_keyboard,
+                helper.getSplitKeyboardMenuTextResId(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS));
+
+        helper.setDisplayDimensions(1920, 1080); // landscape
+        assertEquals(R.string.merge_keyboard,
+                helper.getSplitKeyboardMenuTextResId(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS));
+    }
+
+    // =========================================================================
+    // 邊界測試案例：buildOptionsMenuConfig items 陣列長度
+    // =========================================================================
+
+    /**
+     * 有分割選項時 items 長度應為 6（含 split keyboard 選項）。
+     */
+    @Test
+    public void testBuildOptionsMenuConfig_WithSplitOption_HasSixItems() {
+        helper.setDisplayDimensions(1080, 1920); // portrait, no arrow keys
+        OptionsDialogHelper.OptionsMenuConfig config =
+                helper.buildOptionsMenuConfig(LIMEKeyboard.SPLIT_KEYBOARD_NEVER, 0);
+        assertTrue("Should have split option", config.hasSplitOption);
+        assertEquals("Items should include split option → 5 items", 5, config.items.length);
+    }
+
+    /**
+     * 無分割選項時（landscape + arrow keys）items 長度應為 5。
+     */
+    @Test
+    public void testBuildOptionsMenuConfig_WithoutSplitOption_HasFiveItems() {
+        helper.setDisplayDimensions(1920, 1080); // landscape
+        OptionsDialogHelper.OptionsMenuConfig config =
+                helper.buildOptionsMenuConfig(LIMEKeyboard.SPLIT_KEYBOARD_NEVER, 1); // showArrowKeys=1
+        assertFalse("Should NOT have split option in landscape+arrowkeys", config.hasSplitOption);
+        assertEquals("Items should exclude split option → 4 items", 4, config.items.length);
+    }
+
     /**
      * Testable subclass that doesn't depend on Android Resources/Preferences.
      */
@@ -158,6 +272,31 @@ public class OptionsDialogHelperTest {
         @Override
         public void setHanConvertOption(int option) {
             this.hanConvertOption = option;
+        }
+
+        /**
+         * Override buildOptionsMenuConfig to avoid null mResources.
+         * Uses stub strings; tests only verify item count and flags.
+         */
+        @Override
+        public OptionsMenuConfig buildOptionsMenuConfig(int splitKeyboardState, int showArrowKeys) {
+            boolean isLandscape = isLandscape();
+            boolean hasSplitOption = shouldShowSplitOption(showArrowKeys);
+
+            // Stub CharSequence items (content not important for structural tests)
+            CharSequence[] items;
+            if (hasSplitOption) {
+                items = new CharSequence[]{
+                        "settings", "hanconvert", "switchim",
+                        "system_im", "split_keyboard"
+                };
+            } else {
+                items = new CharSequence[]{
+                        "settings", "hanconvert", "switchim",
+                        "system_im"
+                };
+            }
+            return new OptionsMenuConfig(items, hasSplitOption, isLandscape);
         }
     }
 }

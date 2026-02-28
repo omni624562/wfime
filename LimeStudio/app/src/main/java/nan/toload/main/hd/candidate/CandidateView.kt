@@ -292,62 +292,66 @@ open class CandidateView @JvmOverloads constructor(
             }
         }
         
-        // Candidates-only layout (composing text now in separate PopupWindow)
-        Box(
+        // Use BoxWithConstraints to handle infinite width constraints gracefully
+        androidx.compose.foundation.layout.BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(gboardDark) // Opaque candidate background
+                .background(gboardDark)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .horizontalScroll(scrollState)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Show raw keycode as first item (if not empty)
-                if (_rawKeycode.isNotEmpty()) {
-                    RawKeycodeItem(
-                        keycode = _rawKeycode,
-                        fontSize = candidateFontSize,
-                        onClick = {
-                            // Input raw keycode directly
-                            mService?.commitTyped(_rawKeycode)
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+            // Only render the scrollable content if we have a finite maximum width.
+            // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
+            if (constraints.maxWidth != androidx.compose.ui.unit.Constraints.Infinity) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .horizontalScroll(scrollState)
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Show raw keycode as first item (if not empty)
+                    if (_rawKeycode.isNotEmpty()) {
+                        RawKeycodeItem(
+                            keycode = _rawKeycode,
+                            fontSize = candidateFontSize,
+                            onClick = {
+                                // Input raw keycode directly
+                                mService?.commitTyped(_rawKeycode)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    
+                    suggestions.forEachIndexed { index, mapping ->
+                        CandidateItem(
+                            mapping = mapping,
+                            isSelected = index == selectedIndex,
+                            onClick = {
+                                mService?.pickCandidateManually(index)
+                                selectedIndex = index
+                            }
+                        )
+                    }
                 }
                 
-                suggestions.forEachIndexed { index, mapping ->
-                    CandidateItem(
-                        mapping = mapping,
-                        isSelected = index == selectedIndex,
-                        onClick = {
-                            mService?.pickCandidateManually(index)
-                            selectedIndex = index
-                        }
-                    )
-                }
-            }
-            
-            // Fade edge indicator on right side when more content is available
-            if (suggestions.isNotEmpty() && !isAtEnd.value) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .width(24.dp)
-                        .fillMaxHeight()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    gboardDark
+                // Fade edge indicator on right side when more content is available
+                if (suggestions.isNotEmpty() && !isAtEnd.value) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(24.dp)
+                            .fillMaxHeight()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        gboardDark
+                                    )
                                 )
                             )
-                        )
-                )
+                    )
+                }
             }
         }
     }

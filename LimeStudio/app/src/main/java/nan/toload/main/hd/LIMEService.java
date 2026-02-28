@@ -115,7 +115,6 @@ public class LIMEService extends InputMethodService implements
     private static final int POS_KEYBOARD = 2;
     private static final int POS_METHOD = 3;
     private static final int POS_SPLIT_KEYBOARD = 4;
-    // private static final int POS_VOICEINPUT = 5;
     private static final KeyboardTheme[] KEYBOARD_THEMES = {
             new KeyboardTheme("Light", 0, R.style.LIMETheme_Light),
             new KeyboardTheme("Dark", 1, R.style.LIMETheme_Dark),
@@ -198,6 +197,7 @@ public class LIMEService extends InputMethodService implements
     private boolean hasMenuPress = false; // Jeremy '11,5,29
     private boolean hasMenuProcessed = false; // Jeremy '11,5,29
     private boolean hasEnterProcessed = false; // Jeremy '11,6.18
+
     private boolean hasSpaceProcessed = false;
     private boolean hasKeyProcessed = false; // Jeremy '11,8,15 for long pressed key
     private int mLongPressKeyTimeout; // Jeremy '11,8, 15 read long press timeout from config
@@ -676,7 +676,9 @@ public class LIMEService extends InputMethodService implements
         mCandidateViewContainer = candidateViewContainer;
 
         mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
+        mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
         mCandidateViewStandAlone.setService(this);
+
 
         if (!mFixedCandidateViewOn)
             mCandidateView = mCandidateViewStandAlone;
@@ -2026,7 +2028,7 @@ public class LIMEService extends InputMethodService implements
             itemSplitKeyboard = getString(R.string.merge_keyboard);
 
         CharSequence[] options;
-        // CharSequence itemVoiceInput = getString(R.string.voice_input);
+
 
         final boolean hasSplitOption;
 
@@ -2290,7 +2292,16 @@ public class LIMEService extends InputMethodService implements
             commitTyped(ic);
             // mJustRevertedSeparator = null;
         } else if (!mEnglishOnly && mComposing.length() > 0) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-            pickHighlightedCandidate();
+            if (!pickHighlightedCandidate()) {
+                // If no candidate is highlighted, pick the first one by default
+                // to commit the Chinese characters before the emoji
+                if (mCandidateList != null && mCandidateList.size() > 0) {
+                    pickCandidateManually(0);
+                } else {
+                    // Fallback: commit raw composing text
+                    commitTyped(mComposing.toString());
+                }
+            }
             // commitTyped(ic);
         }
         ic.commitText(text, 1);
@@ -3128,14 +3139,24 @@ public class LIMEService extends InputMethodService implements
         hideCandidateView();
 
         if (primaryCode == KEYCODE_SWITCH_TO_SYMBOL_MODE) { // Symbol keyboard
-            mEnglishOnly = true;
-            mKeyboardSwitcher.toggleSymbols();
-            if (mFixedCandidateViewOn) {
-                forceHideCandidateView();
+            // Jeremy '24,1,7: Check for Emoji mode preference
+            if (mLIMEPref.getEmojiMode()) {
+                toggleEmojiVisibility();
+            } else {
+                mEnglishOnly = true;
+                mKeyboardSwitcher.toggleSymbols();
+                if (mFixedCandidateViewOn) {
+                    forceHideCandidateView();
+                }
             }
         } else if (primaryCode == KEYCODE_SWITCH_SYMBOL_KEYBOARD) { // Symbol keyboard
-            mEnglishOnly = true;
-            mKeyboardSwitcher.switchSymbols();
+            // Jeremy '24,1,7: Check for Emoji mode preference
+            if (mLIMEPref.getEmojiMode()) {
+                toggleEmojiVisibility();
+            } else {
+                mEnglishOnly = true;
+                mKeyboardSwitcher.switchSymbols();
+            }
             if (mFixedCandidateViewOn) {
                 forceHideCandidateView();
             }

@@ -1,0 +1,11 @@
+{
+	"nodes":[
+		{"id":"5015c5a2bc3ef625","x":-340,"y":-260,"width":250,"height":60,"type":"text","text":"TEST"},
+		{"id":"6b8d0e218f4e3bd9","x":-340,"y":-140,"width":250,"height":50,"color":"3","type":"text","text":""},
+		{"id":"407da186361d8fb2","x":-20,"y":-160,"width":400,"height":400,"color":"2","type":"file","file":"Untitled.canvas"}
+	],
+	"edges":[
+		{"id":"22d62b8eb4ca6336","fromNode":"5015c5a2bc3ef625","fromSide":"bottom","toNode":"6b8d0e218f4e3bd9","toSide":"top"},
+		{"id":"835b90ed2471d0e5","fromNode":"6b8d0e218f4e3bd9","fromSide":"right","toNode":"407da186361d8fb2","toSide":"left"}
+	]
+}
