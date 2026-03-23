@@ -62,8 +62,6 @@ import nan.toload.main.hd.limedb.LimeDB;
 public class DBServer {
     private static final boolean DEBUG = false;
     private static final String TAG = "LIME.DBServer";
-    // private NotificationManager notificationMgr;
-
     protected static LimeDB datasource = null; // static LIMEDB for shared LIMEDB between DBServer instances
     protected static LIMEPreferenceManager mLIMEPref = null;
     protected static Context ctx = null;
@@ -72,33 +70,12 @@ public class DBServer {
                                                  // share these variables
     private static boolean abortDownload = false;
 
-    // Monitoring thread.
-    // private Thread thread = null;
-
-    // public class DBServiceImpl extends IDBService.Stub {
-    //
-    // Context ctx = null;
-    // //private Thread thread = null;
-    //
-    // DBServiceImpl(Context ctx) {
-    // this.ctx = ctx;
-    // mLIMEPref = new LIMEPreferenceManager(ctx);
-    // loadLimeDB();
-    // }
     public DBServer(Context context) {
         DBServer.ctx = context;
         mLIMEPref = new LIMEPreferenceManager(ctx);
-        // loadLimeDB();
         if (datasource == null)
             datasource = new LimeDB(ctx);
     }
-    /*
-     * deprecated by jeremy '12,5,2
-     * public void loadLimeDB(){
-     * if(datasource==null)
-     * datasource = new LimeDB(ctx);
-     * }
-     */
 
     public static void resetCache() {
         SearchServer.resetCache(true);
@@ -299,31 +276,30 @@ public class DBServer {
                 targetFolderObj.mkdirs();
             }
 
-            FileInputStream fis = new FileInputStream(sourceFile);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-            // ZipEntry entry;
-            while ((zis.getNextEntry()) != null) {
+            try (FileInputStream fis = new FileInputStream(sourceFile);
+                 ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
+                // ZipEntry entry;
+                while ((zis.getNextEntry()) != null) {
 
-                int size;
-                byte[] buffer = new byte[2048];
+                    int size;
+                    byte[] buffer = new byte[2048];
 
-                File OutputFile = new File(targetFolderObj.getAbsolutePath() + File.separator + targetFile);
-                OutputFile.delete();
+                    File OutputFile = new File(targetFolderObj.getAbsolutePath() + File.separator + targetFile);
+                    OutputFile.delete();
 
-                FileOutputStream fos = new FileOutputStream(OutputFile);
-                BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length);
-                while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
-                    bos.write(buffer, 0, size);
+                    try (FileOutputStream fos = new FileOutputStream(OutputFile);
+                         BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length)) {
+                        while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
+                            bos.write(buffer, 0, size);
+                        }
+                        bos.flush();
+                    }
+
+                    // Log.i("ART","uncompress Output File:"+OutputFile.getAbsolutePath() + " / " +
+                    // OutputFile.length());
+
                 }
-                bos.flush();
-                bos.close();
-
-                // Log.i("ART","uncompress Output File:"+OutputFile.getAbsolutePath() + " / " +
-                // OutputFile.length());
-
             }
-            zis.close();
-            fis.close();
 
             if (removeOriginal) {
                 sourceFile.delete();
@@ -498,16 +474,11 @@ public class DBServer {
             URL downloadUrl = new URL(url);
             URLConnection conn = downloadUrl.openConnection();
             conn.connect();
-            InputStream is = conn.getInputStream();
             long remoteFileSize = conn.getContentLength();
             long downloadedSize = 0;
 
             if (DEBUG)
                 Log.i(TAG, "downloadRemoteFile() contentLength:");
-
-            if (is == null) {
-                throw new RuntimeException("stream is null");
-            }
 
             File downloadFolder = new File(folder);
             downloadFolder.mkdirs();
@@ -519,27 +490,28 @@ public class DBServer {
                 downloadedFile.delete();
             }
 
-            FileOutputStream fos = null;
-            fos = new FileOutputStream(downloadedFile);
             // '04,12,27 Jeremy modified buf size from 128 to 128k and dramatically speed-up
             // downloading speed on modern devices
             byte[] buf = new byte[128000];
-            do {
-                Thread.sleep(300);
-                int numread = is.read(buf);
-                downloadedSize += numread;
-
-                if (DEBUG)
-                    Log.i(TAG, "downloadRemoteFile(), contentLength:"
-                            + remoteFileSize + ". downloadedSize:" + downloadedSize);
-
-                if (numread <= 0) {
-                    break;
+            try (InputStream is = conn.getInputStream();
+                 FileOutputStream fos = new FileOutputStream(downloadedFile)) {
+                if (is == null) {
+                    throw new RuntimeException("stream is null");
                 }
-                fos.write(buf, 0, numread);
-            } while (!abortDownload);
-            fos.close();
-            is.close();
+                do {
+                    int numread = is.read(buf);
+                    downloadedSize += numread;
+
+                    if (DEBUG)
+                        Log.i(TAG, "downloadRemoteFile(), contentLength:"
+                                + remoteFileSize + ". downloadedSize:" + downloadedSize);
+
+                    if (numread <= 0) {
+                        break;
+                    }
+                    fos.write(buf, 0, numread);
+                } while (!abortDownload);
+            }
 
             return downloadedFile;
 
@@ -581,21 +553,19 @@ public class DBServer {
             File OutputFile = new File(targetFolderObj.getAbsolutePath() + File.separator + targetFile);
             OutputFile.delete();
 
-            FileOutputStream dest = new FileOutputStream(OutputFile);
-            ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-
             byte[] data = new byte[BUFFER];
 
-            FileInputStream fi = new FileInputStream(sourceFile);
-            BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
-            ZipEntry entry = new ZipEntry(sourceFile.getAbsolutePath());
-            out.putNextEntry(entry);
-            int count;
-            while ((count = origin.read(data, 0, BUFFER)) != -1) {
-                out.write(data, 0, count);
+            try (FileInputStream fi = new FileInputStream(sourceFile);
+                 BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
+                 FileOutputStream dest = new FileOutputStream(OutputFile);
+                 ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest))) {
+                ZipEntry entry = new ZipEntry(sourceFile.getAbsolutePath());
+                out.putNextEntry(entry);
+                int count;
+                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+                    out.write(data, 0, count);
+                }
             }
-            origin.close();
-            out.close();
 
             // Log.i("ART","compress Output File:"+OutputFile.getAbsolutePath() + " / " +
             // OutputFile.length());
@@ -612,45 +582,6 @@ public class DBServer {
     public void checkPhoneticKeyboardSetting() {
         datasource.checkPhoneticKeyboardSetting();
     }
-    /*
-     * @Deprecated //by Jeremy '12,6,6
-     * public void forceUpgrad() throws RemoteException {
-     * //if (datasource == null) {loadLimeDB();}
-     * datasource.forceUpgrade();
-     * }
-     */
-
-    // }
-
-    // public IBinder onBind(Intent arg0) {
-    // return new DBServiceImpl(this);
-    // }
-    //
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see android.app.Service#onCreate()
-    // */
-    //
-    // public void onCreate() {
-    // super.onCreate();
-    // }
-    //
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see android.app.Service#onDestroy()
-    // */
-    //
-    // public void onDestroy() {
-    // if (datasource != null) {
-    // datasource.close();
-    // datasource = null;
-    //
-    // }
-    // notificationMgr.cancelAll();
-    // super.onDestroy();
-    // }
 
     public int getLoadingMappingPercentageDone() throws RemoteException {
         if (remoteFileDownloading)

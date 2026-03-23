@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -81,6 +82,9 @@ open class CandidateView @JvmOverloads constructor(
     private var selectedIndex by mutableIntStateOf(-1)
     private var _composingText by mutableStateOf("")
     private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
+    // Cached font size scale — read from SharedPreferences once, updated via updateFontSize()
+    // Stored as Compose state so CandidateRow recomposes automatically when it changes
+    private var _fontSizeScale by mutableFloatStateOf(1f)
     
     // Custom lifecycle and recomposer for Compose support in InputMethodService
     private val lifecycleOwner = IMELifecycleOwner()
@@ -119,6 +123,9 @@ open class CandidateView @JvmOverloads constructor(
     }
 
     init {
+        // Read font size preference once at construction; refreshed by updateFontSize()
+        _fontSizeScale = mLIMEPref.fontSize
+
         // Load styles from R.styleable.LIMECandidateView
          val a = context.theme.obtainStyledAttributes(
             attrs, R.styleable.LIMECandidateView, defStyle, R.style.LIMECandidateView
@@ -269,15 +276,14 @@ open class CandidateView @JvmOverloads constructor(
 
     @Composable
     fun CandidateRow() {
-        // Gboard-style dark background
-        val gboardDark = Color(0xFF2B2B2B)
+        // Stable Color — remembered so the object is not re-created on every recomposition
+        val gboardDark = remember { Color(0xFF2B2B2B) }
         val scrollState = rememberScrollState()
-        
-        // Read font size from dimension resource and apply user's font_size preference scale
-        val fontSizeScale = mLIMEPref.fontSize
-        val scaledFontSizePx = baseCandidateFontSizePx * fontSizeScale
-        val candidateFontSize = with(LocalDensity.current) {
-            scaledFontSizePx.toSp()
+
+        // Font size only recalculates when _fontSizeScale or density changes
+        val density = LocalDensity.current
+        val candidateFontSize = remember(density, _fontSizeScale) {
+            with(density) { (baseCandidateFontSizePx * _fontSizeScale).toSp() }
         }
         
         // Reset scroll position when suggestions change
@@ -327,6 +333,7 @@ open class CandidateView @JvmOverloads constructor(
                         CandidateItem(
                             mapping = mapping,
                             isSelected = index == selectedIndex,
+                            fontSize = candidateFontSize,
                             onClick = {
                                 mService?.pickCandidateManually(index)
                                 selectedIndex = index
@@ -360,19 +367,13 @@ open class CandidateView @JvmOverloads constructor(
     fun CandidateItem(
         mapping: Mapping,
         isSelected: Boolean,
+        fontSize: androidx.compose.ui.unit.TextUnit,
         onClick: () -> Unit
     ) {
         // Gboard-style: light text on dark background
         val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
         val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
-        
-        // Read font size from dimension resource and apply user's font_size preference scale
-        val fontSizeScale = mLIMEPref.fontSize  // e.g. 0.8, 1.0, 1.2
-        val scaledFontSizePx = baseCandidateFontSizePx * fontSizeScale
-        val candidateFontSize = with(LocalDensity.current) {
-            scaledFontSizePx.toSp()
-        }
-        
+
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -383,7 +384,7 @@ open class CandidateView @JvmOverloads constructor(
             Text(
                 text = mapping.word ?: "",
                 color = textColor,
-                fontSize = candidateFontSize, 
+                fontSize = fontSize,
                 fontWeight = fontWeight,
                 maxLines = 1
             )
@@ -420,7 +421,9 @@ open class CandidateView @JvmOverloads constructor(
 
     // Required Stub methods
     override fun setScrollX(x: Int) {}
-    fun updateFontSize() {}
+    fun updateFontSize() {
+        _fontSizeScale = mLIMEPref.fontSize
+    }
     fun setTouchX(x: Int) {}
     fun takeSuggestionAt(x: Int) {}
     fun onTouchReal(event: android.view.MotionEvent): Boolean = false

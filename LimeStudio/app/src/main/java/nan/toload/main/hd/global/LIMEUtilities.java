@@ -145,26 +145,23 @@ public class LIMEUtilities {
         else if (zipFile.exists() && OverWrite)
             zipFile.delete();
 
-        ZipOutputStream zos = null;
-        FileOutputStream outStream = null;
-        outStream = new FileOutputStream(zipFile);
-        zos = new ZipOutputStream(outStream);
-
         if (baseFolderPath == null)
             baseFolderPath = "";
 
-        for (String item : sourceFiles) {
-            String itemName = (item.startsWith(File.separator) || baseFolderPath.endsWith(File.separator)) ? item
-                    : (File.separator + item);
+        final String finalBaseFolderPath = baseFolderPath;
+        try (FileOutputStream outStream = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(outStream)) {
+            for (String item : sourceFiles) {
+                String itemName = (item.startsWith(File.separator) || finalBaseFolderPath.endsWith(File.separator)) ? item
+                        : (File.separator + item);
 
-            if (baseFolderPath.equals("")) // absolute path
-                addFileToZip(baseFolderPath + itemName, zos);
-            else // relative path
-                addFileToZip(baseFolderPath + itemName, baseFolderPath, zos);
-
+                if (finalBaseFolderPath.equals("")) // absolute path
+                    addFileToZip(finalBaseFolderPath + itemName, zos);
+                else // relative path
+                    addFileToZip(finalBaseFolderPath + itemName, finalBaseFolderPath, zos);
+            }
+            zos.flush();
         }
-        zos.flush();
-        zos.close();
 
     }
 
@@ -197,18 +194,18 @@ public class LIMEUtilities {
         } else {
             byte[] buf = new byte[102400]; // 100k buffer
             int len;
-            FileInputStream inStream = new FileInputStream(sourceFilePath);
-            if (baseFolderPath.equals("")) // sourceFiles in absolute path, zip the file with absolute path
-                zos.putNextEntry(new ZipEntry(sourceFilePath));
-            else {// relative path
-                String relativePath = sourceFilePath.substring(baseFolderPath.length());
-                zos.putNextEntry(new ZipEntry(relativePath));
-            }
+            try (FileInputStream inStream = new FileInputStream(sourceFilePath)) {
+                if (baseFolderPath.equals("")) // sourceFiles in absolute path, zip the file with absolute path
+                    zos.putNextEntry(new ZipEntry(sourceFilePath));
+                else {// relative path
+                    String relativePath = sourceFilePath.substring(baseFolderPath.length());
+                    zos.putNextEntry(new ZipEntry(relativePath));
+                }
 
-            while ((len = inStream.read(buf)) > 0) {
-                zos.write(buf, 0, len);
+                while ((len = inStream.read(buf)) > 0) {
+                    zos.write(buf, 0, len);
+                }
             }
-
         }
     }
 
@@ -293,9 +290,8 @@ public class LIMEUtilities {
             return false;
         if (targetFile == null)
             targetFile = new File(targetFilePath);
-        try {
-            FileInputStream inStream = new FileInputStream(sourceFile);
-            FileOutputStream outSteram = new FileOutputStream(targetFile);
+        try (FileInputStream inStream = new FileInputStream(sourceFile);
+             FileOutputStream outSteram = new FileOutputStream(targetFile)) {
             copyRAWFile(inStream, outSteram);
             return true;
         } catch (Exception ignored) {
@@ -305,10 +301,8 @@ public class LIMEUtilities {
     }
 
     public static void copyRAWFile(InputStream inStream, File newfile) {
-        try {
-            FileOutputStream fs = new FileOutputStream(newfile);
+        try (FileOutputStream fs = new FileOutputStream(newfile)) {
             copyRAWFile(inStream, fs);
-            fs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -316,18 +310,16 @@ public class LIMEUtilities {
 
     public static void copyRAWFile(InputStream inStream, FileOutputStream outStream) {
         try {
-            int bytesum = 0, byteread = 0;
-
             byte[] buffer = new byte[102400]; // 100k buffer
+            int byteread;
             while ((byteread = inStream.read(buffer)) != -1) {
-                bytesum += byteread;
-                System.out.println(bytesum);
                 outStream.write(buffer, 0, byteread);
             }
-            inStream.close();
-            outStream.close();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { inStream.close(); } catch (Exception ignored) {}
+            try { outStream.close(); } catch (Exception ignored) {}
         }
     }
 

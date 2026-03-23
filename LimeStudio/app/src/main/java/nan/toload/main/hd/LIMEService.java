@@ -2396,13 +2396,8 @@ public class LIMEService extends InputMethodService implements
                             }
                         }
                     }
-                    // try {
-                    // sleep(0);
-                    // } catch (InterruptedException ignored) {
-                    // ignored.printStackTrace();
-                    // return; // terminate thread here, since it is interrupted and more recent
-                    // getMappingByCode will update the suggestions.
-                    // }
+                    // Exit early if a newer query has already been started
+                    if (Thread.currentThread().isInterrupted()) return;
                     // Jeremy '11,6,19 EZ and ETEN use "`" as IM Keys, and also custom may use "`".
                     if (list.size() > 0) {
                         // Setup sel key display if
@@ -2429,13 +2424,8 @@ public class LIMEService extends InputMethodService implements
                                 selkey = mixedModeSelkey + " " + selkey;
                         }
 
-                        // try {
-                        // sleep(0);
-                        // } catch (InterruptedException ignored) {
-                        // ignored.printStackTrace();
-                        // return; // terminate thread here, since it is interrupted and more recent
-                        // getMappingByCode will update the suggestions.
-                        // }
+                        // Exit early if a newer query has already been started
+                        if (Thread.currentThread().isInterrupted()) return;
 
                         // Emoji Control
                         // Check the Emoji parameter setting and load icons into the suggestions list
@@ -2731,6 +2721,9 @@ public class LIMEService extends InputMethodService implements
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
+
+                        // Exit early if a newer query has already been started
+                        if (Thread.currentThread().isInterrupted()) return;
 
                         if (list.size() > 0) {
 

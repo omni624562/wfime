@@ -54,7 +54,6 @@ public class ShareDbRunnable implements Runnable {
     // Global
     private String imtype = null;
     private DBServer dbsrv = null;
-    // private LIMEPreferenceManager mLIMEPref;
 
     public ShareDbRunnable(Activity activity, String imtype, MainActivityHandler handler) {
         this.handler = handler;
@@ -62,7 +61,6 @@ public class ShareDbRunnable implements Runnable {
         this.activity = activity;
         this.dbsrv = new DBServer(activity);
         this.datasource = new LimeDB(activity);
-        // this.mLIMEPref = new LIMEPreferenceManager(activity);
     }
 
     @Override
@@ -92,19 +90,12 @@ public class ShareDbRunnable implements Runnable {
         handler.updateProgress(activity.getResources().getString(R.string.share_step_initial));
 
         // Copy Database File
-        try {
-            InputStream from = activity.getResources().openRawResource(R.raw.blank);
-            FileOutputStream to = new FileOutputStream(targetfile);
+        try (InputStream from = activity.getResources().openRawResource(R.raw.blank);
+             FileOutputStream to = new FileOutputStream(targetfile)) {
             byte[] buffer = new byte[4096];
             int bytes_read;
             while ((bytes_read = from.read(buffer)) != -1) {
                 to.write(buffer, 0, bytes_read);
-            }
-            if (from != null) {
-                from.close();
-            }
-            if (to != null) {
-                to.close();
             }
         } catch (FileNotFoundException e) {
             android.util.Log.e(TAG, "File not found: " + e.getMessage());
