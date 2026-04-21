@@ -39,9 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import nan.toload.main.hd.R;
 import nan.toload.main.hd.data.ImObj;
@@ -53,7 +50,6 @@ import nan.toload.main.hd.global.LIMEUtilities;
 import nan.toload.main.hd.limedb.LimeDB;
 
 public class SearchServer {
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static final boolean DEBUG = false;
     private static final String TAG = "LIME.SearchServer";
@@ -241,7 +237,7 @@ public class SearchServer {
         abandonPhraseSuggestion = abandonSuggestion;
     }
 
-    private synchronized void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
+    private void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {
@@ -611,7 +607,7 @@ public class SearchServer {
     /*
      * Jeremy '15,7,12 synchronized the method called from LIMEService only
      */
-    public synchronized List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
+    public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
             throws RemoteException {
         return getMappingByCode(code, softkeyboard, getAllRecords, false);
     }
@@ -824,9 +820,8 @@ public class SearchServer {
             // 25/Jul/2011 by Art
             // Just ignore error when something wrong with the result set
             try {
-                Future<List<Mapping>> future = executor
-                        .submit(() -> dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords));
-                cacheTemp = future.get(); // This is still blocking, but the query runs on a background thread.
+                if (Thread.currentThread().isInterrupted()) return null;
+                cacheTemp = dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords);
                 if (cacheTemp != null)
                     cache.put(cacheKey, cacheTemp);
                 // Jeremy '12,6,5 check if need to update code remap cache
@@ -1479,7 +1474,7 @@ public class SearchServer {
         }
     }
 
-    public synchronized List<Mapping> getEnglishSuggestions(String word) throws RemoteException {
+    public List<Mapping> getEnglishSuggestions(String word) throws RemoteException {
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {

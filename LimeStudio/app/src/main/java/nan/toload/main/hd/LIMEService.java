@@ -123,7 +123,9 @@ public class LIMEService extends InputMethodService implements
             new KeyboardTheme("FashionPurple", 4, R.style.LIMETheme_FashionPurple),
             new KeyboardTheme("RelaxGreen", 5, R.style.LIMETheme_RelaxGreen),
     };
-    private static Thread queryThread; // queryThread for no-blocking I/O Jeremy '15,6,1
+    private static final java.util.concurrent.ExecutorService queryExecutor =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
+    private static volatile java.util.concurrent.Future<?> queryFuture;
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     public boolean hasMappingList = false;
     public String activeIM; // Jeremy '12,4,30 renamed from keyboardSelection
@@ -810,7 +812,11 @@ public class LIMEService extends InputMethodService implements
     /**
      * Clear suggestions or candidates in candidate view.
      */
-    private synchronized void clearSuggestions() {
+    private void clearSuggestions() {
+        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(this::clearSuggestions);
+            return;
+        }
         if (mCandidateView != null) {
             if (DEBUG)
                 Log.i(TAG, "clearSuggestions(): "
@@ -2369,11 +2375,8 @@ public class LIMEService extends InputMethodService implements
 
             final String finalKeyString = keyString;
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
-            if (queryThread != null && queryThread.isAlive())
-                queryThread.interrupt();
-            queryThread = new Thread() {
-
-                public void run() {
+            if (queryFuture != null) queryFuture.cancel(true);
+            queryFuture = queryExecutor.submit(() -> {
 
                     try {
                         list.addAll(
@@ -2511,7 +2514,7 @@ public class LIMEService extends InputMethodService implements
                                 && !keynameString.toUpperCase(Locale.US).equals(finalKeyString.toUpperCase(Locale.US))
                                 && !keynameString.trim().equals("")) {
                             try {
-                                sleep(0);
+                                Thread.sleep(0);
                             } catch (InterruptedException ignored) {
                                 ignored.printStackTrace();
                                 return; // terminate thread here, since it is interrupted and more recent
@@ -2520,9 +2523,7 @@ public class LIMEService extends InputMethodService implements
                             showComposingPopup(keynameString);
                         }
                     }
-                }
-            };
-            queryThread.start();
+            });
 
         } else
             // Jermy '11,8,14
@@ -2586,10 +2587,8 @@ public class LIMEService extends InputMethodService implements
                         tempEnglishList.clear();
 
                         final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
-                        if (queryThread != null && queryThread.isAlive())
-                            queryThread.interrupt();
-                        queryThread = new Thread() {
-                            public void run() {
+                        if (queryFuture != null) queryFuture.cancel(true);
+                        queryFuture = queryExecutor.submit(() -> {
                                 final Mapping self = new Mapping();
                                 self.setWord(tempEnglishWord.toString());
                                 self.setComposingCodeRecord();
@@ -2601,7 +2600,7 @@ public class LIMEService extends InputMethodService implements
                                     e.printStackTrace();
                                 }
                                 try {
-                                    sleep(0);
+                                    Thread.sleep(0);
                                 } catch (InterruptedException ignored) {
                                     ignored.printStackTrace();
                                     return; // terminate thread here, since it is interrupted and more recent
@@ -2619,7 +2618,7 @@ public class LIMEService extends InputMethodService implements
                                         selkey = "";
                                     }
                                     try {
-                                        sleep(0);
+                                        Thread.sleep(0);
                                     } catch (InterruptedException ignored) {
                                         ignored.printStackTrace();
                                         return; // terminate thread here, since it is interrupted and more recent
@@ -2666,9 +2665,7 @@ public class LIMEService extends InputMethodService implements
                                     // Jermy '11,8,14
                                     clearSuggestions();
                                 }
-                            }
-                        };
-                        queryThread.start();
+                        });
                     }
 
                 }
@@ -2698,10 +2695,8 @@ public class LIMEService extends InputMethodService implements
                 && !committedCandidate.getWord().equals("")) {
 
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
-            if (queryThread != null && queryThread.isAlive())
-                queryThread.interrupt();
-            queryThread = new Thread() {
-                public void run() {
+            if (queryFuture != null) queryFuture.cancel(true);
+            queryFuture = queryExecutor.submit(() -> {
 
                     LinkedList<Mapping> list = new LinkedList<>();
                     // Jeremy '11,8,9 Insert completion suggestions from application
@@ -2711,8 +2706,6 @@ public class LIMEService extends InputMethodService implements
                     }
 
                     if (committedCandidate != null && hasMappingList) {
-                        if (queryThread != null && queryThread.isAlive())
-                            queryThread.interrupt();
                         try {
                             if (!committedCandidate.isEmojiRecord()
                                     && !committedCandidate.isChinesePunctuationSymbolRecord()) {
@@ -2740,9 +2733,7 @@ public class LIMEService extends InputMethodService implements
                             clearSuggestions();
                         }
                     }
-                }
-            };
-            queryThread.start();
+            });
         }
 
     }
@@ -2811,8 +2802,12 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    public synchronized void setSuggestions(List<Mapping> suggestions, boolean showNumber, String diplaySelkey) {
-
+    public void setSuggestions(List<Mapping> suggestions, boolean showNumber, String diplaySelkey) {
+        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            new android.os.Handler(android.os.Looper.getMainLooper())
+                    .post(() -> setSuggestions(suggestions, showNumber, diplaySelkey));
+            return;
+        }
         if (suggestions != null && suggestions.size() > 0) {
 
             if (DEBUG)
