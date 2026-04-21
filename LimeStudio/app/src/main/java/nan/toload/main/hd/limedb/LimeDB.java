@@ -87,7 +87,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public final static String FIELD_DIC_is = "isDictionary";
     private static final boolean DEBUG = false;
     private static final String TAG = "LIMEDB";
-    private final static int DATABASE_VERSION = 101;
+    private final static int DATABASE_VERSION = 102;
     // Jeremy '11,8,5
     // TODO: should set INITIAL_RESULT_LIMIT according to screen size.
     private final static String INITIAL_RESULT_LIMIT = "15";
@@ -460,6 +460,17 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase dbin, int oldVersion, int newVersion) {
 
         Log.i(TAG, "OnUpgrade() db old version = " + oldVersion + ", new version = " + newVersion);
+
+        if (oldVersion < 102) {
+            // Add code column index on main IM tables for faster prefix range queries
+            String[] imTables = {"phonetic", "custom", "dayi", "hs", "hs1", "hs2", "hs3"};
+            for (String tbl : imTables) {
+                try {
+                    execSQL(dbin, "CREATE INDEX IF NOT EXISTS idx_" + tbl + "_code ON " + tbl + " (code)");
+                } catch (Exception ignored) {
+                }
+            }
+        }
 
         if (oldVersion < 101) {
             long startTime = System.currentTimeMillis();

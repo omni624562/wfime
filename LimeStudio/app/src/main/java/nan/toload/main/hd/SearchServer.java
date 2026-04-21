@@ -71,7 +71,7 @@ public class SearchServer {
     private static String lastConfirmedBestSuggestion = null;
     // Jeremy '15,6,21
     private static int maxCodeLength = 4;
-    private static boolean mResetCache;
+    private static volatile boolean mResetCache;
     private static List<List<Mapping>> LDPhraseListArray = null;
     private static List<Mapping> LDPhraseList = null;
     private static String tablename = "";
@@ -239,6 +239,7 @@ public class SearchServer {
     }
 
     private void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
+        java.util.HashMap<String, Mapping> relatedPhraseCache = new java.util.HashMap<>();
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {
@@ -457,7 +458,13 @@ public class SearchServer {
                             for (int k = ((phraseLen < 4) ? phraseLen - 1 : 3); k > 0; k--) {
                                 String pword = phrase.substring(phraseLen - k - 1, phraseLen - k);
                                 String cword = phrase.substring(phraseLen - k, phraseLen);
-                                relatedMapping = dbadapter.isRelatedPhraseExist(pword, cword);
+                                String relatedKey = pword + "\0" + cword;
+                                if (relatedPhraseCache.containsKey(relatedKey)) {
+                                    relatedMapping = relatedPhraseCache.get(relatedKey);
+                                } else {
+                                    relatedMapping = dbadapter.isRelatedPhraseExist(pword, cword);
+                                    relatedPhraseCache.put(relatedKey, relatedMapping);
+                                }
                                 if (relatedMapping != null)
                                     break;
                             }
