@@ -35,6 +35,7 @@ public class MainActivityHandler extends Handler {
     private MainActivity activity = null;
 
     public MainActivityHandler(MainActivity activity) {
+        super(android.os.Looper.getMainLooper());
         this.activity = activity;
     }
 

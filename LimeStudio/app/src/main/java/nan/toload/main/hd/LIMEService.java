@@ -859,7 +859,7 @@ public class LIMEService extends InputMethodService implements
     public void onStartInput(EditorInfo attribute, boolean restarting) {
         if (DEBUG)
             Log.i(TAG, "onStartInput()");
-        super.onStartInputView(attribute, restarting);
+        super.onStartInput(attribute, restarting);
         initOnStartInput(attribute);
     }
 
@@ -3939,6 +3939,7 @@ public class LIMEService extends InputMethodService implements
         private final int MSG_HIDE_CANDIDATE_VIEW = 2;
 
         CandidateViewHandler(LIMEService im) {
+            super(android.os.Looper.getMainLooper());
             mLIMEService = new WeakReference<>(im);
         }
 

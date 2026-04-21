@@ -38,6 +38,7 @@ public class ManageImHandler extends Handler {
     private ManageImFragment fragment = null;
 
     public ManageImHandler(ManageImFragment fragment) {
+        super(android.os.Looper.getMainLooper());
         this.fragment = fragment;
     }
 

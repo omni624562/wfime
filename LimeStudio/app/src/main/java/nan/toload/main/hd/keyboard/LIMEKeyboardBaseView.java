@@ -304,6 +304,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         private final WeakReference<LIMEKeyboardBaseView> mLIMEKeyboardBaseViewWeakReference;
 
         public UIHandler(LIMEKeyboardBaseView keyboardBaseView) {
+            super(android.os.Looper.getMainLooper());
             mLIMEKeyboardBaseViewWeakReference = new WeakReference<LIMEKeyboardBaseView>(keyboardBaseView);
         }
 
