@@ -123,9 +123,9 @@ public class LIMEService extends InputMethodService implements
             new KeyboardTheme("FashionPurple", 4, R.style.LIMETheme_FashionPurple),
             new KeyboardTheme("RelaxGreen", 5, R.style.LIMETheme_RelaxGreen),
     };
-    private static final java.util.concurrent.ExecutorService queryExecutor =
+    private java.util.concurrent.ExecutorService queryExecutor =
             java.util.concurrent.Executors.newSingleThreadExecutor();
-    private static volatile java.util.concurrent.Future<?> queryFuture;
+    private volatile java.util.concurrent.Future<?> queryFuture;
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     public boolean hasMappingList = false;
     public String activeIM; // Jeremy '12,4,30 renamed from keyboardSelection
@@ -142,6 +142,7 @@ public class LIMEService extends InputMethodService implements
     private ComposingTextPopup mComposingPopup = null;
     private CompletionInfo[] mCompletions;
     private StringBuilder mComposing = new StringBuilder();
+    private EditorInfo mLastInitializedEditorInfo = null;
     private boolean mPredictionOn;
     private boolean mCompletionOn;
     private boolean mCapsLock;
@@ -877,6 +878,8 @@ public class LIMEService extends InputMethodService implements
      * according the input attrubute in editorInfo
      */
     private void initOnStartInput(EditorInfo attribute) {
+        if (attribute == mLastInitializedEditorInfo) return;
+        mLastInitializedEditorInfo = attribute;
 
         if (DEBUG)
             Log.i(TAG, "initOnStartInput(): attribute.inputType & EditorInfo.TYPE_MASK_CLASS: "
@@ -3854,6 +3857,13 @@ public class LIMEService extends InputMethodService implements
     public void onDestroy() {
         if (DEBUG)
             Log.i(TAG, "onDestroy()");
+
+        // Cancel pending query and shut down the executor
+        if (queryFuture != null) {
+            queryFuture.cancel(true);
+            queryFuture = null;
+        }
+        queryExecutor.shutdownNow();
 
         // Clean up resources to prevent callback warnings
         try {

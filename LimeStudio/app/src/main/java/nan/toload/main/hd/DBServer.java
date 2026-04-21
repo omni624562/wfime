@@ -71,7 +71,7 @@ public class DBServer {
     private static boolean abortDownload = false;
 
     public DBServer(Context context) {
-        DBServer.ctx = context;
+        DBServer.ctx = context.getApplicationContext();
         mLIMEPref = new LIMEPreferenceManager(ctx);
         if (datasource == null)
             datasource = new LimeDB(ctx);

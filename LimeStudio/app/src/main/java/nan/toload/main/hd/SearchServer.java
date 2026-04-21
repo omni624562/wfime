@@ -53,6 +53,7 @@ public class SearchServer {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "LIME.SearchServer";
+    private static final int MAX_CACHE_ENTRIES = 512;
     // Jeremy '12,6,9 make run-time suggestion phrase
     private static final boolean doRunTimeSuggestion = true;
 
@@ -822,8 +823,10 @@ public class SearchServer {
             try {
                 if (Thread.currentThread().isInterrupted()) return null;
                 cacheTemp = dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords);
-                if (cacheTemp != null)
+                if (cacheTemp != null) {
+                    if (cache.size() >= MAX_CACHE_ENTRIES) cache.clear();
                     cache.put(cacheKey, cacheTemp);
+                }
                 // Jeremy '12,6,5 check if need to update code remap cache
                 if (cacheTemp != null && cacheTemp != null
                         && cacheTemp.size() > 0 && cacheTemp.get(0) != null
