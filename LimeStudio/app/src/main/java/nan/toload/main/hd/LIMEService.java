@@ -126,6 +126,7 @@ public class LIMEService extends InputMethodService implements
     private java.util.concurrent.ExecutorService queryExecutor =
             java.util.concurrent.Executors.newSingleThreadExecutor();
     private volatile java.util.concurrent.Future<?> queryFuture;
+    private final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     public boolean hasMappingList = false;
     public String activeIM; // Jeremy '12,4,30 renamed from keyboardSelection
@@ -527,7 +528,7 @@ public class LIMEService extends InputMethodService implements
     private void showComposingPopup(String text) {
         // Ensure popup operations run on main thread (may be called from background
         // thread)
-        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+        mMainHandler.post(() -> {
             if (mComposingPopup != null) {
                 mComposingPopup.updateComposingText(text);
                 View anchor = mInputViewContainer != null ? mInputViewContainer
@@ -541,7 +542,7 @@ public class LIMEService extends InputMethodService implements
 
     private void hideComposingPopup() {
         // Ensure popup operations run on main thread
-        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+        mMainHandler.post(() -> {
             if (mComposingPopup != null) {
                 mComposingPopup.hide();
             }
@@ -815,7 +816,7 @@ public class LIMEService extends InputMethodService implements
      */
     private void clearSuggestions() {
         if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(this::clearSuggestions);
+            mMainHandler.post(this::clearSuggestions);
             return;
         }
         if (mCandidateView != null) {
@@ -2807,8 +2808,7 @@ public class LIMEService extends InputMethodService implements
 
     public void setSuggestions(List<Mapping> suggestions, boolean showNumber, String diplaySelkey) {
         if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
-            new android.os.Handler(android.os.Looper.getMainLooper())
-                    .post(() -> setSuggestions(suggestions, showNumber, diplaySelkey));
+            mMainHandler.post(() -> setSuggestions(suggestions, showNumber, diplaySelkey));
             return;
         }
         if (suggestions != null && suggestions.size() > 0) {

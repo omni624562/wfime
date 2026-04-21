@@ -32,11 +32,14 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -79,7 +82,7 @@ public class SearchServer {
     // Jeremy '11,6,10
     private static boolean hasNumberMapping;
     private static boolean hasSymbolMapping;
-    private static ConcurrentHashMap<String, List<Mapping>> cache = null;
+    private static Map<String, List<Mapping>> cache = null;
     private static ConcurrentHashMap<String, List<Mapping>> engcache = null;
     private static ConcurrentHashMap<String, List<Mapping>> emojicache = null;
     private static ConcurrentHashMap<String, String> keynamecache = null;
@@ -831,7 +834,6 @@ public class SearchServer {
                 if (Thread.currentThread().isInterrupted()) return null;
                 cacheTemp = dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords);
                 if (cacheTemp != null) {
-                    if (cache.size() >= MAX_CACHE_ENTRIES) cache.clear();
                     cache.put(cacheKey, cacheTemp);
                 }
                 // Jeremy '12,6,5 check if need to update code remap cache
@@ -967,6 +969,15 @@ public class SearchServer {
         return realCodeLen;
     }
 
+    private static <K, V> Map<K, V> newLruMap(int maxSize) {
+        return Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > maxSize;
+            }
+        });
+    }
+
     /**
      * This method is to initial/reset the cache of im.
      */
@@ -977,7 +988,7 @@ public class SearchServer {
             // e.printStackTrace();
             Log.e(TAG, e.getMessage());
         }
-        cache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
+        cache = newLruMap(MAX_CACHE_ENTRIES);
         engcache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
         emojicache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
         keynamecache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
@@ -1460,9 +1471,6 @@ public class SearchServer {
     }
 
     public void clear() throws RemoteException {
-        if (scorelist != null) {
-            scorelist.clear();
-        }
         if (scorelist != null) {
             scorelist.clear();
         }
