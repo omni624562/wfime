@@ -23,18 +23,17 @@
  */
 
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
     signingConfigs {
     }
-    compileSdkVersion 36
+    compileSdk 36
     buildToolsVersion '36.0.0'
     defaultConfig {
         applicationId "nan.toload.main.hd"
-        minSdkVersion 30
-        targetSdkVersion 36
+        minSdk 30
+        targetSdk 36
         versionCode new Date().format('yyyyMMdd').toInteger()
         versionName new Date().format('yyyy.MM.dd')
     }
