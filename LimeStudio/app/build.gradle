@@ -28,21 +28,21 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 android {
     signingConfigs {
     }
-    compileSdk 36
-    buildToolsVersion '36.0.0'
+    compileSdk = 36
+    buildToolsVersion = '36.0.0'
     defaultConfig {
-        applicationId "nan.toload.main.hd"
-        minSdk 30
-        targetSdk 36
-        versionCode new Date().format('yyyyMMdd').toInteger()
-        versionName new Date().format('yyyy.MM.dd')
+        applicationId = "nan.toload.main.hd"
+        minSdk = 30
+        targetSdk = 36
+        versionCode = new Date().format('yyyyMMdd').toInteger()
+        versionName = new Date().format('yyyy.MM.dd')
     }
     buildTypes {
         debug {
             buildConfigField "boolean", "DEBUG_LOGGING", "true"
         }
         release {
-            minifyEnabled true
+            minifyEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "boolean", "DEBUG_LOGGING", "false"
         }
@@ -56,13 +56,13 @@ android {
     }
 
     buildFeatures {
-        aidl true
-        buildConfig true
-        compose true
+        aidl = true
+        buildConfig = true
+        compose = true
     }
-    namespace 'nan.toload.main.hd'
+    namespace = 'nan.toload.main.hd'
     lint {
-        abortOnError false
+        abortOnError = false
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
