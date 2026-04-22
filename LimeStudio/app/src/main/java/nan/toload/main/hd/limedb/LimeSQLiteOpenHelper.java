@@ -370,6 +370,9 @@ public abstract class LimeSQLiteOpenHelper {
      * @param db The database.
      */
     public void onOpen(SQLiteDatabase db) {
+        if (!db.isReadOnly()) {
+            db.enableWriteAheadLogging();
+        }
     }
 
     public void showToastMessage(Context ctx, String msg, int length) {

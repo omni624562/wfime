@@ -37,6 +37,7 @@ public class ManageRelatedHandler extends Handler {
     private ManageRelatedFragment mFragment = null;
 
     public ManageRelatedHandler(ManageRelatedFragment fragment) {
+        super(android.os.Looper.getMainLooper());
         mFragment = fragment;
     }
 

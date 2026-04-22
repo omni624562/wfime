@@ -32,16 +32,16 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import nan.toload.main.hd.R;
 import nan.toload.main.hd.data.ImObj;
@@ -53,10 +53,10 @@ import nan.toload.main.hd.global.LIMEUtilities;
 import nan.toload.main.hd.limedb.LimeDB;
 
 public class SearchServer {
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static final boolean DEBUG = false;
     private static final String TAG = "LIME.SearchServer";
+    private static final int MAX_CACHE_ENTRIES = 512;
     // Jeremy '12,6,9 make run-time suggestion phrase
     private static final boolean doRunTimeSuggestion = true;
 
@@ -74,7 +74,7 @@ public class SearchServer {
     private static String lastConfirmedBestSuggestion = null;
     // Jeremy '15,6,21
     private static int maxCodeLength = 4;
-    private static boolean mResetCache;
+    private static volatile boolean mResetCache;
     private static List<List<Mapping>> LDPhraseListArray = null;
     private static List<Mapping> LDPhraseList = null;
     private static String tablename = "";
@@ -82,7 +82,7 @@ public class SearchServer {
     // Jeremy '11,6,10
     private static boolean hasNumberMapping;
     private static boolean hasSymbolMapping;
-    private static ConcurrentHashMap<String, List<Mapping>> cache = null;
+    private static Map<String, List<Mapping>> cache = null;
     private static ConcurrentHashMap<String, List<Mapping>> engcache = null;
     private static ConcurrentHashMap<String, List<Mapping>> emojicache = null;
     private static ConcurrentHashMap<String, String> keynamecache = null;
@@ -241,7 +241,8 @@ public class SearchServer {
         abandonPhraseSuggestion = abandonSuggestion;
     }
 
-    private synchronized void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
+    private void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
+        java.util.HashMap<String, Mapping> relatedPhraseCache = new java.util.HashMap<>();
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {
@@ -460,7 +461,13 @@ public class SearchServer {
                             for (int k = ((phraseLen < 4) ? phraseLen - 1 : 3); k > 0; k--) {
                                 String pword = phrase.substring(phraseLen - k - 1, phraseLen - k);
                                 String cword = phrase.substring(phraseLen - k, phraseLen);
-                                relatedMapping = dbadapter.isRelatedPhraseExist(pword, cword);
+                                String relatedKey = pword + "\0" + cword;
+                                if (relatedPhraseCache.containsKey(relatedKey)) {
+                                    relatedMapping = relatedPhraseCache.get(relatedKey);
+                                } else {
+                                    relatedMapping = dbadapter.isRelatedPhraseExist(pword, cword);
+                                    relatedPhraseCache.put(relatedKey, relatedMapping);
+                                }
                                 if (relatedMapping != null)
                                     break;
                             }
@@ -611,7 +618,7 @@ public class SearchServer {
     /*
      * Jeremy '15,7,12 synchronized the method called from LIMEService only
      */
-    public synchronized List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
+    public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
             throws RemoteException {
         return getMappingByCode(code, softkeyboard, getAllRecords, false);
     }
@@ -824,11 +831,11 @@ public class SearchServer {
             // 25/Jul/2011 by Art
             // Just ignore error when something wrong with the result set
             try {
-                Future<List<Mapping>> future = executor
-                        .submit(() -> dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords));
-                cacheTemp = future.get(); // This is still blocking, but the query runs on a background thread.
-                if (cacheTemp != null)
+                if (Thread.currentThread().isInterrupted()) return null;
+                cacheTemp = dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords);
+                if (cacheTemp != null) {
                     cache.put(cacheKey, cacheTemp);
+                }
                 // Jeremy '12,6,5 check if need to update code remap cache
                 if (cacheTemp != null && cacheTemp != null
                         && cacheTemp.size() > 0 && cacheTemp.get(0) != null
@@ -962,6 +969,15 @@ public class SearchServer {
         return realCodeLen;
     }
 
+    private static <K, V> Map<K, V> newLruMap(int maxSize) {
+        return Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > maxSize;
+            }
+        });
+    }
+
     /**
      * This method is to initial/reset the cache of im.
      */
@@ -972,7 +988,7 @@ public class SearchServer {
             // e.printStackTrace();
             Log.e(TAG, e.getMessage());
         }
-        cache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
+        cache = newLruMap(MAX_CACHE_ENTRIES);
         engcache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
         emojicache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
         keynamecache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
@@ -1458,9 +1474,6 @@ public class SearchServer {
         if (scorelist != null) {
             scorelist.clear();
         }
-        if (scorelist != null) {
-            scorelist.clear();
-        }
         if (cache != null) {
             cache.clear();
         }
@@ -1479,7 +1492,7 @@ public class SearchServer {
         }
     }
 
-    public synchronized List<Mapping> getEnglishSuggestions(String word) throws RemoteException {
+    public List<Mapping> getEnglishSuggestions(String word) throws RemoteException {
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {

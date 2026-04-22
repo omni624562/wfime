@@ -32,6 +32,7 @@ public class SetupImHandler extends Handler {
     private SetupImFragment fragment = null;
 
     public SetupImHandler(SetupImFragment fragment) {
+        super(android.os.Looper.getMainLooper());
         this.fragment = fragment;
     }
 
