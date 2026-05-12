@@ -38,9 +38,9 @@
 
     <!-- Material3 specific key values -->
     <dimen name="key_height_material3">48dp</dimen>
-    <dimen name="key_text_size_material3">24dp</dimen>
-    <dimen name="label_text_size_material3">16dp</dimen>
-    <dimen name="small_label_text_size_material3">18dp</dimen>
+    <dimen name="key_text_size_material3">28dp</dimen>
+    <dimen name="label_text_size_material3">18dp</dimen>
+    <dimen name="small_label_text_size_material3">20dp</dimen>
     <dimen name="key_horizontal_gap_material3">3dp</dimen>
     <dimen name="key_vertical_gap_material3">2dp</dimen>
 
