@@ -405,7 +405,7 @@ public class LIMEPreferenceManager {
     }
 
     public int getKeyboardTheme() {
-        return Integer.parseInt(sp.getString("keyboard_theme", "0"));
+        return Integer.parseInt(sp.getString("keyboard_theme", "6"));
     }
 
     public boolean getResetCacheFlag(boolean defaultvalue) {

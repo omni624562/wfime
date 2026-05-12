@@ -83,7 +83,13 @@ public class LIMEPreferenceHC extends androidx.appcompat.app.AppCompatActivity {
         android.widget.FrameLayout container = findViewById(R.id.settings_container);
         if (container != null) {
             android.view.View settingsView = ComposeBridge.INSTANCE.createSettingsView(this, this);
-            container.addView(settingsView);
+            if (settingsView != null) {
+                try {
+                    container.addView(settingsView);
+                } catch (Exception e) {
+                    android.util.Log.e("LIME_PREF", "FAILED to add settingsView: " + e.getMessage(), e);
+                }
+            }
         }
 
         // Set up preference change listener for keyboard type handling

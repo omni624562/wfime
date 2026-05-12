@@ -838,6 +838,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         if (!checkDBConnection())
             return 0;
+            
+        // Check if table exists first to avoid "no such table" log errors
+        if (!hasTable(table)) {
+            return 0;
+        }
 
         Cursor cursor = null;
         try {
@@ -3063,24 +3068,48 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
-    public boolean checkBackuptable(String table) {
+        public boolean checkBackuptable(String table) {
+        String backupTableName = table + "_user";
+        
+        if (!checkDBConnection() || !hasTable(backupTableName)) {
+            return false;
+        }
 
         try {
-            String backupTableName = table + "_user";
             Cursor cursor = db.rawQuery("select COUNT(*) as total from " + backupTableName, null);
 
             cursor.moveToFirst();
 
             int total = cursor.getInt(cursor.getColumnIndex("total"));
+            cursor.close();
+            
             if (total > 0) {
                 Log.i("LIME", "Total size :" + total);
                 return true;
             } else {
                 return false;
             }
-        } catch (SQLiteException s) {
+        } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Checks if a table exists in the database.
+     *
+     * @param tableName Name of the table to check
+     * @return true if the table exists
+     */
+    public boolean hasTable(String tableName) {
+        if (!checkDBConnection()) return false;
+        
+        Cursor cursor = db.rawQuery(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            new String[]{tableName}
+        );
+        boolean exists = cursor != null && cursor.getCount() > 0;
+        if (cursor != null) cursor.close();
+        return exists;
     }
 
     /**

@@ -109,4 +109,12 @@
         <item name="LIMEPopupKeyboardLayout">@style/LIMEPopupKeyboardLayout.RelaxGreen</item>
         <item name="LIMECandidateView">@style/LIMECandidateView.RelaxGreen</item>
     </style>
+    <style name="LIMETheme.Material3">
+        <item name="LIMEKeyboardStyle">@style/LIMEKeyboard.Material3</item>
+        <item name="LIMEBaseKeyboardStyle">@style/LIMEBaseKeyboard.Material3</item>
+        <item name="LIMEKeyboardBaseView">@style/LIMEKeyboardBaseView.Material3</item>
+        <item name="LIMEKeyboardLayout">@style/LIMEKeyboardLayout.Material3</item>
+        <item name="LIMEPopupKeyboardLayout">@style/LIMEPopupKeyboardLayout.Material3</item>
+        <item name="LIMECandidateView">@style/LIMECandidateView.Material3</item>
+    </style>
 </resources>

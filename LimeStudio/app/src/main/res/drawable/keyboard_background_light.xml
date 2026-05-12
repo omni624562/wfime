@@ -25,12 +25,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="1.5dp" />
-    <solid android:color="@color/keyboard_background_material3" />
+    <solid android:color="@color/keyboard_background_light" />
     <padding
         android:bottom="1dp"
         android:left="1dp"
         android:right="1dp"
         android:top="1dp" />
-
-
 </shape>

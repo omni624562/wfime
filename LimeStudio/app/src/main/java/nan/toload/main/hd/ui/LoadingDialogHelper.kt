@@ -26,9 +26,16 @@ package nan.toload.main.hd.ui
 
 import android.app.Dialog
 import android.content.Context
+import android.content.ContextWrapper
 import android.view.Window
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import nan.toload.main.hd.R
 
 /**
@@ -53,9 +60,46 @@ class LoadingDialogHelper(private val context: Context) {
     private val messageState = mutableStateOf("")
     private val progressState = mutableStateOf<Float?>(null)
     private var isShowing = false
+    
+    private var lifecycleOwner: LifecycleOwner? = findLifecycleOwner(context)
+    private var savedStateRegistryOwner: SavedStateRegistryOwner? = findSavedStateRegistryOwner(context)
+    private var viewModelStoreOwner: ViewModelStoreOwner? = findViewModelStoreOwner(context)
 
     init {
         createDialog()
+    }
+
+    private fun findLifecycleOwner(context: Context): LifecycleOwner? {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is LifecycleOwner) {
+                return currentContext
+            }
+            currentContext = currentContext.baseContext
+        }
+        return null
+    }
+
+    private fun findSavedStateRegistryOwner(context: Context): SavedStateRegistryOwner? {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is SavedStateRegistryOwner) {
+                return currentContext
+            }
+            currentContext = currentContext.baseContext
+        }
+        return null
+    }
+
+    private fun findViewModelStoreOwner(context: Context): ViewModelStoreOwner? {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is ViewModelStoreOwner) {
+                return currentContext
+            }
+            currentContext = currentContext.baseContext
+        }
+        return null
     }
 
     private fun createDialog() {
@@ -64,6 +108,12 @@ class LoadingDialogHelper(private val context: Context) {
             setCancelable(false)
 
             val composeView = ComposeView(context).apply {
+                // Set ViewTree owners if available.
+                // This prevents "ViewTreeLifecycleOwner not found" when showing the dialog.
+                lifecycleOwner?.let { setViewTreeLifecycleOwner(it) }
+                savedStateRegistryOwner?.let { setViewTreeSavedStateRegistryOwner(it) }
+                viewModelStoreOwner?.let { setViewTreeViewModelStoreOwner(it) }
+
                 setContent {
                     LoadingDialog(
                         message = messageState.value,
@@ -74,6 +124,23 @@ class LoadingDialogHelper(private val context: Context) {
 
             setContentView(composeView)
         }
+    }
+
+    /**
+     * Set ViewTree owners explicitly. Useful for Service contexts (like LIMEService)
+     * where the context itself doesn't implement these interfaces.
+     */
+    fun setOwners(
+        lifecycleOwner: LifecycleOwner?,
+        savedStateRegistryOwner: SavedStateRegistryOwner?,
+        viewModelStoreOwner: ViewModelStoreOwner?
+    ) {
+        this.lifecycleOwner = lifecycleOwner
+        this.savedStateRegistryOwner = savedStateRegistryOwner
+        this.viewModelStoreOwner = viewModelStoreOwner
+        
+        // Re-create dialog if it was already initialized to apply new owners to its ComposeView
+        createDialog()
     }
 
     /**

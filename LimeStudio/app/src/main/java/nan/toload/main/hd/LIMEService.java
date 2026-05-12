@@ -102,8 +102,8 @@ public class LIMEService extends InputMethodService implements
     static final int MY_KEYCODE_SPACE = 32;
     static final int MY_KEYCODE_SWITCH_CHARSET = 95;
     static final int MY_KEYCODE_WINDOWS_START = 117; // Jeremy '12,4,29 windows start key
-    private static final boolean DEBUG = false;
-    private static final String TAG = "LIMEService";
+    static final boolean DEBUG = false;
+    static final String TAG = "LIMEService";
     private static final String CHANNEL_ID = "lime_ime_service";
     private static final int FOREGROUND_NOTIFICATION_ID = 1001;
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
@@ -122,37 +122,38 @@ public class LIMEService extends InputMethodService implements
             new KeyboardTheme("TechBlue", 3, R.style.LIMETheme_TechBlue),
             new KeyboardTheme("FashionPurple", 4, R.style.LIMETheme_FashionPurple),
             new KeyboardTheme("RelaxGreen", 5, R.style.LIMETheme_RelaxGreen),
+            new KeyboardTheme("Material3", 6, R.style.LIMETheme_Material3),
     };
     private java.util.concurrent.ExecutorService queryExecutor =
             java.util.concurrent.Executors.newSingleThreadExecutor();
     private volatile java.util.concurrent.Future<?> queryFuture;
-    private final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     public boolean hasMappingList = false;
     public String activeIM; // Jeremy '12,4,30 renamed from keyboardSelection
     LIMEKeyboardSwitcher mKeyboardSwitcher;
     // Keep keydown event
     KeyEvent mKeydownEvent = null;
-    private LIMEKeyboardView mInputView = null;
+    LIMEKeyboardView mInputView = null;
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
     CandidateView mCandidateView = null;
-    private CandidateView mCandidateViewInInputView = null;
-    private CandidateView mCandidateViewStandAlone = null;
+    CandidateView mCandidateViewInInputView = null;
+    CandidateView mCandidateViewStandAlone = null;
     private CandidateViewContainer mCandidateViewContainer = null;
     private ComposingTextPopup mComposingPopup = null;
-    private CompletionInfo[] mCompletions;
-    private StringBuilder mComposing = new StringBuilder();
+    CompletionInfo[] mCompletions;
+    StringBuilder mComposing = new StringBuilder();
     private EditorInfo mLastInitializedEditorInfo = null;
-    private boolean mPredictionOn;
-    private boolean mCompletionOn;
+    boolean mPredictionOn;
+    boolean mCompletionOn;
     private boolean mCapsLock;
     private boolean mAutoCap;
 
     // private String mWordSeparators;
     // private String misMatched; //Removed by Jeremy '13,1,10
     private boolean mHasShift;
-    private boolean mEnglishOnly;
+    boolean mEnglishOnly;
     private boolean mEnglishFlagShift;
     private boolean mPersistentLanguageMode; // Jeremy '12,5,1
     private int mShowArrowKeys; // Jeremy '12,5,22 force recreate keyboard if show arrow keys mode changes.
@@ -164,69 +165,70 @@ public class LIMEService extends InputMethodService implements
     private int mHardkeyboardHidden;
     private boolean mPredicting;
     private Context mThemeContext;
-    private Mapping selectedCandidate; // Jeremy '12,5,7 renamed from firstMacthed
+    Mapping selectedCandidate; // Jeremy '12,5,7 renamed from firstMacthed
     // private int selectedIndex; //Jeremy '12,5,7 the index in resultList of
     // selectedCandidate
-    private Mapping committedCandidate; // Jeremy '12,5,7 renamed from tempMatched
-    private StringBuffer tempEnglishWord;
-    private List<Mapping> tempEnglishList;
+    Mapping committedCandidate; // Jeremy '12,5,7 renamed from tempMatched
+    StringBuffer tempEnglishWord;
+    List<Mapping> tempEnglishList;
     boolean hasPhysicalKeyPressed;
-    private LinkedList<Mapping> mCandidateList; // Jeremy '12,5,7 renamed from templist
+    LinkedList<Mapping> mCandidateList; // Jeremy '12,5,7 renamed from templist
     // private boolean hasSearchPress = false; // Jeremy '11,5,29
     // private boolean hasSearchProcessed = false; // Jeremy '11,5,29
     private Vibrator mVibrator;
     private AudioManager mAudioManager;
     private boolean hasVibration = false;
     private boolean hasSound = false;
-    private boolean hasNumberMapping = false;
-    private boolean hasSymbolMapping = false;
+    boolean hasNumberMapping = false;
+    boolean hasSymbolMapping = false;
 
-    private boolean hasQuickSwitch = false;
+    boolean hasQuickSwitch = false;
     // Hard Keyboad Shift + Space Status
-    private boolean hasShiftPress = false;
-    private boolean onlyShiftPress = false; // Jeremy '15,5,30 shift only to switch between chi/eng
-    private boolean hasCtrlPress = false; // Jeremy '11,5,13
-    private boolean lastKeyCtrl = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing space
-                                         // down event
-    private boolean spaceKeyPress = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing
-                                           // space down event
+    boolean hasShiftPress = false;
+    boolean onlyShiftPress = false; // Jeremy '15,5,30 shift only to switch between chi/eng
+    boolean hasCtrlPress = false; // Jeremy '11,5,13
+    boolean lastKeyCtrl = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing space
+                                 // down event
+    boolean spaceKeyPress = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing
+                                   // space down event
 
     // To keep key press time
     // private long keyPressTime = 0;
     private long mLastShiftTime = 0; // Jeremy '24,1,7: For shift double-tap check
-    private boolean hasWinPress = false; // Jeremy '12,4,29 windows start key on standard windows keyboard
+    boolean hasWinPress = false; // Jeremy '12,4,29 windows start key on standard windows keyboard
     // private boolean hasCtrlProcessed = false; // Jeremy '11,6.18
-    private boolean hasDistinctMultitouch;// Jeremy '11,8,3
+    boolean hasDistinctMultitouch;// Jeremy '11,8,3
     private boolean hasShiftCombineKeyPressed = false; // Jeremy ,11,8, 3
-    private boolean hasMenuPress = false; // Jeremy '11,5,29
-    private boolean hasMenuProcessed = false; // Jeremy '11,5,29
-    private boolean hasEnterProcessed = false; // Jeremy '11,6.18
+    boolean hasMenuPress = false; // Jeremy '11,5,29
+    boolean hasMenuProcessed = false; // Jeremy '11,5,29
+    boolean hasEnterProcessed = false; // Jeremy '11,6.18
 
-    private boolean hasSpaceProcessed = false;
-    private boolean hasKeyProcessed = false; // Jeremy '11,8,15 for long pressed key
-    private int mLongPressKeyTimeout; // Jeremy '11,8, 15 read long press timeout from config
+    boolean hasSpaceProcessed = false;
+    boolean hasKeyProcessed = false; // Jeremy '11,8,15 for long pressed key
+    int mLongPressKeyTimeout; // Jeremy '11,8, 15 read long press timeout from config
     private boolean mIsHardwareAcceleratedDrawingEnabled = false;
-    private boolean hasSymbolEntered = false; // Jeremy '11,5,24
+    boolean hasSymbolEntered = false; // Jeremy '11,5,24
     private String mIMActivatedState = ""; // Jeremy '12,5,3, renamed from keyboardSelectedState
     private List<String> activatedIMNameList; // Jeremy '12,4,30 renamed from keyboardList
     private List<String> activatedIMShortNameList; // Jeremy '12,4,30 renamed from keyboardShortname
     private List<String> activatedIMList; // jerem '12,4,30 reanmed from keybaordCodeList
-    private String currentSoftKeyboard = ""; // Jeremy '12,4,30 reanmed from keybaord_xml;
-    private SearchServer SearchSrv = null;
+    String currentSoftKeyboard = ""; // Jeremy '12,4,30 reanmed from keybaord_xml;
+    SearchServer SearchSrv = null;
     // Auto Commmit Value
     private int auto_commit = 0;
     // Disable physical keyboard candidate words selection
     private boolean disable_physical_selection = false;
-    private String LDComposingBuffer = ""; // Jeremy '11,7,30 for learning continuous typing phrases
+    String LDComposingBuffer = ""; // Jeremy '11,7,30 for learning continuous typing phrases
     LIMEPreferenceManager mLIMEPref;
-    private boolean hasChineseSymbolCandidatesShown = false;
-    private boolean hasCandidatesShown = false;
+    boolean hasChineseSymbolCandidatesShown = false;
+    boolean hasCandidatesShown = false;
     private androidx.appcompat.app.AlertDialog mOptionsDialog;
     private int mKeyboardThemeIndex = -1;
 
     // Jeremy '24,1,7: Emoji Picker Support (Compose)
     private android.widget.FrameLayout mInputViewContainer;
-    private android.view.View mEmojiKeyboardView; // ComposeView
+    private nan.toload.main.hd.ComposeLifecycleOwner mComposeLifecycleOwner;
+    android.view.View mEmojiKeyboardView; // ComposeView
 
     // Helper classes for better code organization
     private IMSwitchHelper mIMSwitchHelper;
@@ -251,6 +253,28 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "OnCreate()");
 
         super.onCreate();
+
+        // Set ViewTree owners on the IME window DecorView so Compose's windowRecomposer
+        // fallback can find a LifecycleOwner. InputMethodService uses a SoftInputWindow
+        // (Dialog subclass); getWindow().getWindow() returns the underlying android.view.Window
+        // whose DecorView is the root ancestor of every view in this IME window.
+        try {
+            android.view.Window imeWin = getWindow().getWindow();
+            if (imeWin != null) {
+                android.view.View decorView = imeWin.getDecorView();
+                mComposeLifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
+                mComposeLifecycleOwner.performRestore(null);
+                mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
+                mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
+                mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
+                androidx.lifecycle.ViewTreeLifecycleOwner.set(decorView, mComposeLifecycleOwner);
+                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(decorView, mComposeLifecycleOwner);
+                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(decorView, mComposeLifecycleOwner);
+                Log.d(TAG, "IME window ViewTree owners set on DecorView");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set IME window ViewTree owners", e);
+        }
 
         // Start foreground service to prevent Samsung FreecessHandler from freezing the
         // IME
@@ -407,117 +431,122 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "OnCreateInputView()");
 
         if (mInputView != null)
-            mInputView = null;
+            mInputView.closing();
+        mInputView = null;
+
+        // Clear dedup guard so onStartInputView runs full initOnStartInput after recreating the view.
+        mLastInitializedEditorInfo = null;
 
         initialViewAndSwitcher(true); // Jeremy '12,4,29. will do buildactivekeyboardlist in init startInput
 
         Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
         Log.d("EMOJI_DEBUG", "mFixedCandidateViewOn = " + mFixedCandidateViewOn);
 
-        if (mFixedCandidateViewOn) {
-            Log.d("EMOJI_DEBUG", "Taking mFixedCandidateViewOn path - creating emoji picker separately");
-            if (DEBUG)
-                Log.i(TAG, "Fixed candiateView in on, return nInputViewContainer ");
-
-            // Create emoji picker even in fixed candidate mode (stored but not added to
-            // mCandidateInInputView)
-            if (mEmojiKeyboardView == null) {
-                Log.d("EMOJI_DEBUG", "Creating emoji picker view via ComposeBridge (fixed mode)");
-                mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
-                mEmojiKeyboardView.setVisibility(View.GONE);
-                Log.d("EMOJI_DEBUG", "Emoji picker created and hidden");
-            }
-
-            // Create a wrapper container for mCandidateInInputView + emoji picker
-            if (mInputViewContainer == null) {
-                Log.d("EMOJI_DEBUG", "Creating wrapper container for fixed mode");
-                mInputViewContainer = new android.widget.FrameLayout(this);
-                mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-
-                // Set up lifecycle owner for Compose views
-                Log.d("EMOJI_DEBUG", "Setting up lifecycle owner for container");
-                nan.toload.main.hd.ComposeLifecycleOwner lifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
-                lifecycleOwner.performRestore(null);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
-                androidx.lifecycle.ViewTreeLifecycleOwner.set(mInputViewContainer, lifecycleOwner);
-                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mInputViewContainer, lifecycleOwner);
-                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mInputViewContainer, lifecycleOwner);
-                Log.d("EMOJI_DEBUG", "Lifecycle owner set on container");
-            }
-            mInputViewContainer.removeAllViews();
-
-            // Add both candidate view and emoji picker to container
-            if (mCandidateInInputView != null) {
-                if (mCandidateInInputView.getParent() != null)
-                    ((android.view.ViewGroup) mCandidateInInputView.getParent()).removeView(mCandidateInInputView);
-                mInputViewContainer.addView(mCandidateInInputView);
-            }
-
-            if (mEmojiKeyboardView.getParent() != null)
-                ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
-            mInputViewContainer.addView(mEmojiKeyboardView);
-
-            Log.d("EMOJI_DEBUG",
-                    "Container setup complete (fixed mode). Children: " + mInputViewContainer.getChildCount());
-            return mInputViewContainer;
-        } else {
-            // Jeremy '24,1,7: Wrap input view and emoji view in a FrameLayout for Compose
-            // integration
-            Log.d("EMOJI_DEBUG", "=== onCreateInputView: Setting up input container ===");
-            if (mInputViewContainer == null) {
-                Log.d("EMOJI_DEBUG", "Creating new FrameLayout for input container");
-                mInputViewContainer = new android.widget.FrameLayout(this);
-                mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-
-                // Set up lifecycle owner for Compose views
-                Log.d("EMOJI_DEBUG", "Setting up lifecycle owner for container (else branch)");
-                nan.toload.main.hd.ComposeLifecycleOwner lifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
-                lifecycleOwner.performRestore(null);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
-                lifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
-                androidx.lifecycle.ViewTreeLifecycleOwner.set(mInputViewContainer, lifecycleOwner);
-                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mInputViewContainer, lifecycleOwner);
-                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mInputViewContainer, lifecycleOwner);
-                Log.d("EMOJI_DEBUG", "Lifecycle owner set on container (else branch)");
-            }
-            mInputViewContainer.removeAllViews();
-
-            if (mInputView != null) {
-                Log.d("EMOJI_DEBUG", "Adding keyboard view to container");
-                if (mInputView.getParent() != null)
-                    ((android.view.ViewGroup) mInputView.getParent()).removeView(mInputView);
-                mInputViewContainer.addView(mInputView);
-            }
-
-            if (mEmojiKeyboardView == null) {
-                Log.d("EMOJI_DEBUG", "Creating emoji picker view via ComposeBridge");
-                // Use ComposeBridge to create the Compose View
-                mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
-                Log.d("EMOJI_DEBUG", "Emoji picker view created, setting to GONE");
-                mEmojiKeyboardView.setVisibility(View.GONE);
-            } else {
-                Log.d("EMOJI_DEBUG", "Emoji picker view already exists, reusing");
-            }
-            if (mEmojiKeyboardView.getParent() != null) {
-                Log.d("EMOJI_DEBUG", "Removing emoji picker from old parent");
-                ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
-            }
-            Log.d("EMOJI_DEBUG", "Adding emoji picker to container");
-            mInputViewContainer.addView(mEmojiKeyboardView);
-            Log.d("EMOJI_DEBUG",
-                    "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
-
-            return mInputViewContainer;
+        if (mInputViewContainer == null) {
+            Log.d("KBD_DEBUG", "Creating new FrameLayout for input container");
+            mInputViewContainer = new android.widget.FrameLayout(this);
+            // InputMethodService views usually should use WRAP_CONTENT for height
+            mInputViewContainer.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         }
 
+        updateInputViewContainer();
+        
+        Log.d("KBD_DEBUG", "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
+        return mInputViewContainer;
     }
+
+    private void ensureComposeLifecycleOwner() {
+        if (mComposeLifecycleOwner == null) {
+            mComposeLifecycleOwner = new nan.toload.main.hd.ComposeLifecycleOwner();
+            mComposeLifecycleOwner.performRestore(null);
+            mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_CREATE);
+            mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START);
+            mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_RESUME);
+        }
+    }
+
+    private void updateInputViewContainer() {
+        if (mInputViewContainer == null) {
+            Log.w(TAG, "updateInputViewContainer: container is null, skipping");
+            return;
+        }
+
+        ensureComposeLifecycleOwner();
+        
+        // Set ViewTree owners so Compose's windowRecomposer lookup finds them.
+        androidx.lifecycle.ViewTreeLifecycleOwner.set(mInputViewContainer, mComposeLifecycleOwner);
+        androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mInputViewContainer, mComposeLifecycleOwner);
+        androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mInputViewContainer, mComposeLifecycleOwner);
+
+        mInputViewContainer.removeAllViews();
+
+        if (mFixedCandidateViewOn) {
+            if (mCandidateInInputView != null) {
+                Log.d("KBD_DEBUG", "Adding mCandidateInInputView to container.");
+                if (mCandidateInInputView.getParent() != null)
+                    ((android.view.ViewGroup) mCandidateInInputView.getParent()).removeView(mCandidateInInputView);
+                mCandidateInInputView.setVisibility(View.VISIBLE);
+                try {
+                    android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    mInputViewContainer.addView(mCandidateInInputView, lp);
+                } catch (Exception e) {
+                    Log.e("KBD_DEBUG", "FAILED to add mCandidateInInputView to container: " + e.getMessage(), e);
+                }
+            } else {
+                Log.e("KBD_DEBUG", "ERROR: mCandidateInInputView is NULL in fixed mode!");
+            }
+        } else {
+            if (mInputView != null) {
+                Log.d("KBD_DEBUG", "Adding keyboard view to container.");
+                if (mInputView.getParent() != null)
+                    ((android.view.ViewGroup) mInputView.getParent()).removeView(mInputView);
+                mInputView.setVisibility(View.VISIBLE);
+                try {
+                    android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    mInputViewContainer.addView(mInputView, lp);
+                } catch (Exception e) {
+                    Log.e("KBD_DEBUG", "FAILED to add mInputView to container: " + e.getMessage(), e);
+                }
+            } else {
+                Log.e("KBD_DEBUG", "ERROR: mInputView is NULL in normal mode!");
+            }
+        }
+
+        // Re-add emoji keyboard view
+        if (mEmojiKeyboardView == null) {
+            Log.d("KBD_DEBUG", "Creating emoji picker view via ComposeBridge");
+            mEmojiKeyboardView = nan.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
+        }
+
+        if (mEmojiKeyboardView != null) {
+            Log.d("KBD_DEBUG", "Adding/Updating emoji picker in container");
+            mEmojiKeyboardView.setVisibility(View.GONE);
+            if (mEmojiKeyboardView.getParent() != null) {
+                ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
+            }
+
+            // Set owners directly on emoji view too
+            androidx.lifecycle.ViewTreeLifecycleOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+            androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+            androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+
+            try {
+                android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                mInputViewContainer.addView(mEmojiKeyboardView, lp);
+            } catch (Exception e) {
+                Log.e("KBD_DEBUG", "FAILED to add mEmojiKeyboardView to container: " + e.getMessage(), e);
+            }
+        }
+    }
+
 
     private void initComposingPopup() {
         if (mComposingPopup == null) {
@@ -534,7 +563,7 @@ public class LIMEService extends InputMethodService implements
                 View anchor = mInputViewContainer != null ? mInputViewContainer
                         : (mCandidateInInputView != null ? mCandidateInInputView : mInputView);
                 if (anchor != null && text != null && !text.isEmpty()) {
-                    mComposingPopup.show(anchor, 16, 8);
+                    mComposingPopup.show(anchor, 16, 12); // Use 12dp vertical margin for better spacing
                 }
             }
         });
@@ -750,7 +779,7 @@ public class LIMEService extends InputMethodService implements
      * add by Jeremy '12,4,21
      * Send ic.finishComposingText upon composing is about to end
      */
-    private void finishComposing() {
+    void finishComposing() {
         if (DEBUG)
             Log.i(TAG, "finishComposing()");
         // Jeremy '11,8,14
@@ -778,7 +807,7 @@ public class LIMEService extends InputMethodService implements
      * add forceClearComposing parameter to control forced clear the system
      * composing buffer
      */
-    private void clearComposing(boolean forceClearComposing) {
+    void clearComposing(boolean forceClearComposing) {
         if (DEBUG)
             Log.i(TAG, "clearComposing()");
 
@@ -814,7 +843,7 @@ public class LIMEService extends InputMethodService implements
     /**
      * Clear suggestions or candidates in candidate view.
      */
-    private void clearSuggestions() {
+    void clearSuggestions() {
         if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
             mMainHandler.post(this::clearSuggestions);
             return;
@@ -880,7 +909,6 @@ public class LIMEService extends InputMethodService implements
      */
     private void initOnStartInput(EditorInfo attribute) {
         if (attribute == mLastInitializedEditorInfo) return;
-        mLastInitializedEditorInfo = attribute;
 
         if (DEBUG)
             Log.i(TAG, "initOnStartInput(): attribute.inputType & EditorInfo.TYPE_MASK_CLASS: "
@@ -888,9 +916,13 @@ public class LIMEService extends InputMethodService implements
                     + "; attribute.inputType & EditorInfo.TYPE_MASK_VARIATION: "
                     + (attribute.inputType & EditorInfo.TYPE_MASK_VARIATION));
 
-        if (mInputView == null) {
+        // mInputView is null when onStartInput fires before onCreateInputView.
+        // Don't mark as initialized yet; onStartInputView will complete the setup.
+        if (mInputView == null || mInputViewContainer == null) {
             return;
         }
+
+        mLastInitializedEditorInfo = attribute;
 
         // Jeremy '12,5,29 override the fixCanddiateMode setting in Landscape mode (in
         // landscape mode the candidate bar is always not fixed).
@@ -906,26 +938,43 @@ public class LIMEService extends InputMethodService implements
         // Jeremy '15,7,15 recreate inputView if keyboard theme changed
         if (mFixedCandidateViewOn != fixedCandidateMode
                 || mKeyboardThemeIndex != mLIMEPref.getKeyboardTheme()) {
+            Log.d("KBD_DEBUG", "Config change detected (fixedMode=" + fixedCandidateMode + ", theme=" + mLIMEPref.getKeyboardTheme() + ")");
             requestHideSelf(0);
             mInputView.closing();
             mFixedCandidateViewOn = fixedCandidateMode;
 
             initialViewAndSwitcher(true);
+            updateInputViewContainer();
 
             if (mFixedCandidateViewOn) {
                 if (DEBUG)
                     Log.i(TAG, "Fixed candidateView in on, return nInputViewContainer ");
-                setInputView(mCandidateInInputView);
+                Log.d("KBD_DEBUG", "Setting input view to container (fixed mode)");
+                setInputView(mInputViewContainer);
             } else {
-                setInputView(mInputView);
+                Log.d("KBD_DEBUG", "Setting input view to container (normal mode)");
+                setInputView(mInputViewContainer);
                 if (DEBUG)
                     Log.i(TAG, "Fixed candidateView in off, return mInputView ");
             }
-
+        } else {
+            Log.d("KBD_DEBUG", "No config change, ensuring input view is set to container");
+            updateInputViewContainer();
+            setInputView(mInputViewContainer);
         }
 
         hasPhysicalKeyPressed = false; // Jeremy '11,9,6 reset phsycalkeyflag
         hasCandidatesShown = false;
+
+        // Retry loading keyboard list if DB wasn't ready during initialViewAndSwitcher.
+        // getKeyboardSize() returns 0 when kbHm is null, so this only fires when needed.
+        if (mKeyboardSwitcher.getKeyboardSize() == 0) {
+            try {
+                mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error loading keyboard list in initOnStartInput: " + e.getMessage());
+            }
+        }
 
         // Reset the IM softkeyboard settings. Jeremy '11,6,19
         try {
@@ -964,8 +1013,12 @@ public class LIMEService extends InputMethodService implements
             mCompletionOn = true;
         }
 
+        Log.d("LIME_KBD", "initOnStartInput: activeIM=" + activeIM
+                + " kbSize=" + mKeyboardSwitcher.getKeyboardSize()
+                + " mInputView=" + (mInputView == null ? "null" : "ok"));
         mKeyboardSwitcher.setKeyboardMode(activeIM, config.keyboardMode, mImeOptions,
                 !config.isEnglishOnly, config.isNumber, config.isDateTime);
+        Log.d("LIME_KBD", "setKeyboardMode done");
 
         if (!config.isEnglishOnly && !config.isPhone && !config.isNumber && !config.isDateTime
                 && config.keyboardMode != LIMEKeyboardSwitcher.MODE_EMAIL
@@ -1088,7 +1141,7 @@ public class LIMEService extends InputMethodService implements
      * InputConnection. It is only needed when using the PROCESS_HARD_KEYS
      * option.
      */
-    private boolean translateKeyDown(int keyCode, KeyEvent event) {
+    boolean translateKeyDown(int keyCode, KeyEvent event) {
         return HardKeyHelper.translateKeyDown(this, keyCode, event);
     }
 
@@ -1403,12 +1456,12 @@ public class LIMEService extends InputMethodService implements
         return super.onKeyDown(keyCode, event);
     }
 
-    private void resetTempEnglishWord() {
+    void resetTempEnglishWord() {
         tempEnglishWord.delete(0, tempEnglishWord.length());
         tempEnglishList.clear();
     }
 
-    private void setInputConnectionMetaStateAsCurrentMetaKeyKeyListenerState() {
+    void setInputConnectionMetaStateAsCurrentMetaKeyKeyListenerState() {
         InputConnection ic = getCurrentInputConnection();
         if (ic != null) {
             int clearStatesFlags = 0;
@@ -1572,6 +1625,14 @@ public class LIMEService extends InputMethodService implements
         return super.onKeyUp(keyCode, event);
     }
 
+    boolean superOnKeyDown(int keyCode, KeyEvent event) {
+        return super.onKeyDown(keyCode, event);
+    }
+
+    boolean superOnKeyUp(int keyCode, KeyEvent event) {
+        return super.onKeyUp(keyCode, event);
+    }
+
     /**
      * Public method to commit raw text directly (e.g., raw keycode from
      * CandidateView).
@@ -1594,7 +1655,7 @@ public class LIMEService extends InputMethodService implements
     /**
      * Helper function to commit any text being composed in to the editor.
      */
-    private void commitTyped(InputConnection ic) {
+    void commitTyped(InputConnection ic) {
         if (DEBUG)
             Log.i(TAG, "commitTyped()");
         if (selectedCandidate == null)
@@ -1810,15 +1871,15 @@ public class LIMEService extends InputMethodService implements
 
     }
 
-    private boolean isValidLetter(int code) {
+    boolean isValidLetter(int code) {
         return Character.isLetter(code);
     }
 
-    private boolean isValidDigit(int code) {
+    boolean isValidDigit(int code) {
         return Character.isDigit(code);
     }
 
-    private boolean isValidSymbol(int code) {
+    boolean isValidSymbol(int code) {
         // code has to < 256, a ascii character
         // Fixed: Simplified logic - exclude letters, digits, and space
         return code < 256 && !Character.isLetter(code)
@@ -2216,7 +2277,7 @@ public class LIMEService extends InputMethodService implements
      * Add by Jeremy '10, 3, 24 for IM picker menu in options menu
      * renamed to showIMPicker from showKeybaordPicer to avoid confusion '12,3,40
      */
-    private void showIMPicker() {
+    void showIMPicker() {
         if (DEBUG)
             Log.i(TAG, "showIMPicker()");
         buildActivatedIMList();
@@ -2321,11 +2382,11 @@ public class LIMEService extends InputMethodService implements
         updateShiftKeyState(getCurrentInputEditorInfo());
     }
 
-    private void updateCandidates() {
+    void updateCandidates() {
         this.updateCandidates(false);
     }
 
-    private void updateChineseSymbol() {
+    void updateChineseSymbol() {
         // ChineseSymbol chineseSym = new ChineseSymbol();
         hasChineseSymbolCandidatesShown = true;
         List<Mapping> list = ChineseSymbol.getChineseSymoblList();
@@ -2537,7 +2598,7 @@ public class LIMEService extends InputMethodService implements
     /*
      * Update English suggestions view
      */
-    private void updateEnglishPrediction() {
+    void updateEnglishPrediction() {
 
         hasChineseSymbolCandidatesShown = false;
         if (mPredictionOn && mLIMEPref.getEnglishPrediction()) {
@@ -2684,7 +2745,7 @@ public class LIMEService extends InputMethodService implements
     /*
      * Update dictionary view
      */
-    private void updateRelatedPhrase(final boolean getAllRecords) {
+    void updateRelatedPhrase(final boolean getAllRecords) {
         if (DEBUG)
             Log.i(TAG, "updateRelatedPhrase()");
         hasChineseSymbolCandidatesShown = false;
@@ -2765,13 +2826,13 @@ public class LIMEService extends InputMethodService implements
         mCandidateViewHandler.hideCandidateView();
     }
 
-    private void showCandidateView() {
+    void showCandidateView() {
         if (DEBUG)
             Log.i(TAG, "showCandidateView()");
         mCandidateViewHandler.showCandidateView();
     }
 
-    private void hideCandidateView() {
+    void hideCandidateView() {
         if (DEBUG)
             Log.i(TAG, "hideCandidateView()");
         if (mCandidateView != null)
@@ -2888,7 +2949,7 @@ public class LIMEService extends InputMethodService implements
     /**
      * Helper to map raw keys to keyboard labels (roots) for display
      */
-    private String getComposingDisplayString(String rawString) {
+    String getComposingDisplayString(String rawString) {
         StringBuilder sb = new StringBuilder();
 
         List<LIMEBaseKeyboard.Key> keys = null;
@@ -3185,7 +3246,7 @@ public class LIMEService extends InputMethodService implements
     /**
      * For physical keybaord to switch between chinese and english mode.
      */
-    private void switchChiEng() {
+    void switchChiEng() {
         if (DEBUG)
             Log.i(TAG, "switchChiEng(): mEnglishOnly:" + mEnglishOnly);
 
@@ -3373,7 +3434,7 @@ public class LIMEService extends InputMethodService implements
         SearchSrv.setTablename(tablename, hasNumberMapping, hasSymbolMapping);
     }
 
-    private boolean handleSelkey(int primaryCode) {
+    boolean handleSelkey(int primaryCode) {
         if (DEBUG)
             Log.i(TAG, "handleSelKey()");
         // Jeremy '12,4,1 only do selkey on starndard keyboard
@@ -3642,7 +3703,7 @@ public class LIMEService extends InputMethodService implements
         mLastShiftTime = now;
     }
 
-    private void toggleCapsLock() {
+    void toggleCapsLock() {
         mCapsLock = !mCapsLock;
         if (mKeyboardSwitcher.isAlphabetMode()) {
             ((LIMEKeyboard) mInputView.getKeyboard()).setShiftLocked(mCapsLock);

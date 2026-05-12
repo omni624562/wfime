@@ -88,7 +88,7 @@ fun EmojiPicker(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight()
+            .wrapContentHeight()
             .background(backgroundColor)
             // Apply bottom padding to the whole column so the bottom bar sits ABOVE the system nav bar
             .padding(bottom = bottomPaddingDp.dp) 
@@ -97,7 +97,7 @@ fun EmojiPicker(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp) // Slightly reduced height
+                .height(40.dp) 
                 .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
@@ -120,18 +120,18 @@ fun EmojiPicker(
                         contentDescription = null,
                         tint = if (selectedCategoryIndex == index) iconColor else secondaryTextColor,
                         modifier = Modifier
-                            .size(30.dp) // Increased from 24dp
-                            .padding(bottom = 6.dp) // Reduced padding slightly
+                            .size(24.dp) 
+                            .padding(bottom = 4.dp) 
                     )
                     // Green underline for selected category
                     Box(
                         modifier = Modifier
-                            .width(30.dp) // Match new icon width
-                            .height(3.dp)
+                            .width(24.dp) 
+                            .height(2.dp)
                             .background(
                                 if (selectedCategoryIndex == index) accentColor
                                 else Color.Transparent,
-                                shape = RoundedCornerShape(1.5.dp)
+                                shape = RoundedCornerShape(1.dp)
                             )
                     )
                 }
@@ -151,7 +151,7 @@ fun EmojiPicker(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(6),
+                columns = GridCells.Fixed(8),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 4.dp),
@@ -238,7 +238,7 @@ fun EmojiGridItem(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(text = emoji.char, fontSize = 36.sp)
+        Text(text = emoji.char, fontSize = 30.sp)
 
         // Visual indicator for emojis with skin tone support (small triangle in bottom-right)
         if (emoji.hasSkinTone) {

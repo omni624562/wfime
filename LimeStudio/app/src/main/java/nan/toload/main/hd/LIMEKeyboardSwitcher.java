@@ -181,6 +181,8 @@ public class LIMEKeyboardSwitcher {
                 return "易";
             case "phonetic":
                 return "注";
+            case "hs":
+                return "麥";
             default:
                 return "中";
         }
@@ -313,9 +315,16 @@ public class LIMEKeyboardSwitcher {
         KeyboardObj kobj = null;
 
         if (imcode == null || imcode.equals("") || imcode.equals("custom")) {
-            imcode = "lime";
-            if (kbHm != null)
+            // Try to use the code directly if it exists in keyboards map, 
+            // otherwise fallback to default 'lime'
+            if (kbHm != null && kbHm.containsKey(code)) {
+                imcode = code;
                 kobj = kbHm.get(imcode);
+            } else {
+                imcode = "lime";
+                if (kbHm != null)
+                    kobj = kbHm.get(imcode);
+            }
         } else if (imcode.equals("wb")) {
             // Art 28/Sep/2011 Force WB to use it special design keyboard layout
             kobj = new KeyboardObj();
@@ -345,9 +354,28 @@ public class LIMEKeyboardSwitcher {
                 kobj = kbHm.get(imcode);
         }
 
-        KeyboardId kid;
+        android.util.Log.d("LIME_KBD", "setKeyboardMode: code=" + code
+                + " imcode=" + imcode
+                + " kbHm=" + (kbHm == null ? "null" : "size=" + kbHm.size() + " keys=" + kbHm.keySet())
+                + " imHm=" + (imHm == null ? "null" : "size=" + imHm.size() + " val=" + (imHm.get(code)))
+                + " kobj=" + (kobj == null ? "null" : kobj.getCode()));
 
-        if (kobj != null) {
+        KeyboardId kid = null;
+
+        if (kobj == null) {
+            // Fallback: If no keyboard object found, try to use default "lime" keyboard
+            // from database.
+            if (kbHm != null && kbHm.containsKey("lime")) {
+                kobj = kbHm.get("lime");
+            } else {
+                Log.e(TAG, "setKeyboardMode: Critical failure - kobj is null and 'lime' keyboard missing!");
+                // Emergency fallback kid if we have NOTHING
+                kid = new KeyboardId(getKeyboardXMLID("lime"), KEYBOARDMODE_NORMAL, true);
+            }
+        }
+
+        // Only run main logic if kid hasn't been set by emergency fallback yet
+        if (kid == null && kobj != null) {
 
             mIsChinese = false;
             if (isSymbol) {

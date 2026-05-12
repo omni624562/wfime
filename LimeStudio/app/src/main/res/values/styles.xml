@@ -529,4 +529,74 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <style name="LIMEKeyboard.Material3" parent="LIMEKeyboard">
+        <item name="spaceKeyIcon">@drawable/sym_keyboard_space_light</item>
+        <item name="spaceKeyPreviewIcon">@drawable/sym_flat_keyboard_space</item>
+        <item name="enterKeyIcon">@drawable/sym_keyboard_return_light</item>
+        <item name="searchKeyIcon">@drawable/sym_keyboard_search_light</item>
+        <item name="doneKeyIcon">@drawable/sym_keyboard_done_light</item>
+        <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_light</item>
+        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift</item>
+        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted</item>
+        <item name="spaceKeyTextColor">@color/keyboard_second_foreground_material3</item>
+        <item name="spaceKeySlidingLeftArrow">@drawable/sym_keyboard_previous</item>
+        <item name="spaceKeySlidingRightArrow">@drawable/sym_keyboard_next</item>
+    </style>
+
+    <style name="LIMEKeyboardLayout.Material3" parent="LIMEKeyboardLayout">
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="actionKeyBackground">@drawable/btn_keyboard_action_key_material3</item>
+        <item name="functionalKeyBackground">@drawable/btn_flat_keyboard_functional_key_material3</item>
+    </style>
+
+    <style name="LIMEPopupKeyboardLayout.Material3" parent="LIMEPopupKeyboardLayout">
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
+    </style>
+
+    <style name="LIMEKeyboardBaseView.Material3" parent="LIMEKeyboardBaseView">
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
+
+        <item name="keyTextSize">@dimen/key_text_size_material3</item>
+        <item name="labelTextSize">@dimen/label_text_size_material3</item>
+        <item name="smallLabelTextSize">@dimen/small_label_text_size_material3</item>
+
+        <item name="keyTextColorNormal">@color/keyboard_foreground_material3</item>
+        <item name="keyTextColorPressed">@color/md_theme_onPrimary</item>
+
+        <item name="functionKeyTextColorNormal">@color/keyboard_second_foreground_material3</item>
+        <item name="functionKeyTextColorPressed">@color/md_theme_onPrimary</item>
+
+        <item name="keySubLabelTextColorNormal">@color/keyboard_third_foreground_material3</item>
+        <item name="keySubLabelTextColorPressed">@color/md_theme_onPrimary</item>
+    </style>
+
+    <style name="LIMEBaseKeyboard.Material3" parent="LIMEBaseKeyboard">
+        <item name="keyHeight">@dimen/key_height_material3</item>
+        <item name="horizontalGap">@dimen/key_horizontal_gap_material3</item>
+        <item name="verticalGap">@dimen/key_vertical_gap_material3</item>
+        <item name="drawableArrowUp">@drawable/sym_keyboard_up_material3</item>
+        <item name="drawableArrowDown">@drawable/sym_keyboard_down_material3</item>
+        <item name="drawableArrowRight">@drawable/sym_keyboard_right_material3</item>
+        <item name="drawableArrowLeft">@drawable/sym_keyboard_left_material3</item>
+    </style>
+
+    <style name="LIMECandidateView.Material3" parent="LIMECandidateView">
+        <item name="suggestHighlight">@drawable/ic_suggest_scroll_background_material3</item>
+        <item name="voiceInputIcon">@drawable/ic_emoji_vector</item>
+        <item name="candidateBackground">@color/keyboard_background_material3</item>
+        <item name="ExpandButtonIcon">@drawable/btn_expand_material3</item>
+        <item name="candidateNormalTextColor">@color/keyboard_foreground_material3</item>
+        <item name="candidateNormalTextHighlightColor">@color/md_theme_primary</item>
+        <item name="composingCodeColor">@color/md_theme_primary</item>
+        <item name="composingCodeHighlightColor">@color/md_theme_onPrimary</item>
+        <item name="spacerColor">@color/keyboard_candidate_spacer_material3</item>
+        <item name="selKeyColor">@color/keyboard_foreground_material3</item>
+        <item name="selKeyShiftedColor">@color/keyboard_selection_keys_material3</item>
+        <item name="composingTextColor">@color/md_theme_primary</item>
+        <item name="composingBackgroundColor">@color/keyboard_composing_background_material3</item>
+    </style>
 </resources>

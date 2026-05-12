@@ -6,6 +6,7 @@ package nan.toload.main.hd.ui
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -48,6 +49,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nan.toload.main.hd.DBServer
 import nan.toload.main.hd.Lime
@@ -129,6 +134,22 @@ class SetupImFragment : Fragment() {
         updateVersionInfo()
 
         return ComposeView(requireContext()).apply {
+            // Set ViewTree owners so internal Compose components walking the tree also find them.
+            // This prevents "ViewTreeLifecycleOwner not found" errors.
+            setViewTreeLifecycleOwner(viewLifecycleOwner)
+            
+            // Robust lookup for SavedStateRegistryOwner from activity context
+            var currentContext: Context? = context
+            while (currentContext is ContextWrapper) {
+                if (currentContext is SavedStateRegistryOwner) {
+                    setViewTreeSavedStateRegistryOwner(currentContext)
+                    break
+                }
+                currentContext = currentContext.baseContext
+            }
+
+            setViewTreeViewModelStoreOwner(this@SetupImFragment)
+
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 val colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()

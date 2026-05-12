@@ -57,7 +57,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
@@ -169,22 +172,30 @@ open class CandidateView @JvmOverloads constructor(
             recomposer?.runRecomposeAndApplyChanges()
         }
         
-        composeView = ComposeView(context).apply {
-            // Force MATCH_PARENT to get bounded width from parent FrameLayout
-            layoutParams = LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT
-            )
-            // Set our custom recomposer directly - bypasses ViewTree lookup
-            setParentCompositionContext(recomposer)
-            // Also set lifecycle owners on this view for any other components that need it
-            setViewTreeLifecycleOwner(lifecycleOwner)
-            setViewTreeSavedStateRegistryOwner(lifecycleOwner)
-            setContent {
-                CandidateRow()
+        try {
+            composeView = ComposeView(context).apply {
+                // Force MATCH_PARENT to get bounded width from parent FrameLayout
+                layoutParams = LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT
+                )
+                // Set our custom recomposer directly - bypasses ViewTree lookup
+                setParentCompositionContext(recomposer)
+                // Also set lifecycle owners on this view for any other components that need it
+                setViewTreeLifecycleOwner(lifecycleOwner)
+                setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+                setViewTreeViewModelStoreOwner(lifecycleOwner)
+                setContent {
+                    CandidateRow()
+                }
             }
+            composeView?.let { 
+                addView(it)
+                Log.d("CANDIDATE_VIEW", "Successfully added composeView to CandidateView")
+            }
+        } catch (e: Exception) {
+            Log.e("CANDIDATE_VIEW", "FAILED to initialize ComposeView in CandidateView: ${e.message}", e)
         }
-        addView(composeView)
     }
     
     override fun onAttachedToWindow() {
@@ -471,9 +482,10 @@ open class CandidateView @JvmOverloads constructor(
  * Custom LifecycleOwner and SavedStateRegistryOwner for Compose support in InputMethodService.
  * InputMethodService doesn't implement LifecycleOwner, so we need to provide our own.
  */
-private class IMELifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
+private class IMELifecycleOwner : LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
+    private val mViewModelStore = ViewModelStore()
     
     init {
         savedStateRegistryController.performRestore(null)
@@ -485,6 +497,9 @@ private class IMELifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
     
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
+
+    override val viewModelStore: ViewModelStore
+        get() = mViewModelStore
     
     fun handleLifecycleEvent(event: Lifecycle.Event) {
         lifecycleRegistry.handleLifecycleEvent(event)

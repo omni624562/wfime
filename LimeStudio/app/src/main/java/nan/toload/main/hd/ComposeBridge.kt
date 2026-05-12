@@ -2,18 +2,14 @@ package nan.toload.main.hd
 
 import android.content.Context
 import android.view.View
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.platform.WindowRecomposerFactory
-import androidx.compose.ui.platform.WindowRecomposerPolicy
 import androidx.compose.runtime.Recomposer
-import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModelProvider
@@ -22,12 +18,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import nan.toload.main.hd.ui.EmojiPicker
 import nan.toload.main.hd.ui.compose.NavigationDrawerScreen
 import nan.toload.main.hd.ui.compose.NavigationViewModel
@@ -38,22 +34,7 @@ import nan.toload.main.hd.ui.compose.manageword.ManageImViewModelFactory
 import nan.toload.main.hd.ui.compose.settings.SettingsScreen
 import nan.toload.main.hd.ui.compose.settings.SettingsViewModel
 import nan.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
-
-import nan.toload.main.hd.data.Word
-import android.view.KeyEvent
 import nan.toload.main.hd.ui.compose.theme.LimeTheme
-
-/**
- * Helper function to get navigation bar height
- */
-private fun getNavigationBarHeight(context: Context): Int {
-    val resourceId = context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
-    return if (resourceId > 0) {
-        context.resources.getDimensionPixelSize(resourceId)
-    } else {
-        0
-    }
-}
 
 /**
  * Bridge object for creating Compose-based views that can be integrated into Java code.
@@ -62,93 +43,122 @@ object ComposeBridge {
     /**
      * Creates an emoji picker view using Jetpack Compose.
      *
+     * Uses the same Recomposer + wrapper-FrameLayout pattern as CandidateView.kt so that
+     * the Recomposer survives detach/re-attach cycles (ON_PAUSE on detach, never ON_DESTROY).
+     * A fresh wrapper is created on each onCreateInputView call.
+     *
      * @param context Android context
      * @param service IME service for handling emoji input
      * @return View containing the emoji picker UI
      */
-    fun createEmojiPickerView(context: Context, service: LIMEService): View {
+    fun createEmojiPickerView(context: Context, service: LIMEService): View? {
         android.util.Log.d("EMOJI_DEBUG", "=== ComposeBridge: createEmojiPickerView() called ===")
 
-        // Create lifecycle owner for Compose
-        val lifecycleOwner = ComposeLifecycleOwner()
-        lifecycleOwner.performRestore(null)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        android.util.Log.d("EMOJI_DEBUG", "Lifecycle owner created")
+        return try {
+            // Create Recomposer before the ComposeView — matches CandidateView.kt pattern.
+            // Using AndroidUiDispatcher.Main avoids tying the Recomposer lifetime to a
+            // CoroutineScope Job, so it is NOT cancelled when the wrapper detaches from the window.
+            val coroutineScope = CoroutineScope(SupervisorJob() + AndroidUiDispatcher.Main)
+            val recomposer = Recomposer(AndroidUiDispatcher.Main)
+            coroutineScope.launch {
+                recomposer.runRecomposeAndApplyChanges()
+            }
 
-        // Create a custom coroutine scope with AndroidUiDispatcher (includes frame clock)
-        val coroutineScope = CoroutineScope(AndroidUiDispatcher.Main)
+            // Lifecycle owner: ON_CREATE + ON_START here; ON_RESUME fires in onAttachedToWindow.
+            val composeLifecycleOwner = ComposeLifecycleOwner().apply {
+                performRestore(null)
+                handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+                handleLifecycleEvent(Lifecycle.Event.ON_START)
+            }
 
-        return ComposeView(context).apply {
-            android.util.Log.d("EMOJI_DEBUG", "Creating ComposeView for emoji picker")
-
-            // Set custom WindowRecomposerFactory that doesn't need ViewTreeLifecycleOwner
-            setViewCompositionStrategy(object : ViewCompositionStrategy {
-                override fun installFor(view: androidx.compose.ui.platform.AbstractComposeView): () -> Unit {
-                    // Create our own Recomposer that doesn't rely on view tree lifecycle
-                    val recomposer = Recomposer(coroutineScope.coroutineContext)
-                    view.setParentCompositionContext(recomposer)
-
-                    // Start the recomposer
-                    coroutineScope.launch {
-                        recomposer.runRecomposeAndApplyChanges()
-                    }
-
-                    // Return cleanup function
-                    return {
-                        recomposer.cancel()
-                        coroutineScope.cancel()
-                    }
-                }
-            })
-
-            // Set lifecycle owner for other Compose features that might need it
-            android.util.Log.d("EMOJI_DEBUG", "Setting lifecycle owners on ComposeView")
-            setViewTreeLifecycleOwner(lifecycleOwner)
-            setViewTreeSavedStateRegistryOwner(lifecycleOwner)
-            setViewTreeViewModelStoreOwner(lifecycleOwner)
-
-            // Set explicit layout parameters
-            // 52dp (category) + ~220dp (emoji grid) + 36dp (bottom bar) + 40dp (system nav padding) = ~348dp
-            val heightDp = 350
+            val heightDp = 240
             val density = context.resources.displayMetrics.density
             val heightPx = (heightDp * density).toInt()
-            android.util.Log.d("EMOJI_DEBUG", "Setting layout params: height=${heightDp}dp (${heightPx}px)")
-            layoutParams = android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                heightPx
-            )
+            val systemBarPaddingDp = 0
 
-            // Set background to ensure visibility (for debugging)
-            android.util.Log.d("EMOJI_DEBUG", "Setting background color to #1F1F1F")
-            setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
-            
-            val systemBarPaddingDp = 40 // Estimated height of the LIME/System bottom bar
-            
-            android.util.Log.d("EMOJI_DEBUG", "Setting Compose content with EmojiPicker, padding=$systemBarPaddingDp")
-            setContent {
-                android.util.Log.d("EMOJI_DEBUG", "Composing EmojiPicker UI")
-                LimeTheme {
-                    EmojiPicker(
-                        onEmojiClick = { emoji ->
-                            android.util.Log.d("EMOJI_DEBUG", "Emoji clicked: $emoji")
-                            service.onText(emoji)
-                        },
-                        onBackClick = {
-                            android.util.Log.d("EMOJI_DEBUG", "Back button clicked")
-                            service.closeEmojiPicker()
-                        },
-                        onBackspaceClick = {
-                            android.util.Log.d("EMOJI_DEBUG", "Backspace clicked")
-                            // Simulate Backspace
-                            service.handleComposeBackspace()
-                        },
-                        bottomPaddingDp = systemBarPaddingDp
-                    )
+            val composeView = ComposeView(context).apply {
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    heightPx
+                )
+                // Bypass WindowRecomposer lookup with our own Recomposer — same as CandidateView.kt.
+                setParentCompositionContext(recomposer)
+                // Set ViewTree owners so internal Compose components walking the tree also find them.
+                setViewTreeLifecycleOwner(composeLifecycleOwner)
+                setViewTreeSavedStateRegistryOwner(composeLifecycleOwner)
+                setViewTreeViewModelStoreOwner(composeLifecycleOwner)
+                // No explicit setViewCompositionStrategy — the default
+                // (DisposeOnDetachedFromWindowOrReleasedFromPool) is installed by the constructor.
+                setContent {
+                    android.util.Log.d("EMOJI_DEBUG", "Composing EmojiPicker UI")
+                    LimeTheme {
+                        EmojiPicker(
+                            onEmojiClick = { emoji ->
+                                android.util.Log.d("EMOJI_DEBUG", "Emoji clicked: $emoji")
+                                service.onText(emoji)
+                            },
+                            onBackClick = {
+                                android.util.Log.d("EMOJI_DEBUG", "Back button clicked")
+                                service.closeEmojiPicker()
+                            },
+                            onBackspaceClick = {
+                                android.util.Log.d("EMOJI_DEBUG", "Backspace clicked")
+                                service.handleComposeBackspace()
+                            },
+                            bottomPaddingDp = systemBarPaddingDp
+                        )
+                    }
                 }
             }
-            android.util.Log.d("EMOJI_DEBUG", "ComposeView created successfully")
+
+            // Thin wrapper that drives lifecycle across attach/detach cycles.
+            // Lifecycle is PAUSED (not DESTROYED) on detach so the Recomposer stays alive for reuse.
+            object : android.widget.FrameLayout(context) {
+                init {
+                    android.util.Log.d("EMOJI_DEBUG", "Creating emoji wrapper FrameLayout")
+                    layoutParams = android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        heightPx
+                    )
+                    setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
+                    
+                    // Explicitly check for null and log error before addView.
+                    // Although composeView is a non-nullable val, adding this check
+                    // for defensive programming against potential initialization issues.
+                    if (composeView != null) {
+                        try {
+                            addView(composeView)
+                            android.util.Log.d("EMOJI_DEBUG", "Successfully added composeView to wrapper")
+                        } catch (e: Exception) {
+                            android.util.Log.e("EMOJI_DEBUG", "FAILED to add composeView to wrapper: ${e.message}", e)
+                        }
+                    } else {
+                        android.util.Log.e("EMOJI_DEBUG", "ERROR: composeView is NULL in createEmojiPickerView wrapper!")
+                    }
+                }
+
+                override fun onAttachedToWindow() {
+                    super.onAttachedToWindow()
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                    android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper attached — lifecycle RESUMED")
+                }
+
+                override fun onDetachedFromWindow() {
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                    android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper detached — lifecycle PAUSED")
+                    super.onDetachedFromWindow()
+                }
+
+                // Suppress hover events reaching AndroidComposeView.
+                // Compose BOM 2024.02 (UI 1.6.1) has a bug where a Handler-deferred
+                // sendHoverExitEvent lambda throws IllegalStateException when hoveredItems
+                // is empty. In an IME context hover events are irrelevant, so consuming
+                // them here prevents the crash without any functional impact.
+                override fun dispatchHoverEvent(event: android.view.MotionEvent): Boolean = true
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("EMOJI_DEBUG", "FAILED to create Emoji Picker View: ${e.message}", e)
+            null
         }
     }
 
@@ -164,35 +174,45 @@ object ComposeBridge {
         context: Context,
         viewModelStoreOwner: ViewModelStoreOwner,
         callbacks: NavigationDrawerCallbacks
-    ): View {
-        return ComposeView(context).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent {
-                // Create ViewModel
-                val factory = NavigationViewModelFactory(context)
-                val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[NavigationViewModel::class.java]
+    ): View? {
+        return try {
+            ComposeView(context).apply {
+                // Set ViewTree owners so internal Compose components walking the tree also find them.
+                // This prevents "ViewTreeLifecycleOwner not found" errors when used in Activities.
+                if (viewModelStoreOwner is LifecycleOwner) {
+                    setViewTreeLifecycleOwner(viewModelStoreOwner)
+                }
+                if (viewModelStoreOwner is SavedStateRegistryOwner) {
+                    setViewTreeSavedStateRegistryOwner(viewModelStoreOwner)
+                }
+                setViewTreeViewModelStoreOwner(viewModelStoreOwner)
 
-                // Observe UI state
-                val uiState by viewModel.uiState.collectAsState()
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    val factory = NavigationViewModelFactory(context)
+                    val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[NavigationViewModel::class.java]
+                    val uiState by viewModel.uiState.collectAsState()
 
-                LimeTheme {
-                    NavigationDrawerScreen(
-                        menuItems = uiState.menuItems,
-                        selectedPosition = uiState.selectedPosition,
-                        onMenuItemClick = { position ->
-                            viewModel.selectItem(position)
-                            callbacks.onNavigationDrawerItemSelected(position)
-                        }
-                    )
+                    LimeTheme {
+                        NavigationDrawerScreen(
+                            menuItems = uiState.menuItems,
+                            selectedPosition = uiState.selectedPosition,
+                            onMenuItemClick = { position ->
+                                viewModel.selectItem(position)
+                                callbacks.onNavigationDrawerItemSelected(position)
+                            }
+                        )
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("COMPOSE_BRIDGE", "Failed to create Navigation Drawer View: ${e.message}", e)
+            null
         }
     }
 
     /**
      * Creates a Manage IM view using Jetpack Compose.
-     *
-     * All word management operations (add, edit, delete) are handled within the Compose UI.
      *
      * @param context Android context
      * @param viewModelStoreOwner Owner of the ViewModelStore (typically the Activity or Fragment)
@@ -203,25 +223,37 @@ object ComposeBridge {
         context: Context,
         viewModelStoreOwner: ViewModelStoreOwner,
         table: String
-    ): View {
-        return ComposeView(context).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent {
-                // Create ViewModel
-                val factory = ManageImViewModelFactory(context, table)
-                val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[ManageImViewModel::class.java]
+    ): View? {
+        return try {
+            ComposeView(context).apply {
+                // Set ViewTree owners so internal Compose components walking the tree also find them.
+                if (viewModelStoreOwner is LifecycleOwner) {
+                    setViewTreeLifecycleOwner(viewModelStoreOwner)
+                }
+                if (viewModelStoreOwner is SavedStateRegistryOwner) {
+                    setViewTreeSavedStateRegistryOwner(viewModelStoreOwner)
+                }
+                setViewTreeViewModelStoreOwner(viewModelStoreOwner)
 
-                LimeTheme {
-                    ManageImScreen(viewModel = viewModel)
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    val factory = ManageImViewModelFactory(context, table)
+                    // Use table name as key so we get a unique ViewModel for each IM table
+                    val viewModel = ViewModelProvider(viewModelStoreOwner, factory).get(table, ManageImViewModel::class.java)
+
+                    LimeTheme {
+                        ManageImScreen(viewModel = viewModel)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("COMPOSE_BRIDGE", "Failed to create Manage IM View for table $table: ${e.message}", e)
+            null
         }
     }
 
     /**
      * Creates a Settings view using Jetpack Compose.
-     *
-     * All preference operations are handled within the Compose UI with reactive state management.
      *
      * @param context Android context
      * @param viewModelStoreOwner Owner of the ViewModelStore (typically the Activity)
@@ -230,18 +262,31 @@ object ComposeBridge {
     fun createSettingsView(
         context: Context,
         viewModelStoreOwner: ViewModelStoreOwner
-    ): View {
-        return ComposeView(context).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent {
-                // Create ViewModel
-                val factory = SettingsViewModelFactory(context)
-                val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[SettingsViewModel::class.java]
+    ): View? {
+        return try {
+            ComposeView(context).apply {
+                // Set ViewTree owners so internal Compose components walking the tree also find them.
+                if (viewModelStoreOwner is LifecycleOwner) {
+                    setViewTreeLifecycleOwner(viewModelStoreOwner)
+                }
+                if (viewModelStoreOwner is SavedStateRegistryOwner) {
+                    setViewTreeSavedStateRegistryOwner(viewModelStoreOwner)
+                }
+                setViewTreeViewModelStoreOwner(viewModelStoreOwner)
 
-                LimeTheme {
-                    SettingsScreen(viewModel = viewModel)
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    val factory = SettingsViewModelFactory(context)
+                    val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[SettingsViewModel::class.java]
+
+                    LimeTheme {
+                        SettingsScreen(viewModel = viewModel)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("COMPOSE_BRIDGE", "Failed to create Settings View: ${e.message}", e)
+            null
         }
     }
 
@@ -249,17 +294,11 @@ object ComposeBridge {
      * Callback interface for navigation drawer events.
      */
     interface NavigationDrawerCallbacks {
-        /**
-         * Called when a navigation drawer item is selected.
-         *
-         * @param position The position of the selected item
-         */
         fun onNavigationDrawerItemSelected(position: Int)
-
     }
 }
 
-// Custom LifecycleOwner for Compose in Service
+// Custom LifecycleOwner for Compose in Service contexts (no built-in LifecycleOwner).
 class ComposeLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)

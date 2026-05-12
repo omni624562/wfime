@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material Design 3 Key Preview Layout
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="120sp"
+    android:background="@drawable/keyboard_key_preview_background_material3"
+    android:gravity="center|top"
+    android:minWidth="32dip"
+    android:text="W"
+    android:textColor="@color/keyboard_foreground_material3"
+    android:textSize="40sp" />

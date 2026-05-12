@@ -590,6 +590,16 @@ public class LIMEBaseKeyboard {
             gap = getDimensionOrFraction(a,
                     R.styleable.LIMEBaseKeyboard_horizontalGap,
                     keyboard.mDisplayWidth, parent.defaultHorizontalGap);
+
+            // Subtract gaps from dimensions to ensure the total width/height
+            // (gap + key) matches the XML definition and prevents overflow.
+            if (gap > 0 && width > gap) {
+                width -= gap;
+            }
+            if (parent.verticalGap > 0 && height > parent.verticalGap) {
+                height -= parent.verticalGap;
+            }
+
             a.recycle();
             a = res.obtainAttributes(Xml.asAttributeSet(parser),
                     R.styleable.LIMEBaseKeyboard_Key);
@@ -841,6 +851,14 @@ public class LIMEBaseKeyboard {
         mDrawableArrowDown = a.getDrawable(R.styleable.LIMEBaseKeyboard_drawableArrowDown);
         mDrawableArrowLeft = a.getDrawable(R.styleable.LIMEBaseKeyboard_drawableArrowLeft);
         mDrawableArrowRight = a.getDrawable((R.styleable.LIMEBaseKeyboard_drawableArrowRight));
+
+        // Read default gaps from theme
+        mDefaultHorizontalGap = getDimensionOrFraction(a,
+                R.styleable.LIMEBaseKeyboard_horizontalGap,
+                mDisplayWidth, 0);
+        mDefaultVerticalGap = getDimensionOrFraction(a,
+                R.styleable.LIMEBaseKeyboard_verticalGap,
+                mDisplayHeight, 0, mKeySizeScale);
 
         // Jeremy '12,5,26 reserve columns in the middle for arrow keys in landscape
         // mode.
@@ -1183,6 +1201,10 @@ public class LIMEBaseKeyboard {
     }
 
     private void loadKeyboard(Context context, XmlResourceParser parser) {
+        if (parser == null) {
+            Log.e(TAG, "loadKeyboard: parser is null!");
+            return;
+        }
         boolean inKey = false;
         boolean inRow = false;
         // boolean leftMostKey = false;
@@ -1380,12 +1402,22 @@ public class LIMEBaseKeyboard {
         mDefaultHeight = getDimensionOrFraction(a,
                 R.styleable.LIMEBaseKeyboard_keyHeight, // Jeremy '11,9,4
                 mDisplayHeight, 50, mKeySizeScale);
-        mDefaultHorizontalGap = getDimensionOrFraction(a,
+
+        // If XML specifies a gap, use it. Otherwise use the theme default.
+        int xmlHorizontalGap = getDimensionOrFraction(a,
                 R.styleable.LIMEBaseKeyboard_horizontalGap,
-                mDisplayWidth, 0);
-        mDefaultVerticalGap = getDimensionOrFraction(a,
-                R.styleable.LIMEBaseKeyboard_verticalGap, // Jeremy '11,9,4
-                mDisplayHeight, 0, mKeySizeScale);
+                mDisplayWidth, -1);
+        if (xmlHorizontalGap != -1 && (xmlHorizontalGap != 0 || mDefaultHorizontalGap == 0)) {
+            mDefaultHorizontalGap = xmlHorizontalGap;
+        }
+
+        int xmlVerticalGap = getDimensionOrFraction(a,
+                R.styleable.LIMEBaseKeyboard_verticalGap,
+                mDisplayHeight, -1, mKeySizeScale);
+        if (xmlVerticalGap != -1 && (xmlVerticalGap != 0 || mDefaultVerticalGap == 0)) {
+            mDefaultVerticalGap = xmlVerticalGap;
+        }
+
         mProximityThreshold = (int) (mDefaultWidth * SEARCH_DISTANCE);
         mProximityThreshold = mProximityThreshold * mProximityThreshold; // Square it for comparison
 
@@ -1393,6 +1425,7 @@ public class LIMEBaseKeyboard {
         mReservedColumnsForSplitedKeyboard = (int) (res.getInteger(R.integer.reserved_columns_for_seperated_keyboard));
 
         mKeysInRow = Math.round(mDisplayWidth / mDefaultWidth);
+
         mSplitKeyWidth = (int) (Math.round(mDisplayWidth / (mKeysInRow + mReservedColumnsForSplitedKeyboard)) * 0.8);
         mSplitedKeyWidthScale = (float) (mSplitKeyWidth) / (float) (mDefaultWidth);
         if (DEBUG)

@@ -143,7 +143,13 @@ public class MainActivity extends AppCompatActivity
                 this,
                 this,
                 this);
-        navDrawerContainer.addView(navDrawerView);
+        if (navDrawerView != null) {
+            try {
+                navDrawerContainer.addView(navDrawerView);
+            } catch (Exception e) {
+                android.util.Log.e("MAIN_ACTIVITY", "FAILED to add navDrawerView: " + e.getMessage(), e);
+            }
+        }
 
         // Handle Import Text from other application
         Intent intent = getIntent();
@@ -321,7 +327,13 @@ public class MainActivity extends AppCompatActivity
                         this,
                         this,
                         table);
-                container.addView(manageImView);
+                if (manageImView != null) {
+                    try {
+                        container.addView(manageImView);
+                    } catch (Exception e) {
+                        android.util.Log.e("MAIN_ACTIVITY", "FAILED to add manageImView: " + e.getMessage(), e);
+                    }
+                }
             }
         }
     }

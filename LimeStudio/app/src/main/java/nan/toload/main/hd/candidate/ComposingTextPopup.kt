@@ -63,10 +63,11 @@ class ComposingTextPopup(private val context: Context) {
             val paddingV = dpToPx(4)
             setPadding(paddingH, paddingV, paddingH, paddingV)
             
-            // Set background with rounded corners (60% opacity for transparency)
+            // Set background with rounded corners (slightly darker gray, more translucent)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#99505050"))
-                cornerRadius = dpToPx(4).toFloat()
+                setColor(Color.parseColor("#CC2B2B2B")) // 80% opacity dark gray
+                cornerRadius = dpToPx(6).toFloat() // Slightly more rounded
+                setStroke(dpToPx(1), Color.parseColor("#664FC3F7")) // Subtle light blue border
             }
             
             // Single line
@@ -112,33 +113,41 @@ class ComposingTextPopup(private val context: Context) {
     /**
      * Show the popup window anchored to the given view (typically the keyboard/candidate view).
      * @param anchor The view to anchor the popup to
-     * @param xOffset Horizontal offset from anchor's left edge
-     * @param yOffset Vertical offset (positive = below anchor top)
+     * @param xOffsetDp Horizontal offset from anchor's left edge in DP
+     * @param yOffsetDp Vertical offset from anchor's top edge in DP
      */
-    fun show(anchor: View, xOffset: Int = 8, yOffset: Int = 8) {
+    fun show(anchor: View, xOffsetDp: Int = 16, yOffsetDp: Int = 12) {
         if (composingText.isEmpty()) return
         
         try {
-            if (!isShowing && popupWindow != null && anchor.windowToken != null) {
-                // Show above the anchor view (at the top of the keyboard area)
+            if (anchor.windowToken == null) return
+
+            // Get absolute screen location of the anchor
+            val location = IntArray(2)
+            anchor.getLocationInWindow(location) // Window coordinates are safer for IMEs
+            
+            // Measure the popup content to know its height
+            textView?.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            val popupHeight = textView?.measuredHeight ?: 0
+            
+            // Calculate position: above the anchor top with vertical margin
+            val x = location[0] + dpToPx(xOffsetDp)
+            val y = location[1] - popupHeight - dpToPx(yOffsetDp)
+
+            if (!isShowing && popupWindow != null) {
+                // Show relative to the window (IME window)
                 popupWindow?.showAtLocation(
                     anchor,
-                    Gravity.BOTTOM or Gravity.START,
-                    xOffset,
-                    anchor.height + yOffset
+                    Gravity.TOP or Gravity.START,
+                    x,
+                    y
                 )
                 isShowing = true
             } else if (isShowing) {
                 // Update position if already showing
-                popupWindow?.update(
-                    xOffset,
-                    anchor.height + yOffset,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT
-                )
+                popupWindow?.update(x, y, -1, -1)
             }
         } catch (e: Exception) {
-            // Window token might not be valid yet
             android.util.Log.w("ComposingTextPopup", "Failed to show popup: ${e.message}")
         }
     }

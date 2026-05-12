@@ -35,13 +35,22 @@
     <dimen name="max_height_for_fullscreen">1.75in</dimen>
     <dimen name="phone_key_height">52dip</dimen>
     <dimen name="key_height">52dip</dimen>
-    <dimen name="candidate_stripe_height">40dp</dimen>
+
+    <!-- Material3 specific key values -->
+    <dimen name="key_height_material3">48dp</dimen>
+    <dimen name="key_text_size_material3">24dp</dimen>
+    <dimen name="label_text_size_material3">16dp</dimen>
+    <dimen name="small_label_text_size_material3">18dp</dimen>
+    <dimen name="key_horizontal_gap_material3">3dp</dimen>
+    <dimen name="key_vertical_gap_material3">2dp</dimen>
+
+    <dimen name="candidate_stripe_height">36dp</dimen>
     <dimen name="candidate_vertical_padding">6sp</dimen>
     <dimen name="candidate_number_font_size">12sp</dimen>
     <dimen name="candidate_expand_button_width">36sp</dimen>
     <dimen name="candidate_font_size">20sp</dimen>
-    <dimen name="keyboard_bottom_padding">0.03in</dimen>
-    <dimen name="key_text_size">22dp</dimen>
+    <dimen name="keyboard_bottom_padding">0.01in</dimen>
+    <dimen name="key_text_size">20dp</dimen>
     <dimen name="label_text_size">13dp</dimen>
     <dimen name="sub_label_text_size">13dp</dimen>
     <dimen name="small_label_text_size">16dp</dimen>
