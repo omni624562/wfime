@@ -419,7 +419,7 @@ public class LIMEBaseKeyboard {
         /**
          * LabelSizeScale Jeremy '12,6,7
          */
-        private static float mLabelSizeScale = 0f;
+        private float mLabelSizeScale = 0f;
 
         public float getLabelSizeScale() {
             if (DEBUG)
@@ -432,13 +432,12 @@ public class LIMEBaseKeyboard {
             if (mLabelSizeScale > 0)
                 return mLabelSizeScale;
 
-            // Jeremy '12,6, 7 move from LIMEkeyboardbaseview
-            mLabelSizeScale = 1;
+            mLabelSizeScale = 1.0f;
 
-            if (width < keyboard.getKeyWidth()) // Jeremy '12,5,26 scaled the label size if the key width is smaller
-                                                // than default key width
+            // Only scale down for very small keys (like 1/2 of default width)
+            // This prevents gaps from triggering font shrinkage.
+            if (width < keyboard.getKeyWidth() / 2.0f)
                 mLabelSizeScale = mSplitKeyboard ? 1f : mSplitedKeyWidthScale;
-            // *= (float)(width) / (float)(keyboard.getKeyWidth());
 
             return mLabelSizeScale;
         }

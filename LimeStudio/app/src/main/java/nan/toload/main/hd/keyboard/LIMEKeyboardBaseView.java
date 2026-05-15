@@ -995,7 +995,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     paint.setTypeface(Typeface.DEFAULT_BOLD);
                 } else {
                     labelSize = (int) (mKeyTextSize * keySizeScale * labelSizeScale);
-                    paint.setTypeface(mKeyTextStyle);
+                    // Material3: Use Medium weight for main keys to match Gboard style
+                    paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
                 }
                 paint.setTextSize(labelSize);
 
