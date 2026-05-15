@@ -38,9 +38,9 @@ class ComposingTextPopup(private val context: Context) {
         LIMEPreferenceManager(context)
     }
     
-    // Base font size from resources
+    // Base font size from resources - Use composing_text_size for accurately controlling "目四米手木" size
     private val baseFontSizePx: Float by lazy {
-        context.resources.getDimension(R.dimen.candidate_font_size)
+        context.resources.getDimension(R.dimen.composing_text_size)
     }
     
     init {

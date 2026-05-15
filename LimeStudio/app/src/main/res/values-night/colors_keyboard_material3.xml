@@ -40,7 +40,7 @@
 
     <!--
         Key Press State
-        Uses primary container for pressed state (darker in dark mode)
     -->
     <color name="keyboard_key_pressed_material3">@color/md_theme_primaryContainer</color>
+    <color name="keyboard_normal_key_pressed_material3">#20FFFFFF</color> <!-- Semi-transparent white overlay for dark mode -->
 </resources>
