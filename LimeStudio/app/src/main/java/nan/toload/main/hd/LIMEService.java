@@ -3191,24 +3191,14 @@ public class LIMEService extends InputMethodService implements
         hideCandidateView();
 
         if (primaryCode == KEYCODE_SWITCH_TO_SYMBOL_MODE) { // Symbol keyboard
-            // Jeremy '24,1,7: Check for Emoji mode preference
-            if (mLIMEPref.getEmojiMode()) {
-                toggleEmojiVisibility();
-            } else {
-                mEnglishOnly = true;
-                mKeyboardSwitcher.toggleSymbols();
-                if (mFixedCandidateViewOn) {
-                    forceHideCandidateView();
-                }
+            mEnglishOnly = true;
+            mKeyboardSwitcher.toggleSymbols();
+            if (mFixedCandidateViewOn) {
+                forceHideCandidateView();
             }
         } else if (primaryCode == KEYCODE_SWITCH_SYMBOL_KEYBOARD) { // Symbol keyboard
-            // Jeremy '24,1,7: Check for Emoji mode preference
-            if (mLIMEPref.getEmojiMode()) {
-                toggleEmojiVisibility();
-            } else {
-                mEnglishOnly = true;
-                mKeyboardSwitcher.switchSymbols();
-            }
+            mEnglishOnly = true;
+            mKeyboardSwitcher.switchSymbols();
             if (mFixedCandidateViewOn) {
                 forceHideCandidateView();
             }

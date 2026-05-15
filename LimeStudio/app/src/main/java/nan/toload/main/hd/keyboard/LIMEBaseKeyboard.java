@@ -400,6 +400,10 @@ public class LIMEBaseKeyboard {
          */
         public boolean pressed;
         /**
+         * Vertical gap following this key
+         */
+        public int verticalGap;
+        /**
          * If this is a sticky key, is it on?
          */
         public boolean on;
@@ -568,6 +572,7 @@ public class LIMEBaseKeyboard {
 
             this.x = x;
             this.y = y;
+            this.verticalGap = parent.verticalGap;
 
             TypedArray a = res.obtainAttributes(Xml.asAttributeSet(parser),
                     R.styleable.LIMEBaseKeyboard);
@@ -590,15 +595,6 @@ public class LIMEBaseKeyboard {
             gap = getDimensionOrFraction(a,
                     R.styleable.LIMEBaseKeyboard_horizontalGap,
                     keyboard.mDisplayWidth, parent.defaultHorizontalGap);
-
-            // Subtract gaps from dimensions to ensure the total width/height
-            // (gap + key) matches the XML definition and prevents overflow.
-            if (gap > 0 && width > gap) {
-                width -= gap;
-            }
-            if (parent.verticalGap > 0 && height > parent.verticalGap) {
-                height -= parent.verticalGap;
-            }
 
             a.recycle();
             a = res.obtainAttributes(Xml.asAttributeSet(parser),

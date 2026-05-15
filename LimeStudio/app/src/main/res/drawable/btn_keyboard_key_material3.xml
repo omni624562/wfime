@@ -10,7 +10,7 @@
     <!-- Normal state -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="10dp" />
+            <corners android:radius="8dp" />
             <solid android:color="@color/keyboard_second_background_material3" />
         </shape>
     </item>

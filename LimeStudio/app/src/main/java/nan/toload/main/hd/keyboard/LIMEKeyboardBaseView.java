@@ -938,11 +938,22 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             // Switch the character to uppercase if shift is pressed
             String label = key.label == null ? null : adjustCase(key.label).toString();
 
-            final Rect bounds = currentBackground.getBounds();
-            if (key.width != bounds.right || key.height != bounds.bottom) {
-                currentBackground.setBounds(0, 0, key.width, key.height);
+            // Calculate drawing dimensions by subtracting gaps from allocated space
+            int drawWidth = key.width;
+            int drawHeight = key.height;
+            if (key.gap > 0 && key.width > key.gap) {
+                drawWidth -= key.gap;
             }
-            canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
+            if (key.verticalGap > 0 && key.height > key.verticalGap) {
+                drawHeight -= key.verticalGap;
+            }
+
+            final Rect bounds = currentBackground.getBounds();
+            if (drawWidth != bounds.right || drawHeight != bounds.bottom) {
+                currentBackground.setBounds(0, 0, drawWidth, drawHeight);
+            }
+            // Offset drawing by horizontal gap
+            canvas.translate(key.x + kbdPaddingLeft + key.gap, key.y + kbdPaddingTop);
             currentBackground.draw(canvas);
 
             boolean shouldDrawIcon = true;
@@ -1012,8 +1023,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 // Draw a drop shadow for the text
                 if (mShadowRadius > 0)
                     paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
-                final int centerX = (key.width + padding.left - padding.right) / 2;
-                final int centerY = (key.height + padding.top - padding.bottom) / 2;
+                final int centerX = (drawWidth + padding.left - padding.right) / 2;
+                final int centerY = (drawHeight + padding.top - padding.bottom) / 2;
                 final int keyColor = key.isFunctionalKey()
                         ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
                         : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
@@ -1045,10 +1056,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     }
 
                     // portrait keyboard
-                    if (key.height > key.width || subLabel.length() > 2 || hasSecondSubLabel) {
-                        baseline = (key.height + padding.top - padding.bottom) * 2 / 3
+                    if (drawHeight > drawWidth || subLabel.length() > 2 || hasSecondSubLabel) {
+                        baseline = (drawHeight + padding.top - padding.bottom) * 2 / 3
                                 + labelHeight * KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR;
-                        float subBaseline = (key.height + padding.top - padding.bottom) / 4
+                        float subBaseline = (drawHeight + padding.top - padding.bottom) / 4
                                 + subLabelHeight * KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR;
                         paint.setColor(subKeyColor);
 
@@ -1112,15 +1123,15 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 final int drawableX;
                 final int drawableY;
                 if (shouldDrawIconFully(key)) {
-                    drawableWidth = key.width;
-                    drawableHeight = key.height;
+                    drawableWidth = drawWidth;
+                    drawableHeight = drawHeight;
                     drawableX = 0;
                     drawableY = NUMBER_HINT_VERTICAL_ADJUSTMENT_PIXEL;
                 } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -100) { // KEYCODE_OPTIONS
                                                                                                 // (Emoji)
                     // Emoji Key: Scale to 55% of key height for consistency with Translate icon
                     float scaleFactor = 0.55f;
-                    drawableHeight = (int) (key.height * scaleFactor);
+                    drawableHeight = (int) (drawHeight * scaleFactor);
 
                     // Maintain aspect ratio if intrinsic dimensions are available
                     if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
@@ -1128,26 +1139,26 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     } else {
                         drawableWidth = drawableHeight;
                     }
-                    drawableX = (key.width + padding.left - padding.right - drawableWidth) / 2;
-                    drawableY = (key.height + padding.top - padding.bottom - drawableHeight) / 2;
+                    drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
+                    drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -10) { // Language Switch
                     // Language Switch Key: Scale to 55% of key height to match text label size
                     float scaleFactor = 0.55f;
-                    drawableHeight = (int) (key.height * scaleFactor);
+                    drawableHeight = (int) (drawHeight * scaleFactor);
                     // Maintain aspect ratio if intrinsic dimensions are available
                     if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
                         drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
                     } else {
                         drawableWidth = drawableHeight;
                     }
-                    drawableX = (key.width + padding.left - padding.right - drawableWidth) / 2;
-                    drawableY = (key.height + padding.top - padding.bottom - drawableHeight) / 2;
+                    drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
+                    drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 } else {
 
-                    drawableHeight = key.height; // icon.getIntrinsicHeight();
+                    drawableHeight = drawHeight; // icon.getIntrinsicHeight();
                     drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
-                    drawableX = (key.width + padding.left - padding.right - drawableWidth) / 2;
-                    drawableY = (key.height + padding.top - padding.bottom - drawableHeight) / 2;
+                    drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
+                    drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 }
                 canvas.translate(drawableX, drawableY);
                 icon.setBounds(0, 0, drawableWidth, drawableHeight);
