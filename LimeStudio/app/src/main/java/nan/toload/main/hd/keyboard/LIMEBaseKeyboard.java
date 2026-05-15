@@ -596,6 +596,15 @@ public class LIMEBaseKeyboard {
                     R.styleable.LIMEBaseKeyboard_horizontalGap,
                     keyboard.mDisplayWidth, parent.defaultHorizontalGap);
 
+            // Subtract gaps from dimensions to ensure the total width/height
+            // (gap + key) matches the XML definition and prevents overflow.
+            if (gap > 0 && width > gap) {
+                width -= gap;
+            }
+            if (this.verticalGap > 0 && height > this.verticalGap) {
+                height -= this.verticalGap;
+            }
+
             a.recycle();
             a = res.obtainAttributes(Xml.asAttributeSet(parser),
                     R.styleable.LIMEBaseKeyboard_Key);

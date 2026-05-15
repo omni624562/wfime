@@ -938,22 +938,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             // Switch the character to uppercase if shift is pressed
             String label = key.label == null ? null : adjustCase(key.label).toString();
 
-            // Calculate drawing dimensions by subtracting gaps from allocated space
+            // Drawing dimensions now trust the pre-calculated key width/height (which have gaps subtracted)
             int drawWidth = key.width;
             int drawHeight = key.height;
-            if (key.gap > 0 && key.width > key.gap) {
-                drawWidth -= key.gap;
-            }
-            if (key.verticalGap > 0 && key.height > key.verticalGap) {
-                drawHeight -= key.verticalGap;
-            }
 
             final Rect bounds = currentBackground.getBounds();
             if (drawWidth != bounds.right || drawHeight != bounds.bottom) {
                 currentBackground.setBounds(0, 0, drawWidth, drawHeight);
             }
-            // Offset drawing by horizontal gap
-            canvas.translate(key.x + kbdPaddingLeft + key.gap, key.y + kbdPaddingTop);
+            // Offset drawing by key position (which already includes horizontal gap)
+            canvas.translate(key.x + kbdPaddingLeft, key.y + kbdPaddingTop);
             currentBackground.draw(canvas);
 
             boolean shouldDrawIcon = true;
