@@ -28,7 +28,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="5dp"
-    tools:context="nan.toload.main.hd.ui.ManageRelatedFragment">
+    tools:context="net.toload.main.hd.ui.ManageRelatedFragment">
 
     <!-- Search Bar -->
     <com.google.android.material.textfield.TextInputEditText

@@ -41,7 +41,7 @@
             android:key="keyboard_theme"
             android:title="@string/keyboard_themes" />
         />
-        <nan.toload.main.hd.limesettings.MultiListPreference
+        <net.toload.main.hd.limesettings.MultiListPreference
             android:key="keyboard_state"
             android:title="@string/keyboard_list"
             android:entries="@array/keyboard"

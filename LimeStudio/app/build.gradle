@@ -31,7 +31,7 @@ android {
     compileSdk = 36
     buildToolsVersion = '36.0.0'
     defaultConfig {
-        applicationId = "nan.toload.main.hd"
+        applicationId = "net.toload.main.hd"
         minSdk = 30
         targetSdk = 35
         versionCode = new Date().format('yyyyMMdd').toInteger()
@@ -61,7 +61,7 @@ android {
         buildConfig = true
         compose = true
     }
-    namespace = 'nan.toload.main.hd'
+    namespace = 'net.toload.main.hd'
     lint {
         abortOnError = false
     }

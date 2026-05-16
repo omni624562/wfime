@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
+    limehd:keyHeight="@dimen/key_height"
+    limehd:keyWidth="8.33%p"
+    limehd:horizontalGap="0px"
+    limehd:verticalGap="0px">
+
+    <!-- Row 1: 12 keys total (8.33 * 12 = 99.96) -->
+    <Row>
+        <Key limehd:codes="49" limehd:keyEdgeFlags="left" limehd:keyLabel="1" />
+        <Key limehd:codes="50" limehd:keyLabel="2" />
+        <Key limehd:codes="51" limehd:keyLabel="3" />
+        <Key limehd:codes="52" limehd:keyLabel="4" />
+        <Key limehd:codes="53" limehd:keyLabel="5" />
+        <Key limehd:codes="54" limehd:keyLabel="6" />
+        <Key limehd:codes="55" limehd:keyLabel="7" />
+        <Key limehd:codes="56" limehd:keyLabel="8" />
+        <Key limehd:codes="57" limehd:keyLabel="9" />
+        <Key limehd:codes="48" limehd:keyLabel="0" />
+        <Key limehd:codes="45" limehd:keyLabel="-" />
+        <Key limehd:codes="61" limehd:keyEdgeFlags="right" limehd:keyLabel="=" />
+    </Row>
+
+    <!-- Row 2: Tab(10) + 10 QWERTY(8) + [(8) + ](10) = 10 + 80 + 8 + 10 = 108% (FIXING TO 100) -->
+    <!-- New: Tab(8.5) + 10 QWERTY(7.5) + [(5.5) + ](6) = 8.5 + 75 + 5.5 + 6 = 95 + 5 = 100 -->
+    <Row>
+        <Key limehd:codes="9" limehd:keyEdgeFlags="left" limehd:keyLabel="Tab" limehd:keyWidth="8.5%p" />
+        <Key limehd:codes="113" limehd:keyLabel="q" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="119" limehd:keyLabel="w" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="101" limehd:keyLabel="e" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="114" limehd:keyLabel="r" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="116" limehd:keyLabel="t" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="121" limehd:keyLabel="y" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="117" limehd:keyLabel="u" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="105" limehd:keyLabel="i" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="111" limehd:keyLabel="o" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="112" limehd:keyLabel="p" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="91" limehd:keyLabel="[" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="93" limehd:keyEdgeFlags="right" limehd:keyLabel="]" limehd:keyWidth="8.5%p" />
+    </Row>
+
+    <!-- Row 3: Caps(12) + 9 ASDF(8) + ;(8) + '(8) + Enter(10) = 12 + 72 + 8 + 8 + 10 = 110% (FIXING) -->
+    <!-- New: Caps(10) + 9 ASDF(7.5) + ;(7.5) + '(7.5) + Enter(7.5) = 10 + 67.5 + 7.5 + 7.5 + 7.5 = 100 -->
+    <Row>
+        <Key limehd:codes="-1" limehd:isModifier="true" limehd:isSticky="true" limehd:keyEdgeFlags="left" limehd:keyLabel="Caps" limehd:keyWidth="10%p" />
+        <Key limehd:codes="97" limehd:keyLabel="a" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="115" limehd:keyLabel="s" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="100" limehd:keyLabel="d" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="102" limehd:keyLabel="f" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="103" limehd:keyLabel="g" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="104" limehd:keyLabel="h" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="106" limehd:keyLabel="j" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="107" limehd:keyLabel="k" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="108" limehd:keyLabel="l" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="59" limehd:keyLabel=";" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="39" limehd:keyLabel="'" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="10" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_return_light" limehd:keyWidth="7.5%p" />
+    </Row>
+
+    <!-- Row 4: Shift(14) + 7 ZXCV(8) + ,(8) + .(8) + /(8) + Del(12) = 14 + 56 + 8 + 8 + 8 + 12 = 106% (FIXING) -->
+    <!-- New: Shift(12) + 7 ZXCV(7.5) + ,(7.5) + .(7.5) + /(7.5) + Del(11) = 12 + 52.5 + 7.5 + 7.5 + 7.5 + 13 = 100 -->
+    <Row>
+        <Key limehd:codes="-1" limehd:isModifier="true" limehd:isSticky="true" limehd:keyEdgeFlags="left" limehd:keyIcon="@drawable/sym_keyboard_shift" limehd:keyWidth="12.5%p" />
+        <Key limehd:codes="122" limehd:keyLabel="z" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="120" limehd:keyLabel="x" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="99" limehd:keyLabel="c" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="118" limehd:keyLabel="v" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="98" limehd:keyLabel="b" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="110" limehd:keyLabel="n" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="109" limehd:keyLabel="m" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="44" limehd:keyLabel="," limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="46" limehd:keyLabel="." limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="47" limehd:keyLabel="/" limehd:keyWidth="7.5%p" />
+        <Key limehd:codes="-5" limehd:isModifier="true" limehd:isRepeatable="true" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_delete_light" limehd:keyWidth="12.5%p" />
+    </Row>
+
+    <!-- Row 5: ?123(12) + Switch(8) + Emoji(8) + Space(34) + \(8) + Left(10) + Up(5) + Down(5) + Right(10) = 100% -->
+    <Row limehd:rowEdgeFlags="bottom">
+        <Key limehd:codes="-2" limehd:isModifier="true" limehd:keyLabel="@string/label_symbol_mode" limehd:keyWidth="10%p" />
+        <Key limehd:codes="-10" limehd:isModifier="true" limehd:keyLabel="易" limehd:keyWidth="8%p" />
+        <Key limehd:codes="-100" limehd:keyIcon="@drawable/ic_emoji_white" limehd:keyWidth="8%p" />
+        <Key limehd:codes="32" limehd:isRepeatable="true" limehd:keyIcon="@drawable/sym_flat_keyboard_space" limehd:keyWidth="38%p" />
+        <Key limehd:codes="92" limehd:keyLabel="\" limehd:keyWidth="8%p" />
+        <Key limehd:codes="-13" limehd:keyIcon="@drawable/sym_keyboard_left_light" limehd:keyWidth="10%p" />
+        <Key limehd:codes="-11" limehd:keyIcon="@drawable/sym_keyboard_up_light" limehd:keyWidth="4%p" />
+        <Key limehd:codes="-12" limehd:keyIcon="@drawable/sym_keyboard_down_light" limehd:keyWidth="4%p" />
+        <Key limehd:codes="-14" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_right_light" limehd:keyWidth="10%p" />
+    </Row>
+</Keyboard>
