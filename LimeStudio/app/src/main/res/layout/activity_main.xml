@@ -63,20 +63,14 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <!-- Navigation Drawer with Compose -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
+    <!-- Navigation Drawer with Compose - Directly as a DrawerLayout child -->
+    <FrameLayout
+        android:id="@+id/navigation_drawer_container"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true">
-
-        <!-- Container for Compose navigation drawer -->
-        <FrameLayout
-            android:id="@+id/navigation_drawer_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </com.google.android.material.navigation.NavigationView>
+        android:background="@color/md_theme_surface"
+        android:clickable="true"
+        android:focusable="true" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

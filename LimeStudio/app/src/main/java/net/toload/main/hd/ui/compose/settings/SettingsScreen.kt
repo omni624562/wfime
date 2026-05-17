@@ -52,6 +52,7 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.systemBarsPadding(),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.action_preference)) }

@@ -552,6 +552,11 @@ public class ManageImFragment extends Fragment {
             if (k.getCode().equals(keyboard)) {
                 datasource.setImKeyboard(table, k);
                 btnManageImKeyboard.setText(k.getDesc());
+                
+                // Refresh main activity menu to show new keyboard description
+                if (activity instanceof MainActivity) {
+                    ((MainActivity) activity).refreshNavigationMenu();
+                }
                 /*
                  * try {
                  * datasource.open();

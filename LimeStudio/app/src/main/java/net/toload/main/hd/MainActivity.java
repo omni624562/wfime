@@ -338,6 +338,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Refreshes the navigation drawer menu items.
+     * Useful when input method tables are added or removed.
+     */
+    public void refreshNavigationMenu() {
+        // Refresh local IM list
+        initialImList();
+
+        // Get the shared NavigationViewModel and trigger a reload
+        net.toload.main.hd.ui.compose.NavigationViewModel viewModel =
+                new androidx.lifecycle.ViewModelProvider(this,
+                        new net.toload.main.hd.ui.compose.NavigationViewModelFactory(this))
+                        .get(net.toload.main.hd.ui.compose.NavigationViewModel.class);
+
+        if (viewModel != null) {
+            viewModel.loadMenuItems();
+        }
+    }
+
     public void onSectionAttached(int number) {
         if (imlist == null) {
             initialImList();

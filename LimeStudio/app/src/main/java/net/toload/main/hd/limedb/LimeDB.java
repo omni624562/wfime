@@ -3616,7 +3616,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 break;
                         }
                     } else if (table.equals("dayi")) {
-                        kobj = getKeyboardObj("dayisym");
+                        kobj = getKeyboardObj("dayi");
                     } else if (table.equals("cj5")) {
                         kobj = getKeyboardObj("cj");
                     } else if (table.equals("ecj")) {

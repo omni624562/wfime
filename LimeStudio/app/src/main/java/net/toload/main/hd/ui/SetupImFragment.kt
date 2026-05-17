@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -56,6 +57,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import net.toload.main.hd.DBServer
 import net.toload.main.hd.Lime
+import net.toload.main.hd.MainActivity
 import net.toload.main.hd.R
 import net.toload.main.hd.data.Im
 import net.toload.main.hd.global.LIMEPreferenceManager
@@ -167,6 +169,7 @@ class SetupImFragment : Fragment() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .systemBarsPadding()
                 .padding(10.dp)
                 .verticalScroll(scrollState)
         ) {
@@ -476,6 +479,10 @@ class SetupImFragment : Fragment() {
                     isDayiImported = isDayi
                 )
 
+                // Refresh main activity navigation drawer menu to sync IM list
+                (activity as? MainActivity)?.refreshNavigationMenu()
+
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -522,6 +529,7 @@ class SetupImFragment : Fragment() {
         // Or we can manually trigger a localized refresh if needed.
         // For simplicity, just re-run initialbutton logic if the handler calls this
         initialbutton()
+        (activity as? MainActivity)?.refreshNavigationMenu()
     }
 
     fun resetImTable(imtable: String, backuplearning: Boolean) {
@@ -530,6 +538,7 @@ class SetupImFragment : Fragment() {
                 datasource.backupUserRecords(imtable)
             }
             DBSrv.resetMapping(imtable)
+            (activity as? MainActivity)?.refreshNavigationMenu()
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
@@ -537,6 +546,7 @@ class SetupImFragment : Fragment() {
 
     fun finishProgress(imtype: String?) {
         cancelProgress()
+        (activity as? MainActivity)?.refreshNavigationMenu()
     }
     
     fun showAlertDialog(action: String?, type: String, message: String) {

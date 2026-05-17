@@ -25,10 +25,12 @@ package net.toload.main.hd.ui.compose
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,26 +63,31 @@ fun NavigationDrawerScreen(
     selectedPosition: Int,
     onMenuItemClick: (Int) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .systemBarsPadding()
         ) {
-            itemsIndexed(menuItems) { index, item ->
-                NavigationDrawerItem(
-                    label = {
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    selected = index == selectedPosition,
-                    onClick = { onMenuItemClick(index) },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                itemsIndexed(menuItems) { index, item ->
+                    NavigationDrawerItem(
+                        label = {
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        selected = index == selectedPosition,
+                        onClick = { onMenuItemClick(index) },
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }

@@ -28,6 +28,7 @@ fun ManageRelatedScreen(viewModel: ManageRelatedViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.systemBarsPadding(),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.manage_related_management)) },

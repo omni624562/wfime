@@ -66,6 +66,7 @@ fun ManageImScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.systemBarsPadding(),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.manage_im_management)) },
