@@ -6,12 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -99,7 +96,8 @@ fun EmojiPicker(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp) 
+                .height(44.dp) 
+                .background(backgroundColor) // Solid background
                 .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
@@ -144,7 +142,7 @@ fun EmojiPicker(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .height(200.dp) // Use fixed height instead of weight(1f) in wrapContent column
+                .weight(1f) // Fill available space
                 .fillMaxWidth()
         ) { page ->
             // Get display emojis for this specific page
@@ -175,44 +173,46 @@ fun EmojiPicker(
         }
 
         // Custom Bottom Bar: ABC (left) | ⌫ (right)
-        // This will sit at the bottom of the Column (content area), 
-        // but ABOVE the system padding we added to the Column.
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp),
+                .height(44.dp), 
             color = bottomBarColor
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // ABC - Back to keyboard
-                TextButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.height(32.dp)
+            Column {
+                HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "ABC",
-                        color = secondaryTextColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                    // ABC - Back to keyboard
+                    TextButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text(
+                            text = "ABC",
+                            color = secondaryTextColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
 
-                // Backspace ⌫
-                IconButton(
-                    onClick = onBackspaceClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Text(
-                        text = "⌫",
-                        fontSize = 20.sp,
-                        color = secondaryTextColor
-                    )
+                    // Backspace ⌫
+                    IconButton(
+                        onClick = onBackspaceClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Text(
+                            text = "⌫",
+                            fontSize = 20.sp,
+                            color = secondaryTextColor
+                        )
+                    }
                 }
             }
         }
@@ -230,7 +230,7 @@ fun EmojiGridItem(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(2.dp)
-            .clip(RoundedCornerShape(8.dp)) // Changed from CircleShape to visible corners for indicator
+            .clip(RoundedCornerShape(8.dp))
             .pointerInput(emoji) {
                 detectTapGestures(
                     onTap = { onEmojiClick(emoji.char) },
@@ -245,20 +245,18 @@ fun EmojiGridItem(
     ) {
         Text(text = emoji.char, fontSize = 30.sp)
 
-        // Visual indicator for emojis with skin tone support (small triangle in bottom-right)
         if (emoji.hasSkinTone) {
             Canvas(modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(4.dp)
-                .size(8.dp) // Increased size slightly for visibility
+                .size(8.dp)
             ) {
                 val path = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(size.width, size.height) // Bottom right
-                    lineTo(size.width, 0f)          // Top right
-                    lineTo(0f, size.height)         // Bottom left
+                    moveTo(size.width, size.height) 
+                    lineTo(size.width, 0f)          
+                    lineTo(0f, size.height)         
                     close()
                 }
-                // Use LightGray with higher alpha for better visibility on dark background
                 drawPath(path, color = Color.LightGray.copy(alpha = 0.8f))
             }
         }

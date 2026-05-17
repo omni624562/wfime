@@ -71,10 +71,10 @@ object ComposeBridge {
                 handleLifecycleEvent(Lifecycle.Event.ON_START)
             }
 
-            val heightDp = 240
+            val heightDp = 300
             val density = context.resources.displayMetrics.density
             val heightPx = (heightDp * density).toInt()
-            val systemBarPaddingDp = 0
+            val systemBarPaddingDp = 40 // Space for system globe/back bar
 
             val composeView = ComposeView(context).apply {
                 layoutParams = android.widget.FrameLayout.LayoutParams(
