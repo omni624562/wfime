@@ -221,3 +221,26 @@ LimeStudio/.idea/misc.xml
 LimeStudio/app/app.iml
 LimeStudio/app/app.iml
 LimeStudio/app/app.iml
+
+#############
+## WFIME project-specific
+#############
+
+# Claude Code temporary session files
+tmpclaude-*
+
+# Build outputs & release artifacts
+*.apk
+test-harness/target/
+
+# ADB / device debug dumps
+uidump*.xml
+lime_check.db
+lime_pref.xml
+
+# Crash / debug logs
+crash_logs.txt
+*.log
+
+# Local reference copies
+androidMain/
