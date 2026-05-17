@@ -4344,10 +4344,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private void checkEmojiDB() {
         if (emojiConverter == null) {
 
-            File emojiDBFile = LIMEUtilities.isFileNotExist(
-                    mContext.getFilesDir().getParentFile().getPath() + "/databases/emoji.db");
+            File emojiDBFile = mContext.getDatabasePath("emoji.db");
+            if (!emojiDBFile.getParentFile().exists()) {
+                emojiDBFile.getParentFile().mkdirs();
+            }
 
-            if (emojiDBFile != null)
+            if (!emojiDBFile.exists())
                 LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.emoji), emojiDBFile);
 
             emojiConverter = new EmojiConverter(mContext);
@@ -4358,27 +4360,22 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (hanConverter == null) {
 
             // Jeremy '11,9,8 update handconverdb to v2 with base score in TCSC table
-            File hanDBFile = LIMEUtilities.isFileExist(
-                    mContext.getFilesDir().getParentFile().getPath() +
-                            "/databases/hanconvert.db");
-            if (hanDBFile != null)
+            File hanDBFile = mContext.getDatabasePath("hanconvert.db");
+            if (hanDBFile.exists())
                 hanDBFile.delete();
-            File hanDBV2File = LIMEUtilities.isFileNotExist(
-                    mContext.getFilesDir().getParentFile().getPath() +
-                            "/databases/hanconvertv2.db");
+            
+            File hanDBV2File = mContext.getDatabasePath("hanconvertv2.db");
+            if (!hanDBV2File.getParentFile().exists()) {
+                hanDBV2File.getParentFile().mkdirs();
+            }
 
             if (DEBUG)
-                Log.i(TAG, "LimeDB: checkHanDB(): hanDBV2Filepaht:" +
-                        mContext.getFilesDir().getParentFile().getPath() +
-                        "/databases/hanconvertv2.db");
+                Log.i(TAG, "LimeDB: checkHanDB(): hanDBV2Filepaht:" + hanDBV2File.getAbsolutePath());
 
-            if (hanDBV2File != null)
+            if (!hanDBV2File.exists())
                 LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.hanconvertv2), hanDBV2File);
             else { // Jeremy '11,9,14 copy the db file if it's newer.
-                hanDBV2File = LIMEUtilities.isFileExist(
-                        mContext.getFilesDir().getParentFile().getPath() +
-                                "/databases/hanconvertv2.db");
-                if (hanDBV2File != null && mLIMEPref.getParameterLong("hanDBDate") != hanDBV2File.lastModified())
+                if (mLIMEPref.getParameterLong("hanDBDate") != hanDBV2File.lastModified())
                     LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.hanconvertv2), hanDBV2File);
             }
 
@@ -4897,7 +4894,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (db != null)
             db.close();
 
-        File dbFile = new File(Lime.DATABASE_DEVICE_FOLDER + File.separator + Lime.DATABASE_NAME);
+        File dbFile = new File(Lime.getDatabaseDeviceFolder(mContext) + File.separator + Lime.DATABASE_NAME);
         dbFile.deleteOnExit();
         LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.lime), dbFile);
         openDBConnection(true);

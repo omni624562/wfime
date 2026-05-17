@@ -280,6 +280,9 @@ public class LIMEService extends InputMethodService implements
         // IME
         startForegroundService();
 
+        // Initialize Global Package Name for paths
+        net.toload.main.hd.global.LIME.PACKAGE_NAME = getPackageName();
+
         SearchSrv = new SearchServer(this);
         mEnglishOnly = false;
         mEnglishFlagShift = false;
@@ -2045,6 +2048,26 @@ public class LIMEService extends InputMethodService implements
             // processing.
         } else if (primaryCode == KEYCODE_SWITCH_TO_IM_MODE && mInputView != null) { // eng -> chi
             switchKeyboard(primaryCode);
+        } else if (primaryCode == MY_KEYCODE_SPACE && "dayi".equals(activeIM) && mComposing.length() > 0) {
+            if (hasCandidatesShown) {
+                pickCandidateManually(0);
+            } else {
+                if (mCandidateList != null && !mCandidateList.isEmpty()) {
+                    if (mCandidateList.size() == 1) {
+                        pickCandidateManually(0);
+                    } else {
+                        showCandidateView();
+                        hasCandidatesShown = true;
+                        try {
+                            String selkey = SearchSrv.getSelkey();
+                            mCandidateView.setSuggestions(mCandidateList, hasPhysicalKeyPressed, selkey);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            return;
         } else if ( // Jeremy '12,7,1 bug fixed on enter not functioning in english mode
         // Space key handling for all modes
         ((primaryCode == MY_KEYCODE_SPACE && (
@@ -2482,122 +2505,101 @@ public class LIMEService extends InputMethodService implements
                     }
 
                     // Filter out the raw code (composing text) if it appears as a candidate
-                    // This fixes the issue where "nh1" shows up as the first candidate
+                    // This fixes the issue where ASCII code like "nh1" shows up as the first candidate
                     if (list.size() > 0) {
                         java.util.Iterator<Mapping> iterator = list.iterator();
                         while (iterator.hasNext()) {
                             Mapping m = iterator.next();
-                            // Remove if word matches raw input OR if word is identical to code (raw code
-                            // fallback)
-                            if (m.getWord().equalsIgnoreCase(finalKeyString) ||
-                                    (m.getCode() != null && m.getWord().equalsIgnoreCase(m.getCode()))) {
+                            String word = m.getWord();
+                            // Only remove if it's an exact ASCII match to the code
+                            // We don't want to remove actual Chinese characters that might match the code
+                            if (word != null && word.matches("[A-Za-z0-9]+") && word.equalsIgnoreCase(finalKeyString)) {
                                 iterator.remove();
                             }
                         }
                     }
                     // Exit early if a newer query has already been started
                     if (Thread.currentThread().isInterrupted()) return;
-                    // Jeremy '11,6,19 EZ and ETEN use "`" as IM Keys, and also custom may use "`".
+
+                    // Setup selection keys
+                    String selkey = null;
+                    if (disable_physical_selection && finalHasPhysicalKeyPressed) {
+                        selkey = "";
+                    } else {
+                        try {
+                            selkey = SearchSrv.getSelkey();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        String mixedModeSelkey = "`";
+                        if (hasSymbolMapping && !activeIM.equals("dayi")
+                                && !(activeIM.equals("phonetic")
+                                        && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
+                            mixedModeSelkey = " ";
+                        }
+
+                        int selkeyOption = mLIMEPref.getSelkeyOption();
+                        if (selkeyOption == 1)
+                            selkey = mixedModeSelkey + selkey;
+                        else if (selkeyOption == 2)
+                            selkey = mixedModeSelkey + " " + selkey;
+                    }
+
+                    // Emoji Control - Always try to add emojis if enabled
+                    if (mLIMEPref.getEmojiMode() && !finalHasPhysicalKeyPressed) {
+                        HashMap<String, String> emojiCheck = new HashMap<>();
+                        List<Mapping> emojiList = new LinkedList<>();
+
+                        // 1. Try emoji tags for the raw code/composing text first (English/Tag matching)
+                        if (!finalKeyString.isEmpty()) {
+                            List<Mapping> tagResults = SearchSrv.emojiConvert(finalKeyString, Lime.EMOJI_EN);
+                            if (tagResults != null) {
+                                for (Mapping m : tagResults) {
+                                    if (!emojiCheck.containsKey(m.getWord())) {
+                                        emojiList.add(m);
+                                        emojiCheck.put(m.getWord(), m.getWord());
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Try emoji tags for top predicted Chinese words
+                        for (int i = 0; i < Math.min(list.size(), 2); i++) {
+                            String word = list.get(i).getWord();
+                            if (word == null || word.isEmpty()) continue;
+                            
+                            // Don't repeat search if word is same as composing code (handled above)
+                            if (word.equalsIgnoreCase(finalKeyString)) continue;
+
+                            for (int type : new int[]{Lime.EMOJI_TW, Lime.EMOJI_CN, Lime.EMOJI_EN}) {
+                                List<Mapping> wordResults = SearchSrv.emojiConvert(word, type);
+                                if (wordResults != null) {
+                                    for (Mapping m : wordResults) {
+                                        if (!emojiCheck.containsKey(m.getWord())) {
+                                            emojiList.add(m);
+                                            emojiCheck.put(m.getWord(), m.getWord());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (emojiList.size() > 0) {
+                            int insertPosition = mLIMEPref.getEmojiDisplayPosition();
+                            if (list.size() <= insertPosition) {
+                                insertPosition = list.size();
+                            }
+                            list.addAll(insertPosition, emojiList);
+                        }
+                    }
+
                     if (list.size() > 0) {
-                        // Setup sel key display if
-                        String selkey = null;
-                        if (disable_physical_selection && finalHasPhysicalKeyPressed) {
-                            selkey = "";
-                        } else {
-                            try {
-                                selkey = SearchSrv.getSelkey();
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-                            String mixedModeSelkey = "`";
-                            if (hasSymbolMapping && !activeIM.equals("dayi")
-                                    && !(activeIM.equals("phonetic")
-                                            && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
-                                mixedModeSelkey = " ";
-                            }
-
-                            int selkeyOption = mLIMEPref.getSelkeyOption();
-                            if (selkeyOption == 1)
-                                selkey = mixedModeSelkey + selkey;
-                            else if (selkeyOption == 2)
-                                selkey = mixedModeSelkey + " " + selkey;
-                        }
-
-                        // Exit early if a newer query has already been started
-                        if (Thread.currentThread().isInterrupted()) return;
-
-                        // Emoji Control
-                        // Check the Emoji parameter setting and load icons into the suggestions list
-                        if (mLIMEPref.getEmojiMode() && !finalHasPhysicalKeyPressed) {
-                            HashMap<String, String> emojiCheck = new HashMap<>();
-                            List<Mapping> emojiList = new LinkedList<>();
-
-                            if (list.size() > 0) {
-
-                                List<Mapping> item1 = null, item2, item3;
-
-                                int insertPosition = mLIMEPref.getEmojiDisplayPosition();
-                                if (list.size() <= insertPosition) {
-                                    insertPosition = list.size();
-                                }
-
-                                if (list.get(0).getWord().matches("[A-Za-z]+")) {
-
-                                    item1 = SearchSrv.emojiConvert(list.get(0).getWord(), Lime.EMOJI_EN);
-                                    if (item1.size() > 0) {
-                                        for (Mapping m : item1) {
-                                            if (emojiCheck.get(m.getWord()) == null) {
-                                                emojiList.add(m);
-                                                emojiCheck.put(m.getWord(), m.getWord());
-                                            }
-                                        }
-                                    }
-
-                                }
-
-                                if (item1 == null || item1.size() == 0) {
-
-                                    // Log.i("EMOJI Check:", ""+list.get(1).getWord().getBytes().length);
-                                    if (list.size() > 1 && list.get(1) != null && list.get(1).getWord() != null &&
-                                            list.get(1).getWord().getBytes().length > 1 &&
-                                            list.get(1).getWord().length() < 4) {
-                                        item2 = SearchSrv.emojiConvert(list.get(1).getWord(), Lime.EMOJI_TW);
-                                        if (item2.size() > 0) {
-                                            for (Mapping m : item2) {
-                                                if (emojiCheck.get(m.getWord()) == null) {
-                                                    emojiList.add(m);
-                                                    emojiCheck.put(m.getWord(), m.getWord());
-                                                }
-                                            }
-                                        }
-                                        if (item2.size() == 0) {
-                                            item3 = SearchSrv.emojiConvert(list.get(1).getWord(), Lime.EMOJI_CN);
-                                            if (item3.size() > 0) {
-                                                for (Mapping m : item3) {
-                                                    if (emojiCheck.get(m.getWord()) == null) {
-                                                        emojiList.add(m);
-                                                        emojiCheck.put(m.getWord(), m.getWord());
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (emojiList.size() > 0) {
-                                    list.addAll(insertPosition, emojiList);
-                                }
-                            }
-                        }
-
                         setSuggestions(list, finalHasPhysicalKeyPressed, selkey);
-
                         if (DEBUG)
                             Log.i(TAG, "updateCandidates(): display selkey:" + selkey
                                     + ", list.size:" + list.size()
                                     + ", mComposing = " + mComposing);
                     } else {
-                        // Jeremy '11,8,14
                         clearSuggestions();
                     }
 
@@ -2913,6 +2915,29 @@ public class LIMEService extends InputMethodService implements
             mMainHandler.post(() -> setSuggestions(suggestions, showNumber, diplaySelkey));
             return;
         }
+
+        // Dayi 3-code Logic: Full-code auto-trigger or delay show
+        if ("dayi".equals(activeIM)) {
+            // Count actual Chinese characters (ignore emojis and raw code for auto-trigger logic)
+            int charCount = 0;
+            Mapping uniqueMatch = null;
+            if (suggestions != null) {
+                for (Mapping m : suggestions) {
+                    if (!m.isEmojiRecord() && !m.isComposingCodeRecord()) {
+                        charCount++;
+                        uniqueMatch = m;
+                    }
+                }
+            }
+
+            if (charCount == 1 && mComposing.length() == 3) {
+                pickCandidateManually(suggestions.indexOf(uniqueMatch));
+                return;
+            }
+
+            // Removed delay show logic to ensure characters appear as user types
+        }
+
         if (suggestions != null && suggestions.size() > 0) {
 
             if (DEBUG)
@@ -3480,6 +3505,23 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "handleSelkey():primarycode:" + primaryCode);
 
         int i = -1;
+
+        // Dayi 3-code selection mapping: Space(0), [ (1), ] (2), - (3), \ (4), ' (5)
+        if ("dayi".equals(activeIM) && hasCandidatesShown) {
+            switch (primaryCode) {
+                case '[': i = 1; break;
+                case ']': i = 2; break;
+                case '-': i = 3; break;
+                case '\\': i = 4; break;
+                case '\'': i = 5; break;
+                case ' ': i = 0; break;
+            }
+            if (i != -1) {
+                pickCandidateManually(i);
+                return true;
+            }
+        }
+
         if (mComposing.length() > 0 && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
             String selkey = "";
 

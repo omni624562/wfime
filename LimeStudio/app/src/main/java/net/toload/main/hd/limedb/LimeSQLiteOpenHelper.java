@@ -98,7 +98,7 @@ public abstract class LimeSQLiteOpenHelper {
 
     private String getDBPath(String dbTarget) {
         // Always use device storage - sdcard storage is deprecated
-        return new File(Lime.DATABASE_DEVICE_FOLDER + File.separator + Lime.DATABASE_NAME).getAbsolutePath();
+        return new File(Lime.getDatabaseDeviceFolder(mContext) + File.separator + Lime.DATABASE_NAME).getAbsolutePath();
     }
 
     private String getDBPath() {
@@ -132,10 +132,11 @@ public abstract class LimeSQLiteOpenHelper {
 
         // Initial Database
         // Copy DB file from Raw Dir to Database Dir
-        File destdir = new File(Lime.DATABASE_DEVICE_FOLDER + File.separator);
+        String dbFolder = Lime.getDatabaseDeviceFolder(mContext);
+        File destdir = new File(dbFolder);
         destdir.mkdirs();
 
-        File destpath = new File(Lime.DATABASE_DEVICE_FOLDER + File.separator + Lime.DATABASE_NAME);
+        File destpath = new File(dbFolder + File.separator + Lime.DATABASE_NAME);
 
         if (!destpath.exists() || destpath.length() < 10000) {
             // Always load from raw resources (sdcard migration is no longer supported)

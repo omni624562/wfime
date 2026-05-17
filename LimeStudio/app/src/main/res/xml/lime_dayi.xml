@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Keyboard xmlns:limehd="http://schemas.android.com/apk/res/net.toload.main.hd"
+<Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
     limehd:keyHeight="@dimen/key_height"
     limehd:keyWidth="10%p">
 

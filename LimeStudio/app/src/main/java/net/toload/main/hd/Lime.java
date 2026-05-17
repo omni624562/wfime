@@ -48,10 +48,20 @@ public class Lime {
     public static final String DATABASE_BACKUP_NAME = "backup.zip";
     public static final String DATABASE_CLOUD_TEMP = "cloudtemp.zip";
 
-    // Legacy path - use context-aware methods instead
-    @Deprecated
-    public static final String DATABASE_DEVICE_FOLDER = Environment.getDataDirectory()
-            + "/data/net.toload.main.hd/databases";
+    /**
+     * Get the database folder path using app-specific storage.
+     * Use this instead of the deprecated hardcoded folder.
+     *
+     * @param context Application context
+     * @return Path to database folder
+     */
+    public static String getDatabaseDeviceFolder(Context context) {
+        File dbDir = context.getDatabasePath(DATABASE_NAME).getParentFile();
+        if (dbDir != null && !dbDir.exists()) {
+            dbDir.mkdirs();
+        }
+        return dbDir != null ? dbDir.getAbsolutePath() : context.getFilesDir().getAbsolutePath();
+    }
 
     // ==================== News ====================
     public static final String LIME_NEWS_CONTENT = "lime_news_content";

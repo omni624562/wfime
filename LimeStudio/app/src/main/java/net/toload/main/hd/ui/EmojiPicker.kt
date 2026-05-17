@@ -43,10 +43,12 @@ fun EmojiPicker(
     onBackspaceClick: () -> Unit,
     bottomPaddingDp: Int = 0
 ) {
-    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     val context = LocalContext.current
-    EmojiData.initialize(context) // Load emojis from JSON
+    LaunchedEffect(Unit) {
+        EmojiData.initialize(context) // Load emojis from JSON once
+    }
 
+    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     // Recent Emojis State
     var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
 
@@ -88,7 +90,6 @@ fun EmojiPicker(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
             .background(backgroundColor)
             // Apply bottom padding to the whole column so the bottom bar sits ABOVE the system nav bar
             .padding(bottom = bottomPaddingDp.dp) 
@@ -142,7 +143,7 @@ fun EmojiPicker(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .weight(1f)
+                .height(200.dp) // Use fixed height instead of weight(1f) in wrapContent column
                 .fillMaxWidth()
         ) { page ->
             // Get display emojis for this specific page
