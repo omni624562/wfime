@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/androidMain/androidx/compose/ui/platform/**)",
+      "Read(//c/tmp/androidMain/androidx/compose/ui/platform/**)",
+      "PowerShell($jar = \"C:\\\\Users\\\\nan\\\\.gradle\\\\caches\\\\modules-2\\\\files-2.1\\\\androidx.compose.ui\\\\ui-android\\\\1.6.1\\\\d49f491345a23451e6155b6c3823b2ad31be4a9c\\\\ui-android-1.6.1-sources.jar\"; Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [System.IO.Compression.ZipFile]::OpenRead\\($jar\\); $zip.Entries | Where-Object { $_.Name -match \"ComposeView|Strategy|WindowRecomposer\" } | Select-Object FullName)",
+      "PowerShell($jar = \"C:\\\\Users\\\\nan\\\\.gradle\\\\caches\\\\modules-2\\\\files-2.1\\\\androidx.compose.ui\\\\ui-android\\\\1.6.1\\\\d49f491345a23451e6155b6c3823b2ad31be4a9c\\\\ui-android-1.6.1-sources.jar\"; Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [System.IO.Compression.ZipFile]::OpenRead\\($jar\\); $zip.Entries | Select-Object FullName | Where-Object { $_.FullName -match \"platform\" } | Select-Object -First 30)",
+      "PowerShell($jar = \"C:\\\\Users\\\\nan\\\\.gradle\\\\caches\\\\modules-2\\\\files-2.1\\\\androidx.compose.ui\\\\ui-android\\\\1.6.1\\\\d49f491345a23451e6155b6c3823b2ad31be4a9c\\\\ui-android-1.6.1-sources.jar\"; Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [System.IO.Compression.ZipFile]::OpenRead\\($jar\\); Write-Output \"Total entries: $\\($zip.Entries.Count\\)\"; $zip.Entries | Select-Object -First 20 FullName)",
+      "PowerShell(cd \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\"; ./gradlew compileDebugJavaWithJavac 2>&1 | Select-String \"error:\" | Where-Object { $_ -match \"PhysicalKeyHandler|TextComposition\" } | Select-Object -First 80)",
+      "PowerShell(cd \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\"; ./gradlew compileDebugJavaWithJavac 2>&1 | Select-String \"error:\" | Where-Object { $_ -match \"PhysicalKeyHandler\" } | Select-Object -Skip 10)",
+      "PowerShell($adb = Get-Command adb -ErrorAction SilentlyContinue; if \\($adb\\) { $adb.Source } else { Get-ChildItem \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName })",
+      "Bash(C:/Users/nan/AppData/Local/Android/Sdk/platform-tools/adb.exe logcat *)"
+    ]
+  }
+}
