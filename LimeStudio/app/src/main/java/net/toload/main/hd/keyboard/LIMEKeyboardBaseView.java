@@ -270,14 +270,12 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      * mBuffer.
      */
     private boolean mKeyboardChanged;
-    private Key mInvalidatedKey;
     /**
      * The canvas for the above mutable keyboard bitmap
      */
     private Canvas mCanvas;
     private final Paint mPaint;
     private final Rect mPadding;
-    private final Rect mClipRegion = new Rect(0, 0, 0, 0);
     // This map caches key label text height in pixel as value and key label text
     // size as map key.
     private final HashMap<Integer, Integer> mTextHeightCache = new HashMap<>();
@@ -885,30 +883,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         final Paint paint = mPaint;
         final Drawable keyBackground = mKeyBackground;
-        final Rect clipRegion = mClipRegion;
         final Rect padding = mPadding;
         final int kbdPaddingLeft = getPaddingLeft();
         final int kbdPaddingTop = getPaddingTop();
         final Key[] keys = mKeys;
-        final Key invalidKey = mInvalidatedKey;
 
-        boolean drawSingleKey = false;
-        if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
-            // TODO we should use Rect.inset and Rect.contains here.
-            // Is clipRegion completely contained within the invalidated key?
-            if (invalidKey.x + kbdPaddingLeft - 1 <= clipRegion.left &&
-                    invalidKey.y + kbdPaddingTop - 1 <= clipRegion.top &&
-                    invalidKey.x + invalidKey.width + kbdPaddingLeft + 1 >= clipRegion.right &&
-                    invalidKey.y + invalidKey.height + kbdPaddingTop + 1 >= clipRegion.bottom) {
-                drawSingleKey = true;
-            }
-        }
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
         // final int keyCount = keys.length;
         for (final Key key : keys) {
-            if (drawSingleKey && invalidKey != key) {
-                continue;
-            }
             int[] drawableState = key.getCurrentDrawableState();
 
             // Use action key background for Enter key if available
@@ -916,11 +898,12 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     && key.codes[0] == LIMEBaseKeyboard.KEYCODE_ENTER;
 
             // Identify functional keys (Delete, Shift, Symbol, Done) - Space (32) removed to match Gboard style
-            boolean isFunctionalKey = key.codes != null && key.codes.length > 0 && (
+            // Also include keys marked as modifiers in XML for consistency
+            boolean isFunctionalKey = key.isFunctionalKey() || (key.codes != null && key.codes.length > 0 && (
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_DELETE ||
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_SHIFT ||
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_MODE_CHANGE ||
-                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE);
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE));
 
             Drawable currentBackground = keyBackground;
             if (isActionKey && mActionKeyBackground != null) {
@@ -1162,7 +1145,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             }
             canvas.translate(-key.x - kbdPaddingLeft, -key.y - kbdPaddingTop);
         }
-        mInvalidatedKey = null;
         // Overlay a dark rectangle to dim the keyboard
         if (mMiniKeyboard != null) {
             paint.setColor((int) (mBackgroundDimAmount * 0xFF) << 24);
@@ -1220,7 +1202,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     public void invalidateKey(Key key) {
         if (key == null)
             return;
-        mInvalidatedKey = key;
         // TODO we should clean up this and record key's region to use in onBufferDraw.
         mDirtyRect.union(key.x + getPaddingLeft(), key.y + getPaddingTop(),
                 key.x + key.width + getPaddingLeft(), key.y + key.height + getPaddingTop());

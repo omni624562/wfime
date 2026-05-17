@@ -83,14 +83,14 @@ public class SearchServer {
     private static boolean hasNumberMapping;
     private static boolean hasSymbolMapping;
     private static Map<String, List<Mapping>> cache = null;
-    private static ConcurrentHashMap<String, List<Mapping>> engcache = null;
-    private static ConcurrentHashMap<String, List<Mapping>> emojicache = null;
-    private static ConcurrentHashMap<String, String> keynamecache = null;
+    private static Map<String, List<Mapping>> engcache = null;
+    private static Map<String, List<Mapping>> emojicache = null;
+    private static Map<String, String> keynamecache = null;
     /**
      * Store the mapping of typing code and mapped code from getMappingByCode on db
      * Jeremy '12,6,5
      */
-    private static ConcurrentHashMap<String, List<String>> coderemapcache = null;
+    private static Map<String, List<String>> coderemapcache = null;
     private static Thread prefetchThread;
     private static boolean abandonPhraseSuggestion = false;
 
@@ -904,10 +904,10 @@ public class SearchServer {
             Log.e(TAG, e.getMessage());
         }
         cache = newLruMap(MAX_CACHE_ENTRIES);
-        engcache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
-        emojicache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
-        keynamecache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
-        coderemapcache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
+        engcache = newLruMap(MAX_CACHE_ENTRIES);
+        emojicache = newLruMap(MAX_CACHE_ENTRIES);
+        keynamecache = newLruMap(MAX_CACHE_ENTRIES);
+        coderemapcache = newLruMap(MAX_CACHE_ENTRIES);
 
         // initial exact match stack here
         suggestionLoL = new LinkedList<>();

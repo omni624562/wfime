@@ -763,8 +763,6 @@
         {"char": "🛷", "keywords": ["sled"]},
         {"char": "🥌", "keywords": ["curling stone"]},
         {"char": "🎯", "keywords": ["bullseye", "dart"]},
-        {"char": "🪀", "keywords": ["yo-yo"]},
-        {"char": "🪁", "keywords": ["kite"]},
         {"char": "🎮", "keywords": ["video game"]},
         {"char": "🎰", "keywords": ["slot machine"]},
         {"char": "🎲", "keywords": ["game die"]},
@@ -777,15 +775,14 @@
         {"char": "🎼", "keywords": ["musical score"]},
         {"char": "🎤", "keywords": ["microphone"]},
         {"char": "🎧", "keywords": ["headphone"]},
-        {"char": " saxophone", "char": "🎷", "keywords": ["saxophone"]},
-        {"char": " guitar", "char": "🎸", "keywords": ["guitar"]},
-        {"char": " musical keyboard", "char": "🎹", "keywords": ["musical keyboard"]},
-        {"char": " trumpet", "char": "🎺", "keywords": ["trumpet"]},
-        {"char": " violin", "char": "🎻", "keywords": ["violin"]},
-        {"char": " banjo", "char": "🪕", "keywords": ["banjo"]},
-        {"char": " drum", "char": "🥁", "keywords": ["drum"]},
-        {"char": "🎬", "keywords": ["clapper board"]},
-        {"char": "🏹", "keywords": ["bow and arrow"]}
+        {"char": "🎷", "keywords": ["saxophone"]},
+        {"char": "🎸", "keywords": ["guitar"]},
+        {"char": "🎹", "keywords": ["musical keyboard"]},
+        {"char": "🎺", "keywords": ["trumpet"]},
+        {"char": "🎻", "keywords": ["violin"]},
+        {"char": "🪕", "keywords": ["banjo"]},
+        {"char": "🥁", "keywords": ["drum"]},
+        {"char": "🎬", "keywords": ["clapper board"]}
       ]
     },
     {

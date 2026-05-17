@@ -763,8 +763,6 @@
         {"char": "🛷", "keywords": ["sled"]},
         {"char": "🥌", "keywords": ["curling stone"]},
         {"char": "🎯", "keywords": ["bullseye", "dart"]},
-        {"char": "🪀", "keywords": ["yo-yo"]},
-        {"char": "🪁", "keywords": ["kite"]},
         {"char": "🎮", "keywords": ["video game"]},
         {"char": "🎰", "keywords": ["slot machine"]},
         {"char": "🎲", "keywords": ["game die"]},
@@ -784,8 +782,7 @@
         {"char": "🎻", "keywords": ["violin"]},
         {"char": "🪕", "keywords": ["banjo"]},
         {"char": "🥁", "keywords": ["drum"]},
-        {"char": "🎬", "keywords": ["clapper board"]},
-        {"char": "🏹", "keywords": ["bow and arrow"]}
+        {"char": "🎬", "keywords": ["clapper board"]}
       ]
     },
     {

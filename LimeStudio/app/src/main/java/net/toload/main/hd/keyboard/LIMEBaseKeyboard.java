@@ -658,7 +658,7 @@ public class LIMEBaseKeyboard {
          * @see #onReleased(boolean)
          */
         public void onPressed() {
-            pressed = !pressed;
+            pressed = true;
         }
 
         /**
@@ -670,7 +670,7 @@ public class LIMEBaseKeyboard {
          * @see #onPressed()
          */
         public void onReleased(boolean inside) {
-            pressed = !pressed;
+            pressed = false;
             if (sticky) {
                 on = !on;
             }

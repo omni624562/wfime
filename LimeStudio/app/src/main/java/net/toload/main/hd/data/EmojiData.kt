@@ -34,56 +34,61 @@ object EmojiData {
 
     private var isInitialized = false
 
-    fun initialize(context: Context) {
+    suspend fun initialize(context: Context) {
         if (isInitialized) return
 
-        try {
-            android.util.Log.d("EMOJI_DEBUG", "Reading emojis.json from assets...")
-            val jsonString = context.assets.open("emojis.json").bufferedReader().use { it.readText() }
-            android.util.Log.d("EMOJI_DEBUG", "File read successfully, length: ${jsonString.length}. Parsing JSON...")
-            
-            val jsonObject = JSONObject(jsonString)
-            val categoriesArray = jsonObject.getJSONArray("categories")
-            android.util.Log.d("EMOJI_DEBUG", "Found ${categoriesArray.length()} categories")
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            // Re-check initialized inside the IO context
+            if (isInitialized) return@withContext
 
-            for (i in 0 until categoriesArray.length()) {
-                val categoryObj = categoriesArray.getJSONObject(i)
-                val categoryName = categoryObj.getString("name")
-                val emojisArray = categoryObj.getJSONArray("emojis")
+            try {
+                android.util.Log.d("EMOJI_DEBUG", "Reading emojis.json from assets...")
+                val jsonString = context.assets.open("emojis.json").bufferedReader().use { it.readText() }
                 
-                val emojiList = ArrayList<Emoji>()
-                for (j in 0 until emojisArray.length()) {
-                    val emojiObj = emojisArray.getJSONObject(j)
-                    val char = emojiObj.getString("char")
-                    val hasSkinTone = emojiObj.optBoolean("hasSkinTone", false)
+                val jsonObject = JSONObject(jsonString)
+                val categoriesArray = jsonObject.getJSONArray("categories")
+
+                val tempCategories = mutableMapOf<String, List<Emoji>>()
+
+                for (i in 0 until categoriesArray.length()) {
+                    val categoryObj = categoriesArray.getJSONObject(i)
+                    val categoryName = categoryObj.getString("name")
+                    val emojisArray = categoryObj.getJSONArray("emojis")
                     
-                    val keywordsArray = emojiObj.getJSONArray("keywords")
-                    val keywords = ArrayList<String>()
-                    for (k in 0 until keywordsArray.length()) {
-                        keywords.add(keywordsArray.getString(k))
+                    val emojiList = ArrayList<Emoji>(emojisArray.length())
+                    for (j in 0 until emojisArray.length()) {
+                        val emojiObj = emojisArray.getJSONObject(j)
+                        val char = emojiObj.getString("char")
+                        val hasSkinTone = emojiObj.optBoolean("hasSkinTone", false)
+                        
+                        val keywordsArray = emojiObj.getJSONArray("keywords")
+                        val keywords = ArrayList<String>(keywordsArray.length())
+                        for (k in 0 until keywordsArray.length()) {
+                            keywords.add(keywordsArray.getString(k))
+                        }
+                        
+                        emojiList.add(Emoji(char, keywords, hasSkinTone))
                     }
-                    
-                    emojiList.add(Emoji(char, keywords, hasSkinTone))
+                    tempCategories[categoryName] = emojiList
                 }
 
-                when (categoryName) {
-                    "SMILEYS" -> SMILEYS = emojiList
-                    "PEOPLE" -> PEOPLE = emojiList
-                    "ANIMALS_NATURE" -> ANIMALS_NATURE = emojiList
-                    "FOOD_DRINK" -> FOOD_DRINK = emojiList
-                    "TRAVEL_PLACES" -> TRAVEL_PLACES = emojiList
-                    "ACTIVITIES" -> ACTIVITIES = emojiList
-                    "OBJECTS" -> OBJECTS = emojiList
-                    "SYMBOLS" -> SYMBOLS = emojiList
-                    "FLAGS" -> FLAGS = emojiList
+                // Batch update state on Main thread
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    tempCategories["SMILEYS"]?.let { SMILEYS = it }
+                    tempCategories["PEOPLE"]?.let { PEOPLE = it }
+                    tempCategories["ANIMALS_NATURE"]?.let { ANIMALS_NATURE = it }
+                    tempCategories["FOOD_DRINK"]?.let { FOOD_DRINK = it }
+                    tempCategories["TRAVEL_PLACES"]?.let { TRAVEL_PLACES = it }
+                    tempCategories["ACTIVITIES"]?.let { ACTIVITIES = it }
+                    tempCategories["OBJECTS"]?.let { OBJECTS = it }
+                    tempCategories["SYMBOLS"]?.let { SYMBOLS = it }
+                    tempCategories["FLAGS"]?.let { FLAGS = it }
+                    isInitialized = true
+                    android.util.Log.d("EMOJI_DEBUG", "EmojiData initialization COMPLETE")
                 }
-                android.util.Log.d("EMOJI_DEBUG", "Loaded category $categoryName with ${emojiList.size} emojis")
+            } catch (e: Exception) {
+                android.util.Log.e("EMOJI_DEBUG", "EmojiData initialization FAILED: ${e.message}", e)
             }
-            isInitialized = true
-            android.util.Log.d("EMOJI_DEBUG", "EmojiData initialization COMPLETE")
-        } catch (e: Exception) {
-            android.util.Log.e("EMOJI_DEBUG", "EmojiData initialization FAILED: ${e.message}", e)
-            e.printStackTrace()
         }
     }
 

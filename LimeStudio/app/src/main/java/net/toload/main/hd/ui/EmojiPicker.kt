@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -158,7 +159,10 @@ fun EmojiPicker(
                     .padding(horizontal = 4.dp),
                 contentPadding = PaddingValues(vertical = 4.dp)
             ) {
-                items(emojisForPage) { emoji ->
+                itemsIndexed(
+                    items = emojisForPage,
+                    key = { index, emoji -> "${emoji.char}_$index" } 
+                ) { _, emoji ->
                     EmojiGridItem(
                         emoji = emoji,
                         onEmojiClick = { char ->
