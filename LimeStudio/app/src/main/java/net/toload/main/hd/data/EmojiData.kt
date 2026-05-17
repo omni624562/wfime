@@ -5,6 +5,10 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 data class Emoji(
     val char: String,
     val keywords: List<String>,
@@ -17,16 +21,16 @@ object EmojiData {
         "🏻", "🏼", "🏽", "🏾", "🏿"
     )
 
-    // Categories - Initially empty, populated from JSON
-    var SMILEYS: List<Emoji> = emptyList()
-    var PEOPLE: List<Emoji> = emptyList()
-    var ANIMALS_NATURE: List<Emoji> = emptyList()
-    var FOOD_DRINK: List<Emoji> = emptyList()
-    var TRAVEL_PLACES: List<Emoji> = emptyList()
-    var ACTIVITIES: List<Emoji> = emptyList()
-    var OBJECTS: List<Emoji> = emptyList()
-    var SYMBOLS: List<Emoji> = emptyList()
-    var FLAGS: List<Emoji> = emptyList()
+    // Categories - Using mutableStateOf so Compose UI recomposes when data is loaded
+    var SMILEYS by mutableStateOf<List<Emoji>>(emptyList())
+    var PEOPLE by mutableStateOf<List<Emoji>>(emptyList())
+    var ANIMALS_NATURE by mutableStateOf<List<Emoji>>(emptyList())
+    var FOOD_DRINK by mutableStateOf<List<Emoji>>(emptyList())
+    var TRAVEL_PLACES by mutableStateOf<List<Emoji>>(emptyList())
+    var ACTIVITIES by mutableStateOf<List<Emoji>>(emptyList())
+    var OBJECTS by mutableStateOf<List<Emoji>>(emptyList())
+    var SYMBOLS by mutableStateOf<List<Emoji>>(emptyList())
+    var FLAGS by mutableStateOf<List<Emoji>>(emptyList())
 
     private var isInitialized = false
 
@@ -34,9 +38,13 @@ object EmojiData {
         if (isInitialized) return
 
         try {
+            android.util.Log.d("EMOJI_DEBUG", "Reading emojis.json from assets...")
             val jsonString = context.assets.open("emojis.json").bufferedReader().use { it.readText() }
+            android.util.Log.d("EMOJI_DEBUG", "File read successfully, length: ${jsonString.length}. Parsing JSON...")
+            
             val jsonObject = JSONObject(jsonString)
             val categoriesArray = jsonObject.getJSONArray("categories")
+            android.util.Log.d("EMOJI_DEBUG", "Found ${categoriesArray.length()} categories")
 
             for (i in 0 until categoriesArray.length()) {
                 val categoryObj = categoriesArray.getJSONObject(i)
@@ -69,12 +77,13 @@ object EmojiData {
                     "SYMBOLS" -> SYMBOLS = emojiList
                     "FLAGS" -> FLAGS = emojiList
                 }
+                android.util.Log.d("EMOJI_DEBUG", "Loaded category $categoryName with ${emojiList.size} emojis")
             }
             isInitialized = true
+            android.util.Log.d("EMOJI_DEBUG", "EmojiData initialization COMPLETE")
         } catch (e: Exception) {
+            android.util.Log.e("EMOJI_DEBUG", "EmojiData initialization FAILED: ${e.message}", e)
             e.printStackTrace()
-            // Fallback to empty or crash? 
-            // For now, print stack trace. If file is missing, lists remain empty.
         }
     }
 

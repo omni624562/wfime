@@ -549,18 +549,14 @@ public class SetupImLoadDialog extends DialogFragment {
     public void loadDefaultRelated() {
 
         try {
-            File relateDBFile = LIMEUtilities.isFileExist(
-                    activity.getFilesDir().getParentFile().getPath() +
-                            "/databases/related.db");
-            if (relateDBFile != null)
-                relateDBFile.delete();
+            File relatedDbPath = activity.getDatabasePath("related.db");
+            if (!relatedDbPath.getParentFile().exists()) {
+                relatedDbPath.getParentFile().mkdirs();
+            }
+            if (relatedDbPath.exists())
+                relatedDbPath.delete();
 
-            File relatedDbPath = LIMEUtilities.isFileNotExist(
-                    activity.getFilesDir().getParentFile().getPath() +
-                            "/databases/related.db");
-
-            if (relatedDbPath != null)
-                LIMEUtilities.copyRAWFile(activity.getResources().openRawResource(R.raw.lime), relatedDbPath);
+            LIMEUtilities.copyRAWFile(activity.getResources().openRawResource(R.raw.lime), relatedDbPath);
 
             DBSrv.importBackupRelatedDb(relatedDbPath);
             relatedDbPath.deleteOnExit();

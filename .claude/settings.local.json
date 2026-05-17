@@ -32,7 +32,28 @@
       "Bash(git restore:*)",
       "Bash(gradlew.bat clean:*)",
       "Bash(adb install:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" devices)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" logcat -d -t 200 -s \"EMOJI_DEBUG\" \"LIMEService\" \"AndroidRuntime\" 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell \"am force-stop nan.toload.main.hd\")",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" logcat -d 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" install -r \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\" 2>&1)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" logcat -c)",
+      "PowerShell(Start-Sleep -Seconds 15; & \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" logcat -d 2>&1 | Where-Object { $_ -match \"toload|EMOJI_DEBUG|LIMEService|AndroidRuntime|FATAL|IllegalState\" } | Select-Object -Last 60 | Out-String)",
+      "PowerShell(& \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell \"ps -ef | grep -i lime\" 2>&1)",
+      "PowerShell(adb install -r \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\")",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; if \\(Test-Path $adb\\) { & $adb install -r \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\" } else { Write-Host \"adb not at $adb\" })",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -d -t 200 --pid=$\\(& $adb shell pidof nan.toload.main.hd\\) 2>&1 | Select-String -Pattern \"FATAL|Exception|Error|EMOJI_DEBUG|LIMEService|InputMethodService\" | Select-Object -Last 80)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -d -t 500 2>&1 | Select-String -Pattern \"nan.toload|LIMEService|EMOJI_DEBUG|AndroidRuntime|Exception|FATAL\" | Select-Object -Last 100)",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb logcat -d 2>&1 | Select-String \"nan.toload|EMOJI_DEBUG|AndroidRuntime|FATAL\" | Select-Object -Last 60 | ForEach-Object { $_.ToString\\(\\) })",
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb install -r \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\")",
+      "PowerShell(& \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" install -r \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\")",
+      "PowerShell(Test-Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\.claude\" && \\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\.claude\" -Force | Select-Object Name\\) || Write-Host \".claude directory not found\")",
+      "PowerShell(Test-Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" && \\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Force | Select-Object Name, PSIsContainer\\) || Write-Host \"androidMain directory not found\")",
+      "PowerShell(Head -30)",
+      "PowerShell(Test-Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -PathType Container; if \\($?\\) { \\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Force -Recurse\\).Count } else { \"Directory not found\" })",
+      "PowerShell(\\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\" -Force | Where-Object { $_.Name -match \"^tmpclaude\" }\\).Count)",
+      "PowerShell(\\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Recurse\\) | Select-Object Name, FullName | Format-Table -AutoSize)"
     ]
   }
 }

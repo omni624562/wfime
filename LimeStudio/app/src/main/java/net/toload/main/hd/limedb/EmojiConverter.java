@@ -78,6 +78,8 @@ public class EmojiConverter extends SQLiteOpenHelper {
                 tablename = "en";
             } else if (emoji == Lime.EMOJI_TW) {//
                 tablename = "tw";
+            } else if (emoji == Lime.EMOJI_CN) {//
+                tablename = "cn";
             }
 
             try {

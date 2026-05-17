@@ -146,6 +146,10 @@ public class SearchServer {
         // Jeremy '15,6,21 set max code length
         if (tablename.startsWith("cj")) {
             maxCodeLength = 5;
+        } else if (tablename.equals("dayi")) {
+            maxCodeLength = 3;
+        } else {
+            maxCodeLength = 4;
         }
     }
 
@@ -623,18 +627,21 @@ public class SearchServer {
         return getMappingByCode(code, softkeyboard, getAllRecords, false);
     }
 
-    public List<Mapping> emojiConvert(String code, int type) {
+        public List<Mapping> emojiConvert(String code, int type) {
         if (code != null) {
             if (emojicache == null) {
                 emojicache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
             }
-            List<Mapping> results = emojicache.get(code);
-            if (emojicache.get(code) != null) {
+            String cacheKey = code + "_" + type;
+            List<Mapping> results = emojicache.get(cacheKey);
+            if (results != null) {
                 return results;
             } else {
                 // Log.i("EMOJI :" , "Run search emoji ...");
                 results = dbadapter.emojiConvert(code, type);
-                emojicache.put(code, results);
+                if (results != null) {
+                    emojicache.put(cacheKey, results);
+                }
                 return results;
             }
         }
@@ -674,150 +681,58 @@ public class SearchServer {
 
             // 12,6,4 Jeremy. Ascending a ab abc... looking up db if the cache is not exist
             // '15,6,4 Jeremy. Do exact search only in between search mode (1 time only).
-            List<Mapping> resultList = getMappingByCodeFromCacheOrDB(code, getAllRecords);
+            // Descending loop to collect suggestions for current code and its prefixes
+            // For Dayi 3-code, we only collect matches for the full code to enable auto-commit
+            String currentLoopCode = code;
+            while (currentLoopCode != null && currentLoopCode.length() > 0) {
+                String loopCacheKey = cacheKey(currentLoopCode);
+                List<Mapping> loopCacheTemp = cache.get(loopCacheKey);
 
-            // Jeremy '15,7,16 reset abandonPhraseSuggestion if code length ==1
-            if (mLIMEPref.getSmartChineseInput() && abandonPhraseSuggestion && code.length() == 1) {
-                clearRunTimeSuggestion(false);
-            }
-            // make run-time suggestion '15, 6, 9 Jeremy.
-            if (!abandonPhraseSuggestion && !prefetchCache && mLIMEPref.getSmartChineseInput()) {
-                makeRunTimeSuggestion(code, resultList);
-            }
-
-            // 12,6,4 Jeremy. Descending abc ab a... Build the result candidate list.
-            // '15,6,4 Jeremy. Do exact search only in between search mode.
-            // for (int i = 0; i < ((LimeDB.getBetweenSearch()) ? 1 : size); i++) {
-            String cacheKey = cacheKey(code);
-            List<Mapping> cacheTemp = cache.get(cacheKey);
-
-            if (cacheTemp != null) {
-                List<Mapping> resultlist = cacheTemp;
-
-                // if getAllRecords is true and result list or related list has has more mark in
-                // the end
-                // recall LimeDB.GetMappingByCode with getAllRecords true.
-                if (getAllRecords &&
-                        resultlist.size() > 1 && resultlist.get(resultlist.size() - 1).isHasMoreRecordsMarkRecord()) {
+                if (loopCacheTemp == null) {
                     try {
-                        cacheTemp = dbadapter.getMappingByCode(code, !isPhysicalKeyboardPressed, true);
-                        cache.remove(cacheKey);
-                        cache.put(cacheKey, cacheTemp);
+                        loopCacheTemp = dbadapter.getMappingByCode(currentLoopCode, !isPhysicalKeyboardPressed, getAllRecords);
+                        if (loopCacheTemp != null) {
+                            cache.put(loopCacheKey, loopCacheTemp);
+                        }
                     } catch (Exception e) {
-                        Log.e(TAG, "Error refreshing cache: " + e.getMessage());
-                    }
-
-                }
-            }
-
-            if (cacheTemp != null) {
-                List<Mapping> resultlist = cacheTemp;
-                // List<Mapping> relatedtlist = cacheTemp.second;
-
-                if (DEBUG || dumpRunTimeSuggestion)
-                    Log.i(TAG, "getMappingByCode() code=" + code + " resultlist.size()=" + resultlist.size()
-                            + ", abandonPhraseSuggestion:" + abandonPhraseSuggestion);
-
-                // if (i == 0) {
-                if (resultlist.size() == 0 && code.length() > 1) {
-                    // If the result list is empty we need to go back to last result list with
-                    // nonzero result list
-                    String wayBackCode = code;
-                    do {
-                        wayBackCode = wayBackCode.substring(0, wayBackCode.length() - 1);
-                        cacheTemp = cache.get(cacheKey(wayBackCode));
-                        if (cacheTemp != null)
-                            resultlist = cacheTemp;
-                    } while (resultlist.size() == 0 && wayBackCode.length() > 1);
-                }
-
-                Mapping self = new Mapping();
-                self.setWord(code);
-                self.setCode(code);
-                self.setComposingCodeRecord();
-                // put run-time built suggestion if it's present
-                /*
-                 * List<Pair<Mapping, String>> bestSuggestionList = null;
-                 * Mapping bestSuggestion = null;
-                 * if (!suggestionLoL.isEmpty()) {
-                 * bestSuggestionList = suggestionLoL.get(suggestionLoL.size() - 1);
-                 * }
-                 * if (bestSuggestionList != null && !bestSuggestionList.isEmpty()) {
-                 * bestSuggestion = bestSuggestionList.get(bestSuggestionList.size() - 1).first;
-                 * }
-                 */
-
-                // Jeremy '15,7,16 check english suggestion if code length > maxCodeLength
-                Mapping englishSuggestion = null;
-                if (code.length() > maxCodeLength) {
-                    List<Mapping> englishSuggestions = getEnglishSuggestions(code);
-                    if (englishSuggestions != null && !englishSuggestions.isEmpty()) {
-                        englishSuggestion = englishSuggestions.get(0);
-                        englishSuggestion.setRuntimeBuiltPhraseRecord();
-                        englishSuggestion.setCode(code);
+                        Log.e(TAG, "Error refreshing cache in loop: " + e.getMessage());
                     }
                 }
 
-                Mapping bestSuggestion = null;
-                if (bestSuggestionStack != null && !bestSuggestionStack.isEmpty()) {
-                    bestSuggestion = bestSuggestionStack.lastElement().first;
-                }
-                int averageScore = (bestSuggestion == null) ? 0
-                        : (bestSuggestion.getBasescore() / bestSuggestion.getWord().length());
-
-                if (bestSuggestion != null // the last element is run-time built suggestion from remaining code query
-                        && !abandonPhraseSuggestion
-                        && !bestSuggestion.isExactMatchToCodeRecord() // will be the first item of result list, dont'
-                                                                      // add duplicated item
-                        && bestSuggestion.getWord().length() > 1
-                        && ((englishSuggestion == null && averageScore > 120)
-                                || (englishSuggestion != null && averageScore > 200))) {
-                    result.add(self);
-                    result.add(bestSuggestion);
-
-                } else if (englishSuggestion != null && averageScore <= 200) {
-                    clearRunTimeSuggestion(true);
-                    result.add(self);
-                    result.add(englishSuggestion);
-                } else {
-                    // put self into the first mapping for mixed input.
-                    result.add(self);
-                }
-                // }
-
-                if (resultlist.size() > 0) {
-                    result.addAll(resultlist);
-                    /*
-                     * int rsize = result.size();
-                     * if (result.get(rsize - 1).isHasMoreRecordsMarkRecord()) {
-                     * //do not need to touch the has more record in between search mode. Jeremy
-                     * '15,6,4
-                     * result.remove(rsize - 1);
-                     * hasMore = true;
-                     * 
-                     * }
-                     */
-                    if (DEBUG)
-                        Log.i(TAG, "getMappingByCode() code=" + code + "  result list added resultlist.size()="
-                                + resultlist.size());
-
+                if (loopCacheTemp != null && !loopCacheTemp.isEmpty()) {
+                    // Only add if it's not already in the result list (avoid duplicates)
+                    for (Mapping m : loopCacheTemp) {
+                        boolean duplicate = false;
+                        for (Mapping existing : result) {
+                            if (m.getWord().equals(existing.getWord())) {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+                        if (!duplicate) {
+                            result.add(m);
+                        }
+                    }
+                    // For Dayi 3-code, we STOP after the first successful match level (exact match only)
+                    if (tablename.equals("dayi")) {
+                        break;
+                    }
                 }
 
+                currentLoopCode = currentLoopCode.substring(0, currentLoopCode.length() - 1);
             }
-            // codeLengthMap is deprecated and replace by exact match stack scheme '15,6,3
-            // jeremy
-            // codeLengthMap.add(new Pair<>(code.length(), result.size())); //Jeremy 12,6,2
-            // preserve the code length in each loop.
-            // if (DEBUG) Log.i(TAG, "getMappingByCode() codeLengthMap code length = " +
-            // code.length() + ", result size = " + result.size());
 
-            code = code.substring(0, code.length() - 1);
+            // Finally add the raw composing code at the beginning
+            Mapping self = new Mapping();
+            self.setWord(code);
+            self.setCode(code);
+            self.setComposingCodeRecord();
+            result.add(0, self);
         }
         if (DEBUG)
-            Log.i(TAG, "getMappingByCode() code=" + code + " result.size()=" + result.size());
+            Log.i(TAG, "getMappingByCode() result.size()=" + result.size());
 
         return result;
-
     }
 
     private List<Mapping> getMappingByCodeFromCacheOrDB(String queryCode, Boolean getAllRecords) {
@@ -1574,7 +1489,7 @@ public class SearchServer {
                     if (tablename.equals("dayi")
                             || (tablename.equals("phonetic")
                                     && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
-                        selkey = "'[]-\\^&*()";
+                        selkey = " []-'^&*(";
                     } else {
                         selkey = "!@#$%^&*()";
                     }

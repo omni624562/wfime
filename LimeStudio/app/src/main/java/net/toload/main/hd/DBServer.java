@@ -208,6 +208,7 @@ public class DBServer {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static void restoreDefaultSharedPreference(File sharePrefs) {
         ObjectInputStream inputStream = null;
 

@@ -24,7 +24,7 @@
   ~  */
   -->
 
-<Keyboard xmlns:limehd="http://schemas.android.com/apk/res/net.toload.main.hd"
+<Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
     limehd:horizontalGap="0px"
     limehd:keyHeight="@dimen/phone_key_height"
     limehd:keyWidth="20%p"

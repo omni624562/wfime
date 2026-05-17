@@ -48,7 +48,20 @@ android {
             buildConfigField "boolean", "DEBUG_LOGGING", "false"
         }
     }
+    flavorDimensions += "device"
     productFlavors {
+        phone {
+            dimension = "device"
+            applicationIdSuffix = ".phone"
+            versionNameSuffix = "-phone"
+            buildConfigField "boolean", "IS_TABLET", "false"
+        }
+        tablet {
+            dimension = "device"
+            applicationIdSuffix = ".tablet"
+            versionNameSuffix = "-tablet"
+            buildConfigField "boolean", "IS_TABLET", "true"
+        }
     }
     packagingOptions {
         resources {
@@ -66,8 +79,8 @@ android {
         abortOnError = false
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
