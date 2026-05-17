@@ -385,11 +385,19 @@ public class DBServer {
             e.printStackTrace();
         }
         // decompressFile(compressedSourceDB, LIME.LIME_SDCARD_FOLDER, imtype, true);
-        if (unzipFilePaths.size() != 1) {
+        String targetDbPath = null;
+        for (String path : unzipFilePaths) {
+            if (path.toLowerCase().endsWith(".db")) {
+                targetDbPath = path;
+                break;
+            }
+        }
+
+        if (targetDbPath == null) {
             // TODO: Process exception here.
             return -1;
         } else {
-            int count = datasource.importDb(unzipFilePaths.get(0), imtype);
+            int count = datasource.importDb(targetDbPath, imtype);
             // mLIMEPref.setResetCacheFlag(true);
             resetCache();
             return count;

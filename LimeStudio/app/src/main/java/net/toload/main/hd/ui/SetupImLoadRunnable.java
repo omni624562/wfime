@@ -105,7 +105,12 @@ public class SetupImLoadRunnable implements Runnable {
 
         // Load DB
         handler.updateProgress(activity.getResources().getString(R.string.setup_load_migrate_load));
-        dbsrv.importMapping(tempfile, imtype);
+        int count = dbsrv.importMapping(tempfile, imtype);
+
+        if (count < 0) {
+            handler.cancelProgress();
+            return;
+        }
 
         mLIMEPref.setParameter("_table", "");
         // mLIMEPref.setResetCacheFlag(true);
@@ -291,41 +296,31 @@ public class SetupImLoadRunnable implements Runnable {
             URL downloadUrl = new URL(url);
             URLConnection conn = downloadUrl.openConnection();
             conn.connect();
-            InputStream is = conn.getInputStream();
 
             int size = conn.getContentLength();
             int downloadSize = 0;
-
-            if (is == null) {
-                throw new RuntimeException("stream is null");
-            }
 
             File downloadFolder = ctx.getCacheDir();
             File downloadedFile = File.createTempFile(Lime.DATABASE_IM_TEMP, Lime.DATABASE_IM_TEMP_EXT, downloadFolder);
             downloadedFile.deleteOnExit();
 
-            FileOutputStream fos;
-            fos = new FileOutputStream(downloadedFile);
+            try (InputStream is = conn.getInputStream();
+                 FileOutputStream fos = new FileOutputStream(downloadedFile)) {
 
-            byte[] buf = new byte[4096];
-            do {
-                int numread = is.read(buf);
-                if (numread <= 0) {
-                    break;
+                byte[] buf = new byte[4096];
+                int numread;
+                while ((numread = is.read(buf)) > 0) {
+                    fos.write(buf, 0, numread);
+                    if (size > 0) {
+                        downloadSize += numread;
+                        int percent = (int) (((float) downloadSize / (float) size) * 100);
+                        handler.updateProgress(percent);
+                    }
+                    if (DEBUG)
+                        Log.i(TAG, numread + " bytes download.");
                 }
-                fos.write(buf, 0, numread);
-                if (size > 0) {
-                    downloadSize += 4096;
-                    float percent = (float) downloadSize / (float) size;
-                    percent *= 100;
-                    handler.updateProgress((int) percent);
-                }
-                if (DEBUG)
-                    Log.i(TAG, numread + "bytes download.");
-
-            } while (true);
-
-            is.close();
+                fos.flush();
+            }
 
             return downloadedFile;
 

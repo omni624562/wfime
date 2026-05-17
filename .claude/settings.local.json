@@ -53,7 +53,13 @@
       "PowerShell(Head -30)",
       "PowerShell(Test-Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -PathType Container; if \\($?\\) { \\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Force -Recurse\\).Count } else { \"Directory not found\" })",
       "PowerShell(\\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\" -Force | Where-Object { $_.Name -match \"^tmpclaude\" }\\).Count)",
-      "PowerShell(\\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Recurse\\) | Select-Object Name, FullName | Format-Table -AutoSize)"
+      "PowerShell(\\(Get-ChildItem -Path \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\androidMain\" -Recurse\\) | Select-Object Name, FullName | Format-Table -AutoSize)",
+      "PowerShell(Get-Command sqlite3 -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Command python, python3, py -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"python|jdk|java\" } | Select Name; Get-ChildItem \"C:\\\\Program Files\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"python|java|jdk\" } | Select Name)",
+      "PowerShell(Get-Command java -ErrorAction SilentlyContinue)",
+      "PowerShell($env:JAVA_HOME)",
+      "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"java|python|android\" })"
     ]
   }
 }

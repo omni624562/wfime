@@ -65,7 +65,7 @@ public class Lime {
 
     // ==================== News ====================
     public static final String LIME_NEWS_CONTENT = "lime_news_content";
-    public static final String LIME_NEWS_CONTENT_URL = "https://github.com/omni624562/nanime-main/raw/master/Resources/Message/content.html";
+    public static final String LIME_NEWS_CONTENT_URL = "https://github.com/omni624562/ime/raw/main/Resources/Message/content.html";
 
     // ==================== File Constants ====================
     public static final String separator = java.io.File.separator;
@@ -74,7 +74,7 @@ public class Lime {
 
     // ==================== Download URLs ====================
     // Primary: GitHub (reliable)
-    public static final String DATABASE_CLOUD_URL_BASED = "https://github.com/omni624562/nanime-main/raw/main/Database/";
+    public static final String DATABASE_CLOUD_URL_BASED = "https://github.com/omni624562/ime/raw/main/Database/";
 
     // Phonetic IM downloads
     public static final String DATABASE_CLOUD_IM_PHONETIC = DATABASE_CLOUD_URL_BASED + "phonetic.zip";

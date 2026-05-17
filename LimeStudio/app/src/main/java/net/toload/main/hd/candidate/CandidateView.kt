@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -285,6 +286,7 @@ open class CandidateView @JvmOverloads constructor(
         // mService?.doVibrateSound(0)
     }
 
+    @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
     fun CandidateRow() {
         // Stable Color — remembered so the object is not re-created on every recomposition
@@ -348,6 +350,11 @@ open class CandidateView @JvmOverloads constructor(
                             onClick = {
                                 mService?.pickCandidateManually(index)
                                 selectedIndex = index
+                            },
+                            onLongClick = {
+                                if (mapping.isRelatedPhraseRecord()) {
+                                    mService?.removeCandidateManually(index)
+                                }
                             }
                         )
                     }
@@ -374,12 +381,14 @@ open class CandidateView @JvmOverloads constructor(
         }
     }
 
+    @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
     fun CandidateItem(
         mapping: Mapping,
         isSelected: Boolean,
         fontSize: androidx.compose.ui.unit.TextUnit,
-        onClick: () -> Unit
+        onClick: () -> Unit,
+        onLongClick: () -> Unit
     ) {
         // Gboard-style: light text on dark background
         val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
@@ -388,7 +397,10 @@ open class CandidateView @JvmOverloads constructor(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .clickable(onClick = onClick)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                )
                 .padding(horizontal = 16.dp, vertical = 2.dp),
             contentAlignment = Alignment.Center
         ) {

@@ -193,6 +193,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         Lime.DB_TABLE_CUSTOM,
         Lime.DB_TABLE_DAYI,
         Lime.DB_TABLE_PHONETIC,
+        Lime.IM_PHONETIC_BIG5,
+        Lime.IM_PHONETIC_ADV,
+        Lime.IM_PHONETIC_ADV_BIG5,
         // System tables
         Lime.DB_IM,
         Lime.DB_RELATED,
@@ -2835,29 +2838,45 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return -1;
 
-        deleteAll(imtype);
+        String validatedImType = validateTableName(imtype);
+        deleteAll(validatedImType);
         holdDBConnection();
         try {
             db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
 
-            // Identify source table name - it might match imtype or be a generic 'im' or 'phonetic'
-            String sourceTable = imtype;
-            Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND (name='" + imtype + "' OR name='phonetic' OR name='dayi')", null);
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    sourceTable = cursor.getString(0);
+            // Identify source table name - it might match imtype or be a generic 'phonetic' or 'dayi'
+            String sourceTable = null;
+            String[] possibleSourceTables = {validatedImType, "phonetic", "dayi", Lime.DB_TABLE_CUSTOM};
+            
+            for (String table : possibleSourceTables) {
+                Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name='" + table + "'", null);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        sourceTable = cursor.getString(0);
+                    }
+                    cursor.close();
                 }
-                cursor.close();
+                if (sourceTable != null) break;
             }
 
-            db.execSQL("insert into " + imtype + " select * from sourceDB." + sourceTable);
+            if (sourceTable == null) {
+                Log.e(TAG, "importDb: No valid source table found in " + sourcedbfile);
+                db.execSQL("detach database sourceDB");
+                return -1;
+            }
+
+            Log.d(TAG, "importDb: Importing from source table '" + sourceTable + "' to '" + validatedImType + "'");
+            db.execSQL("insert into " + validatedImType + " select * from sourceDB." + sourceTable);
 
             // Update IM info if present in source
             Cursor imCursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name='" + Lime.DB_IM + "'", null);
             if (imCursor != null) {
                 if (imCursor.moveToFirst()) {
-                    db.execSQL("delete from " + Lime.DB_IM + " where code = '" + imtype + "'");
-                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
+                    db.execSQL("delete from " + Lime.DB_IM + " where code = '" + validatedImType + "'");
+                    // We need to ensure we only insert the relevant IM info if there are multiple
+                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM + " where code = '" + sourceTable + "'");
+                    // Update the code in our DB to match the requested imtype if it was different in source
+                    db.execSQL("update " + Lime.DB_IM + " set code = '" + validatedImType + "' where code = '" + sourceTable + "'");
                 }
                 imCursor.close();
             }
@@ -2875,7 +2894,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             unHoldDBConnection();
         }
 
-        return countMapping(imtype);
+        return countMapping(validatedImType);
     }
 
     /*
@@ -2883,6 +2902,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * table.
      * Jeremy '15,5,21
      */
+    public void deleteRelatedPhrase(String pword, String cword) {
+        if (!checkDBConnection())
+            return;
+        db.delete(Lime.DB_RELATED, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?", new String[] { pword, cword });
+    }
+
     public int backupUserRecords(final String table) {
         if (!checkDBConnection())
             return -1;

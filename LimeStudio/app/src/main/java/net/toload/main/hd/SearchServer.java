@@ -620,6 +620,10 @@ public class SearchServer {
     /*
      * Jeremy '15,7,12 synchronized the method called from LIMEService only
      */
+    public void deleteRelatedPhrase(String pword, String cword) {
+        dbadapter.deleteRelatedPhrase(pword, cword);
+    }
+
     public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
             throws RemoteException {
         return getMappingByCode(code, softkeyboard, getAllRecords, false);

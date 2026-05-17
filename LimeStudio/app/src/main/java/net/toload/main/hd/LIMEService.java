@@ -3784,6 +3784,26 @@ public class LIMEService extends InputMethodService implements
 
     }
 
+    public void removeCandidateManually(int index) {
+        if (mCandidateList != null && index >= 0 && index < mCandidateList.size()) {
+            Mapping mapping = mCandidateList.get(index);
+            if (mapping.isRelatedPhraseRecord()) {
+                
+                new androidx.appcompat.app.AlertDialog.Builder(mThemeContext)
+                    .setTitle("Delete Suggestion")
+                    .setMessage("Remove '" + mapping.getWord() + "' from related words list?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        SearchSrv.deleteRelatedPhrase(mapping.getPword(), mapping.getWord());
+                        mCandidateList.remove(index);
+                        setSuggestions(mCandidateList, false, "");
+                        Toast.makeText(this, "Removed", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            }
+        }
+    }
+
     public void pickCandidateManually(int index) {
         if (DEBUG)
             Log.i(TAG, "pickCandidateManually():"
