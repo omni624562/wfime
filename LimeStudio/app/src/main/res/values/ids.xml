@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2015, The LimeIME Open Source Project
+  -->
+<resources>
+    <item name="mode_normal" type="id" />
+    <item name="mode_url" type="id" />
+    <item name="mode_email" type="id" />
+    <item name="mode_im" type="id" />
+</resources>
