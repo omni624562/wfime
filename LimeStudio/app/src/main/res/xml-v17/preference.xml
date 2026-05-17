@@ -33,14 +33,6 @@
         android:key="lime_keyboard"
         android:summary=""
         android:title="@string/keyboard">
-        <ListPreference
-            android:defaultValue="0"
-            android:dialogTitle="@string/keyboard_themes"
-            android:entries="@array/keyboard_themes_options"
-            android:entryValues="@array/keyboard_themes_values"
-            android:key="keyboard_theme"
-            android:title="@string/keyboard_themes" />
-        />
         <net.toload.main.hd.limesettings.MultiListPreference
             android:key="keyboard_state"
             android:title="@string/keyboard_list"
@@ -160,13 +152,6 @@
         android:key="lime_im"
         android:summary=""
         android:title="@string/im">
-
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="smart_chinese_input"
-            android:summary="@string/preference_smart_chinese_input_message"
-            android:title="@string/preference_smart_chinese_input" />
-
 
         <SwitchPreferenceCompat
             android:defaultValue="false"

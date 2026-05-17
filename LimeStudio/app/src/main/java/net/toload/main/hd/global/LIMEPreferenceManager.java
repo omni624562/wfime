@@ -350,10 +350,6 @@ public class LIMEPreferenceManager {
 
     }
 
-    public boolean getSmartChineseInput() {
-        return sp.getBoolean("smart_chinese_input", false);
-    }
-
     public boolean getAutoChineseSymbol() {
 
         return sp.getBoolean("auto_chinese_symbol", false);
@@ -409,7 +405,7 @@ public class LIMEPreferenceManager {
     }
 
     public int getKeyboardTheme() {
-        return Integer.parseInt(sp.getString("keyboard_theme", "6"));
+        return 6;
     }
 
     public boolean getResetCacheFlag(boolean defaultvalue) {

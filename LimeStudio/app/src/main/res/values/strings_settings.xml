@@ -66,7 +66,7 @@
     <!-- TAB -->
     <string name="lime_setting_db">對應表管理</string>
     <string name="lime_setting_preference">喜好設定</string>
-    <string name="lime_setting_bluetooth">藍牙鍵盤</string>
+
 
 
     <!-- Preference -->
@@ -109,12 +109,8 @@
     <string name="enable_english_dictionary_physical_keyboard_summary">實體鍵盤使用英文輸入模式時，顯示英文建議字</string>
     <string name="im_reverse_lookup_list">輸入法字根反查</string>
     <string name="default_reverse_lookup_list">自建字根反查</string>
-    <string name="cj_reverse_lookup_list">倉頡字根反查</string>
-    <string name="scj_reverse_lookup_list">快倉字根反查</string>
     <string name="dayi_reverse_lookup_list">大易字根反查</string>
     <string name="bpmf_reverse_lookup_list">注音字根反查</string>
-    <string name="cj5_reverse_lookup_list">倉頡五代字根反查</string>
-    <string name="ecj_reverse_lookup_list">速成字根反查</string>
 
     <string name="reverse_lookup_notify">啟用字根反查跳出提示</string>
 
@@ -328,10 +324,6 @@
     <!-- Table Selection list -->
     <string-array name="table">
         <item>自建/電話</item>
-        <item>倉頡</item>
-        <item>快倉</item>
-        <item>倉頡五代</item>
-        <item>速成</item>
         <item>大易</item>
         <item>注音</item>
         <item>預載關聯字</item>
@@ -346,8 +338,6 @@
     <string name="l3_tab_initial_message">請點選 [預載資料庫] OR [空白資料庫] 鍵下載 LIME 資料庫或點選 [還原資料庫] 鍵由備份檔案中還原</string>
     <string name="l3_initial_btn_load_empty_db">空白資料庫</string>
     <string name="l3_initial_btn_load_phonetic_only_db">僅含注音資料庫</string>
-    <!--<string name="l3_initial_btn_load_phonetic_hs_only_db">僅含注音+華象直覺資料庫</string>
-    -->
     <string name="l3_initial_btn_load_preload_db">預載資料庫 \n注音, 大易, </string>
     <string name="l3_initial_btn_reset_db">重置資料庫</string>
     <string name="l3_initial_btn_store_to_sdcard">請問您要變更資料庫的儲存位置至 SDCARD 嗎? 在部份機種上可能會產生效能不佳的問題。</string>
@@ -358,11 +348,6 @@
     <string name="l3_tab_manage">輸入法管理</string>
     <string name="l3_manage_default">自建</string>
     <string name="l3_manage_phonetic">注音</string>
-    <string name="l3_manage_phonetic_adv">注音連打</string>
-    <string name="l3_manage_cj">倉頡</string>
-    <string name="l3_manage_cj5">倉頡五代</string>
-    <string name="l3_manage_ecj">速成</string>
-    <string name="l3_manage_scj">快倉</string>
     <string name="l3_manage_dayi">大易</string>
 
     <string name="l3_tab_preference">喜好設定</string>
@@ -387,40 +372,15 @@
     <string name="l3_initial_backup_end">資料庫備份完成</string>
     <string name="l3_initial_backup_confirm">您是否要備份資料庫?</string>
     <string name="l3_initial_backup_error">資料庫備份失敗</string>
+    <string name="l3_initial_cloud_backup_database">雲端備份</string>
+    <string name="l3_initial_cloud_restore_database">雲端還原</string>
     <string name="l3_initial_restore_database">還原資料庫</string>
     <string name="l3_initial_restore_error">還原失敗, 請確定備份檔案存在.</string>
     <string name="l3_initial_restore_confirm">您是否要還原資料庫?</string>
     <string name="l3_initial_restore_start">開始還原資料庫</string>
     <string name="l3_initial_restore_end">資料庫還原完成</string>
 
-    <string name="l3_initial_cloud_backup_database">Google Drive備份</string>
-    <string name="l3_initial_cloud_backup_start">開始Google Drive資料庫備份</string>
-    <string name="l3_initial_cloud_backup_end">Google Drive資料庫備份完成</string>
-    <string name="l3_initial_cloud_backup_confirm">您是否要備份資料庫至Google Drive?</string>
-    <string name="l3_initial_cloud_backup_error">資料庫不存在，無法進行備份.</string>
-    <string name="l3_initial_cloud_restore_database">Google Drive還原</string>
-    <string name="l3_initial_cloud_restore_error">Google Drive 還原失敗.</string>
-    <string name="l3_initial_cloud_restore_confirm">您是否要由 Google Drive還原資料庫?</string>
-    <string name="l3_initial_cloud_restore_start">開始還原Google Drive資料庫</string>
-    <string name="l3_initial_cloud_restore_end">Google Drive資料庫還原完成</string>
-    <string name="l3_initial_cloud_failed">Google Drive服務暫時無法連接，請稍後再試</string>
 
-    <string name="l3_initial_dropbox_backup_database">Dropbox 備份</string>
-    <string name="l3_initial_dropbox_downloading">Dropbox 備份檔下載中 </string>
-    <string name="l3_initial_dropbox_uploading">Dropbox 備份檔上傳中 </string>
-    <string name="l3_initial_dropbox_backup_start">開始Dropbox資料庫備份</string>
-    <string name="l3_initial_dropbox_backup_end">Dropbox資料庫備份完成</string>
-    <string name="l3_initial_dropbox_backup_confirm">您是否要備份資料庫至Dropbox?</string>
-    <string name="l3_initial_dropbox_backup_error">資料庫不存在，無法進行備份.</string>
-    <string name="l3_initial_dropbox_restore_database">Dropbox 還原</string>
-    <string name="l3_initial_dropbox_restore_error">Dropbox 備份不存在. 請先進行Dropbox 備份</string>
-    <string name="l3_initial_dropbox_restore_confirm">您是否要由Dropbox還原資料庫?</string>
-    <string name="l3_initial_dropbox_restore_start">開始還原Dropbox資料庫</string>
-    <string name="l3_initial_dropbox_restore_end">Dropbox資料庫還原完成</string>
-    <string name="l3_initial_dropbox_failed">Dropbox服務暫時無法連接，請稍後再試</string>
-    <string name="l3_initial_dropbox_canceled">Dropbox動作已取消，請稍後再試</string>
-    <string name="l3_initial_dropbox_authetication_failed">Dropbox認證失敗，請稍後再試</string>
-    <string name="l3_initial_dropbox_large">檔案過大無法上傳Dropbox</string>
 
 
     <string name="l3_im_setting_select_keyboard">請選擇輸入法鍵盤顯示</string>
@@ -439,71 +399,29 @@
     <string name="l3_im_download_from_dayi_start">開始下載 OpenVanilla 大易字根</string>
     <string name="l3_im_download_from_dayi_install">開始安裝 OpenVanilla 大易字根</string>
 
-    <string name="l3_im_download_from_phonetic_big5">安裝 OpenVanilla 注音字根 (BIG5字集)</string>
-
     <string name="l3_im_download_from_phonetic">安裝 OpenVanilla 注音字根</string>
     <string name="l3_im_download_from_phonetic_start">開始下載 OpenVanilla 注音字根</string>
     <string name="l3_im_download_from_phonetic_install">開始安裝 OpenVanilla 注音字根</string>
 
-    <string name="l3_im_download_from_phonetic_adv_big5">安裝注音連打字根 (BIG5字集)</string>
-
-    <string name="l3_im_download_from_phonetic_adv">安裝注音連打字根</string>
-    <string name="l3_im_download_from_phonetic_adv_start">開始下載注音連打字根</string>
-    <string name="l3_im_download_from_phonetic_adv_install">開始安裝注音連打字根</string>
-    <string name="l3_im_download_from_phonetic_adv_warning">檔案容量較大系統會需要比較長的時間進行資料匯入</string>
+    <string name="l3_im_download_from_phonetic_big5">安裝 OpenVanilla 注音字根 (Big5)</string>
+    <string name="l3_im_download_from_phonetic_adv">安裝 OpenVanilla 注音字根進階版</string>
+    <string name="l3_im_download_from_phonetic_adv_big5">安裝 OpenVanilla 注音字根進階版 (Big5)</string>
 
     <string name="l3_im_download_from_phonetic_cns">正體注音 CNS11643 字根，由於裝置及操作系統差異，部份字型可能無法正確顯示</string>
     <string name="l3_im_download_from_phonetic_cns_start">開始下載注音CNS11643字根</string>
     <string name="l3_im_download_from_phonetic_cns_install">開始安裝注音CNS11643字根</string>
     <string name="l3_im_download_from_phonetic_cns_warning">檔案容量較大系統會需要比較長的時間進行資料匯入</string>
 
-    <string name="l3_im_download_from_cj_cns">正體倉頡 CNS11643 字根，由於裝置及操作系統差異，部份字型可能無法正確顯示</string>
-    <string name="l3_im_download_from_cj_cns_start">開始下載倉頡CNS11643字根</string>
-    <string name="l3_im_download_from_cj_cns_install">開始安裝倉頡CNS11643字根</string>
-
-    <string name="l3_im_download_from_cj_big5">安裝倉頡字根 (BIG5字集)</string>
-    <string name="l3_im_download_from_cj">安裝倉頡字根</string>
-    <string name="l3_im_download_from_cj_start">開始下載倉頡字根</string>
-    <string name="l3_im_download_from_cj_install">開始安裝倉頡字根</string>
-
-    <string name="l3_im_download_from_cj5">安裝倉頡五代字根</string>
-    <string name="l3_im_download_from_cj5_start">開始下載倉頡五代字根</string>
-    <string name="l3_im_download_from_cj5_install">開始安裝倉頡五代字根</string>
-
-    <string name="l3_im_download_from_ecj">安裝簡易速成</string>
-    <string name="l3_im_download_from_ecj_start">開始下載簡易速成字根</string>
-    <string name="l3_im_download_from_ecj_install">開始安裝簡易速成字根</string>
-
-    <string name="l3_im_download_from_scj">安裝快倉字根</string>
-    <string name="l3_im_download_from_scj_start">開始下載快倉字根</string>
-    <string name="l3_im_download_from_scj_install">開始安裝快倉字根</string>
-
     <string name="l3_im_download_from_cjk_phonetic">安裝注音字根</string>
     <string name="l3_im_download_from_cjk_phonetic_start">開始下載注音字根</string>
     <string name="l3_im_download_from_cjk_phonetic_install">開始安裝注音字根</string>
-
-    <string name="l3_im_download_from_cjk_ecj">安裝速成字根</string>
-    <string name="l3_im_download_from_cjk_ecj_start">開始下載速成字根</string>
-    <string name="l3_im_download_from_cjk_ecj_install">開始安裝速成字根</string>
-
-    <string name="l3_im_download_from_cjk_cj">安裝倉頡字根</string>
-    <string name="l3_im_download_from_cjk_cj_start">開始下載倉頡字根</string>
-    <string name="l3_im_download_from_cjk_cj_install">開始安裝倉頡字根</string>
-
-    <string name="l3_im_download_from_cjk_hk_ecj">安裝速成香港字字根</string>
-    <string name="l3_im_download_from_cjk_hk_ecj_start">開始下載速成香港字字根</string>
-    <string name="l3_im_download_from_cjk_hk_ecj_install">開始安裝速成香港字字根</string>
-
-    <string name="l3_im_download_from_cjk_hk_cj">安裝倉頡香港字字根</string>
-    <string name="l3_im_download_from_cjk_hk_cj_start">開始下載倉頡香港字字根</string>
-    <string name="l3_im_download_from_cjk_hk_cj_install">開始安裝倉頡香港字字根</string>
 
     <string name="l3_im_database_error">資料庫操作錯誤，請稍待一會重新操作。</string>
 
     <string name="l3_database_loading">資料庫載入中，請稍待…</string>
     <string name="l3_database_not_exist">資料庫不存在，請先下載資料庫</string>
 
-    <string name="l3_tab_bluetooth">藍牙設定</string>
+
 
     <string name="l3_im_notice">為了節省記憶體使用空間，我們強烈建議您清空不常使用的輸入法字根，或使用空白資料庫來載入個別輸入法字根檔。</string>
 
@@ -523,27 +441,7 @@
     </string-array>
 
 
-    <string name="keyboard_themes">鍵盤樣式</string>
-    <string-array name="keyboard_themes_options">
-        <item>跟隨系統 (Material3)</item>
-        <item>淺色</item>
-        <item>深色</item>
-        <item>粉紅</item>
-        <item>科技藍</item>
-        <item>時尚紫</item>
-        <item>放鬆綠</item>
-    </string-array>
 
-
-    <string-array name="keyboard_themes_values">
-        <item>6</item>
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
 
 
     <string-array name="split_keyboard_options">
@@ -553,8 +451,7 @@
     </string-array>
 
 
-    <!-- AD Message -->
-    <string name="ad_zippy">藍芽鍵盤測試支援\nZIPPY BT-540 藍芽一對六鍵盤 - http://www.zippy.com (Sam Lin/sam_lin@hotmail.com)</string>
+
 
 
     <!-- Version 3 UI and Theme String Set -->

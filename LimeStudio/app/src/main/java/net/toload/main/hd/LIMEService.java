@@ -1760,7 +1760,7 @@ public class LIMEService extends InputMethodService implements
                         }
 
                         // Art '30,Sep,2011 when show related then clear composing
-                        if (currentSoftKeyboard.contains("wb") || selectedCandidate.isEmojiRecord()
+                        if (selectedCandidate.isEmojiRecord()
                                 || selectedCandidate.isChinesePunctuationSymbolRecord()) {
                             clearComposing(true);
                         }
@@ -2127,7 +2127,7 @@ public class LIMEService extends InputMethodService implements
         builder = new MaterialAlertDialogBuilder(themedContext);
 
         builder.setCancelable(true);
-        builder.setIcon(R.drawable.sym_keyboard_done_dark);
+        builder.setIcon(R.drawable.sym_keyboard_done_white);
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.setTitle(getResources().getString(R.string.ime_name));
 
@@ -2291,7 +2291,7 @@ public class LIMEService extends InputMethodService implements
         builder = new MaterialAlertDialogBuilder(this);
 
         builder.setCancelable(true);
-        builder.setIcon(R.drawable.sym_keyboard_done_light);
+        builder.setIcon(R.drawable.sym_keyboard_done_white);
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.setTitle(getResources().getString(R.string.han_convert_option_list));
         CharSequence[] items = getResources().getStringArray(R.array.han_convert_options);
@@ -2336,7 +2336,7 @@ public class LIMEService extends InputMethodService implements
         builder = new MaterialAlertDialogBuilder(this);
 
         builder.setCancelable(true);
-        builder.setIcon(R.drawable.sym_keyboard_done_light);
+        builder.setIcon(R.drawable.sym_keyboard_done_white);
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.setTitle(getResources().getString(R.string.keyboard_list));
 
@@ -2479,6 +2479,7 @@ public class LIMEService extends InputMethodService implements
             }
 
             // Art '30,Sep,2011 restrict the length of composing text for Stroke5
+            /*
             if (currentSoftKeyboard.contains("wb")) {
                 if (keyString.length() > 5) {
                     keyString = keyString.substring(0, 5);
@@ -2491,6 +2492,7 @@ public class LIMEService extends InputMethodService implements
                     getComposingDisplayString(keyString);
                 }
             }
+            */
 
             final String finalKeyString = keyString;
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
@@ -3413,62 +3415,19 @@ public class LIMEService extends InputMethodService implements
                 hasNumberMapping = mLIMEPref.getAllowNumberMapping();
                 hasSymbolMapping = mLIMEPref.getAllowSymoblMapping();
                 break;
-            case "cj":
-            case "scj":
-            case "cj5":
-            case "ecj":
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                hasNumberMapping = false;
-                hasSymbolMapping = false;
-                break;
             case "phonetic":
                 mKeyboardSwitcher.setKeyboardMode(activeIM,
                         LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
                 // Jeremy '11,6,18 ETEN 26 has no number mapping
-                boolean standardPhonetic = !(mLIMEPref.getPhoneticKeyboardType().equals("eten26")
-                        || mLIMEPref.getPhoneticKeyboardType().equals("hsu"));
+                boolean standardPhonetic = !(mLIMEPref.getPhoneticKeyboardType().equals("eten26"));
                 hasNumberMapping = standardPhonetic;
                 hasSymbolMapping = standardPhonetic;
                 break;
-            case "ez":
             case "dayi":
                 mKeyboardSwitcher.setKeyboardMode(activeIM,
                         LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
                 hasNumberMapping = true;
                 hasSymbolMapping = true;
-                break;
-            case "array10":
-                hasNumberMapping = true;
-                hasSymbolMapping = false;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                break;
-            case "array":
-                hasNumberMapping = true; // Jeremy '12,4,28 array 30 actually use number combination keys to enter
-                                         // symbols1
-
-                hasSymbolMapping = true;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                break;
-            case "wb":
-                hasNumberMapping = false;
-                hasSymbolMapping = true;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                break;
-            case "hs":
-                hasNumberMapping = true;
-                hasSymbolMapping = true;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                break;
-            case "pinyin":
-                hasNumberMapping = true;
-                hasSymbolMapping = false;
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
                 break;
             default:
                 mKeyboardSwitcher.setKeyboardMode(activeIM,
@@ -3881,10 +3840,12 @@ public class LIMEService extends InputMethodService implements
 
         }
 
+        /*
         if (currentSoftKeyboard.contains("wb")) {
             if (ic != null && mPredictionOn)
                 ic.setComposingText("", 0);
         }
+        */
 
     }
 

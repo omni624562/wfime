@@ -181,8 +181,6 @@ public class LIMEKeyboardSwitcher {
                 return "易";
             case "phonetic":
                 return "注";
-            case "hs":
-                return "麥";
             default:
                 return "中";
         }
@@ -305,12 +303,8 @@ public class LIMEKeyboardSwitcher {
             mMode = mode;
 
         String imcode = "";
-        if (!code.equals("wb") && !code.equals("hs")) {
-            if (imHm != null)
-                imcode = imHm.get(code);
-        } else {
-            imcode = code;
-        }
+        if (imHm != null)
+            imcode = imHm.get(code);
 
         KeyboardObj kobj = null;
 
@@ -325,30 +319,6 @@ public class LIMEKeyboardSwitcher {
                 if (kbHm != null)
                     kobj = kbHm.get(imcode);
             }
-        } else if (imcode.equals("wb")) {
-            // Art 28/Sep/2011 Force WB to use it special design keyboard layout
-            kobj = new KeyboardObj();
-            kobj.setCode("wb");
-            kobj.setName("筆順五碼");
-            kobj.setDescription("筆順五碼");
-            kobj.setType("phone");
-            kobj.setImage("wb_keyboard_preview");
-            kobj.setImkb("lime");
-            kobj.setImshiftkb("lime_shift");
-            kobj.setEngkb("lime");
-            kobj.setEngshiftkb("lime_shift");
-        } else if (imcode.equals("hs")) {
-            // Art 7/Feb/2012 HS Input Method
-            kobj = new KeyboardObj();
-            kobj.setCode("hs");
-            kobj.setName("華象直覺");
-            kobj.setDescription("華象直覺");
-            kobj.setType("phone");
-            kobj.setImage("hs_keyboard_preview");
-            kobj.setImkb("lime");
-            kobj.setImshiftkb("lime_shift");
-            kobj.setEngkb("lime");
-            kobj.setEngshiftkb("lime_shift");
         } else {
             if (kbHm != null)
                 kobj = kbHm.get(imcode);

@@ -70,22 +70,6 @@ fun SettingsScreen(
                 PreferenceCategory(title = stringResource(R.string.keyboard))
             }
 
-            // Keyboard Theme
-            item {
-                val themeEntries = stringArrayResource(R.array.keyboard_themes_values)
-                val themeLabels = stringArrayResource(R.array.keyboard_themes_options)
-                ListPreference(
-                    title = stringResource(R.string.keyboard_themes),
-                    summary = themeLabels.getOrNull(themeEntries.indexOf(uiState.keyboardTheme))
-                        ?: themeLabels.firstOrNull() ?: "",
-                    selectedValue = uiState.keyboardTheme,
-                    entries = themeEntries.toList(),
-                    labels = themeLabels.toList(),
-                    onValueSelected = { viewModel.setKeyboardTheme(it) },
-                    dialogTitle = stringResource(R.string.keyboard_themes)
-                )
-            }
-
             // Enable Emoji
             item {
                 SwitchPreference(
@@ -265,16 +249,6 @@ fun SettingsScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 PreferenceCategory(title = stringResource(R.string.im))
-            }
-
-            // Smart Chinese Input
-            item {
-                SwitchPreference(
-                    title = stringResource(R.string.preference_smart_chinese_input),
-                    summary = stringResource(R.string.preference_smart_chinese_input_message),
-                    checked = uiState.smartChineseInput,
-                    onCheckedChange = { viewModel.setSmartChineseInput(it) }
-                )
             }
 
             // Auto Chinese Symbol

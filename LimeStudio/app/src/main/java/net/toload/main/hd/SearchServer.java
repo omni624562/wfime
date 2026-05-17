@@ -144,9 +144,7 @@ public class SearchServer {
         }
 
         // Jeremy '15,6,21 set max code length
-        if (tablename.startsWith("cj")) {
-            maxCodeLength = 5;
-        } else if (tablename.equals("dayi")) {
+        if (tablename.equals("dayi")) {
             maxCodeLength = 3;
         } else {
             maxCodeLength = 4;

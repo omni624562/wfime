@@ -63,7 +63,6 @@ import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEProgressListener;
 import net.toload.main.hd.global.LIMEUtilities;
-import net.toload.main.hd.tools.Stemmer;
 
 public class LimeDB extends LimeSQLiteOpenHelper {
 
@@ -103,8 +102,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // for keyToChar
     private final static String DAYI_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
     private final static String DAYI_CHAR = "言|牛|目|四|王|門|田|米|足|金|石|山|一|工|糸|火|艸|木|口|耳|人|革|日|土|手|鳥|月|立|女|虫|心|水|鹿|禾|馬|魚|雨|力|舟|竹";
-    private final static String ARRAY_KEY = "qazwsxedcrfvtgbyhnujmik,ol.p;/";
-    private final static String ARRAY_CHAR = "1^|1-|1v|2^|2-|2v|3^|3-|3v|4^|4-|4v|5^|5-|5v|6^|6-|6v|7^|7-|7v|8^|8-|8v|9^|9-|9v|0^|0-|0v|";
     private final static String BPMF_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
     private final static String BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
     private final static String SHIFTED_NUMBERIC_KEY = "!@#$%^&*()";
@@ -113,41 +110,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private final static String SHIFTED_SYMBOL_KEY_REMAP = ",./-;='";
     private final static String ETEN_KEY = "abcdefghijklmnopqrstuvwxyz12347890-=;',./!@#$&*()<>?_+:\"";
     private final static String ETEN_KEY_REMAP = "81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg7634f0p;5tg/yh-";
-    // private final static String DESIREZ_ETEN_KEY_REMAP =
-    // "-`81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg/";
-    // private final static String MILESTONE_ETEN_KEY_REMAP =
-    // "-`81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg/";
-    // private final static String MILESTONE3_ETEN_KEY_REMAP =
-    // "-h81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg/";
-    private final static String DESIREZ_ETEN_DUALKEY = "o,ukm9iq5axesa"; // remapped from "qwer uiop,vlnm";
-    private final static String DESIREZ_ETEN_DUALKEY_REMAP = "7634f0p;thg/-h"; // remapped from "1234 7890;-/='";
-    private final static String CHACHA_ETEN_DUALKEY = ",uknljvcrx1?"; // remapped from "werszxchglb?"
-    private final static String CHACHA_ETEN_DUALKEY_REMAP = "7634f0p/g-hy"; // remapped from "1234789-/=';";
-    private final static String XPERIAPRO_ETEN_DUALKEY = "o,ukm9iqa52z"; // remapped from "qweruiopm,df";
-    private final static String XPERIAPRO_ETEN_DUALKEY_REMAP = "7634f0p;th/-"; // remapped from "12347890;'=-";
-    private final static String MILESTONE_ETEN_DUALKEY = "o,ukm9iq5aec"; // remapped from "qweruiop,mvh";
-    private final static String MILESTONE_ETEN_DUALKEY_REMAP = "7634f0p;th/-"; // remapped from "12347890;'=-";
-    private final static String MILESTONE2_ETEN_DUALKEY = "o,ukm9iq5aer"; // remapped from "qweruiop,mvg";
-    private final static String MILESTONE2_ETEN_DUALKEY_REMAP = "7634f0p;th/-";
-    private final static String MILESTONE3_ETEN_DUALKEY = "5aew"; // ",mvt"
-    private final static String MILESTONE3_ETEN_DUALKEY_REMAP = "th/-";
     private final static String ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ" +
             "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄓ|ㄔ|ㄕ|ㄥ|ㄦ|ㄗ|ㄘ";
-    private final static String DESIREZ_ETEN_CHAR = "@|`|ㄚ|ㄅ|ㄒ|ㄉ|(ㄧ/ˇ)|ㄈ|ㄐ|ㄏ|(ㄞ/ㄢ)|ㄖ|ㄎ|(ㄌ/ㄕ)|(ㄇ/ㄘ)|(ㄋ/ㄦ)|(ㄛ/ㄣ)|(ㄆ/ㄤ)|(ㄟ/˙)"
-            +
-            "|(ㄜ/ˋ)|ㄙ|ㄊ|(ㄩ/ㄑ)|(ㄍ/ㄥ)|(ㄝ/ˊ)|ㄨ|ㄡ|ㄠ" +
-            "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|(ㄓ/ㄗ)|ㄔ|ㄕ|?";
-    private final static String MILESTONE_ETEN_CHAR = "ㄦ|`|ㄚ|ㄅ|ㄒ|ㄉ|(ㄧ/ˇ)|ㄈ|ㄐ|(ㄏ/ㄦ)|(ㄞ/ㄢ)|ㄖ|ㄎ|ㄌ|(ㄇ/ㄘ)|ㄋ|(ㄛ/ㄣ)|(ㄆ/ㄤ)|(ㄟ/˙)"
-            +
-            "|(ㄜ/ˋ)|ㄙ|ㄊ|(ㄩ/ㄑ)|(ㄍ/ㄥ)|(ㄝ/ˊ)|ㄨ|ㄡ|ㄠ" +
-            "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|(ㄓ/ㄗ)|ㄔ|ㄕ|ㄥ";
-    private final static String MILESTONE2_ETEN_CHAR = "ㄦ|`|ㄚ|ㄅ|ㄒ|ㄉ|(ㄧ/ˇ)|ㄈ|(ㄐ/ㄦ)|ㄏ|(ㄞ/ㄢ)|ㄖ|ㄎ|ㄌ|(ㄇ/ㄘ)|ㄋ|(ㄛ/ㄣ)|(ㄆ/ㄤ)|(ㄟ/˙)"
-            +
-            "|(ㄜ/ˋ)|ㄙ|ㄊ|(ㄩ/ㄑ)|(ㄍ/ㄥ)|(ㄝ/ˊ)|ㄨ|ㄡ|ㄠ" +
-            "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|(ㄓ/ㄗ)|ㄔ|ㄕ|ㄥ";
-    private final static String MILESTONE3_ETEN_CHAR = "ㄦ|ㄘ|ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|(ㄇ/ㄘ)|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|(ㄊ/ㄦ)|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ"
-            +
-            "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|(ㄍ/ㄥ)|ㄦ|ㄗ|ㄘ|(ㄓ/ㄗ)|ㄔ|ㄕ|ㄥ";
     private final static String ETEN26_KEY = "qazwsxedcrfvtgbyhnujmikolp,.";
     private final static String ETEN26_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
     private final static String ETEN26_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
@@ -155,63 +119,71 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private final static String ETEN26_DUALKEY = "yhvewrscpaxqs3467";
     private final static String ETEN26_CHAR_INITIAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|ㄉ|(ㄕ/ㄒ)|ㄜ|ㄈ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ㄖ|(ㄇ/ㄢ)|ㄞ|ㄎ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
     private final static String ETEN26_CHAR_FINAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|˙|(ㄕ/ㄒ)|ㄜ|ˊ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ˇ|(ㄇ/ㄢ)|ㄞ|ˋ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
-    // Jeremy '12,5,31 use dual codes instead of initial/final remap for Hsu
-    // phonetic keyboard
-    private final static String HSU_KEY = "azwsxedcrfvtgbyhnujmikolpq,.";
-    private final static String HSU_KEY_REMAP_INITIAL = "hylnju2vbzfwe18csm5a9d.xq`<>";
-    private final static String HSU_KEY_REMAP_FINAL = "hyl7ju6vb3fwe18csm4a9d.xq`<>";
-    private final static String HSU_DUALKEY_REMAP = "g8t5r/-,okip0;n2z";
-    private final static String HSU_DUALKEY = "vbf45x/uhecsad763";
-    private final static String HSU_CHAR_INITIAL = "(ㄘ/ㄟ)|ㄗ|ㄠ|ㄙ|ㄨ|(ㄧ/ㄝ)|ㄉ|(ㄕ/ㄒ)|ㄖ|ㄈ|(ㄔ/ㄑ)|ㄊ|(ㄍ/ㄜ)|ㄅ|ㄚ|(ㄏ/ㄛ)|(ㄋ/ㄣ)|ㄩ|(ㄐ/ㄓ)|(ㄇ/ㄢ)|ㄞ|(ㄎ/ㄤ)|ㄡ|(ㄌ/ㄥ/ㄦ)|ㄆ|q|，|。";
-    private final static String HSU_CHAR_FINAL = "(ㄘ/ㄟ)|ㄗ|ㄠ|(ㄙ/˙)|ㄨ|(ㄧ/ㄝ)|(ㄉ/ˊ)|(ㄕ/ㄒ)|ㄖ|(ㄈ/ˇ)|(ㄔ/ㄑ)|ㄊ|(ㄍ/ㄜ)|ㄅ|ㄚ|(ㄏ/ㄛ)|(ㄋ/ㄣ)|ㄩ|(ㄐ/ㄓ/ˋ)|(ㄇ/ㄢ)|ㄞ|(ㄎ/ㄤ)|ㄡ|(ㄥ/ㄦ)|ㄆ|q|，|。";
-    private final static String DESIREZ_KEY = "@qazwsxedcrfvtgbyhnujmik?olp,.";
-    private final static String DESIREZ_BPMF_KEY_REMAP = "1qaz2wsedc5tg6yh4uj8ik9ol0;-,.";
-    private final static String DESIREZ_BPMF_DUALKEY_REMAP = "xrfvb3n7m,.p/";
-    private final static String DESIREZ_BPMF_DUALKEY = "sedcg6h4jkl0;";
-    private final static String DESIREZ_DUALKEY_REMAP = "1234567890;-/='";
-    private final static String DESIREZ_DUALKEY = "qwertyuiop,vlnm";
-    private final static String DESIREZ_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|(ㄋ/ㄌ)|(ㄍ/ㄐ)|(ㄎ/ㄑ)|(ㄏ/ㄒ)|ㄓ|ㄔ|(ㄕ/ㄖ)|(ˊ/ˇ)|ㄗ|(ㄘ/ㄙ)|(ˋ/˙)"
-            +
-            "|ㄧ|(ㄨ/ㄩ)|ㄚ|ㄛ|(ㄜ/ㄝ)|ㄞ|ㄟ|(ㄠ/ㄡ)|(ㄢ/ㄣ)|(ㄤ/ㄥ)|ㄦ|,|.";
-    private final static String DESIREZ_DAYI_CHAR = "@|(言/石)|人|心|(牛/山)|革|水|(目/一)|日|鹿|(四/工)|土|禾|(王/糸)|手|馬|(門/火)|鳥|魚|(田/艸)|月|雨|"
-            + "(米/木)|立|?|(足/口)|(女/竹)|(金/耳)|(力/虫)|舟";
-    private final static String CHACHA_KEY = "qazwsxedcrfvtgbyhnujmik?olp,.";
-    private final static String CHACHA_BPMF_KEY_REMAP = "qax2scedb5t3yh4uj68k.9o/0p-<>";
-    private final static String CHACHA_BPMF_DUALKEY_REMAP = "1zwrfvnmgi,7l;";
-    private final static String CHACHA_BPMF_DUALKEY = "qxsedchjt8k6op";
-    private final static String CHACHA_DUALKEY_REMAP = "123456789-/=';";
-    private final static String CHACHA_DUALKEY = "wersdfzxchglb?";
-    private final static String CHACHA_BPMF_CHAR = "(ㄅ/ㄆ)|(ㄇ/ㄈ)|ㄌ|ㄉ|(ㄊ/ㄋ)|(ㄏ/ㄒ)|(ㄍ/ㄐ)|(ㄎ/ㄑ)|ㄖ|ㄓ|(ㄔ/ㄕ)|ˇ|ㄗ|(ㄘ/ㄙ)|ˋ|ㄧ|(ㄨ/ㄩ)|(ˊ/˙)"
-            +
-            "|(ㄚ/ㄛ)|(ㄜ/ㄝ)|ㄡ|ㄞ|(ㄟ/ㄠ)|ㄥ|ㄢ|(ㄣ/ㄤ)|ㄦ|,|.";
-    private final static String XPERIAPRO_KEY = "qazZwsxXedcCrfvVtgbByhnNujmMik`~ol'\"pP!/@";
-    private final static String XPERIAPRO_BPMF_KEY_REMAP = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
-    // private final static String XPERIAPRO_BPMF_DUALKEY_REMAP = "";
-    // private final static String XPERIAPRO_BPMF_DUALKEY = "";
-    private final static String XPERIAPRO_DUALKEY_REMAP = "1234567890;,=-";
-    private final static String XPERIAPRO_DUALKEY = "qwertyuiopm.df";
-    private final static String MILESTONE_DUALKEY_REMAP = "1234567890;'=-";
-    private final static String MILESTONE_DUALKEY = "qwertyuiop,mhv";
-    private final static String MILESTONE_KEY = "qazwsxedcrfvtgbyhnujmik,ol.p/?";
-    private final static String MILESTONE_BPMF_CHAR = "(ㄅ/ㄆ)|ㄇ|ㄈ|(ㄉ/ㄊ)|ㄋ|ㄌ|(ㄍ/ˇ)|ㄎ|ㄏ|(ㄐ/ˋ)|ㄑ|ㄒ|(ㄓ/ㄔ)|ㄕ|ㄖ|(ㄗ/ˊ)|ㄘ|ㄙ|(ㄧ/˙)"
-            +
-            "|ㄨ|ㄩ|(ㄚ/ㄛ)|ㄜ|(ㄝ/ㄤ)|(ㄞ/ㄟ)|ㄠ|ㄡ|(ㄢ/ㄣ)|ㄥ|ㄦ";
-    // private final static String XPERIAPRO_BPMF_CHAR =; // Use BPMF_CHAR
-    private final static String MILESTONE_DAYI_CHAR = "(言/石)|人|心|(牛/山)|革|水|(目/一)|日|鹿|(四/工)|土|禾|(王/糸)|手|馬|(門/火)|鳥|魚|(田/艸)|月|雨|"
-            + "(米/木)|立|(力/虫)|(足/口)|女|舟|(金/耳)|竹|?";
-    private final static String MILESTONE2_DUALKEY_REMAP = "1234567890;'=-";
-    private final static String MILESTONE2_DUALKEY = "qwertyuiop,mgv";
-    private final static String MILESTONE3_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p/";
-    private final static String MILESTONE3_DUALKEY_REMAP = ";";
-    private final static String MILESTONE3_DUALKEY = ",";
-    private final static String MILESTONE3_BPMF_DUALKEY_REMAP = ";/-";
-    private final static String MILESTONE3_BPMF_DUALKEY = "l.p";
-    private final static String MILESTONE3_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|" +
-            "ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|(ㄠ/ㄤ)|(ㄡ/ㄥ)|ㄢ|ㄣ|ㄥ";
     private final static String MILESTONE3_DAYI_CHAR = "言|石|人|心|牛|山|革|水|目|一|日|鹿|四|工|土|禾|王|糸|手|馬|門|火|鳥|魚|田|" +
             "艸|月|雨|米|木|立|(力/虫)|足|口|女|舟|金|耳|竹";
-    private final static String CJ_KEY = "qwertyuiopasdfghjklzxcvbnm";
-    private final static String CJ_CHAR = "手|田|水|口|廿|卜|山|戈|人|心|日|尸|木|火|土|竹|十|大|中|重|難|金|女|月|弓|一";
+    private final static String MILESTONE3_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|" +
+            "ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|(ㄠ/ㄤ)|(ㄡ/ㄥ)|ㄢ|ㄣ|ㄥ";
+
+    private final static String CJ_KEY = "abcdefghijklmnopqrstuvwxyz";
+    private final static String CJ_CHAR = "日|月|金|木|水|火|土|竹|戈|十|大|中|一|弓|人|心|手|口|尸|廿|山|女|田|難|卜";
+    private final static String MILESTONE_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    private final static String MILESTONE_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    private final static String MILESTONE_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
+    private final static String MILESTONE_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    private final static String MILESTONE_DUALKEY = "yhvewrscpaxq3467";
+    private final static String MILESTONE_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String MILESTONE_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String MILESTONE_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String MILESTONE2_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    private final static String MILESTONE2_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    private final static String MILESTONE2_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    private final static String MILESTONE2_DUALKEY = "yhvewrscpaxq3467";
+    private final static String MILESTONE2_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String MILESTONE2_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String MILESTONE2_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String MILESTONE3_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    private final static String MILESTONE3_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    private final static String MILESTONE3_DUALKEY = "yhvewrscpaxq3467";
+    private final static String MILESTONE3_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String MILESTONE3_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String MILESTONE3_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String MILESTONE3_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String MILESTONE3_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String DESIREZ_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String DESIREZ_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    private final static String DESIREZ_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
+    private final static String DESIREZ_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    private final static String DESIREZ_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String DESIREZ_DUALKEY = "yhvewrscpaxq3467";
+    private final static String DESIREZ_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String DESIREZ_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String DESIREZ_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String DESIREZ_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String DESIREZ_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String CHACHA_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String CHACHA_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    private final static String CHACHA_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String CHACHA_DUALKEY = "yhvewrscpaxq3467";
+    private final static String CHACHA_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String CHACHA_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String CHACHA_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String CHACHA_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String CHACHA_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String XPERIAPRO_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String XPERIAPRO_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    private final static String XPERIAPRO_DUALKEY = "yhvewrscpaxq3467";
+    private final static String XPERIAPRO_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    private final static String XPERIAPRO_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String XPERIAPRO_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String HSU_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
+    private final static String HSU_CHAR_INITIAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
+    private final static String HSU_CHAR_FINAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
+    private final static String HSU_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
+    private final static String HSU_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
+    private final static String HSU_DUALKEY = "yhvewrscpaxqs3467";
+    private final static String HSU_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    private final static String ARRAY_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
+    private final static String ARRAY_CHAR = "1-|2-|3-|4-|5-|6-|7-|8-|9-|0-|1⇡|2⇡|3⇡|4⇡|5⇡|6⇡|7⇡|8⇡|9⇡|0⇡|1⇣|2⇣|3⇣|4⇣|5⇣|6⇣|7⇣|8⇣|9⇣|0⇣|？|＊|．|，|。";
 
     // ==================== Security: Table Name Validation ====================
     // SQL Injection Prevention: Whitelist of valid table names
@@ -221,28 +193,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         Lime.DB_TABLE_CUSTOM,
         Lime.DB_TABLE_DAYI,
         Lime.DB_TABLE_PHONETIC,
-        Lime.DB_TABLE_IMTABLE2,
-        Lime.DB_TABLE_IMTABLE3,
-        Lime.DB_TABLE_IMTABLE4,
-        Lime.DB_TABLE_IMTABLE5,
-        Lime.DB_TABLE_IMTABLE6,
-        Lime.DB_TABLE_IMTABLE7,
-        Lime.DB_TABLE_IMTABLE8,
-        Lime.DB_TABLE_IMTABLE9,
-        Lime.DB_TABLE_IMTABLE10,
         // System tables
         Lime.DB_IM,
         Lime.DB_RELATED,
         Lime.DB_KEYBOARD,
-        // Additional known IM types
-        "array", "cj", "ez", "hs", "hs1", "hs2", "hs3",
-        "dayiuni", "dayiunibig5", "dayiunip", "dayiunipbig5",
-        "phoneticbig5", "phoneticadv", "phoneticadvbig5", "phoneticcomplete", "phoneticcompletebig5",
         // Backup tables (with _user suffix)
-        "custom_user", "dayi_user", "phonetic_user",
-        "imtable2_user", "imtable3_user", "imtable4_user", "imtable5_user",
-        "imtable6_user", "imtable7_user", "imtable8_user", "imtable9_user", "imtable10_user",
-        "array_user", "cj_user", "ez_user", "hs_user"
+        "custom_user", "dayi_user", "phonetic_user"
     ));
 
     /**
@@ -322,8 +278,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private final Context mContext;
     // Cache for Related Score
     private final HashMap<String, Integer> relatedscore = new HashMap<>();
-    // Stemmer for English Dictionary
-    Stemmer stemmer = new Stemmer();
     private String lastCode = "";
     private String lastValidDualCodeList = "";
     private File filename = null;
@@ -463,7 +417,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         if (oldVersion < 102) {
             // Add code column index on main IM tables for faster prefix range queries
-            String[] imTables = {"phonetic", "custom", "dayi", "hs", "hs1", "hs2", "hs3"};
+            String[] imTables = {"phonetic", "custom", "dayi"};
             for (String tbl : imTables) {
                 try {
                     execSQL(dbin, "CREATE INDEX IF NOT EXISTS idx_" + tbl + "_code ON " + tbl + " (code)");
@@ -2883,11 +2837,43 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         deleteAll(imtype);
         holdDBConnection();
-        db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
-        db.execSQL("insert into " + imtype + " select * from sourceDB." + imtype);
-        db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
-        db.execSQL("detach database sourceDB");
-        unHoldDBConnection();
+        try {
+            db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
+
+            // Identify source table name - it might match imtype or be a generic 'im' or 'phonetic'
+            String sourceTable = imtype;
+            Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND (name='" + imtype + "' OR name='phonetic' OR name='dayi')", null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    sourceTable = cursor.getString(0);
+                }
+                cursor.close();
+            }
+
+            db.execSQL("insert into " + imtype + " select * from sourceDB." + sourceTable);
+
+            // Update IM info if present in source
+            Cursor imCursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name='" + Lime.DB_IM + "'", null);
+            if (imCursor != null) {
+                if (imCursor.moveToFirst()) {
+                    db.execSQL("delete from " + Lime.DB_IM + " where code = '" + imtype + "'");
+                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
+                }
+                imCursor.close();
+            }
+
+            db.execSQL("detach database sourceDB");
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                db.execSQL("detach database sourceDB");
+            } catch (Exception ex) {
+                // ignore
+            }
+            return -1;
+        } finally {
+            unHoldDBConnection();
+        }
 
         return countMapping(imtype);
     }
@@ -4076,62 +4062,34 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             return null;
         KeyboardObj kobj = null;
 
-        if (!keyboard.equals("wb") && !keyboard.equals("hs")) {
-            try {
-                Cursor cursor = db.query("keyboard", null, FIELD_CODE + " = ?", new String[] { keyboard }, null, null,
-                        null, null);
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        kobj = new KeyboardObj();
-                        kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                        kobj.setName(cursor.getString(cursor.getColumnIndex("name")));
-                        kobj.setDescription(cursor.getString(cursor.getColumnIndex("desc")));
-                        kobj.setType(cursor.getString(cursor.getColumnIndex("type")));
-                        kobj.setImage(cursor.getString(cursor.getColumnIndex("image")));
-                        kobj.setImkb(cursor.getString(cursor.getColumnIndex("imkb")));
-                        kobj.setImshiftkb(cursor.getString(cursor.getColumnIndex("imshiftkb")));
-                        kobj.setEngkb(cursor.getString(cursor.getColumnIndex("engkb")));
-                        kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndex("engshiftkb")));
-                        kobj.setSymbolkb(cursor.getString(cursor.getColumnIndex("symbolkb")));
-                        kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndex("symbolshiftkb")));
-                        kobj.setDefaultkb(cursor.getString(cursor.getColumnIndex("defaultkb")));
-                        kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndex("defaultshiftkb")));
-                        kobj.setExtendedkb(cursor.getString(cursor.getColumnIndex("extendedkb")));
-                        kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndex("extendedshiftkb")));
-                    }
-
-                    cursor.close();
+        try {
+            Cursor cursor = db.query("keyboard", null, FIELD_CODE + " = ?", new String[]{keyboard}, null, null,
+                    null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    kobj = new KeyboardObj();
+                    kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
+                    kobj.setName(cursor.getString(cursor.getColumnIndex("name")));
+                    kobj.setDescription(cursor.getString(cursor.getColumnIndex("desc")));
+                    kobj.setType(cursor.getString(cursor.getColumnIndex("type")));
+                    kobj.setImage(cursor.getString(cursor.getColumnIndex("image")));
+                    kobj.setImkb(cursor.getString(cursor.getColumnIndex("imkb")));
+                    kobj.setImshiftkb(cursor.getString(cursor.getColumnIndex("imshiftkb")));
+                    kobj.setEngkb(cursor.getString(cursor.getColumnIndex("engkb")));
+                    kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndex("engshiftkb")));
+                    kobj.setSymbolkb(cursor.getString(cursor.getColumnIndex("symbolkb")));
+                    kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndex("symbolshiftkb")));
+                    kobj.setDefaultkb(cursor.getString(cursor.getColumnIndex("defaultkb")));
+                    kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndex("defaultshiftkb")));
+                    kobj.setExtendedkb(cursor.getString(cursor.getColumnIndex("extendedkb")));
+                    kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndex("extendedshiftkb")));
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                cursor.close();
             }
-        } else if (keyboard.equals("wb")) {
-            kobj = new KeyboardObj();
-            kobj.setCode("wb");
-            kobj.setName("筆順五碼");
-            kobj.setDescription("筆順五碼輸入法鍵盤");
-            kobj.setType("phone");
-            kobj.setImage("wb_keyboard_preview");
-            kobj.setImkb("lime_wb");
-            kobj.setImshiftkb("lime_wb");
-            kobj.setEngkb("lime_abc");
-            kobj.setEngshiftkb("lime_abc_shift");
-            kobj.setSymbolkb("symbols");
-            kobj.setSymbolshiftkb("symbols_shift");
-        } else if (keyboard.equals("hs")) {
-            kobj = new KeyboardObj();
-            kobj.setCode("hs");
-            kobj.setName("華象直覺");
-            kobj.setDescription("華象直覺輸入法鍵盤");
-            kobj.setType("phone");
-            kobj.setImage("hs_keyboard_preview");
-            kobj.setImkb("lime_hs");
-            kobj.setImshiftkb("lime_hs_shift");
-            kobj.setEngkb("lime_abc");
-            kobj.setEngshiftkb("lime_abc_shift");
-            kobj.setSymbolkb("symbols");
-            kobj.setSymbolshiftkb("symbols_shift");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return kobj;

@@ -40,7 +40,6 @@ import net.toload.main.hd.global.LIMEPreferenceManager
  */
 data class SettingsUiState(
     // Keyboard preferences
-    val keyboardTheme: String = "0",
     val enableEmoji: Boolean = false,
     val emojiPosition: String = "3",
     val persistentLanguageMode: Boolean = false,
@@ -57,7 +56,6 @@ data class SettingsUiState(
     val switchEnglishModeShift: Boolean = true,
 
     // IM preferences
-    val smartChineseInput: Boolean = false,
     val autoChineseSymbol: Boolean = false,
     val disablePhysicalSelkey: Boolean = false,
     val autoCommit: String = "0",
@@ -108,7 +106,6 @@ class SettingsViewModel(
             _uiState.update {
                 SettingsUiState(
                     // Keyboard
-                    keyboardTheme = preferenceManager.getKeyboardTheme().toString(),
                     enableEmoji = preferenceManager.getParameterBoolean("enable_emoji", false),
                     emojiPosition = preferenceManager.getParameterString("enable_emoji_position", "3"),
                     persistentLanguageMode = preferenceManager.getParameterBoolean("persistent_language_mode", false),
@@ -125,7 +122,6 @@ class SettingsViewModel(
                     switchEnglishModeShift = preferenceManager.getParameterBoolean("switch_english_mode_shift", true),
 
                     // IM
-                    smartChineseInput = preferenceManager.getParameterBoolean("smart_chinese_input", false),
                     autoChineseSymbol = preferenceManager.getParameterBoolean("auto_chinese_symbol", false),
                     disablePhysicalSelkey = preferenceManager.getParameterBoolean("disable_physical_selkey", false),
                     autoCommit = preferenceManager.getParameterString("auto_commit", "0"),
@@ -152,11 +148,6 @@ class SettingsViewModel(
     }
 
     // Keyboard preference setters
-
-    fun setKeyboardTheme(value: String) {
-        preferenceManager.setParameter("keyboard_theme", value.toIntOrNull() ?: 0)
-        _uiState.update { it.copy(keyboardTheme = value) }
-    }
 
     fun setEnableEmoji(value: Boolean) {
         preferenceManager.setParameter("enable_emoji", value)
@@ -229,11 +220,6 @@ class SettingsViewModel(
     }
 
     // IM preference setters
-
-    fun setSmartChineseInput(value: Boolean) {
-        preferenceManager.setParameter("smart_chinese_input", value)
-        _uiState.update { it.copy(smartChineseInput = value) }
-    }
 
     fun setAutoChineseSymbol(value: Boolean) {
         preferenceManager.setParameter("auto_chinese_symbol", value)

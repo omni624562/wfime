@@ -49,20 +49,6 @@ public class LIME {
     public static final String DATABASE_SOURCE_PHONETIC = "phonetic.lime";
     public static final String DATABASE_SOURCE_PHONETIC_CNS = "bopomofo.cin";
     public static final String DATABASE_SOURCE_PHONETICADV = "phonetic_adv_CJK.lime";
-    public static final String DATABASE_SOURCE_CJ = "cj.lime";
-    public static final String DATABASE_SOURCE_CJ_CNS = "cangjie.cin";
-    public static final String DATABASE_SOURCE_CJ5 = "cj5.lime";
-    public static final String DATABASE_SOURCE_ECJ = "ecj.lime";
-    public static final String DATABASE_SOURCE_SCJ = "scj.lime";
-    public static final String DATABASE_SOURCE_ARRAY = "array.lime";
-    public static final String DATABASE_SOURCE_ARRAY10 = "array10.lime";
-    public static final String DATABASE_SOURCE_WB = "stroke5.cin";
-    public static final String DATABASE_SOURCE_EZ = "ez.lime";
-    public static final String DATABASE_SOURCE_PINYIN_BIG5 = "pinyinbig5.cin";
-    public static final String DATABASE_SOURCE_PINYIN_GB = "pinyin.cin";
-    public static final String DATABASE_SOURCE_PINYIN_LIME = "pinyin_CJK.cin";
-    public static final String DATABASE_SOURCE_CJ_LIME = "cj_CJK.lime";
-    public static final String DATABASE_SOURCE_ECJ_LIME = "ecj_CJK.lime";
     public static final String DATABASE_SOURCE_PHONETIC_LIME = "phonetic_CJK.lime";
     public static final String DATABASE_SOURCE_FILENAME = "lime.zip";
     public static final String DATABASE_SOURCE_FILENAME_EMPTY = "empty.zip";
@@ -81,12 +67,9 @@ public class LIME {
     public static final String DATABASE_DOWNLOAD_STATUS = "database_download_status";
 
     // ==================== IM Status Keys ====================
-    public static final String IM_CJ_STATUS = "im_cj_status";
-    public static final String IM_SCJ_STATUS = "im_scj_status";
     public static final String IM_PHONETIC_STATUS = "im_phonetic_status";
     public static final String IM_DAYI_STATUS = "im_dayi_status";
     public static final String IM_CUSTOM_STATUS = "im_custom_status";
-    public static final String IM_EZ_STATUS = "im_ez_status";
     public static final String IM_MAPPING_FILENAME = "im_mapping_filename";
     public static final String IM_MAPPING_VERSION = "im_mapping_version";
     public static final String IM_MAPPING_TOTAL = "im_mapping_total";

@@ -65,7 +65,7 @@ public class Lime {
 
     // ==================== News ====================
     public static final String LIME_NEWS_CONTENT = "lime_news_content";
-    public static final String LIME_NEWS_CONTENT_URL = "https://github.com/lime-ime/limeime/raw/master/Resources/Message/content.html";
+    public static final String LIME_NEWS_CONTENT_URL = "https://github.com/omni624562/nanime-main/raw/master/Resources/Message/content.html";
 
     // ==================== File Constants ====================
     public static final String separator = java.io.File.separator;
@@ -74,21 +74,18 @@ public class Lime {
 
     // ==================== Download URLs ====================
     // Primary: GitHub (reliable)
-    public static final String DATABASE_CLOUD_URL_BASED = "https://github.com/lime-ime/limeime/raw/master/Database/";
+    public static final String DATABASE_CLOUD_URL_BASED = "https://github.com/omni624562/nanime-main/raw/main/Database/";
 
     // Phonetic IM downloads
-    public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE_BIG5 = DATABASE_CLOUD_URL_BASED
-            + "phoneticcompletebig5.zip";
-    public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE = DATABASE_CLOUD_URL_BASED + "phoneticcomplete.zip";
-    public static final String DATABASE_CLOUD_IM_PHONETIC_BIG5 = DATABASE_CLOUD_URL_BASED + "phoneticbig5.zip";
     public static final String DATABASE_CLOUD_IM_PHONETIC = DATABASE_CLOUD_URL_BASED + "phonetic.zip";
+    public static final String DATABASE_CLOUD_IM_PHONETIC_BIG5 = DATABASE_CLOUD_URL_BASED + "phoneticbig5.zip";
+    public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE = DATABASE_CLOUD_URL_BASED + "phoneticcomplete.zip";
+    public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE_BIG5 = DATABASE_CLOUD_URL_BASED + "phoneticcompletebig5.zip";
     public static final String DATABASE_CLOUD_IM_PHONETIC_KEYBOARD = "phonetic";
 
     // Dayi IM downloads
     public static final String DATABASE_CLOUD_IM_DAYI = DATABASE_CLOUD_URL_BASED + "dayi.zip";
-    public static final String DATABASE_CLOUD_IM_DAYIUNI_BIG5 = DATABASE_CLOUD_URL_BASED + "dayiunibig5.zip";
     public static final String DATABASE_CLOUD_IM_DAYIUNI = DATABASE_CLOUD_URL_BASED + "dayiuni.zip";
-    public static final String DATABASE_CLOUD_IM_DAYIUNIP_BIG5 = DATABASE_CLOUD_URL_BASED + "dayiunipbig5.zip";
     public static final String DATABASE_CLOUD_IM_DAYIUNIP = DATABASE_CLOUD_URL_BASED + "dayiunip.zip";
     public static final String DATABASE_CLOUD_IM_DAYI_KEYBOARD = "dayi";
 
@@ -97,38 +94,27 @@ public class Lime {
     public static final String DATABASE_CLOUD_IM_HS_V1 = DATABASE_CLOUD_URL_BASED + "hs1.zip";
     public static final String DATABASE_CLOUD_IM_HS_V2 = DATABASE_CLOUD_URL_BASED + "hs2.zip";
     public static final String DATABASE_CLOUD_IM_HS_V3 = DATABASE_CLOUD_URL_BASED + "hs3.zip";
-    public static final String DATABASE_CLOUD_IM_HS_KEYBOARD = "hs";
 
     // ==================== Database Tables ====================
-    public static final String DB_TABLE_IMTABLE2 = "imtable2";
-    public static final String DB_TABLE_IMTABLE3 = "imtable3";
-    public static final String DB_TABLE_IMTABLE4 = "imtable4";
-    public static final String DB_TABLE_IMTABLE5 = "imtable5";
-    public static final String DB_TABLE_IMTABLE6 = "imtable6";
-    public static final String DB_TABLE_IMTABLE7 = "imtable7";
-    public static final String DB_TABLE_IMTABLE8 = "imtable8";
-    public static final String DB_TABLE_IMTABLE9 = "imtable9";
-    public static final String DB_TABLE_IMTABLE10 = "imtable10";
     public static final String DB_TABLE_CUSTOM = "custom";
     public static final String DB_TABLE_DAYI = "dayi";
     public static final String DB_TABLE_PHONETIC = "phonetic";
+    public static final String DB_TABLE_EZ = "ez";
 
     // ==================== IM Type Names ====================
     public static final String IM_CUSTOM = "custom";
     public static final String IM_DAYI = "dayi";
     public static final String IM_DAYIUNI = "dayiuni";
-    public static final String IM_DAYIUNI_BIG5 = "dayiunibig5";
     public static final String IM_DAYIUNIP = "dayiunip";
-    public static final String IM_DAYIUNIP_BIG5 = "dayiunipbig5";
+    public static final String IM_PHONETIC = "phonetic";
+    public static final String IM_PHONETIC_BIG5 = "phonetic_big5";
+    public static final String IM_PHONETIC_ADV = "phonetic_adv";
+    public static final String IM_PHONETIC_ADV_BIG5 = "phonetic_adv_big5";
     public static final String IM_EZ = "ez";
     public static final String IM_HS = "hs";
-    public static final String IM_HS_V1 = "hs1";
-    public static final String IM_HS_V2 = "hs2";
-    public static final String IM_HS_V3 = "hs3";
-    public static final String IM_PHONETIC = "phonetic";
-    public static final String IM_PHONETIC_ADV = "phoneticadv";
-    public static final String IM_PHONETIC_BIG5 = "phoneticbig5";
-    public static final String IM_PHONETIC_ADV_BIG5 = "phoneticadvbig5";
+    public static final String IM_HS_V1 = "hs_v1";
+    public static final String IM_HS_V2 = "hs_v2";
+    public static final String IM_HS_V3 = "hs_v3";
 
     // ==================== Database Columns ====================
     public static final String DB_COLUMN_ID = "_id";
@@ -198,16 +184,12 @@ public class Lime {
     // ==================== Preference Keys ====================
     public static final String DB_CHECK_RELATED_USERSCORE = "db_user_score_check";
     public static final String DATABASE_DOWNLOAD_STATUS = "database_download_status";
-    public static final String ACCOUNT_PREFS_NAME = "prefs";
-    public static final String ACCESS_KEY_NAME = "ACCESS_KEY";
-    public static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
 
     // ==================== Backup/Restore ====================
     public static final String BACKUP = "backup";
     public static final String RESTORE = "restore";
     public static final String LOCAL = "LOCAL";
     public static final String DEVICE = "device";
-    public static final int GOOGLE_RETRIEVE_MAXIMUM = 500;
 
     // ==================== File Types ====================
     public static final String SHARE_TYPE_TXT = "text/plain";

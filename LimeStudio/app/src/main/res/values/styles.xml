@@ -75,8 +75,8 @@
         <item name="searchKeyIcon">@drawable/sym_keyboard_search_white</item>
         <item name="doneKeyIcon">@drawable/sym_keyboard_done_white</item>
         <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_white</item>
-        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift_pink</item>
-        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted_pink</item>
+        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift</item>
+        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted</item>
         <item name="spaceKeyTextColor">@color/color_white</item>
         <item name="spaceKeySlidingLeftArrow">@drawable/sym_keyboard_previous_white</item>
         <item name="spaceKeySlidingRightArrow">@drawable/sym_keyboard_next_white</item>
@@ -89,8 +89,8 @@
         <item name="searchKeyIcon">@drawable/sym_keyboard_search_white</item>
         <item name="doneKeyIcon">@drawable/sym_keyboard_done_white</item>
         <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_white</item>
-        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift_tech_blue</item>
-        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted_tech_blue</item>
+        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift</item>
+        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted</item>
         <item name="spaceKeyTextColor">@color/color_white</item>
         <item name="spaceKeySlidingLeftArrow">@drawable/sym_keyboard_previous_white</item>
         <item name="spaceKeySlidingRightArrow">@drawable/sym_keyboard_next_white</item>
@@ -118,92 +118,92 @@
         <item name="searchKeyIcon">@drawable/sym_keyboard_search_white</item>
         <item name="doneKeyIcon">@drawable/sym_keyboard_done_white</item>
         <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_white</item>
-        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift_relax_green</item>
-        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted_relax_green</item>
+        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift</item>
+        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted</item>
         <item name="spaceKeyTextColor">@color/color_white</item>
         <item name="spaceKeySlidingLeftArrow">@drawable/sym_keyboard_previous_white</item>
         <item name="spaceKeySlidingRightArrow">@drawable/sym_keyboard_next_white</item>
     </style>
 
     <style name="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_light</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_light</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.Light" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_light</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_light</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.Dark" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_dark</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_dark</item>
-        <item name="actionKeyBackground">@drawable/btn_keyboard_action_key_dark</item>
-        <item name="functionalKeyBackground">@drawable/btn_flat_keyboard_functional_key_dark</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="actionKeyBackground">@drawable/btn_keyboard_action_key_material3</item>
+        <item name="functionalKeyBackground">@drawable/btn_flat_keyboard_functional_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.Pink" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_pink</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_pink</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.TechBlue" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_tech_blue</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_tech_blue</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.FashionPurple" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_fashion_purple</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_fashion_purple</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardLayout.RelaxGreen" parent="LIMEKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_background_relax_green</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_relax_green</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_light</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_light</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.Light" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_light</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_light</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.Dark" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_dark</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_dark</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.Pink" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_pink</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_pink</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.TechBlue" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_tech_blue</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_tech_blue</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.FashionPurple" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_fashion_purple
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3
         </item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_fashion_purple</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEPopupKeyboardLayout.RelaxGreen" parent="LIMEPopupKeyboardLayout">
-        <item name="android:background">@drawable/keyboard_popup_panel_background_relax_green</item>
-        <item name="android:keyBackground">@drawable/btn_keyboard_key_relax_green</item>
+        <item name="android:background">@drawable/keyboard_popup_panel_background_material3</item>
+        <item name="android:keyBackground">@drawable/btn_keyboard_key_material3</item>
     </style>
 
     <style name="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_light</item>
-        <item name="android:background">@drawable/keyboard_background_light</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_light</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="android:background">@drawable/keyboard_background_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
         <item name="keyTextSize">@dimen/key_text_size</item>
-        <item name="popupHint">@drawable/hint_popup</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_light</item>
         <item name="keyTextColorPressed">@color/color_common_green_hl</item>
@@ -232,9 +232,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.Light" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_light</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_light</item>
-        <item name="popupHint">@drawable/hint_popup</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_light</item>
         <item name="keyTextColorPressed">@color/color_common_green_hl</item>
@@ -248,9 +248,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.Dark" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_dark</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_dark</item>
-        <item name="popupHint">@drawable/hint_popup_dark</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_dark</item>
         <item name="keyTextColorPressed">@color/color_common_green_hl</item>
@@ -263,9 +263,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.Pink" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_pink</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_pink</item>
-        <item name="popupHint">@drawable/hint_popup_dark</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/color_white</item>
         <item name="keyTextColorPressed">@color/color_white</item>
@@ -278,9 +278,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.TechBlue" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_tech_blue</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_tech_blue</item>
-        <item name="popupHint">@drawable/hint_popup_dark</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_tech_blue</item>
         <item name="keyTextColorPressed">@color/color_white</item>
@@ -293,9 +293,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.FashionPurple" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_fashion_purple</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_fashion_purple</item>
-        <item name="popupHint">@drawable/hint_popup_dark</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_fashion_purple</item>
         <item name="keyTextColorPressed">@color/color_white</item>
@@ -308,9 +308,9 @@
     </style>
 
     <style name="LIMEKeyboardBaseView.RelaxGreen" parent="LIMEKeyboardBaseView">
-        <item name="keyPreviewLayout">@layout/key_preview_relax_green</item>
-        <item name="keyBackground">@drawable/btn_keyboard_key_relax_green</item>
-        <item name="popupHint">@drawable/hint_popup_dark</item>
+        <item name="keyPreviewLayout">@layout/key_preview_material3</item>
+        <item name="keyBackground">@drawable/btn_keyboard_key_material3</item>
+        <item name="popupHint">@drawable/hint_popup_material3</item>
 
         <item name="keyTextColorNormal">@color/foreground_relax_green</item>
         <item name="keyTextColorPressed">@color/color_white</item>
@@ -331,14 +331,14 @@
         <item name="drawableArrowUp">@drawable/sym_keyboard_up_light</item>
         <item name="drawableArrowDown">@drawable/sym_keyboard_down_light</item>
         <item name="drawableArrowRight">@drawable/sym_keyboard_right_light</item>
-        <item name="drawableArrowLeft">@drawable/sym_keyboard_left_light</item>>
+        <item name="drawableArrowLeft">@drawable/sym_keyboard_left_light</item>
     </style>
 
     <style name="LIMEBaseKeyboard.Light" parent="LIMEBaseKeyboard">
         <item name="drawableArrowUp">@drawable/sym_keyboard_up_light</item>
         <item name="drawableArrowDown">@drawable/sym_keyboard_down_light</item>
         <item name="drawableArrowRight">@drawable/sym_keyboard_right_light</item>
-        <item name="drawableArrowLeft">@drawable/sym_keyboard_left_light</item>>
+        <item name="drawableArrowLeft">@drawable/sym_keyboard_left_light</item>
     </style>
 
     <style name="LIMEBaseKeyboard.Dark" parent="LIMEBaseKeyboard">

@@ -301,7 +301,7 @@ public class SetupImLoadDialog extends DialogFragment {
                     btnSetupImDialogLoad2
                             .setText(getResources().getString(R.string.l3_im_download_from_phonetic) + " (34,838)");
                     btnSetupImDialogLoad2
-                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV));
+                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC));
                     btnSetupImDialogLoad3.setText(
                             getResources().getString(R.string.l3_im_download_from_phonetic_adv_big5) + " (76,122)");
                     btnSetupImDialogLoad3.setOnClickListener(
