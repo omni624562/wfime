@@ -1,0 +1,165 @@
+
+====== dayiunip.db ======
+
+  [含簡體字詞條] 29 條:
+    id=85026, word=万
+    id=82573, word=东
+    id=96659, word=义
+    id=100386, word=乐
+    id=95526, word=乱
+    id=79571, word=亿
+    id=79468, word=从
+    id=79255, word=们
+    id=79474, word=众
+    id=89079, word=写
+    id=79592, word=华
+    id=88783, word=实
+    id=104039, word=将
+    id=85134, word=层
+    id=85005, word=属
+    id=80920, word=广
+    id=104816, word=总
+    id=104731, word=数
+    id=98113, word=汉
+    id=87102, word=爱
+    id=95940, word=种
+    id=102201, word=设
+    id=101941, word=证
+    id=102354, word=话
+    id=103909, word=转
+    id=104115, word=软
+    id=101463, word=针
+    id=96992, word=难
+    id=80347, word=马
+
+  [大陸特有用語] 19 條:
+    id=164667, word=人民幣
+    id=181080, word=人民日報
+    id=118031, word=信息
+    id=124366, word=兩會
+    id=180065, word=公共汽車
+    id=135486, word=初中
+    id=134757, word=市委
+    id=165290, word=摩托車
+    id=125781, word=政協
+    id=170074, word=新華社
+    id=173814, word=普通話
+    id=143456, word=書記
+    id=145698, word=省委
+    id=142707, word=硬件
+    id=113488, word=縣委
+    id=194882, word=計算機中心
+    id=114893, word=軟件
+    id=138111, word=電臺
+    id=135589, word=高考
+
+====== phoneticcomplete.db ======
+
+  [含簡體字詞條] 53 條:
+    id=799101, word=万
+    id=795050, word=东
+    id=816689, word=义
+    id=816711, word=义
+    id=816750, word=义
+    id=818829, word=义
+    id=809707, word=乐
+    id=824325, word=乐
+    id=823920, word=乱
+    id=817537, word=亿
+    id=818831, word=亿
+    id=807887, word=从
+    id=807949, word=从
+    id=826226, word=从
+    id=826295, word=从
+    id=799528, word=们
+    id=799547, word=们
+    id=799558, word=们
+    id=797216, word=众
+    id=811710, word=众
+    id=819661, word=众
+    id=820524, word=写
+    id=820582, word=写
+    id=801561, word=华
+    id=806819, word=实
+    id=805352, word=将
+    id=813893, word=将
+    id=813947, word=将
+    id=807616, word=层
+    id=797341, word=属
+    id=807074, word=属
+    id=818350, word=广
+    id=826231, word=总
+    id=826270, word=总
+    id=807075, word=数
+    id=807124, word=数
+    id=807234, word=数
+    id=808021, word=数
+    id=811127, word=数
+    id=800759, word=汉
+    id=798148, word=爱
+    id=797191, word=种
+    id=797208, word=种
+    id=816876, word=种
+    id=807344, word=设
+    id=796403, word=证
+    id=801529, word=话
+    id=797294, word=转
+    id=797319, word=转
+    id=800243, word=软
+    id=797929, word=针
+    id=815236, word=难
+    id=798980, word=马
+
+  [大陸特有用語] 21 條:
+    id=841442, word=人大
+    id=841444, word=人大
+    id=841443, word=人大
+    id=843012, word=人民幣
+    id=843013, word=人民幣
+    id=839626, word=信息
+    id=839625, word=信息
+    id=839627, word=信息
+    id=839624, word=信息
+    id=865394, word=初中
+    id=865393, word=初中
+    id=878388, word=新華社
+    id=878387, word=新華社
+    id=862937, word=書記
+    id=862936, word=書記
+    id=855287, word=軟件
+    id=855286, word=軟件
+    id=863635, word=電臺
+    id=863636, word=電臺
+    id=850832, word=高考
+    id=850833, word=高考
+
+====== phoneticcompletebig5.db ======
+
+  [含簡體字詞條] 4 條:
+    id=799101, word=万
+    id=797191, word=种
+    id=797208, word=种
+    id=816876, word=种
+
+  [大陸特有用語] 21 條:
+    id=841442, word=人大
+    id=841444, word=人大
+    id=841443, word=人大
+    id=843012, word=人民幣
+    id=843013, word=人民幣
+    id=839626, word=信息
+    id=839625, word=信息
+    id=839627, word=信息
+    id=839624, word=信息
+    id=865394, word=初中
+    id=865393, word=初中
+    id=878388, word=新華社
+    id=878387, word=新華社
+    id=862937, word=書記
+    id=862936, word=書記
+    id=855287, word=軟件
+    id=855286, word=軟件
+    id=863635, word=電臺
+    id=863636, word=電臺
+    id=850832, word=高考
+    id=850833, word=高考

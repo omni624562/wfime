@@ -1,0 +1,24 @@
+=== remove_simp_mainland.py results ===
+
+--- dayiunip.db ---
+  Deleted word entries : 47
+  Updated related rows : 38
+  Verification         : PASS (0 remaining)
+  Repacking dayiunip.zip ...
+  ZIP size             : 3,024,026 bytes
+
+--- phoneticcomplete.db ---
+  Deleted word entries : 72
+  Updated related rows : 25
+  Verification         : PASS (0 remaining)
+  Repacking phoneticcomplete.zip ...
+  ZIP size             : 2,944,454 bytes
+
+--- phoneticcompletebig5.db ---
+  Deleted word entries : 23
+  Updated related rows : 12
+  Verification         : PASS (0 remaining)
+  Repacking phoneticcompletebig5.zip ...
+  ZIP size             : 1,969,165 bytes
+
+Done.

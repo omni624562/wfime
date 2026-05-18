@@ -59,7 +59,9 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"python|jdk|java\" } | Select Name; Get-ChildItem \"C:\\\\Program Files\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"python|java|jdk\" } | Select Name)",
       "PowerShell(Get-Command java -ErrorAction SilentlyContinue)",
       "PowerShell($env:JAVA_HOME)",
-      "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"java|python|android\" })"
+      "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"java|python|android\" })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Storage\\\\workspace\\\\nanime-main\\\\Database\" -Recurse | Select-Object FullName, @{Name=\"Size\";Expression={if\\($_.PSIsContainer\\) { \"DIR\" } else { \"{0:N0} bytes\" -f $_.Length }}} | Format-Table -AutoSize)",
+      "PowerShell(Move-Item \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\Database\\\\scripts\" \"c:\\\\Storage\\\\workspace\\\\nanime-main\\\\scripts\")"
     ]
   }
 }

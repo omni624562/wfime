@@ -1,0 +1,24 @@
+=== remove_prc_terms.py results ===
+
+--- dayiunip.db ---
+  Deleted word entries : 63
+  Updated related rows : 71
+  Verification         : PASS (0 remaining)
+  Repacking dayiunip.zip ...
+  ZIP size             : 3,021,967 bytes
+
+--- phoneticcomplete.db ---
+  Deleted word entries : 17
+  Updated related rows : 33
+  Verification         : PASS (0 remaining)
+  Repacking phoneticcomplete.zip ...
+  ZIP size             : 2,944,299 bytes
+
+--- phoneticcompletebig5.db ---
+  Deleted word entries : 17
+  Updated related rows : 12
+  Verification         : PASS (0 remaining)
+  Repacking phoneticcompletebig5.zip ...
+  ZIP size             : 1,969,339 bytes
+
+Done.
