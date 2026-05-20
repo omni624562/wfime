@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
+    limehd:horizontalGap="0px"
+    limehd:keyHeight="@dimen/key_height"
+    limehd:keyWidth="33.3%p"
+    limehd:verticalGap="0px">
+
+    <Row>
+        <Key limehd:codes="49" limehd:keyLabel="1" />
+        <Key limehd:codes="50" limehd:keyLabel="2" />
+        <Key limehd:codes="51" limehd:keyLabel="3" />
+    </Row>
+
+    <Row>
+        <Key limehd:codes="52" limehd:keyLabel="4" />
+        <Key limehd:codes="53" limehd:keyLabel="5" />
+        <Key limehd:codes="54" limehd:keyLabel="6" />
+    </Row>
+
+    <Row>
+        <Key limehd:codes="55" limehd:keyLabel="7" />
+        <Key limehd:codes="56" limehd:keyLabel="8" />
+        <Key limehd:codes="57" limehd:keyLabel="9" />
+    </Row>
+
+    <Row limehd:rowEdgeFlags="bottom">
+        <Key limehd:codes="-5" limehd:isModifier="true" limehd:isRepeatable="true" limehd:keyIcon="@drawable/sym_keyboard_delete_light" />
+        <Key limehd:codes="48" limehd:keyLabel="0" />
+        <Key limehd:codes="10" limehd:isModifier="true" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_return_light" />
+    </Row>
+</Keyboard>
