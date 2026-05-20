@@ -56,20 +56,16 @@ import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.limedb.LimeDB;
 import net.toload.main.hd.ui.ImportDialog;
-import net.toload.main.hd.ui.ManageImFragment;
-import net.toload.main.hd.ui.ManageRelatedFragment;
-import net.toload.main.hd.ui.SetupImFragment;
+import net.toload.main.hd.ui.SetupImHandler;
+import net.toload.main.hd.ui.SetupImLoadDialog;
+import android.os.RemoteException;
 
-public class MainActivity extends AppCompatActivity
-        implements ComposeBridge.NavigationDrawerCallbacks {
+public class MainActivity extends AppCompatActivity {
     public static final String ARG_ADD_WORD = "arg_add_word";
     private static final int STORAGE_PERMISSION_CODE = 0;
     // private static final int STORAGE_PERMISSION_CODE = android.permission.;
 
-    /**
-     * DrawerLayout for managing navigation drawer state.
-     */
-    private androidx.drawerlayout.widget.DrawerLayout mDrawerLayout;
+
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -89,12 +85,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        SetupImFragment ImFragment = (SetupImFragment) getSupportFragmentManager().findFragmentByTag("SetupImFragment");
-        if (ImFragment == null)
-            return;
-        if (hasFocus && ImFragment.isVisible())
-            ImFragment.initialbutton();
-
+        if (hasFocus) {
+            refreshImportStatus();
+        }
     }
 
     @Override
@@ -112,15 +105,7 @@ public class MainActivity extends AppCompatActivity
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Set up drawer toggle - clicking hamburger icon opens/closes drawer
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        toolbar.setNavigationOnClickListener(v -> {
-            if (mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
-                mDrawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
-            } else {
-                mDrawerLayout.openDrawer(androidx.core.view.GravityCompat.START);
-            }
-        });
+        toolbar.setNavigationIcon(null);
 
         handler = new MainActivityHandler(this);
 
@@ -137,19 +122,7 @@ public class MainActivity extends AppCompatActivity
         // initial imlist
         initialImList();
 
-        // Set up Compose navigation drawer
-        android.widget.FrameLayout navDrawerContainer = findViewById(R.id.navigation_drawer_container);
-        android.view.View navDrawerView = ComposeBridge.INSTANCE.createNavigationDrawerView(
-                this,
-                this,
-                this);
-        if (navDrawerView != null) {
-            try {
-                navDrawerContainer.addView(navDrawerView);
-            } catch (Exception e) {
-                android.util.Log.e("MAIN_ACTIVITY", "FAILED to add navDrawerView: " + e.getMessage(), e);
-            }
-        }
+
 
         // Handle Import Text from other application
         Intent intent = getIntent();
@@ -199,11 +172,7 @@ public class MainActivity extends AppCompatActivity
             mLIMEPref.setParameter("current_version", versionstr);
         }
 
-        // Daniel: check if it's for adding new words
-        if (getIntent() != null && getIntent().getStringExtra(ARG_ADD_WORD) != null) {
-            String table = getIntent().getStringExtra(ARG_ADD_WORD);
-            showImeAddWordDialog(table);
-        }
+
 
         // Handle back button press using OnBackPressedDispatcher (Android 13+
         // predictive back support)
@@ -214,32 +183,21 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Load initial fragment (position 0 = Setup)
-        onNavigationDrawerItemSelected(0);
-    }
-
-    private void showImeAddWordDialog(String table) {
-        for (int i = 0; i < imlist.size(); i++) {
-            String im = imlist.get(i).getCode();
-            if (im.equals(table)) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, ManageImFragment.newInstance(i, table, true),
-                                "ManageImFragment_" + table)
-                        .addToBackStack("ManageImFragment_" + table)
-                        .commit();
-                break;
+        // Load Compose Settings Screen directly as requested by the user
+        android.widget.FrameLayout container = findViewById(R.id.container);
+        if (container != null) {
+            container.removeAllViews();
+            android.view.View settingsView = ComposeBridge.INSTANCE.createSettingsView(this, this);
+            if (settingsView != null) {
+                container.addView(settingsView);
             }
         }
+
+        mTitle = this.getResources().getString(R.string.action_preference);
+        restoreActionBar();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (intent.getStringExtra(ARG_ADD_WORD) != null) {
-            String table = intent.getStringExtra(ARG_ADD_WORD);
-            showImeAddWordDialog(table);
-        }
-    }
+
 
     private String getContentName(ContentResolver resolver, Uri uri) {
         Cursor cursor = resolver.query(uri, null, null, null, null);
@@ -288,92 +246,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        android.widget.FrameLayout container = findViewById(R.id.container);
-
-        if (position == 0) {
-            // Use Fragment for Setup (will migrate in future phase)
-            container.removeAllViews();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, SetupImFragment.newInstance(position), "SetupImFragment")
-                    .addToBackStack("SetupImFragment")
-                    .commit();
-        } else if (position == 1) {
-            // Use Fragment for Manage Related (will migrate in future phase)
-            container.removeAllViews();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, ManageRelatedFragment.newInstance(position), "ManageRelatedFragment")
-                    .addToBackStack("ManageRelatedFragment")
-                    .commit();
-        } else {
-            // Use Compose for Manage IM
-            if (imlist == null || imlist.isEmpty()) {
-                imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
-            }
-
-            if (!imlist.isEmpty()) {
-                int number = position - 2;
-                String table = imlist.get(number).getCode();
-
-                // Clear fragments and use Compose view
-                fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                container.removeAllViews();
-
-                android.view.View manageImView = ComposeBridge.INSTANCE.createManageImView(
-                        this,
-                        this,
-                        table);
-                if (manageImView != null) {
-                    try {
-                        container.addView(manageImView);
-                    } catch (Exception e) {
-                        android.util.Log.e("MAIN_ACTIVITY", "FAILED to add manageImView: " + e.getMessage(), e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Refreshes the navigation drawer menu items.
-     * Useful when input method tables are added or removed.
-     */
-    public void refreshNavigationMenu() {
-        // Refresh local IM list
-        initialImList();
-
-        // Get the shared NavigationViewModel and trigger a reload
-        net.toload.main.hd.ui.compose.NavigationViewModel viewModel =
-                new androidx.lifecycle.ViewModelProvider(this,
-                        new net.toload.main.hd.ui.compose.NavigationViewModelFactory(this))
-                        .get(net.toload.main.hd.ui.compose.NavigationViewModel.class);
-
-        if (viewModel != null) {
-            viewModel.loadMenuItems();
-        }
-    }
-
-    public void onSectionAttached(int number) {
-        if (imlist == null) {
-            initialImList();
-        }
-        if (number == 0) {
-            mTitle = this.getResources().getString(R.string.default_menu_initial);
-            // mCode = "initial";
-        } else if (number == 1) {
-            mTitle = this.getResources().getString(R.string.default_menu_related);
-            // mCode = "related";
-        } else {
-            int position = number - 2;
-            if (position >= 0 && position < imlist.size()) {
-                mTitle = imlist.get(position).getDesc();
-            }
-        }
-    }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -385,26 +258,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (mDrawerLayout != null && !mDrawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main, menu);
+        restoreActionBar();
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_preference) {
-            // Open settings activity
-            Intent intent = new Intent(this, net.toload.main.hd.limesettings.LIMEPreferenceHC.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.action_help) {
+        if (id == R.id.action_help) {
             // Show help dialog
             net.toload.main.hd.ui.HelpDialog helpDialog = new net.toload.main.hd.ui.HelpDialog();
             helpDialog.show(getSupportFragmentManager(), "helpDialog");
@@ -459,6 +321,73 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void initialDefaultPreference() {
+    }
+
+    public void downloadPhonetic() {
+        showSetupImLoadDialog(Lime.DB_TABLE_PHONETIC);
+    }
+
+    public void downloadDayi() {
+        showSetupImLoadDialog(Lime.DB_TABLE_DAYI);
+    }
+
+    private void showSetupImLoadDialog(String imtype) {
+        androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SetupImHandler setupImHandler = new SetupImHandler(this);
+        SetupImLoadDialog dialog = SetupImLoadDialog.newInstance(imtype, setupImHandler);
+        dialog.show(ft, "loadimdialog");
+    }
+
+    public void showProgress(boolean spinnerStyle, String message) {
+        if (progress.isShowing()) {
+            progress.dismiss();
+        }
+        progress.setIndeterminate(spinnerStyle);
+        if (message != null) {
+            progress.setMessage(message);
+        }
+        if (!spinnerStyle) {
+            progress.setProgress(0);
+        }
+        progress.show();
+    }
+
+    public void setProgressIndeterminate(boolean flag) {
+        progress.setIndeterminate(flag);
+    }
+
+    public void finishProgress(String imtype) {
+        cancelProgress();
+        refreshImportStatus();
+    }
+
+    public void resetImTable(String imtable, boolean backuplearning) {
+        try {
+            if (backuplearning) {
+                datasource.backupUserRecords(imtable);
+            }
+            DBServer dbSrv = new DBServer(this);
+            dbSrv.resetMapping(imtable);
+            refreshImportStatus();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void refreshImportStatus() {
+        runOnUiThread(() -> {
+            try {
+                net.toload.main.hd.ui.compose.settings.SettingsViewModel settingsViewModel =
+                        new androidx.lifecycle.ViewModelProvider(this,
+                                new net.toload.main.hd.ui.compose.settings.SettingsViewModelFactory(this))
+                                .get(net.toload.main.hd.ui.compose.settings.SettingsViewModel.class);
+                if (settingsViewModel != null) {
+                    settingsViewModel.refreshImportStatus();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }

@@ -46,6 +46,7 @@ public class LIMEKeyboardSwitcher {
     public static final int MODE_URL = 4;
     public static final int MODE_EMAIL = 5;
     public static final int MODE_IM = 6;
+    public static final int MODE_NUMBER = 7;
     public static final int MODE_TEXT_QWERTY = 0;
     public static final int MODE_TEXT_ALPHA = 1;
     public static final int MODE_TEXT_COUNT = 2;
@@ -281,7 +282,16 @@ public class LIMEKeyboardSwitcher {
     }
 
     private int getKeyboardXMLID(String value) {
-        return mThemedContext.getResources().getIdentifier(value, "xml", mService.getPackageName());
+        if (value == null || value.isEmpty()) {
+            Log.w(TAG, "getKeyboardXMLID: value is null or empty, falling back to 'lime'");
+            return mThemedContext.getResources().getIdentifier("lime", "xml", mService.getPackageName());
+        }
+        int id = mThemedContext.getResources().getIdentifier(value, "xml", mService.getPackageName());
+        if (id == 0) {
+            Log.w(TAG, "getKeyboardXMLID: resource '" + value + "' not found, falling back to 'lime'");
+            id = mThemedContext.getResources().getIdentifier("lime", "xml", mService.getPackageName());
+        }
+        return id;
     }
 
     public void setKeyboardMode(String code, int mode, int imeOptions, boolean isIm, boolean isSymbol,
@@ -290,6 +300,7 @@ public class LIMEKeyboardSwitcher {
             Log.d(TAG, "setKeyboardMode () code:" + code + ", mode:" + mode + ", imOptions:" + imeOptions + "" +
                     ", isIM:" + isIm + ", isSymbol:" + isSymbol + ", isShift:" + isShift);
         }
+        
         imtype = code;
 
         // Jeremy '11,6,2. Has to preserve these options for toggle keyboard controls.
@@ -303,8 +314,16 @@ public class LIMEKeyboardSwitcher {
             mMode = mode;
 
         String imcode = "";
-        if (imHm != null)
+        if (imHm != null) {
             imcode = imHm.get(code);
+            if (imcode != null) {
+                if (imcode.contains("dayi")) {
+                    imcode = "dayi";
+                } else if (imcode.contains("phonetic") || imcode.contains("hsu") || imcode.contains("et26") || imcode.contains("et41")) {
+                    imcode = "phonetic";
+                }
+            }
+        }
 
         KeyboardObj kobj = null;
 
@@ -320,8 +339,16 @@ public class LIMEKeyboardSwitcher {
                     kobj = kbHm.get(imcode);
             }
         } else {
-            if (kbHm != null)
+            if (kbHm != null) {
                 kobj = kbHm.get(imcode);
+                if (kobj == null) {
+                    if (imcode.contains("dayi")) {
+                        kobj = kbHm.get("dayi");
+                    } else if (imcode.contains("phonetic")) {
+                        kobj = kbHm.get("phonetic");
+                    }
+                }
+            }
         }
 
         android.util.Log.d("LIME_KBD", "setKeyboardMode: code=" + code
@@ -351,7 +378,9 @@ public class LIMEKeyboardSwitcher {
         if (kid == null && kobj != null) {
 
             mIsChinese = false;
-            if (isSymbol) {
+            if (mode == MODE_NUMBER) {
+                kid = new KeyboardId(getKeyboardXMLID("numeric"));
+            } else if (isSymbol) {
                 switch (mCurrentSymbolsKeyboard) {
                     case SYMBOLS_KEYBOARD_1:
                     default:
@@ -364,12 +393,11 @@ public class LIMEKeyboardSwitcher {
                         kid = new KeyboardId(getKeyboardXMLID("symbols3"));
                         break;
                 }
-
             } else {
                 switch (mode) {
                     case MODE_PHONE:
                         // Log.i("ART","KBMODE ->: phone");
-                        kid = new KeyboardId(getKeyboardXMLID("phone_number"));
+                        kid = new KeyboardId(getKeyboardXMLID("phone"));
                         break;
                     case MODE_URL:
                         // Log.i("ART","KBMODE ->: url");

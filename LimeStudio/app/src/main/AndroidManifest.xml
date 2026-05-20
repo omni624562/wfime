@@ -80,12 +80,7 @@
                 android:value="Input Method Service requires persistent notification to prevent system from freezing the process" />
         </service>
 
-        <activity
-            android:theme="@style/AppTheme"
-            android:name=".limesettings.LIMEPreferenceHC"
-            android:configChanges="keyboard|keyboardHidden|orientation"
-            android:label="@string/ime_setting">
-        </activity>
+
 
 
     </application>

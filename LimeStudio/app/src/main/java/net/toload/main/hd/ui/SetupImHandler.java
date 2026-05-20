@@ -1,43 +1,23 @@
-/*
- *
- *  *
- *  **    Copyright 2015, The LimeIME Open Source Project
- *  **
- *  **    Project Url: http://github.com/lime-ime/limeime/
- *  **                 http://android.toload.net/
- *  **
- *  **    This program is free software: you can redistribute it and/or modify
- *  **    it under the terms of the GNU General Public License as published by
- *  **    the Free Software Foundation, either version 3 of the License, or
- *  **    (at your option) any later version.
- *  *
- *  **    This program is distributed in the hope that it will be useful,
- *  **    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  **    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  **    GNU General Public License for more details.
- *  *
- *  **    You should have received a copy of the GNU General Public License
- *  **    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *  *
- *
- */
-
 package net.toload.main.hd.ui;
 
 import android.os.Handler;
 import android.os.Message;
+import java.lang.ref.WeakReference;
+import net.toload.main.hd.MainActivity;
 
 public class SetupImHandler extends Handler {
 
-    private SetupImFragment fragment = null;
+    private final WeakReference<MainActivity> activityRef;
 
-    public SetupImHandler(SetupImFragment fragment) {
+    public SetupImHandler(MainActivity activity) {
         super(android.os.Looper.getMainLooper());
-        this.fragment = fragment;
+        this.activityRef = new WeakReference<>(activity);
     }
 
     @Override
     public void handleMessage(Message msg) {
+        MainActivity activity = activityRef.get();
+        if (activity == null) return; // Activity has been destroyed, drop message
 
         String action = msg.getData().getString("action");
         String type = msg.getData().getString("type");
@@ -46,21 +26,21 @@ public class SetupImHandler extends Handler {
             if (type != null) {
                 if (type.equalsIgnoreCase("showSpinner")) {
                     String message = msg.getData().getString("message");
-                    fragment.showProgress(true, message);
+                    activity.showProgress(true, message);
                 } else if (type.equalsIgnoreCase("showHorizontal")) {
                     String message = msg.getData().getString("message");
-                    fragment.showProgress(false, message);
+                    activity.showProgress(false, message);
                 } else if (type.equalsIgnoreCase("cancel")) {
-                    fragment.cancelProgress();
+                    activity.cancelProgress();
                 } else if (type.equalsIgnoreCase("update")) {
                     int value = msg.getData().getInt("value");
-                    fragment.updateProgress(value);
+                    activity.updateProgress(value);
                 } else if (type.equalsIgnoreCase("message")) {
                     String message = msg.getData().getString("message");
-                    fragment.updateProgress(message);
+                    activity.updateProgress(message);
                 } else if (type.equalsIgnoreCase("indeterminate")) {
                     Boolean flag = msg.getData().getBoolean("flag");
-                    fragment.setProgressIndeterminate(flag);
+                    activity.setProgressIndeterminate(flag);
                 }
             }
         } else if (action != null && action.equalsIgnoreCase("toast")) {
@@ -68,22 +48,22 @@ public class SetupImHandler extends Handler {
             int length = msg.getData().getInt("length");
 
             if (message != null) {
-                fragment.showToastMessage(message, length);
+                activity.showToastMessage(message, length);
             } else {
-                fragment.showToastMessage("Error", length);
+                activity.showToastMessage("Error", length);
             }
 
         } else if (action != null && action.equalsIgnoreCase("initialbutton")) {
-            fragment.initialbutton();
+            activity.refreshImportStatus();
         } else if (action != null && action.equalsIgnoreCase("updatecustombutton")) {
-            fragment.updateCustomButton();
+            activity.refreshImportStatus();
         } else if (action != null && action.equalsIgnoreCase("reset")) {
             String imtype = msg.getData().getString("im");
             boolean backuplearning = msg.getData().getBoolean("backup");
-            fragment.resetImTable(imtype, backuplearning);
+            activity.resetImTable(imtype, backuplearning);
         } else if (action != null && action.equalsIgnoreCase("finish")) {
             String imtype = msg.getData().getString("im");
-            fragment.finishProgress(imtype);
+            activity.finishProgress(imtype);
         }
 
     }

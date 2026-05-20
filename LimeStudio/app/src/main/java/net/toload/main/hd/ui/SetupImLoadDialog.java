@@ -452,16 +452,7 @@ public class SetupImLoadDialog extends DialogFragment {
                 url = Lime.DATABASE_CLOUD_IM_PHONETIC;
             } else if (type.equals(Lime.IM_PHONETIC_ADV)) {
                 url = Lime.DATABASE_CLOUD_IM_PHONETICCOMPLETE;
-            } else if (type.equals(Lime.IM_HS)) {
-                url = Lime.DATABASE_CLOUD_IM_HS;
-            } else if (type.equals(Lime.IM_HS_V1)) {
-                url = Lime.DATABASE_CLOUD_IM_HS_V1;
-            } else if (type.equals(Lime.IM_HS_V2)) {
-                url = Lime.DATABASE_CLOUD_IM_HS_V2;
-            } else if (type.equals(Lime.IM_HS_V3)) {
-                url = Lime.DATABASE_CLOUD_IM_HS_V3;
             }
-
             loadthread = new Thread(new SetupImLoadRunnable(getActivity(), handler, code, type, url, restorelearning));
             loadthread.start();
 

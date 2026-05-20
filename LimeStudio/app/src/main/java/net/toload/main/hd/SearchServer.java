@@ -725,11 +725,15 @@ public class SearchServer {
             }
 
             // Finally add the raw composing code at the beginning
-            Mapping self = new Mapping();
-            self.setWord(code);
-            self.setCode(code);
-            self.setComposingCodeRecord();
-            result.add(0, self);
+            // Jeremy '24,1,7: Don't add raw code for Dayi to prevent things like "./" showing up
+            // BUT allow it if it's alphanumeric (like "00") so users see a reaction
+            if (!tablename.equals("dayi") || code.matches("[A-Za-z0-9]+")) {
+                Mapping self = new Mapping();
+                self.setWord(code);
+                self.setCode(code);
+                self.setComposingCodeRecord();
+                result.add(0, self);
+            }
         }
         if (DEBUG)
             Log.i(TAG, "getMappingByCode() result.size()=" + result.size());

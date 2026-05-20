@@ -22,6 +22,7 @@
 
 package net.toload.main.hd.ui.compose.settings
 
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -29,10 +30,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.toload.main.hd.R
+import net.toload.main.hd.MainActivity
+
+@Composable
+fun findMainActivity(): MainActivity? {
+    var context = LocalContext.current
+    while (context is ContextWrapper) {
+        if (context is MainActivity) {
+            return context
+        }
+        context = context.baseContext
+    }
+    return null
+}
 
 /**
  * Main settings screen with all preference categories.
@@ -50,14 +66,11 @@ fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val activity = findMainActivity()
 
     Scaffold(
-        modifier = Modifier.systemBarsPadding(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.action_preference)) }
-            )
-        }
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -65,6 +78,80 @@ fun SettingsScreen(
                 .padding(paddingValues),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
+            // 載入輸入法 (IM Loading Card)
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.setup_im_download),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.setup_im_download_description),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { activity?.downloadPhonetic() },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (uiState.isPhoneticImported) 
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) 
+                                    else 
+                                        MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = if (uiState.isPhoneticImported) "注音 (已載入)" else "載入注音",
+                                    fontWeight = if (uiState.isPhoneticImported) FontWeight.Normal else FontWeight.Bold,
+                                    color = if (uiState.isPhoneticImported) 
+                                        MaterialTheme.colorScheme.onSecondaryContainer 
+                                    else 
+                                        MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                            Button(
+                                onClick = { activity?.downloadDayi() },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (uiState.isDayiImported) 
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) 
+                                    else 
+                                        MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = if (uiState.isDayiImported) "大易 (已載入)" else "載入大易",
+                                    fontWeight = if (uiState.isDayiImported) FontWeight.Normal else FontWeight.Bold,
+                                    color = if (uiState.isDayiImported) 
+                                        MaterialTheme.colorScheme.onSecondaryContainer 
+                                    else 
+                                        MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // Keyboard Category
             item {
                 PreferenceCategory(title = stringResource(R.string.keyboard))

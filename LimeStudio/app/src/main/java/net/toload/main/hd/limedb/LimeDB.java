@@ -4062,7 +4062,15 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         if (title.equals("keyboard")) {
                             ImObj kobj = new ImObj();
                             kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                            kobj.setKeyboard(cursor.getString(cursor.getColumnIndex("keyboard")));
+                            String kb = cursor.getString(cursor.getColumnIndex("keyboard"));
+                            if (kb != null) {
+                                if (kb.contains("dayi")) {
+                                    kb = "dayi";
+                                } else if (kb.contains("phonetic") || kb.contains("hsu") || kb.contains("et26") || kb.contains("et41")) {
+                                    kb = "phonetic";
+                                }
+                            }
+                            kobj.setKeyboard(kb);
                             result.add(kobj);
                         }
                     } while (cursor.moveToNext());
@@ -4167,10 +4175,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         List<KeyboardObj> result = new LinkedList<>();
         try {
             // SQLiteDatabase db = this.getSqliteDb(true);
-            // Filter to only show Dayi and Phonetic related keyboards
-            String selection = "code LIKE ? OR code LIKE ? OR type LIKE ? OR type LIKE ?";
-            String[] selectionArgs = { "%dayi%", "%phonetic%", "%dayi%", "%phonetic%" };
-            Cursor cursor = db.query("keyboard", null, selection, selectionArgs, null, null, "name ASC", null);
+            Cursor cursor = db.query("keyboard", null, null, null, null, null, "name ASC", null);
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -4469,10 +4474,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return result;
 
-        // Filter to only show Dayi and Phonetic related keyboards
-        String selection = Lime.DB_KEYBOARD_COLUMN_CODE + " LIKE ? OR " + Lime.DB_KEYBOARD_COLUMN_CODE + " LIKE ? OR " +
-                Lime.DB_KEYBOARD_COLUMN_TYPE + " LIKE ? OR " + Lime.DB_KEYBOARD_COLUMN_TYPE + " LIKE ?";
-        String[] selectionArgs = { "%dayi%", "%phonetic%", "%dayi%", "%phonetic%" };
+        // Filter to only show Dayi English and Phonetic keyboards
+        String selection = Lime.DB_KEYBOARD_COLUMN_CODE + " = ? OR " + Lime.DB_KEYBOARD_COLUMN_CODE + " = ?";
+        String[] selectionArgs = { "dayi", "phonetic" };
         Cursor cursor = db.query(Lime.DB_KEYBOARD, null, selection, selectionArgs,
                 null, null, Lime.DB_KEYBOARD_COLUMN_NAME + " ASC");
         cursor.moveToFirst();

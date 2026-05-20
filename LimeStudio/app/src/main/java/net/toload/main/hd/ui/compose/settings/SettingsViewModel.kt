@@ -26,11 +26,13 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.toload.main.hd.global.LIMEPreferenceManager
 
 /**
@@ -75,7 +77,11 @@ data class SettingsUiState(
     val learningSwitch: Boolean = true,
     val physicalKeyboardSort: Boolean = true,
     val acceptNumberIndex: Boolean = false,
-    val acceptSymbolIndex: Boolean = false
+    val acceptSymbolIndex: Boolean = false,
+
+    // IM loading status
+    val isPhoneticImported: Boolean = false,
+    val isDayiImported: Boolean = false
 )
 
 /**
@@ -90,6 +96,7 @@ class SettingsViewModel(
     private val context: Context
 ) : ViewModel() {
     private val preferenceManager = LIMEPreferenceManager(context)
+    private val limeDb = net.toload.main.hd.limedb.LimeDB(context)
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -99,10 +106,38 @@ class SettingsViewModel(
     }
 
     /**
-     * Loads all preferences from SharedPreferences.
+     * Checks DB on IO thread and returns (isPhonetic, isDayi) import status.
+     */
+    private suspend fun fetchImportStatus(): Pair<Boolean, Boolean> = withContext(Dispatchers.IO) {
+        val check = HashMap<String, String>()
+        try {
+            val imlist = limeDb.getIm(null, net.toload.main.hd.Lime.IM_TYPE_NAME)
+            imlist?.forEach { im -> check[im.code] = im.desc }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        val isPhonetic = check[net.toload.main.hd.Lime.DB_TABLE_PHONETIC] != null
+        val isDayi = check[net.toload.main.hd.Lime.DB_TABLE_DAYI] != null
+        isPhonetic to isDayi
+    }
+
+    /**
+     * Refresh input method database import status (runs DB query off main thread).
+     */
+    fun refreshImportStatus() {
+        viewModelScope.launch {
+            val (isPhonetic, isDayi) = fetchImportStatus()
+            _uiState.update { it.copy(isPhoneticImported = isPhonetic, isDayiImported = isDayi) }
+        }
+    }
+
+    /**
+     * Loads all preferences from SharedPreferences (DB query runs on IO thread).
      */
     private fun loadPreferences() {
         viewModelScope.launch {
+            val (isPhonetic, isDayi) = fetchImportStatus()
+            // Read SharedPreferences — fast enough to keep on main thread after IO completes.
             _uiState.update {
                 SettingsUiState(
                     // Keyboard
@@ -141,7 +176,9 @@ class SettingsViewModel(
                     learningSwitch = preferenceManager.getParameterBoolean("learning_switch", true),
                     physicalKeyboardSort = preferenceManager.getParameterBoolean("physical_keyboard_sort", true),
                     acceptNumberIndex = preferenceManager.getParameterBoolean("accept_number_index", false),
-                    acceptSymbolIndex = preferenceManager.getParameterBoolean("accept_symbol_index", false)
+                    acceptSymbolIndex = preferenceManager.getParameterBoolean("accept_symbol_index", false),
+                    isPhoneticImported = isPhonetic,
+                    isDayiImported = isDayi
                 )
             }
         }

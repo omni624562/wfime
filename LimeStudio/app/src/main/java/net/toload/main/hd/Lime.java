@@ -89,11 +89,7 @@ public class Lime {
     public static final String DATABASE_CLOUD_IM_DAYIUNIP = DATABASE_CLOUD_URL_BASED + "dayiunip.zip";
     public static final String DATABASE_CLOUD_IM_DAYI_KEYBOARD = "dayi";
 
-    // HS IM downloads
-    public static final String DATABASE_CLOUD_IM_HS = DATABASE_CLOUD_URL_BASED + "hs.zip";
-    public static final String DATABASE_CLOUD_IM_HS_V1 = DATABASE_CLOUD_URL_BASED + "hs1.zip";
-    public static final String DATABASE_CLOUD_IM_HS_V2 = DATABASE_CLOUD_URL_BASED + "hs2.zip";
-    public static final String DATABASE_CLOUD_IM_HS_V3 = DATABASE_CLOUD_URL_BASED + "hs3.zip";
+
 
     // ==================== Database Tables ====================
     public static final String DB_TABLE_CUSTOM = "custom";

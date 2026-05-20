@@ -40,8 +40,21 @@ android {
         applicationId = "net.toload.main.hd"
         minSdk = 30
         targetSdk = 35
-        versionCode = new Date().format('yyyyMMdd').toInteger()
-        versionName = new Date().format('yyyy.MM.dd')
+
+        // Read version details from version.properties at project root
+        def versionPropsFile = rootProject.file('version.properties')
+        def versionProps = new Properties()
+        if (versionPropsFile.exists()) {
+            versionPropsFile.withInputStream { versionProps.load(it) }
+        }
+        
+        def major = versionProps['VERSION_MAJOR'] ?: "1"
+        def minor = versionProps['VERSION_MINOR'] ?: "0"
+        def patch = versionProps['VERSION_PATCH'] ?: "0"
+        def build = versionProps['VERSION_BUILD'] ?: new Date().format('yyyyMMdd')
+
+        versionCode build.toInteger()
+        versionName "${major}.${minor}.${patch}"
     }
     buildTypes {
         debug {
@@ -129,7 +142,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1"
 
     // Jetpack Compose
-    def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
+    def composeBom = platform('androidx.compose:compose-bom:2024.11.00')
     implementation composeBom
     androidTestImplementation composeBom
 

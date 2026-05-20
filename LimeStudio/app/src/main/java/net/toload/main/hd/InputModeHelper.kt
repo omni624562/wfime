@@ -39,7 +39,7 @@ class InputModeHelper {
                 EditorInfo.TYPE_CLASS_NUMBER -> { // 0x02
                     config.isEnglishOnly = true
                     config.isNumber = true
-                    config.keyboardMode = LIMEKeyboardSwitcher.MODE_TEXT // Passed to setKeyboardMode as text but with isNumber=true
+                    config.keyboardMode = LIMEKeyboardSwitcher.MODE_NUMBER
                 }
                 EditorInfo.TYPE_CLASS_DATETIME -> { // 0x04
                     config.isEnglishOnly = true

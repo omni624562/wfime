@@ -55,7 +55,7 @@
     <string name="action_reset">恢復原廠設定</string>
     <string name="action_news">最新消息</string>
     <string name="action_help">使用說明</string>
-    <string name="action_preference">偏好設定</string>
+    <string name="action_preference">麥田輸入法</string>
 
     <string name="global_exit_title">結束程式</string>
 

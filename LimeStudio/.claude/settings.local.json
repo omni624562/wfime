@@ -6,7 +6,8 @@
       "Bash(./gradlew:*)",
       "Bash(javac:*)",
       "Bash(ls:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(Get-ChildItem \"C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\src\\\\main\\\\res\\\\xml\\\\\" | Select-Object Name *)"
     ],
     "deny": []
   }

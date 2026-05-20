@@ -82,7 +82,7 @@ import net.toload.main.hd.keyboard.LIMEKeyboard;
 import net.toload.main.hd.keyboard.LIMEKeyboardBaseView;
 import net.toload.main.hd.keyboard.LIMEKeyboardView;
 import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
-import net.toload.main.hd.limesettings.LIMEPreferenceHC;
+
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -1972,8 +1972,12 @@ public class LIMEService extends InputMethodService implements
 
         }
 
+        // Jeremy '24,1,7: Explicitly disable English prediction for numbers/symbols
+        // and phone mode to prevent unwanted candidate bar suggestions like "Pacific"
         if (mLIMEPref.getEnglishPrediction()
-                && primaryCode != LIMEBaseKeyboard.KEYCODE_DELETE) {
+                && primaryCode != LIMEBaseKeyboard.KEYCODE_DELETE
+                && !mKeyboardSwitcher.isSymbols()
+                && !currentSoftKeyboard.contains("phone")) {
 
             // Check if input character not valid English Character then reset
             // temp english string
@@ -2225,7 +2229,7 @@ public class LIMEService extends InputMethodService implements
     private void launchSettings() {
         handleClose();
         Intent intent = new Intent();
-        intent.setClass(LIMEService.this, LIMEPreferenceHC.class);
+        intent.setClass(LIMEService.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
@@ -2473,10 +2477,10 @@ public class LIMEService extends InputMethodService implements
 
             String keyString = mComposing.toString();
 
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null && mPredictionOn) {
-                ic.setComposingText(getComposingDisplayString(keyString), 1);
-            }
+            // getComposingDisplayString(keyString) updates the CandidateView and Floating Composing Popup.
+            // We no longer set the composing text in the input connection (ic.setComposingText) to prevent
+            // intermediate radicals/composing text from being injected into the host application's editor.
+            getComposingDisplayString(keyString);
 
             // Art '30,Sep,2011 restrict the length of composing text for Stroke5
             /*
@@ -3558,7 +3562,7 @@ public class LIMEService extends InputMethodService implements
             }
         }
 
-        if (!mEnglishOnly) {
+        if (!mEnglishOnly && !mKeyboardSwitcher.isSymbols()) {
 
             InputConnection ic = getCurrentInputConnection();
 
@@ -3695,6 +3699,7 @@ public class LIMEService extends InputMethodService implements
             }
 
             if (mLIMEPref.getEnglishPrediction() && mPredictionOn && !mKeyboardSwitcher.isSymbols()
+                    && !currentSoftKeyboard.contains("phone")
                     && (!hasPhysicalKeyPressed || mLIMEPref.getEnglishPredictionOnPhysicalKeyboard())) {
                 if (Character.isLetter((char) primaryCode)) {
                     this.tempEnglishWord.append((char) primaryCode);
