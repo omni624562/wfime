@@ -3262,15 +3262,21 @@ public class LIMEService extends InputMethodService implements
         if (mCapsLock)
             toggleCapsLock();
 
-        // Auto commit the text when user switch the keyboard from chi -> eng
+        // Discard composing for symbol/English mode switches; commit for other switches
+        boolean shouldDiscard = (primaryCode == KEYCODE_SWITCH_TO_SYMBOL_MODE
+                || primaryCode == KEYCODE_SWITCH_SYMBOL_KEYBOARD
+                || primaryCode == KEYCODE_SWITCH_TO_ENGLISH_MODE);
         try {
             if (mComposing != null && mComposing.length() > 0) {
-                getCurrentInputConnection().commitText(mComposing, 1);
-                finishComposing();
+                if (shouldDiscard) {
+                    clearComposing(true);
+                } else {
+                    getCurrentInputConnection().commitText(mComposing, 1);
+                    finishComposing();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // ignore all possible error
         }
 
         clearComposing(false);
