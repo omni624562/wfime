@@ -3818,17 +3818,27 @@ public class LIMEService extends InputMethodService implements
             Mapping mapping = mCandidateList.get(index);
             if (mapping.isRelatedPhraseRecord()) {
                 
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(mThemeContext)
+                androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(mThemeContext)
                     .setTitle("Delete Suggestion")
                     .setMessage("Remove '" + mapping.getWord() + "' from related words list?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+                    .setPositiveButton("Delete", (dialogInterface, which) -> {
                         SearchSrv.deleteRelatedPhrase(mapping.getPword(), mapping.getWord());
                         mCandidateList.remove(index);
                         setSuggestions(mCandidateList, false, "");
                         Toast.makeText(this, "Removed", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton(android.R.string.cancel, null)
-                    .show();
+                    .create();
+
+                Window window = dialog.getWindow();
+                if (window != null) {
+                    WindowManager.LayoutParams lp = window.getAttributes();
+                    lp.token = mInputView != null ? mInputView.getWindowToken() : null;
+                    lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+                    window.setAttributes(lp);
+                    window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                }
+                dialog.show();
             }
         }
     }
