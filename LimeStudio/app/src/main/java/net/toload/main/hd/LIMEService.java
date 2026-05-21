@@ -3818,7 +3818,7 @@ public class LIMEService extends InputMethodService implements
             Mapping mapping = mCandidateList.get(index);
             if (mapping.isRelatedPhraseRecord()) {
                 
-                new androidx.appcompat.app.AlertDialog.Builder(mThemeContext)
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(mThemeContext)
                     .setTitle("Delete Suggestion")
                     .setMessage("Remove '" + mapping.getWord() + "' from related words list?")
                     .setPositiveButton("Delete", (dialog, which) -> {
