@@ -1470,6 +1470,18 @@ public class LIMEService extends InputMethodService implements
                         LIMEMetaKeyKeyListener.META_ALT_ON) > 0
                         && mLIMEPref.getPhysicalKeyboardType().equals("milestone2")))
                     break;
+            case KeyEvent.KEYCODE_GRAVE: // ` (key left of 1) — Ctrl+` cycles internal IMs (大易↔注音)
+                if (hasCtrlPress || event.isCtrlPressed()) {
+                    switchToNextActivatedIM(true);
+                    return true;
+                }
+                // No Ctrl: treat like any other character key (translateKeyDown)
+                if (!hasMenuPress) {
+                    if (translateKeyDown(keyCode, event)) {
+                        return true;
+                    }
+                }
+                break;
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
                     if (translateKeyDown(keyCode, event)) {
@@ -2296,7 +2308,8 @@ public class LIMEService extends InputMethodService implements
         startActivity(intent);
     }
 
-    private void switchToNextActivatedIM(boolean forward) { // forward: true, next IM; false prev. IM
+    // Package-private so PhysicalKeyHandler can invoke IM cycling via Ctrl+`
+    void switchToNextActivatedIM(boolean forward) { // forward: true, next IM; false prev. IM
         if (DEBUG)
             Log.i(TAG, "switchToNextActivatedIM()");
 
