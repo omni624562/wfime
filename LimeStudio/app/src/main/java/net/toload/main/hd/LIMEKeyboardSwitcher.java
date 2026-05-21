@@ -466,11 +466,16 @@ public class LIMEKeyboardSwitcher {
             for (net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key key : keys) {
                 // 1. Space Bar Label
                 if (key.codes[0] == net.toload.main.hd.keyboard.LIMEBaseKeyboard.KEYCODE_SPACE) {
-                    key.icon = null; // Remove the underscore icon
-                    if (isIm) {
-                        key.label = getActiveIMShortname();
+                    if (mode == MODE_NUMBER) {
+                        key.label = null;
+                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_spacebar_numeric_material3);
                     } else {
-                        key.label = "English";
+                        key.icon = null;
+                        if (isIm) {
+                            key.label = getActiveIMShortname();
+                        } else {
+                            key.label = "English";
+                        }
                     }
                 }
                 // 2. IM Switch Key Label (keycode -10)

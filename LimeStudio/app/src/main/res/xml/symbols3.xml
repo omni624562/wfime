@@ -72,7 +72,7 @@
         <Key limehd:keyLabel="≠" />
         <Key limehd:keyLabel="≒" />
         <Key limehd:keyLabel="㊣" />
-        <Key limehd:codes="-15" limehd:isModifier="true" limehd:keyLabel="≡" />
+        <Key limehd:codes="-15" limehd:isModifier="true" limehd:keyIcon="@drawable/sym_keyboard_more_material3" />
         <Key limehd:codes="-5" limehd:isModifier="true" limehd:isRepeatable="true" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_delete_material3" limehd:keyWidth="20%p" />
     </Row>
 

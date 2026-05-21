@@ -75,6 +75,7 @@ public class LIMEKeyboard extends LIMEBaseKeyboard {
     private static Drawable mShiftKeyIcon;
     private static Drawable mShiftKeyShiftedIcon;
     private static Drawable mDoneKeyIcon;
+    private static Drawable mGoKeyIcon;
 
     private static Drawable mSearchKeyIcon;
     private static Drawable mSpaceKeySlidingLeftArrow;
@@ -126,6 +127,7 @@ public class LIMEKeyboard extends LIMEBaseKeyboard {
         mEnterKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_enterKeyIcon);
         mSearchKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_searchKeyIcon);
         mDoneKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_doneKeyIcon);
+        mGoKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_goKeyIcon);
         mDeleteKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_deleteKeyIcon);
         mShiftKeyIcon = a.getDrawable(R.styleable.LIMEKeyboard_shiftKeyIcon);
         mShiftKeyShiftedIcon = a.getDrawable(R.styleable.LIMEKeyboard_shiftKeyShiftedIcon);
@@ -265,20 +267,18 @@ public class LIMEKeyboard extends LIMEBaseKeyboard {
             switch (options & (EditorInfo.IME_MASK_ACTION | EditorInfo.IME_FLAG_NO_ENTER_ACTION)) {
                 case EditorInfo.IME_ACTION_GO:
                     mEnterKey.iconPreview = null;
-                    mEnterKey.icon = null;
-                    mEnterKey.label = res.getText(R.string.label_go_key);
+                    mEnterKey.icon = mGoKeyIcon;
+                    mEnterKey.label = null;
                     break;
                 case EditorInfo.IME_ACTION_NEXT:
                     mEnterKey.iconPreview = null;
-                    mEnterKey.icon = null;
-                    // int c[] = {-99};
-                    // mEnterKey.codes = c;
-                    mEnterKey.label = res.getText(R.string.label_next_key);
+                    mEnterKey.icon = mGoKeyIcon;
+                    mEnterKey.label = null;
                     break;
                 case EditorInfo.IME_ACTION_DONE:
                     mEnterKey.iconPreview = null;
-                    mEnterKey.icon = null;
-                    mEnterKey.label = res.getText(R.string.label_done_key);
+                    mEnterKey.icon = mDoneKeyIcon;
+                    mEnterKey.label = null;
                     break;
                 case EditorInfo.IME_ACTION_SEARCH:
                     mEnterKey.icon = mSearchKeyIcon;
@@ -286,8 +286,8 @@ public class LIMEKeyboard extends LIMEBaseKeyboard {
                     break;
                 case EditorInfo.IME_ACTION_SEND:
                     mEnterKey.iconPreview = null;
-                    mEnterKey.icon = null;
-                    mEnterKey.label = res.getText(R.string.label_send_key);
+                    mEnterKey.icon = mGoKeyIcon;
+                    mEnterKey.label = null;
                     break;
                 default:
 

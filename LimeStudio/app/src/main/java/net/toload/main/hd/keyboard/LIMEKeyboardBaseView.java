@@ -903,7 +903,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_DELETE ||
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_SHIFT ||
                     key.codes[0] == LIMEBaseKeyboard.KEYCODE_MODE_CHANGE ||
-                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE));
+                    key.codes[0] == LIMEBaseKeyboard.KEYCODE_DONE ||
+                    key.codes[0] == -15)); // KEYCODE_SWITCH_SYMBOL_KEYBOARD (more pages ≡)
 
             Drawable currentBackground = keyBackground;
             if (isActionKey && mActionKeyBackground != null) {
@@ -1003,12 +1004,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     paint.setShadowLayer(mShadowRadius, 0, 0, mShadowColor);
                 final int centerX = (drawWidth + padding.left - padding.right) / 2;
                 final int centerY = (drawHeight + padding.top - padding.bottom) / 2;
-                final int keyColor = key.isFunctionalKey()
-                        ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
-                        : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
-                final int subKeyColor = key.isFunctionalKey()
-                        ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
-                        : (key.pressed ? mKeySubLabelTextColorPressed : mKeySubLabelTextColorNormal);
+                final int keyColor = isActionKey
+                        ? mFunctionKeyTextColorPressed  // action key always contrasts against primary background
+                        : key.isFunctionalKey()
+                                ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
+                                : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
+                final int subKeyColor = isActionKey
+                        ? mFunctionKeyTextColorPressed
+                        : key.isFunctionalKey()
+                                ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
+                                : (key.pressed ? mKeySubLabelTextColorPressed : mKeySubLabelTextColorNormal);
 
                 float KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR = 0.55f;
                 float baseline = centerY
