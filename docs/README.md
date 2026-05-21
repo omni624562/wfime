@@ -6,7 +6,7 @@
 
 | 文件 | 說明 |
 |------|------|
-| **[WHEAT_IME_REFACTORING.md](WHEAT_IME_REFACTORING.md)** | 麥田輸入法一站式重構、死碼大掃除與字根不上屏優化技術說明書 |
+| **[WHEAT_IME_REFACTORING.md](WHEAT_IME_REFACTORING.md)** | 麥田輸入法一站式重構、死碼大掃除與字根不上字最佳化技術說明書 |
 | **[SECURITY_ANALYSIS.md](SECURITY_ANALYSIS.md)** | SQL 注入漏洞分析、白名單驗證機制與安全稽核報告 |
 | **[AndroidX-Preference-Migration.md](AndroidX-Preference-Migration.md)** | AndroidX Preference 遷移完成記錄（Android 16 合規） |
 | **[Phase3-Color-Audit-Material3-Mapping.md](Phase3-Color-Audit-Material3-Mapping.md)** | Material 3 色彩系統對應表與舊色彩映射參考 |

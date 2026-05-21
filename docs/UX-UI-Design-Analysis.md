@@ -1020,7 +1020,7 @@ gantt
 
 ---
 
-### Phase 2: Layout Optimization (Weeks 3-6) | 第二階段：佈局優化（第 3-6 週）
+### Phase 2: Layout Optimization (Weeks 3-6) | 第二階段：佈局最佳化（第 3-6 週）
 
 ```mermaid
 gantt
@@ -1092,7 +1092,7 @@ gantt
 
 ---
 
-### Phase 5: Accessibility & Polish (Weeks 25-28) | 第五階段：無障礙與優化（第 25-28 週）
+### Phase 5: Accessibility & Polish (Weeks 25-28) | 第五階段：無障礙與最佳化（第 25-28 週）
 
 ```mermaid
 gantt

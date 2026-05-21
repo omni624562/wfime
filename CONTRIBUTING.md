@@ -544,8 +544,8 @@ git push origin feature/your-feature-name
 - Customizable keyboard themes | 可自訂鍵盤主題
 - Adaptive layout for foldable devices | 可摺疊裝置的自適應佈局
 
-**5. Performance Optimization | 效能優化**
-- Database query optimization | 資料庫查詢優化
+**5. Performance Optimization | 效能最佳化**
+- Database query optimization | 資料庫查詢最佳化
 - Candidate generation speed | 候選詞生成速度
 - Memory usage reduction | 記憶體使用減少
 

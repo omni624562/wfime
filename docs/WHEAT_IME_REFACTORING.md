@@ -1,13 +1,13 @@
-# 麥田輸入法一站式重構、死碼大掃除與字根不上屏優化技術說明書
+# 麥田輸入法一站式重構、死碼大掃除與字根不上字最佳化技術說明書
 
-本文件詳細記錄了「麥田輸入法 (WFIME)」在版本 `1.2.0` 中所進行的重大技術架構重構、程式碼清理、輸入體驗（字根不上屏）優化，以及針對新設備（如 Pixel 7+）在釋放版本（Release Build）下資源收縮導致崩潰的關鍵性修復。
+本文件詳細記錄了「麥田輸入法 (WFIME)」在版本 `1.2.0` 中所進行的重大技術架構重構、程式碼清理、輸入體驗（字根不上字）最佳化，以及針對新設備（如 Pixel 7+）在 Release 版本下資源收縮導致崩潰的關鍵性修復。
 
 ---
 
 ## 🎯 1. 麥田金一站式首頁重構 (Consolidated Settings Dashboard)
 
 ### 1.1 背景與設計動機
-傳統輸入法引導與設定流程往往包含繁複的分步精靈（Wizard Setup）與側邊抽屜選單（Navigation Drawer），對日常打字而言是多餘的架構負擔。
+傳統輸入法引導與設定流程往往包含繁複的分步設定精靈與側邊抽屜選單（Navigation Drawer），對日常打字而言是多餘的架構負擔。
 我們重構後將其整併為**單一入口、直達核心**的極簡主控台：
 * **全新卡片區塊**：於 Jetpack Compose 設計的 `SettingsScreen.kt` 頁面頂部，新增一站式的「下載輸入法」麥田金卡片。採用 Slate Dark 灰黑色背景搭配 HSL 調和之麥田金主題色。
 * **即時反應式更新 (Reactive State Sync)**：與底層 SQLite 資料庫的狀態緊密相連，動態偵測「注音」與「大易」的載入狀態。按鈕文字即時呈現「載入注音」/「注音 (已載入)」狀態，免去手動刷新的困擾。
@@ -17,7 +17,7 @@
 1. **設定首頁回呼 (Compose Bridge Callbacks)**：
    當使用者在卡片點擊「載入」時，Compose UI 會觸發回呼函數至 `MainActivity.java`。
 2. **啟動非同步對話框 (`SetupImLoadDialog`)**：
-   在 `MainActivity` 拉起非同步載入對話框，透過非同步背景執行緒 `SetupImRunnable` 安全執行 SQLite 大量批次寫入，頂部顯示精緻的加載/進度條，並統一使用 `LoadingDialogHelper` 管理進度彈窗。
+   在 `MainActivity` 拉起非同步載入對話框，透過非同步背景執行緒 `SetupImRunnable` 安全執行 SQLite 大量批次寫入，頂部顯示精緻的進度條，並統一使用 `LoadingDialogHelper` 管理進度彈窗。
 3. **完成載入重刷機制**：
    當背景載入完成後，透過 `SetupImHandler` 發送完成訊號（`MSG_FINISH_LOAD`）回主執行緒，主執行緒立刻調用 `SettingsViewModel` 重新偵測資料庫，驅動 Compose 設定首頁即時反應式重刷，達到極致的流暢同步。
 
@@ -46,13 +46,13 @@
 
 ---
 
-## ⌨️ 3. 字根不上屏體驗優化 (Radicals Off-Screen Optimization)
+## ⌨️ 3. 字根不上字體驗最佳化 (Radicals Off-Screen Optimization)
 
 ### 3.1 傳統輸入法的體驗缺陷
-在進行大易輸入（例如拼打「詹」，對照字根為 `魚鳥言` / 英文 `nh1`）或注音輸入時，使用者正在鍵入的字根，以前會以「Composing Text（組字中文字）」的形式直接即時填入目標應用程式（例如 Google 搜尋框、LINE 聊天輸入框）。
+在進行大易輸入（例如拼打「詹」，對照字根為 `魚鳥言` / 英文 `nh1`） or 注音輸入時，使用者正在鍵入的字根，以前會以「Composing Text（組字中文字）」的形式直接即時填入目標應用程式（例如 Google 搜尋框、LINE 聊天輸入框）。
 這會強制目標應用程式在漢字尚未拼完前，就針對字根字母（`魚鳥言`）進行高頻率的聯想與自動建議（例如被搜尋引擎誤判想搜尋「魚鳥之戀」），對用戶組字輸入的流暢感造成極大干擾。
 
-### 3.2 智慧字根不上屏實作細節
+### 3.2 智慧字根不上字實作細節
 在 [LIMEService.java](file:///c:/Storage/workspace/nanime-main/LimeStudio/app/src/main/java/net/toload/main/hd/LIMEService.java) 中，我們重構了 `updateCandidates(final boolean getAllRecords)` 方法，**將 `ic.setComposingText` 呼叫移除**，僅執行鍵盤內部的字根渲染與懸浮視窗繪製：
 
 ```java
@@ -62,8 +62,8 @@
             getComposingDisplayString(keyString);
 ```
 
-### 3.3 優化成效與運作機制
-1. **輸入框極致乾淨**：組字過程中，目標 Host App 的輸入框**始終保持清空狀態**，絕不出現干擾性的字根殘留。
+### 3.3 最佳化成效與運作機制
+1. **輸入框極致乾淨**：組字過程中，目標 Host 應用程式的輸入框**始終保持清空狀態**，絕不出現干擾性的字根殘留。
 2. **狀態即時同步**：鍵入的字根依然即時且精準地呈現在輸入法的**組字浮動懸浮窗**與**候選字列表最前端**，打字進度一目了然。
 3. **無縫漢字提交**：點選漢字（如 `詹`）或按下 Space 確認時，漢字以最乾淨的 `commitText` 正確填入游標處，體驗無比流暢。
 
@@ -101,7 +101,7 @@
 ## 📱 5. 新設備 Release 建置資源保留 (keep.xml Release Whitelist)
 
 ### 5.1 崩潰問題與根本原因分析
-在 Pixel 7 等配備較新系統的裝置上，安裝「偵錯版本 (Debug Build)」可以完美啟動，但安裝「釋放版本 (Release Build)」時卻會發生以下嚴重崩潰：
+在 Pixel 7 等配備較新系統的裝置上，安裝「偵錯版本 (Debug Build)」可以完美啟動，但安裝「Release 版本」時卻會發生以下嚴重崩潰：
 `android.content.res.Resources$NotFoundException: Resource ID #0x0`
 崩潰點位於 `LIMEBaseKeyboard.java` 內透過動態反射尋找資源 ID 處。
 
@@ -123,6 +123,6 @@ shrinkResources = true
       tools:keep="@xml/*" />
   ```
   精確指示 `tools:keep="@xml/*"` 強制保留 `xml` 目錄下的所有佈局檔，不參與收縮。
-* **封裝與多機相容性驗證**：
-  我們重新編譯了經過深度優化的 Release 版本，並使用 ADB 將其部署至 **Pixel 7** 與 **Pixel 5**。
+* **打包與多機相容性驗證**：
+  我們重新編譯了經過深度最佳化的 Release 版本，並使用 ADB 將其部署至 **Pixel 7** 與 **Pixel 5**。
   兩台實體設備均成功裝載，切換鍵盤與打字皆完全流暢、無任何閃退與資源遺失異常，相容性測試圓滿通過。

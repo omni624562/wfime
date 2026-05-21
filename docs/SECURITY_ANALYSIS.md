@@ -93,7 +93,7 @@ db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
 
 **影響：** 可能刪除表、損壞資料或執行任意 SQL 命令。
 
-### Scenario 2: Input Method Code Injection | 輸入法代碼注入
+### Scenario 2: Input Method Code Injection | 輸入法程式碼注入
 
 **Attack Vector:**
 ```java
