@@ -25,10 +25,10 @@
   -->
 
 <Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
-    limehd:horizontalGap="0px"
-    limehd:keyHeight="@dimen/key_height"
+    limehd:horizontalGap="@dimen/key_horizontal_gap_material3"
+    limehd:keyHeight="@dimen/key_height_material3"
     limehd:keyWidth="10%p"
-    limehd:verticalGap="0px">
+    limehd:verticalGap="@dimen/key_vertical_gap_material3">
 
     <Row>
         <Key
@@ -176,7 +176,7 @@
             limehd:codes="-1"
             limehd:isModifier="true"
             limehd:isSticky="true"
-            limehd:keyIcon="@drawable/sym_keyboard_shift"
+            limehd:keyIcon="@drawable/sym_keyboard_shift_material3"
             limehd:keyWidth="15%p" />
         <Key
             limehd:codes="-2"
@@ -185,13 +185,13 @@
             limehd:keyWidth="10%p" />
         <Key
             limehd:codes="-100"
-            limehd:keyIcon="@drawable/ic_emoji_white"
+            limehd:keyIcon="@drawable/ic_emoji_vector"
             limehd:keyWidth="10%p"
             limehd:popupKeyboard="@xml/popup_smileys" />
         <Key
             limehd:codes="32"
             limehd:isRepeatable="true"
-            limehd:keyIcon="@drawable/sym_keyboard_space_light"
+            limehd:keyIcon="@drawable/sym_flat_keyboard_space"
             limehd:keyWidth="25%p" />
         <Key
             limehd:codes="45"
@@ -201,13 +201,13 @@
             limehd:codes="-5"
             limehd:isModifier="true"
             limehd:isRepeatable="true"
-            limehd:keyIcon="@drawable/sym_keyboard_delete_light"
+            limehd:keyIcon="@drawable/sym_keyboard_delete_material3"
             limehd:keyWidth="15%p" />
         <Key
             limehd:codes="10"
             limehd:isModifier="true"
             limehd:keyEdgeFlags="right"
-            limehd:keyIcon="@drawable/sym_keyboard_return_light"
+            limehd:keyIcon="@drawable/sym_keyboard_return_material3"
             limehd:keyWidth="15%p" />
     </Row>
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_keyboard_shift_caps_24" android:state_checkable="true" android:state_checked="true" android:state_pressed="true" android:tint="@color/md_theme_primary" />
+    <item android:drawable="@drawable/ic_keyboard_shift_caps_24" android:state_checkable="true" android:state_checked="true" android:tint="@color/md_theme_primary" />
+    <item android:drawable="@drawable/ic_keyboard_shift_24" android:state_checkable="true" android:state_pressed="true" android:tint="@color/keyboard_second_foreground_material3" />
+    <item android:drawable="@drawable/ic_keyboard_shift_24" android:state_checkable="true" android:tint="@color/keyboard_second_foreground_material3" />
+</selector>

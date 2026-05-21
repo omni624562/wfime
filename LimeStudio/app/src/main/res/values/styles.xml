@@ -530,14 +530,14 @@
     </style>
 
     <style name="LIMEKeyboard.Material3" parent="LIMEKeyboard">
-        <item name="spaceKeyIcon">@drawable/sym_keyboard_space_light</item>
+        <item name="spaceKeyIcon">@drawable/sym_flat_keyboard_space</item>
         <item name="spaceKeyPreviewIcon">@drawable/sym_flat_keyboard_space</item>
-        <item name="enterKeyIcon">@drawable/sym_keyboard_return_light</item>
-        <item name="searchKeyIcon">@drawable/sym_keyboard_search_light</item>
-        <item name="doneKeyIcon">@drawable/sym_keyboard_done_light</item>
-        <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_light</item>
-        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift</item>
-        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted</item>
+        <item name="enterKeyIcon">@drawable/sym_keyboard_return_material3</item>
+        <item name="searchKeyIcon">@drawable/sym_keyboard_search_material3</item>
+        <item name="doneKeyIcon">@drawable/sym_keyboard_done_material3</item>
+        <item name="deleteKeyIcon">@drawable/sym_keyboard_delete_material3</item>
+        <item name="shiftKeyIcon">@drawable/sym_keyboard_shift_material3</item>
+        <item name="shiftKeyShiftedIcon">@drawable/sym_keyboard_shift_shifted_material3</item>
         <item name="spaceKeyTextColor">@color/keyboard_second_foreground_material3</item>
         <item name="spaceKeySlidingLeftArrow">@drawable/sym_keyboard_previous</item>
         <item name="spaceKeySlidingRightArrow">@drawable/sym_keyboard_next</item>

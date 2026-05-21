@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
-    limehd:horizontalGap="0px"
-    limehd:keyHeight="@dimen/key_height"
+    limehd:horizontalGap="@dimen/key_horizontal_gap_material3"
+    limehd:keyHeight="@dimen/key_height_material3"
     limehd:keyWidth="33.3%p"
-    limehd:verticalGap="0px">
+    limehd:verticalGap="@dimen/key_vertical_gap_material3">
 
     <Row>
         <Key limehd:codes="49" limehd:keyLabel="1" />
@@ -24,8 +24,8 @@
     </Row>
 
     <Row limehd:rowEdgeFlags="bottom">
-        <Key limehd:codes="-5" limehd:isModifier="true" limehd:isRepeatable="true" limehd:keyIcon="@drawable/sym_keyboard_delete_light" />
+        <Key limehd:codes="-5" limehd:isModifier="true" limehd:isRepeatable="true" limehd:keyIcon="@drawable/sym_keyboard_delete_material3" />
         <Key limehd:codes="48" limehd:keyLabel="0" />
-        <Key limehd:codes="10" limehd:isModifier="true" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_return_light" />
+        <Key limehd:codes="10" limehd:isModifier="true" limehd:keyEdgeFlags="right" limehd:keyIcon="@drawable/sym_keyboard_return_material3" />
     </Row>
 </Keyboard>

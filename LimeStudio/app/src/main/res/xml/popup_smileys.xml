@@ -23,10 +23,10 @@
   -->
 
 <Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
-    limehd:horizontalGap="0px"
-    limehd:keyHeight="@dimen/key_height"
+    limehd:horizontalGap="@dimen/key_horizontal_gap_material3"
+    limehd:keyHeight="@dimen/key_height_material3"
     limehd:keyWidth="15%p"
-    limehd:verticalGap="0px">
+    limehd:verticalGap="@dimen/key_vertical_gap_material3">
 
     <Row limehd:rowEdgeFlags="top">
         <Key

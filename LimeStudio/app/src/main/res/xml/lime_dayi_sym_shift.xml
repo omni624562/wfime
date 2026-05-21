@@ -25,10 +25,10 @@
   -->
 
 <Keyboard xmlns:limehd="http://schemas.android.com/apk/res-auto"
-    limehd:horizontalGap="0px"
-    limehd:keyHeight="@dimen/key_height"
+    limehd:horizontalGap="@dimen/key_horizontal_gap_material3"
+    limehd:keyHeight="@dimen/key_height_material3"
     limehd:keyWidth="10%p"
-    limehd:verticalGap="0px">
+    limehd:verticalGap="@dimen/key_vertical_gap_material3">
 
 
     <Row>
@@ -142,7 +142,7 @@
             limehd:isModifier="true"
             limehd:isSticky="true"
             limehd:keyEdgeFlags="left"
-            limehd:keyIcon="@drawable/sym_keyboard_shift_shifted"
+            limehd:keyIcon="@drawable/sym_keyboard_shift_shifted_material3"
             limehd:keyWidth="15%p" />
         <Key
             limehd:codes="90"
@@ -170,7 +170,7 @@
             limehd:isModifier="true"
             limehd:isRepeatable="true"
             limehd:keyEdgeFlags="right"
-            limehd:keyIcon="@drawable/sym_keyboard_delete_light"
+            limehd:keyIcon="@drawable/sym_keyboard_delete_material3"
             limehd:keyWidth="15%p" />
     </Row>
     <Row limehd:rowEdgeFlags="bottom">
@@ -178,7 +178,7 @@
             limehd:codes="-3"
             limehd:isModifier="true"
             limehd:keyEdgeFlags="left"
-            limehd:keyIcon="@drawable/sym_keyboard_done_light"
+            limehd:keyIcon="@drawable/sym_keyboard_done_material3"
             limehd:keyWidth="15%p" />
         <Key
             limehd:codes="-9"
@@ -207,7 +207,7 @@
             limehd:codes="10"
             limehd:isModifier="true"
             limehd:keyEdgeFlags="right"
-            limehd:keyIcon="@drawable/sym_keyboard_return_light"
+            limehd:keyIcon="@drawable/sym_keyboard_return_material3"
             limehd:keyWidth="15%p" />
     </Row>
 
