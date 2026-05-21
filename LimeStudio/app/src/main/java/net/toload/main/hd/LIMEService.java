@@ -510,13 +510,56 @@ public class LIMEService extends InputMethodService implements
                             android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
                     lp.gravity = android.view.Gravity.BOTTOM;
                     mInputViewContainer.addView(mCandidateInInputView, lp);
-                    
+
                     // Update mCandidateView to the one inside InputView
                     mCandidateView = mCandidateInInputView.findViewById(R.id.candidatesView);
-                    
+
+                    // Root cause of Samsung "Keyboard button on navigation bar" overlap:
+                    // Our IME runs edge-to-edge and the candidate bar extends INTO the
+                    // navigation bar area. Samsung's IME switcher button is drawn by system
+                    // UI at a higher z-order in that same nav-bar zone, visually covering
+                    // our candidates and intercepting touch events.
+                    //
+                    // Fix: When a physical keyboard is connected, register an insets listener
+                    // that applies paddingBottom = max(navBar, gesture) to the candidate
+                    // container. This pushes candidate CONTENT above the nav bar area so
+                    // Samsung's button is in the empty background strip below, not on top
+                    // of our candidates.
+                    if (isPhysicalKeyboardConnected) {
+                        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(
+                                mCandidateInInputView,
+                                (view, insets) -> {
+                                    int navBottom = insets.getInsets(
+                                            androidx.core.view.WindowInsetsCompat.Type.navigationBars()).bottom;
+                                    int gestureBottom = insets.getInsets(
+                                            androidx.core.view.WindowInsetsCompat.Type.systemGestures()).bottom;
+                                    int bottomPad = Math.max(navBottom, gestureBottom);
+                                    view.setPadding(
+                                            view.getPaddingLeft(),
+                                            view.getPaddingTop(),
+                                            view.getPaddingRight(),
+                                            bottomPad);
+                                    Log.d("KBD_DEBUG", "Candidate container paddingBottom=" + bottomPad
+                                            + "px (navBar=" + navBottom + ", gesture=" + gestureBottom + ")");
+                                    return insets;
+                                });
+                        androidx.core.view.ViewCompat.requestApplyInsets(mCandidateInInputView);
+                    } else {
+                        // Remove any previous insets listener and reset bottom padding when
+                        // no physical keyboard is connected.
+                        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(
+                                mCandidateInInputView, null);
+                        mCandidateInInputView.setPadding(
+                                mCandidateInInputView.getPaddingLeft(),
+                                mCandidateInInputView.getPaddingTop(),
+                                mCandidateInInputView.getPaddingRight(),
+                                0);
+                    }
+
                 } catch (Exception e) {
                     Log.e("KBD_DEBUG", "FAILED to add mCandidateInInputView to container: " + e.getMessage(), e);
                 }
+
             } else {
                 Log.e("KBD_DEBUG", "ERROR: mCandidateInInputView is NULL in fixed mode!");
             }
@@ -930,7 +973,9 @@ public class LIMEService extends InputMethodService implements
     @Override
     public void onComputeInsets(InputMethodService.Insets outInsets) {
         super.onComputeInsets(outInsets);
-        // Let the system handle insets automatically
+        // Let the system handle insets automatically.
+        // Note: Do NOT set TOUCHABLE_INSETS_CONTENT here — doing so interferes with
+        // touch event distribution to the candidate bar on Samsung One UI.
     }
 
     /**
