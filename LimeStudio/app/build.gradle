@@ -25,13 +25,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
+// Load signing config from keystore.properties (excluded from git)
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
 android {
     signingConfigs {
         release {
-            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+            storeFile file(keystoreProps['storeFile']?.replace('~', System.getProperty('user.home')) ?: "${System.getProperty('user.home')}/.android/debug.keystore")
+            storePassword keystoreProps['storePassword'] ?: System.getenv('KEYSTORE_PASSWORD') ?: 'android'
+            keyAlias keystoreProps['keyAlias'] ?: System.getenv('KEY_ALIAS') ?: 'androiddebugkey'
+            keyPassword keystoreProps['keyPassword'] ?: System.getenv('KEY_PASSWORD') ?: 'android'
         }
     }
     compileSdk = 36

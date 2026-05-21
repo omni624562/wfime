@@ -5,6 +5,13 @@ fail-output.txt
 *-output.txt
 
 #################
+## Signing / Secrets
+#################
+keystore.properties
+*.keystore
+*.jks
+
+#################
 ## Eclipse
 #################
 
