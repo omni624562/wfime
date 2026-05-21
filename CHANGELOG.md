@@ -23,26 +23,32 @@ WFIME (Wheat Fields Input Method Editor) 所有重要版本變更記錄於此。
 
 ## [1.2.0] - 2026-05-21
 
-重大程式碼清理與重構，建立穩定可發布基線。
+重大程式碼清理、首頁重構、輸入體驗優化與新機相容性提升，建立穩定可發布基線。
 
 ### Added | 新增
-- **數字鍵盤佈局** (`numeric.xml`) — 支援 `TYPE_CLASS_NUMBER` 輸入欄位，提供獨立的 3×4 純數字鍵盤
-- **鍵盤導航圖示** — 新增方向鍵等 drawable 資源
-- **發布簽署設定** — build.gradle 加入 release signing configuration
+- **一站式麥田金首頁** — 於 `SettingsScreen.kt` 建立「下載輸入法」麥田金卡片，整合注音與大易對照表下載，並與 `SetupImLoadDialog` 橋接，支援非同步安全載入與狀態反應式即時重刷，取代舊有側邊抽屜選單與多餘齒輪設定。
+- **字根不上屏優化** — 重構 `LIMEService.java`，在拼打漢字時不將中間字根（如大易的 `魚鳥言` 或注音拼音）作為 Composing Text 送至 Host App 編輯框，徹底杜絕目標應用程式的多餘搜尋聯想與干擾，並保留浮動組字懸浮視窗與 CandidateView 字根提示。
+- **新設備資源保留配置** (`keep.xml`) — 新增 `app/src/main/res/raw/keep.xml`，強制保留所有 XML 佈局檔（`tools:keep="@xml/*"`），防止 ProGuard/Gradle 資源收縮器 (`shrinkResources`) 將動態反射解析的鍵盤佈局 XML 誤剪，完美解決在 Pixel 7 等新設備上安裝 Release 版本時崩潰的 Bug。
+- **數字鍵盤佈局** (`numeric.xml`) — 支援 `TYPE_CLASS_NUMBER` 輸入欄位，提供獨立的 3×4 純數字鍵盤。
+- **鍵盤導航圖示** — 新增方向鍵等 drawable 資源。
+- **發布簽署設定** — `build.gradle` 加入 release signing configuration。
+- **獨立版本號管理** (`version.properties`) — 於 `LimeStudio/version.properties` 解耦版號變數，由 Gradle 動態解析以避免動態時間導致編譯快取失效。
 
 ### Changed | 變更
-- **Java 21 相容性** — 將 `sourceCompatibility` / `targetCompatibility` 升級至 Java 21
-- **鍵盤識別碼重構** — 統一鍵盤名稱對應，更新導航選單刷新邏輯
-- **EmojiPicker 佈局優化** — 改善 Emoji 選擇器的顯示與初始化流程
+- **Java 21 相容性** — 將 `sourceCompatibility` / `targetCompatibility` 升級至 Java 21。
+- **鍵盤識別碼與防錯 Fallback** — 統一鍵盤名稱對應，並於 `LIMEKeyboardSwitcher.java` 引入雙重安全 Fallback 容錯切換，即使遇到資料庫加載異常，也能自動安全回退至注音或大易默認佈局，保障鍵盤切換的 100% 穩定度。
+- **EmojiPicker 佈局優化** — 改善 Emoji 選擇器的顯示與初始化流程。
+- **主畫面 CoordinatorLayout 化** — 將 `activity_main.xml` 的 root 佈局重構為 CoordinatorLayout，完全移除 drawer 容器，實現 0 負擔極速啟動。
 
 ### Removed | 移除
-- **廢棄版面配置** — 移除 `fragment_dialog_related_*.xml`、`kbsetting.xml`、`kbsetting2.xml`、`related.xml`、`word.xml` 等不再使用的 XML
-- **舊符號鍵盤檔** — 刪除 `symbols1.xml`、`symbols2.xml`、`symbols3.xml`、`phone_simple.xml`、`popup_domains.xml`、`templime.xml`，改用統一的 `lime_number_symbol.xml`
-- **SetupImRestoreRunnable** — 移除已廢棄的輸入法還原執行緒
+- **死碼與廢棄檔案大掃除** — 徹底掃描並刪除 **28 個 Java/Kotlin 原始碼檔案**（包含 `ManageImFragment.java`、`AboutFragment.java`、側邊抽屜模組 `NavigationDrawerScreen.kt` 等相關 UI、Dialog 與非同步備份任務檔案）與 **18 個 XML layout 佈局檔案**，精煉專案架構。
+- **廢棄版面配置** — 移除 `fragment_dialog_related_*.xml`、`kbsetting.xml`、`kbsetting2.xml`、`related.xml`、`word.xml` 等不再使用的 XML。
+- **舊符號鍵盤檔** — 刪除 `symbols1.xml`、`symbols2.xml` 、`symbols3.xml`、`phone_simple.xml`、`popup_domains.xml`、`templime.xml`，改用統一的 `lime_number_symbol.xml`。
+- **SetupImRestoreRunnable** — 移除已廢棄的輸入法還原執行緒。
 
 ### Fixed | 修復
-- **輸入法處理更新** — 修復多項輸入模式切換相關問題
-- **Emoji 資料清理** — 修正初始化流程並清理舊 Emoji 資料
+- **輸入法處理更新** — 修復多項輸入模式切換與動態 package flavor name 資源解析問題。
+- **Emoji 資料清理** — 修正初始化流程並清理舊 Emoji 資料。
 
 ---
 
