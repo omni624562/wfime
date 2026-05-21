@@ -1111,6 +1111,13 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     float scaleFactor = 0.55f;
                     drawableHeight = (int) (drawHeight * scaleFactor);
 
+                    // Apply tint to ensure visibility, as ic_emoji_vector uses ?attr/colorControlNormal
+                    // which may not resolve correctly in all theme contexts
+                    icon.mutate();
+                    int tintColor = key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal;
+                    icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+                    icon.setAlpha(255);
+
                     // Maintain aspect ratio if intrinsic dimensions are available
                     if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
                         drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
@@ -1123,6 +1130,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     // Language Switch Key: Scale to 55% of key height to match text label size
                     float scaleFactor = 0.55f;
                     drawableHeight = (int) (drawHeight * scaleFactor);
+
+                    // Apply tint to ensure visibility, as ic_translate uses ?attr/colorControlNormal
+                    // which may not resolve correctly in all theme contexts
+                    icon.mutate();
+                    int tintColor = key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal;
+                    icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+                    icon.setAlpha(255);
+
                     // Maintain aspect ratio if intrinsic dimensions are available
                     if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
                         drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
@@ -1132,9 +1147,17 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
                     drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 } else {
+                    // Default icon scaling (Delete, Return, etc.)
+                    // Use 55% of key height to match Emoji and Translate icons
+                    float scaleFactor = 0.55f;
+                    drawableHeight = (int) (drawHeight * scaleFactor);
 
-                    drawableHeight = drawHeight; // icon.getIntrinsicHeight();
-                    drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
+                    // Maintain aspect ratio if intrinsic dimensions are available
+                    if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
+                        drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
+                    } else {
+                        drawableWidth = drawableHeight;
+                    }
                     drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
                     drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 }
