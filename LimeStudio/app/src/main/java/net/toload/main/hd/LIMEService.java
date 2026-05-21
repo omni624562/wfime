@@ -211,7 +211,7 @@ public class LIMEService extends InputMethodService implements
     private String mIMActivatedState = ""; // Jeremy '12,5,3, renamed from keyboardSelectedState
     private List<String> activatedIMNameList; // Jeremy '12,4,30 renamed from keyboardList
     private List<String> activatedIMShortNameList; // Jeremy '12,4,30 renamed from keyboardShortname
-    private List<String> activatedIMList; // jerem '12,4,30 reanmed from keybaordCodeList
+    List<String> activatedIMList; // jerem '12,4,30 reanmed from keybaordCodeList; package-private for PhysicalKeyHandler
     String currentSoftKeyboard = ""; // Jeremy '12,4,30 reanmed from keybaord_xml;
     SearchServer SearchSrv = null;
     // Auto Commmit Value
@@ -1629,8 +1629,13 @@ public class LIMEService extends InputMethodService implements
                 if (!hasSymbolEntered && (hasMenuPress || hasCtrlPress)) { // Jeremy '12,4,29 use
                                                                                             // mEnglishOnly instead of
                                                                                             // onIM
-                    // nextActiveKeyboard(true);
-                    showIMPicker(); // Jeremy '11,8,28
+                    // Ctrl+Shift: cycle internal IMs (大易↔注音) instead of showing the
+                    // system IME picker — same logic as PhysicalKeyHandler.onKeyUp().
+                    if (hasCtrlPress) {
+                        switchToNextActivatedIM(true);
+                    } else {
+                        showIMPicker(); // Menu+Shift: keep showing system picker
+                    }
                     if (hasMenuPress) {
                         hasMenuProcessed = true;
                         hasMenuPress = false;
@@ -2410,9 +2415,12 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "showIMPicker()");
         buildActivatedIMList();
 
-        MaterialAlertDialogBuilder builder;
-
-        builder = new MaterialAlertDialogBuilder(this);
+        // MaterialAlertDialogBuilder requires an AppCompat theme context, but the IME
+        // service context does not carry one — wrapping it fixes the crash.
+        android.view.ContextThemeWrapper themedCtx = new android.view.ContextThemeWrapper(
+                this, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog);
+        androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(themedCtx);
 
         builder.setCancelable(true);
         builder.setIcon(R.drawable.sym_keyboard_done_white);
