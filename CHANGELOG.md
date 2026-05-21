@@ -14,6 +14,11 @@ WFIME (Wheat Fields Input Method Editor) 所有重要版本變更記錄於此。
 - **英文預測干擾** — 在符號模式與電話模式下停用英文預測，避免產生「Pacific」等無關建議詞
 - **大易輸入原始碼顯示** — 修正 Dayi 輸入時非字母數字組合（如 `./`）不必要地出現於候選列的問題
 
+### Security | 安全性
+- **移除 `requestLegacyExternalStorage`** — 此屬性在 Android 11（API 30）後已無效，從 `AndroidManifest.xml` 中刪除
+- **停用 `allowBackup`** — 改為 `false`，防止用戶輸入資料（字典、設定）透過 `adb backup` 被外部存取
+- **簽署憑證外部化** — `build.gradle` 的 release signing 密碼改從 `keystore.properties` 讀取（已加入 `.gitignore`），支援 CI 環境變數（`KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`）作為回退，不再硬編碼於版本控制
+
 ---
 
 ## [1.2.0] - 2026-05-21
