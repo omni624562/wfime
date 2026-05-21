@@ -137,6 +137,78 @@ public class PhysicalKeyboardTest {
         });
     }
 
+    @Test
+    public void testCtrlSpaceShortcutSwitch() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                service.resetFlags();
+                // 模擬 Ctrl 鍵按下
+                KeyEvent ctrlEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CTRL_LEFT);
+                service.onKeyDown(KeyEvent.KEYCODE_CTRL_LEFT, ctrlEvent);
+
+                // 模擬 Space 鍵按下 (Ctrl 鍵仍在按下狀態，所以 metaState 有 META_CTRL_ON，isCtrlPressed() 為 true)
+                KeyEvent spaceEvent = new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
+                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE, 0, KeyEvent.META_CTRL_ON);
+                service.onKeyDown(KeyEvent.KEYCODE_SPACE, spaceEvent);
+
+                assertTrue("Ctrl+Space 必須觸發 switchChiEng()", service.switchChiEngCalled);
+            }
+        });
+    }
+
+    @Test
+    public void testCtrlShiftShortcutShowPicker() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                service.resetFlags();
+                service.mEnglishOnly = false; // 確保非英文模式
+
+                // 1. 按下 Ctrl 鍵
+                KeyEvent ctrlDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_CTRL_LEFT);
+                service.onKeyDown(KeyEvent.KEYCODE_CTRL_LEFT, ctrlDown);
+
+                // 2. 按下 Shift 鍵
+                KeyEvent shiftDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT);
+                service.onKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT, shiftDown);
+
+                // 3. 放開 Shift 鍵
+                KeyEvent shiftUp = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT);
+                service.onKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT, shiftUp);
+
+                assertTrue("Ctrl+Shift 必須觸發 showIMPicker()", service.showIMPickerCalled);
+            }
+        });
+    }
+
+    @Test
+    public void testShiftAtShortcutShowPicker() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                service.resetFlags();
+                service.mEnglishOnly = false; // 確保非英文模式
+
+                // 1. 按下 Shift 鍵
+                KeyEvent shiftDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT);
+                service.onKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT, shiftDown);
+
+                // 2. 按下 @ 鍵
+                KeyEvent atDown = new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
+                        KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_AT, 0, KeyEvent.META_SHIFT_ON);
+                service.onKeyDown(KeyEvent.KEYCODE_AT, atDown);
+
+                // 3. 放開 @ 鍵 (放開時 shift 仍然為 true，故 metaState 具有 META_SHIFT_ON)
+                KeyEvent atUp = new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
+                        KeyEvent.ACTION_UP, KeyEvent.KEYCODE_AT, 0, KeyEvent.META_SHIFT_ON);
+                service.onKeyUp(KeyEvent.KEYCODE_AT, atUp);
+
+                assertTrue("Shift+@ 必須觸發 showIMPicker()", service.showIMPickerCalled);
+            }
+        });
+    }
+
     /**
      * 測試用的 Testable LIMEService 子類別，覆寫部分系統 UI 依賴以確保測試穩定執行。
      */
@@ -169,6 +241,25 @@ public class PhysicalKeyboardTest {
         @Override
         public void requestHideSelf(int flags) {
             // 空實作
+        }
+
+        public boolean showIMPickerCalled = false;
+        public boolean switchChiEngCalled = false;
+
+        @Override
+        public void showIMPicker() {
+            showIMPickerCalled = true;
+        }
+
+        @Override
+        public void switchChiEng() {
+            switchChiEngCalled = true;
+            mEnglishOnly = !mEnglishOnly;
+        }
+
+        public void resetFlags() {
+            showIMPickerCalled = false;
+            switchChiEngCalled = false;
         }
     }
 }
