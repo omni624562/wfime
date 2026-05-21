@@ -283,13 +283,22 @@ public class LIMEKeyboardSwitcher {
 
     private int getKeyboardXMLID(String value) {
         if (value == null || value.isEmpty()) {
-            Log.w(TAG, "getKeyboardXMLID: value is null or empty, falling back to 'lime'");
-            return mThemedContext.getResources().getIdentifier("lime", "xml", mService.getPackageName());
+            Log.w(TAG, "getKeyboardXMLID: value is null or empty, falling back to R.xml.lime");
+            return R.xml.lime;
         }
+
+        // Try to get resource ID using the current package name
         int id = mThemedContext.getResources().getIdentifier(value, "xml", mService.getPackageName());
+
+        // If not found, try the base package name (in case of flavor suffix like .phone)
         if (id == 0) {
-            Log.w(TAG, "getKeyboardXMLID: resource '" + value + "' not found, falling back to 'lime'");
-            id = mThemedContext.getResources().getIdentifier("lime", "xml", mService.getPackageName());
+            id = mThemedContext.getResources().getIdentifier(value, "xml", "net.toload.main.hd");
+        }
+
+        // Fallback to default 'lime' keyboard if still not found
+        if (id == 0) {
+            Log.w(TAG, "getKeyboardXMLID: resource '" + value + "' not found, falling back to R.xml.lime");
+            id = R.xml.lime;
         }
         return id;
     }
@@ -455,11 +464,18 @@ public class LIMEKeyboardSwitcher {
 
                 }
             }
+        }
+
+        if (kid != null) {
 
             if (mInputView == null)
                 return;
 
             LIMEKeyboard keyboard = getKeyboard(kid);
+            if (keyboard == null) {
+                Log.e(TAG, "setKeyboardMode: Failed to load keyboard for " + kid.mXml);
+                return;
+            }
 
             // Jeremy '24,1,7: Dynamic Space Bar Label & Dayi Hints
             List<net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key> keys = keyboard.getKeys();
