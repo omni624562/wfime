@@ -1482,6 +1482,19 @@ public class LIMEService extends InputMethodService implements
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_E: // Ctrl+E — toggle emoji picker (like Win+. on Windows)
+                if (hasCtrlPress || event.isCtrlPressed()) {
+                    android.widget.Toast.makeText(this, "Ctrl+E reached!", android.widget.Toast.LENGTH_SHORT).show();
+                    toggleEmojiVisibility();
+                    return true;
+                }
+                // No Ctrl: normal 'e' key — fall through to translateKeyDown
+                if (!hasMenuPress) {
+                    if (translateKeyDown(keyCode, event)) {
+                        return true;
+                    }
+                }
+                break;
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
                     if (translateKeyDown(keyCode, event)) {
