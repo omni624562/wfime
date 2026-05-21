@@ -4,21 +4,23 @@
 
 WFIME (Wheat Fields Input Method Editor) is a fork of LimeIME — an Android IME (Input Method Editor) supporting multiple Chinese input methods. The app is licensed under GPLv3.
 
-- **Package:** `nan.toload.main.hd`
+- **Package:** `net.toload.main.hd`
 - **Min SDK:** 30 / **Target SDK:** 36 / **Compile SDK:** 36
 - **Languages:** Java (primary) + Kotlin (newer features, Compose)
 - **UI:** Mixed XML layouts + Jetpack Compose (migration in progress)
 - **Theming:** Material Design 3 with dynamic colors
 - **Bilingual:** English + Traditional Chinese (zh-TW)
+- **Version:** Managed in `LimeStudio/version.properties` (major.minor.patch + auto-date versionCode)
 
 ## Project Structure | 專案結構
 
 ```
 LimeStudio/                  # Android project root (open this in Android Studio)
 ├── app/
-│   ├── src/main/java/nan/toload/main/hd/   # Main source code
+│   ├── src/main/java/net/toload/main/hd/   # Main source code
 │   ├── src/main/res/                        # Resources (layouts, strings, drawables)
 │   └── src/test/                            # Unit tests (JUnit + Robolectric)
+├── version.properties                       # Version management (major/minor/patch)
 ├── build.gradle                             # Root build script
 └── gradle/                                  # Gradle wrapper
 docs/                        # Project documentation
@@ -58,7 +60,8 @@ Follow Conventional Commits format with scope when applicable:
 - AndroidX Preference migration completed (see `docs/AndroidX-Preference-Migration.md`)
 - Material 3 color migration is in progress (see `docs/Phase3-Color-Audit-Material3-Mapping.md`)
 - Compose adoption is partial — Settings screen is fully Compose; keyboard/candidate views remain XML
-- Version code/name are auto-generated from the build date (`yyyyMMdd` / `yyyy.MM.dd`)
+- Version name (`major.minor.patch`) is defined in `LimeStudio/version.properties`; versionCode is auto-generated as `yyyyMMdd` on each build
+- To bump version: edit `VERSION_MAJOR`/`VERSION_MINOR`/`VERSION_PATCH` in `LimeStudio/version.properties`
 
 ## Development Guidelines | 開發規範
 
