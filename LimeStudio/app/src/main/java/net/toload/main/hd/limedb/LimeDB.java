@@ -245,7 +245,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         // If pattern is valid but not in whitelist, log warning but allow
         // This allows for future table additions while maintaining security
-        Log.w(TAG, "Table name not in whitelist but matches pattern: " + tableName);
+        try {
+            Log.w(TAG, "Table name not in whitelist but matches pattern: " + tableName);
+        } catch (RuntimeException ignored) {
+            // Some JVM unit test environments do not mock android.util.Log.
+        }
         return true;
     }
 

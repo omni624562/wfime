@@ -8,7 +8,8 @@
       "Bash(ls:*)",
       "Bash(rm:*)",
       "Bash(Get-ChildItem \"C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\src\\\\main\\\\res\\\\xml\\\\\" | Select-Object Name *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(powershell *)"
     ],
     "deny": []
   }
