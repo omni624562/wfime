@@ -1,4 +1,10 @@
 #################
+## Build Artifacts / CI Outputs
+#################
+fail-output.txt
+*-output.txt
+
+#################
 ## Eclipse
 #################
 
