@@ -218,8 +218,7 @@ open class CandidateView @JvmOverloads constructor(
     fun setService(service: LIMEService) {
         mService = service
     }
-
-    fun setSuggestions(
+    open fun setSuggestions(
         suggestions: List<Mapping>?,
         completions: Boolean,
         typedWordValid: Boolean,
@@ -229,34 +228,34 @@ open class CandidateView @JvmOverloads constructor(
         this.selectedIndex = -1
     }
 
-    fun setSuggestions(
+    open fun setSuggestions(
         suggestions: List<Mapping>?,
         showNumber: Boolean,
         displaySelKey: Any
     ) {
          setSuggestions(suggestions, showNumber, true, true)
-    }
+     }
 
-    fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
+    open fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
         this.suggestions = suggestions?.toList() ?: emptyList()
         this.selectedIndex = selectedIndex
     }
 
-    fun setSuggestions(
+    open fun setSuggestions(
         suggestions: List<Mapping>?,
         reset: Boolean
     ) {
         setSuggestions(suggestions, false, false, false)
     }
     
-    fun clear() {
+    open fun clear() {
         suggestions = emptyList()
         selectedIndex = -1
         _composingText = ""
         _rawKeycode = ""
     }
     
-    fun setRawKeycode(keycode: String) {
+    open fun setRawKeycode(keycode: String) {
         _rawKeycode = keycode
     }
     
@@ -460,28 +459,28 @@ open class CandidateView @JvmOverloads constructor(
         clear()
     }
     
-    fun selectNext() {
+    open fun selectNext() {
         if (suggestions.isNotEmpty()) {
             selectedIndex = (selectedIndex + 1).coerceAtMost(suggestions.size - 1)
         }
     }
     
-    fun selectPrev() {
+    open fun selectPrev() {
          if (suggestions.isNotEmpty()) {
             selectedIndex = (selectedIndex - 1).coerceAtLeast(0)
         }
     }
     
-    fun selectNextRow() {
+    open fun selectNextRow() {
          // Prototype: equivalent to next page or jump 10?
          selectNext()
     }
     
-    fun selectPrevRow() {
+    open fun selectPrevRow() {
         selectPrev()
     }
     
-    fun takeSelectedSuggestion(): Boolean {
+    open fun takeSelectedSuggestion(): Boolean {
         if (selectedIndex >= 0 && selectedIndex < suggestions.size) {
             mService?.pickCandidateManually(selectedIndex)
             return true
