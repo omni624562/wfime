@@ -63,22 +63,6 @@ Follow Conventional Commits format with scope when applicable:
 - Version name (`major.minor.patch`) is defined in `LimeStudio/version.properties`; versionCode is auto-generated as `yyyyMMdd` on each build
 - To bump version: edit `VERSION_MAJOR`/`VERSION_MINOR`/`VERSION_PATCH` in `LimeStudio/version.properties`
 
-## Change Scope Rules | 修改範圍規範
-
-**Only touch what was explicitly requested. These rules are non-negotiable.**
-
-- **Do not refactor, modernize, or "improve" code that was not part of the task.** If a fix for A requires touching file B, change only the minimum lines needed in B.
-- **Do not change working code while fixing a bug elsewhere.** "While I'm here" edits are the primary source of regressions in this project (e.g. the emoji lazy-loading refactor that broke the emoji grid).
-- **If you notice something worth improving, list it and ask — do not act unilaterally.**
-- **One task = one focused commit.** Mixing unrelated changes in a single commit makes regressions hard to revert.
-
-**只改被明確要求的部分。以下規則不可妥協。**
-
-- 沒有被要求的 code，不重構、不現代化、不「順便改善」。
-- 修 bug 時不動其他運作正常的程式碼。「順手」的改動是這個專案 regression 的主要來源。
-- 發現可改善之處：列出來讓使用者決定，不自行動手。
-- 一個任務 = 一個 commit，不混入無關變更。
-
 ## Development Guidelines | 開發規範
 
 - Always provide both English and Traditional Chinese translations for user-facing strings
