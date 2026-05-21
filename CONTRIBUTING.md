@@ -55,7 +55,7 @@ Before contributing, ensure you have:
 - **Android Studio** - Latest stable version (Ladybug | 2024.2.1+) | **Android Studio** - 最新穩定版本（Ladybug | 2024.2.1+）
 - **JDK** - Java Development Kit 17+ | **JDK** - Java 開發工具包 17+
 - **Git** - Version control system | **Git** - 版本控制系統
-- **Android SDK** - API 30 (minimum) to API 36 (target) | **Android SDK** - API 30（最低）至 API 36（目標）
+- **Android SDK** - API 30 (minimum) to API 35 (target) | **Android SDK** - API 30（最低）至 API 35（目標）
 
 **Knowledge Requirements | 知識需求**
 - Java and/or Kotlin programming | Java 和/或 Kotlin 程式設計
@@ -361,7 +361,7 @@ Added whitelist-based validation for 30+ database tables with pattern
 validation fallback. See SECURITY_ANALYSIS.md for details.
 
 # Documentation
-docs(readme): update installation instructions for Android 16
+docs(readme): update installation instructions for Android 15
 
 # Refactoring
 refactor(ui): migrate ProgressDialog to Material3 CircularProgressIndicator
@@ -466,8 +466,8 @@ Relates to #[issue-number]
 - [ ] Manual testing performed | 執行手動測試
 
 **Test Environment | 測試環境**
-- Device: [e.g., Pixel 8, Android 16 emulator]
-- Android Version: [e.g., Android 16 (API 36)]
+- Device: [e.g., Pixel 8, Android 15 emulator]
+- Android Version: [e.g., Android 15 (API 35)]
 
 ## Screenshots | 螢幕截圖
 
@@ -633,7 +633,7 @@ public class LimeDBTest {
 **Before Submitting PR | 提交 PR 前**
 - [ ] Install APK on physical device | 在實體裝置上安裝 APK
 - [ ] Test on Android 11 (minimum SDK) | 在 Android 11 上測試（最低 SDK）
-- [ ] Test on Android 16 (target SDK) | 在 Android 16 上測試（目標 SDK）
+- [ ] Test on Android 15 (target SDK) | 在 Android 15 上測試（目標 SDK）
 - [ ] Test portrait and landscape orientations | 測試直向和橫向方向
 - [ ] Test on phone and tablet screen sizes | 測試手機和平板螢幕尺寸
 - [ ] Verify input method switching works | 驗證輸入法切換有效
