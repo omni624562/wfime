@@ -104,6 +104,25 @@ object ComposeBridge {
             // Thin wrapper that drives lifecycle across attach/detach cycles.
             // Lifecycle is PAUSED (not DESTROYED) on detach so the Recomposer stays alive for reuse.
             object : android.widget.FrameLayout(context) {
+                private var mBottomInset = 0
+
+                override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
+                    val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                        val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
+                        val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
+                        java.lang.Math.max(navBarBottom, gestureBottom)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        insets.systemWindowInsetBottom
+                    }
+                    if (bottom != mBottomInset) {
+                        mBottomInset = bottom
+                        setPadding(0, 0, 0, mBottomInset)
+                        if (BuildConfig.DEBUG) android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper dynamic bottom padding set to $mBottomInset px")
+                    }
+                    return super.onApplyWindowInsets(insets)
+                }
+
                 init {
                     if (BuildConfig.DEBUG) android.util.Log.d("EMOJI_DEBUG", "Creating emoji wrapper FrameLayout")
                     layoutParams = android.view.ViewGroup.LayoutParams(
@@ -124,6 +143,7 @@ object ComposeBridge {
                     super.onAttachedToWindow()
                     composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                     if (BuildConfig.DEBUG) android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper attached — lifecycle RESUMED")
+                    requestApplyInsets()
                 }
 
                 override fun onDetachedFromWindow() {

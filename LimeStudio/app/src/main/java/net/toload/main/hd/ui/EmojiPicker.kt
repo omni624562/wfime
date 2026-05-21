@@ -89,8 +89,7 @@ fun EmojiPicker(
         modifier = Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            // Apply dynamic system navigation bar padding to prevent overlap with gesture navigation bar
-            .navigationBarsPadding()
+            // Apply bottom padding to the whole column so the bottom bar sits ABOVE the system nav bar
             .padding(bottom = bottomPaddingDp.dp) 
     ) {
         // Top Bar: Category Icons
