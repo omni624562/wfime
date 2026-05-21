@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(*)",
       "Bash(.gradlew:*)",
       "Bash(gradlew.bat clean:*)",
       "Bash(./gradlew:*)",
@@ -9,7 +10,12 @@
       "Bash(rm:*)",
       "Bash(Get-ChildItem \"C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\src\\\\main\\\\res\\\\xml\\\\\" | Select-Object Name *)",
       "Bash(git *)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "PowerShell(Get-ChildItem 'C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\' -Recurse | Where-Object { $_.Extension -eq '.apk' } | Select-Object FullName, @{N='MB';E={[math]::Round\\($_.Length/1MB,1\\)}})",
+      "PowerShell(Get-ChildItem 'C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\' -Recurse | Select-Object FullName, Length | Where-Object { $_.Length -gt 0 } | Sort-Object Length -Descending | Select-Object -First 10)",
+      "PowerShell(Get-ChildItem 'C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\' -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.apk' -or $_.Extension -eq '.aab' } | Select-Object FullName, @{N='MB';E={[math]::Round\\($_.Length/1MB,1\\)}})",
+      "PowerShell(*)",
+      "Bash(wslpath -u \"C:\\\\Storage\\\\workspace\\\\nanime-main\\\\LimeStudio\\\\app\\\\build\\\\outputs\\\\apk\\\\phone\\\\debug\\\\app-phone-debug.apk\")"
     ],
     "deny": []
   }
