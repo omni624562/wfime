@@ -1569,7 +1569,7 @@ public class LIMEService extends InputMethodService implements
                 // '11,8,28 Jeremy popup keyboard picker instead of nextIM when onIM
                 // '11,5,14 Jeremy ctrl-shift switch to next available keyboard;
                 // '11,5,24 blocking switching if full-shape symbol
-                if (!hasSymbolEntered && !mEnglishOnly && (hasMenuPress || hasCtrlPress)) { // Jeremy '12,4,29 use
+                if (!hasSymbolEntered && (hasMenuPress || hasCtrlPress)) { // Jeremy '12,4,29 use
                                                                                             // mEnglishOnly instead of
                                                                                             // onIM
                     // nextActiveKeyboard(true);
@@ -1624,14 +1624,13 @@ public class LIMEService extends InputMethodService implements
                     // switchChiEng(); // Jeremy '11,8,15 moved to onKeyDown()
                     return true;
                 } else if (LIMEMetaKeyKeyListener.getMetaState(mMetaState,
-                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0 && !mEnglishOnly // Jeremy '12,4,29 use mEnglishOnly
-                                                                                   // instead of onIM
+                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0 // Jeremy '12,4,29 use mEnglishOnly
                         && !mLIMEPref.getPhysicalKeyboardType().equals("xperiapro")) { // '12,4,1 Jeremy XPERIA Pro does
                                                                                        // not use this key as @
                     // alt-@ is conflict with symbol input thus altered to shift-@ Jeremy '11,8,15
                     // alt-@ switch to next active keyboard.
                     // nextActiveKeyboard(true);
-                    showIMPicker(); // Jeremy '11,8,28
+                    showIMPicker(); // Jeremy '11,8,28 Jeremy '11,8,28
                     mMetaState = LIMEMetaKeyKeyListener.adjustMetaAfterKeypress(mMetaState);
                     setInputConnectionMetaStateAsCurrentMetaKeyKeyListenerState();
                     return true;

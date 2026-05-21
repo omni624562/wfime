@@ -379,7 +379,7 @@ class PhysicalKeyHandler {
                 // '11,8,28 Jeremy popup keyboard picker instead of nextIM when onIM
                 // '11,5,14 Jeremy ctrl-shift switch to next available keyboard;
                 // '11,5,24 blocking switching if full-shape symbol
-                if (!service.hasSymbolEntered && !service.mEnglishOnly && (service.hasMenuPress || service.hasCtrlPress)) {
+                if (!service.hasSymbolEntered && (service.hasMenuPress || service.hasCtrlPress)) {
                     // nextActiveKeyboard(true);
                     service.showIMPicker(); // Jeremy '11,8,28
                     if (service.hasMenuPress) {
@@ -432,7 +432,7 @@ class PhysicalKeyHandler {
                     // switchChiEng(); // Jeremy '11,8,15 moved to onKeyDown()
                     return true;
                 } else if (LIMEMetaKeyKeyListener.getMetaState(service.mMetaState,
-                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0 && !service.mEnglishOnly
+                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0
                         && !service.mLIMEPref.getPhysicalKeyboardType().equals("xperiapro")) {
                     // alt-@ is conflict with symbol input thus altered to shift-@ Jeremy '11,8,15
                     // alt-@ switch to next active keyboard.
