@@ -380,8 +380,16 @@ class PhysicalKeyHandler {
                 // '11,5,14 Jeremy ctrl-shift switch to next available keyboard;
                 // '11,5,24 blocking switching if full-shape symbol
                 if (!service.hasSymbolEntered && (service.hasMenuPress || service.hasCtrlPress)) {
-                    // nextActiveKeyboard(true);
-                    service.showIMPicker(); // Jeremy '11,8,28
+                    // Ctrl+Shift: always cycle through the user's activated internal IMs
+                    // (大易 ↔ 注音 etc.). The system IME picker is accessible via the
+                    // Samsung navigation-bar keyboard button instead.
+                    // NOTE: switchToNextActivatedIM() builds the list internally if needed,
+                    // so no null-check on activatedIMList is required here.
+                    if (service.hasCtrlPress) {
+                        service.switchToNextActivatedIM(true);
+                    } else {
+                        service.showIMPicker(); // Menu+Shift: keep showing system picker
+                    }
                     if (service.hasMenuPress) {
                         service.hasMenuProcessed = true;
                         service.hasMenuPress = false;
