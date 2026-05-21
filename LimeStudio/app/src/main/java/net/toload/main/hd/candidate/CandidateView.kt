@@ -225,7 +225,7 @@ open class CandidateView @JvmOverloads constructor(
         typedWordValid: Boolean,
         haveMinimalSuggestion: Boolean
     ) {
-        this.suggestions = suggestions ?: emptyList()
+        this.suggestions = suggestions?.toList() ?: emptyList()
         this.selectedIndex = -1
     }
 
@@ -238,7 +238,7 @@ open class CandidateView @JvmOverloads constructor(
     }
 
     fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
-        this.suggestions = suggestions ?: emptyList()
+        this.suggestions = suggestions?.toList() ?: emptyList()
         this.selectedIndex = selectedIndex
     }
 
