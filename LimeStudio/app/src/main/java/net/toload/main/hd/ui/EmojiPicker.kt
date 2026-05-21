@@ -145,10 +145,8 @@ fun EmojiPicker(
                 .weight(1f) // Fill available space
                 .fillMaxWidth()
         ) { page ->
-            // Get display emojis for this specific page
-            val emojisForPage = remember(page, recentEmojis) {
-                EmojiData.getListByCategory(page + 1) // Categories are 1-indexed
-            }
+            // Read directly (no remember) so Compose reacts when EmojiData.initialize() completes
+            val emojisForPage = EmojiData.getListByCategory(page + 1)
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(8),
