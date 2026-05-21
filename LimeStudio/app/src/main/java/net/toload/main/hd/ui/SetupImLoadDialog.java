@@ -32,6 +32,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
@@ -357,6 +358,7 @@ public class SetupImLoadDialog extends DialogFragment {
         button.setOnClickListener(v -> dialog.dismiss());
 
         listview = dialog.findViewById(R.id.listview_loading_target);
+        listview.setHasFixedSize(true);
         listview.setLayoutManager(new LinearLayoutManager(activity));
         toplayout = dialog.findViewById(R.id.linearlayout_loading_confirm_top);
 
@@ -434,7 +436,11 @@ public class SetupImLoadDialog extends DialogFragment {
 
         boolean restorelearning = chkSetupImRestoreLearning.isChecked();
 
-        if (connManager.getActiveNetworkInfo() != null && connManager.getActiveNetworkInfo().isConnected()) {
+        NetworkCapabilities caps = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
+        boolean isConnected = caps != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        if (isConnected) {
 
             String url = null;
 

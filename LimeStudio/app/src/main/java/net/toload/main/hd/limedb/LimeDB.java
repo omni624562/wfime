@@ -729,7 +729,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      *
      * @return return true if db connection is ready.
      */
-    private boolean checkDBConnection() {
+    private synchronized boolean checkDBConnection() {
         // Jeremy '12,5,1 mapping loading. db is locked
         if (DEBUG)
             Log.i(TAG, "checkDBConnection()");
@@ -4851,12 +4851,15 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
         db.beginTransaction();
-        for (Word w : scorelist) {
-            String updatesql = Word.getUpdateScoreQuery(imtype, w);
-            db.execSQL(updatesql);
+        try {
+            for (Word w : scorelist) {
+                String updatesql = Word.getUpdateScoreQuery(imtype, w);
+                db.execSQL(updatesql);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        db.endTransaction();
-        db.setTransactionSuccessful();
     }
 
     public Cursor rawQuery(String query) {

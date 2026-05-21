@@ -17,6 +17,20 @@
 #}
 -keepattributes InnerClasses
 
+# Keep data model classes accessed via reflection (LimeDB, Word, Im, Related)
+-keep class net.toload.main.hd.data.** { *; }
+-keep class net.toload.main.hd.limedb.** { *; }
+
+# Keep keyboard view classes loaded via XML inflation
+-keep class net.toload.main.hd.keyboard.** { *; }
+-keepclassmembers class * extends android.view.View {
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+# Keep AIDL-generated and IME service classes
+-keep class net.toload.main.hd.LIMEService { *; }
+
 # Remove all debug logging in release builds
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);

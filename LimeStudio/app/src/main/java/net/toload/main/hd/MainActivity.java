@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -42,6 +41,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentManager;
 
 import java.io.File;
@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     private LimeDB datasource;
     private List<Im> imlist;
 
-    private ConnectivityManager connManager;
     private LIMEPreferenceManager mLIMEPref;
 
     // Material3 loading dialog (replacement for deprecated ProgressDialog)
@@ -112,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
         progress = new LoadingDialogHelper(this);
         progress.setMax(100);
         progress.setCancelable(false);
-
-        connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         this.mLIMEPref = new LIMEPreferenceManager(this);
 
@@ -200,31 +197,20 @@ public class MainActivity extends AppCompatActivity {
 
 
     private String getContentName(ContentResolver resolver, Uri uri) {
-        Cursor cursor = resolver.query(uri, null, null, null, null);
-        if (cursor == null)
-            return null;
-        cursor.moveToFirst();
-        int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-        if (nameIndex >= 0) {
-            return cursor.getString(nameIndex);
-        } else {
-            cursor.close();
-            return null;
+        try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
+            if (cursor == null || !cursor.moveToFirst()) return null;
+            int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+            return nameIndex >= 0 ? cursor.getString(nameIndex) : null;
         }
     }
 
     private void InputStreamToFile(InputStream in, String file) {
-        try {
-            OutputStream out = new FileOutputStream(new File(file));
-
-            int size;
+        try (OutputStream out = new FileOutputStream(new File(file))) {
             byte[] buffer = new byte[102400];
-
+            int size;
             while ((size = in.read(buffer)) != -1) {
                 out.write(buffer, 0, size);
             }
-
-            out.close();
         } catch (Exception e) {
             Log.e("MainActivity", "InputStreamToFile exception: " + e.getMessage());
         }
@@ -233,17 +219,22 @@ public class MainActivity extends AppCompatActivity {
     void handleSendText(Intent intent) {
         String importtext = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (importtext != null && !importtext.isEmpty()) {
-            android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+            androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ImportDialog dialog = ImportDialog.newInstance(importtext);
             dialog.show(ft, "importdialog");
         }
     }
 
     public void initialImList() {
-        if (datasource == null) {
-            datasource = new LimeDB(this);
-            imlist = datasource.getIm(null, Lime.IM_TYPE_NAME);
-        }
+        if (datasource != null) return;
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            LimeDB db = new LimeDB(this);
+            List<Im> list = db.getIm(null, Lime.IM_TYPE_NAME);
+            runOnUiThread(() -> {
+                datasource = db;
+                imlist = list;
+            });
+        });
     }
 
 
@@ -313,8 +304,9 @@ public class MainActivity extends AppCompatActivity {
         sharingIntent.setType(type);
 
         File target = new File(filepath);
-        Uri targetfile = Uri.fromFile(target);
+        Uri targetfile = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", target);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, targetfile);
+        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         sharingIntent.putExtra(Intent.EXTRA_TEXT, target.getName());
         startActivity(Intent.createChooser(sharingIntent, target.getName()));

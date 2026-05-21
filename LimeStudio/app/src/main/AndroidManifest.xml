@@ -38,6 +38,17 @@
 <!--    <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION"-->
 <!--        tools:ignore="ProtectedPermissions" />-->
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="false"
         android:icon="@drawable/logo"
@@ -48,7 +59,7 @@
 
         <activity
             android:name="net.toload.main.hd.MainActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
             android:hardwareAccelerated="true"
             android:exported="true"
             android:label="@string/app_name">
@@ -81,6 +92,16 @@
 
 
 
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
 
     </application>
 </manifest>

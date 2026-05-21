@@ -64,17 +64,17 @@ public class DBServer {
     private static final String TAG = "LIME.DBServer";
     protected static LimeDB datasource = null; // static LIMEDB for shared LIMEDB between DBServer instances
     protected static LIMEPreferenceManager mLIMEPref = null;
-    protected static Context ctx = null;
+    protected static Context appContext = null;
     private static boolean remoteFileDownloading = false;
     private static String loadingTablename = ""; // Jeremy '12,6,2 change all variable to static for all instances to
                                                  // share these variables
     private static boolean abortDownload = false;
 
     public DBServer(Context context) {
-        DBServer.ctx = context.getApplicationContext();
-        mLIMEPref = new LIMEPreferenceManager(ctx);
+        DBServer.appContext = context.getApplicationContext();
+        mLIMEPref = new LIMEPreferenceManager(appContext);
         if (datasource == null)
-            datasource = new LimeDB(ctx);
+            datasource = new LimeDB(appContext);
     }
 
     public static void resetCache() {
@@ -84,9 +84,9 @@ public class DBServer {
     public static void backupDatabase() throws RemoteException {
         if (DEBUG)
             Log.i(TAG, "backupDatabase()");
-        // showNotificationMessage(ctx.getText(R.string.l3_initial_backup_start) + "");
+        // showNotificationMessage(appContext.getText(R.string.l3_initial_backup_start) + "");
 
-        String externalFolder = LIME.getExternalLimeFolder(ctx);
+        String externalFolder = LIME.getExternalLimeFolder(appContext);
         if (externalFolder == null) {
             Log.e(TAG, "External storage not available for backup");
             return;
@@ -97,7 +97,7 @@ public class DBServer {
         }
 
         // backup shared preferences
-        File fileSharedPrefsBackup = new File(LIME.getLimeDataRootFolder(ctx), LIME.SHARED_PREFS_BACKUP_NAME);
+        File fileSharedPrefsBackup = new File(LIME.getLimeDataRootFolder(appContext), LIME.SHARED_PREFS_BACKUP_NAME);
         if (fileSharedPrefsBackup.exists())
             fileSharedPrefsBackup.delete();
         backupDefaultSharedPreference(fileSharedPrefsBackup);
@@ -116,12 +116,12 @@ public class DBServer {
         // ready to zip backup file list
         try {
             LIMEUtilities.zip(externalFolder + File.separator + LIME.DATABASE_BACKUP_NAME, backupFileList,
-                    LIME.getLimeDataRootFolder(ctx), true);
+                    LIME.getLimeDataRootFolder(appContext), true);
         } catch (Exception e) {
             e.printStackTrace();
-            showNotificationMessage(ctx.getText(R.string.l3_initial_backup_error) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_backup_error) + "");
         } finally {
-            showNotificationMessage(ctx.getText(R.string.l3_initial_backup_end) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_backup_end) + "");
         }
 
         // backup finished. unhold the database connection and false reopen the
@@ -135,7 +135,7 @@ public class DBServer {
     }
 
     public static void restoreDatabase() throws RemoteException {
-        File backupFile = new File(new File(ctx.getFilesDir(), "backups"), LIME.DATABASE_BACKUP_NAME);
+        File backupFile = new File(new File(appContext.getFilesDir(), "backups"), LIME.DATABASE_BACKUP_NAME);
         restoreDatabase(backupFile.getAbsolutePath());
     }
 
@@ -149,19 +149,19 @@ public class DBServer {
             closeDatabse();
 
             try {
-                LIMEUtilities.unzip(srcFilePath, LIME.getLimeDataRootFolder(ctx), true);
+                LIMEUtilities.unzip(srcFilePath, LIME.getLimeDataRootFolder(appContext), true);
             } catch (Exception e) {
                 e.printStackTrace();
-                showNotificationMessage(ctx.getText(R.string.l3_initial_restore_error) + "");
+                showNotificationMessage(appContext.getText(R.string.l3_initial_restore_error) + "");
             } finally {
-                showNotificationMessage(ctx.getText(R.string.l3_initial_restore_end) + "");
+                showNotificationMessage(appContext.getText(R.string.l3_initial_restore_end) + "");
             }
 
             datasource.unHoldDBConnection(); // Jeremy '15,5,23
             datasource.openDBConnection(true);
 
             // restore shared preference
-            File checkpref = new File(LIME.getLimeDataRootFolder(ctx), LIME.SHARED_PREFS_BACKUP_NAME);
+            File checkpref = new File(LIME.getLimeDataRootFolder(appContext), LIME.SHARED_PREFS_BACKUP_NAME);
             if (checkpref.exists()) {
                 restoreDefaultSharedPreference(checkpref);
             }
@@ -173,7 +173,7 @@ public class DBServer {
             datasource.checkAndUpdateRelatedTable();
 
         } else {
-            showNotificationMessage(ctx.getText(R.string.error_restore_not_found) + "");
+            showNotificationMessage(appContext.getText(R.string.error_restore_not_found) + "");
 
         }
 
@@ -187,7 +187,7 @@ public class DBServer {
         ObjectOutputStream output = null;
         try {
             output = new ObjectOutputStream(new FileOutputStream(sharePrefs));
-            SharedPreferences pref = ctx.getSharedPreferences(ctx.getPackageName() + "_preferences",
+            SharedPreferences pref = appContext.getSharedPreferences(appContext.getPackageName() + "_preferences",
                     Context.MODE_PRIVATE);
             output.writeObject(pref.getAll());
 
@@ -214,8 +214,8 @@ public class DBServer {
 
         try {
             inputStream = new ObjectInputStream(new FileInputStream(sharePrefs));
-            SharedPreferences.Editor prefEdit = ctx
-                    .getSharedPreferences(ctx.getPackageName() + "_preferences", Context.MODE_PRIVATE).edit();
+            SharedPreferences.Editor prefEdit = appContext
+                    .getSharedPreferences(appContext.getPackageName() + "_preferences", Context.MODE_PRIVATE).edit();
             prefEdit.clear();
             Map<String, ?> entries = (Map<String, ?>) inputStream.readObject();
             for (Map.Entry<String, ?> entry : entries.entrySet()) {
@@ -235,7 +235,7 @@ public class DBServer {
                         prefEdit.putString(key, ((String) v));
                 }
             }
-            prefEdit.commit();
+            prefEdit.apply();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -307,7 +307,7 @@ public class DBServer {
             }
             return true;
         } catch (Exception e) {
-            showNotificationMessage(ctx.getText(R.string.l3_initial_download_failed) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
             e.printStackTrace();
         }
         return false;
@@ -318,10 +318,10 @@ public class DBServer {
     public static void showNotificationMessage(String message) {
 
         Intent i = null;
-        i = new Intent(ctx, MainActivity.class);
+        i = new Intent(appContext, MainActivity.class);
 
         LIMEUtilities.showNotification(
-                ctx, true, ctx.getText(R.string.ime_setting), message, i);
+                appContext, true, appContext.getText(R.string.ime_setting), message, i);
 
     }
 
@@ -342,7 +342,7 @@ public class DBServer {
         datasource.setFinish(false);
         datasource.setFilename(sourcefile);
 
-        // showNotificationMessage(ctx.getText(R.string.lime_setting_notification_loading)
+        // showNotificationMessage(appContext.getText(R.string.lime_setting_notification_loading)
         // + "");
         datasource.loadFileV2(tablename, progressListener);
         // datasource.close();
@@ -380,7 +380,7 @@ public class DBServer {
         List<String> unzipFilePaths = new ArrayList<>();
         try {
             unzipFilePaths = LIMEUtilities.unzip(compressedSourceDB.getAbsolutePath(),
-                    ctx.getCacheDir().getAbsolutePath() + "limehd", true);
+                    appContext.getCacheDir().getAbsolutePath() + "limehd", true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -526,20 +526,20 @@ public class DBServer {
 
         } catch (FileNotFoundException e) {
             Log.d(TAG, "downloadRemoteFile(); can't open temp file on sdcard for writing.");
-            showNotificationMessage(ctx.getText(R.string.l3_initial_download_write_sdcard_failed) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_download_write_sdcard_failed) + "");
             e.printStackTrace();
 
         } catch (MalformedURLException e) {
             Log.d(TAG, "downloadRemoteFile() MalformedURLException....");
-            showNotificationMessage(ctx.getText(R.string.l3_initial_download_failed) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
             e.printStackTrace();
         } catch (IOException e) {
             Log.d(TAG, "downloadRemoteFile() IOException....");
-            showNotificationMessage(ctx.getText(R.string.l3_initial_download_failed) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
             e.printStackTrace();
         } catch (Exception e) {
             Log.d(TAG, "downloadRemoteFile() Others....");
-            showNotificationMessage(ctx.getText(R.string.l3_initial_download_failed) + "");
+            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
             e.printStackTrace();
         }
         if (DEBUG)

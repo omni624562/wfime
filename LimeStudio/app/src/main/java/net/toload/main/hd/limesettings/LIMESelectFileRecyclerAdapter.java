@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
@@ -103,7 +104,8 @@ public class LIMESelectFileRecyclerAdapter extends RecyclerView.Adapter<LIMESele
 
         holder.itemView.setOnClickListener(v -> {
             if (mClickListener != null) {
-                mClickListener.onItemClick(holder.getAdapterPosition());
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_ID) mClickListener.onItemClick(pos);
             }
         });
     }
@@ -119,7 +121,17 @@ public class LIMESelectFileRecyclerAdapter extends RecyclerView.Adapter<LIMESele
      * @param newList New list of files to display
      */
     public void updateItems(List<File> newList) {
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return list != null ? list.size() : 0; }
+            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return list.get(o).getAbsolutePath().equals(newList.get(n).getAbsolutePath());
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                return list.get(o).isDirectory() == newList.get(n).isDirectory();
+            }
+        });
         this.list = newList;
-        notifyDataSetChanged();
+        diff.dispatchUpdatesTo(this);
     }
 }

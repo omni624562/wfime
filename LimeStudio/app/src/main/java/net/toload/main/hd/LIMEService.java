@@ -540,20 +540,15 @@ public class LIMEService extends InputMethodService implements
             }
         }
 
-        // Re-add emoji keyboard view
-        if (mEmojiKeyboardView == null) {
-            Log.d("KBD_DEBUG", "Creating emoji picker view via ComposeBridge");
-            mEmojiKeyboardView = net.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
-        }
-
+        // Re-add emoji keyboard view only if it was already created (lazy loading)
         if (mEmojiKeyboardView != null) {
-            Log.d("KBD_DEBUG", "Adding/Updating emoji picker in container");
-            mEmojiKeyboardView.setVisibility(View.GONE);
+            Log.d("KBD_DEBUG", "Re-adding existing emoji picker in container");
             if (mEmojiKeyboardView.getParent() != null) {
                 ((android.view.ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
             }
 
             // Set owners directly on emoji view too
+            ensureComposeLifecycleOwner();
             androidx.lifecycle.ViewTreeLifecycleOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
             androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
             androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
@@ -604,10 +599,33 @@ public class LIMEService extends InputMethodService implements
     public void toggleEmojiVisibility() {
         Log.d("EMOJI_DEBUG", "=== toggleEmojiVisibility() called ===");
 
+        // Lazy load emoji picker view only when user actually clicks it
+        if (mEmojiKeyboardView == null && mInputViewContainer != null) {
+            Log.d("EMOJI_DEBUG", "Creating emoji picker view lazily via ComposeBridge");
+            mEmojiKeyboardView = net.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
+            if (mEmojiKeyboardView != null) {
+                mEmojiKeyboardView.setVisibility(View.GONE);
+
+                // Set owners
+                ensureComposeLifecycleOwner();
+                androidx.lifecycle.ViewTreeLifecycleOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mEmojiKeyboardView, mComposeLifecycleOwner);
+
+                try {
+                    android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lp.gravity = android.view.Gravity.BOTTOM;
+                    mInputViewContainer.addView(mEmojiKeyboardView, lp);
+                } catch (Exception e) {
+                    Log.e("EMOJI_DEBUG", "FAILED to add mEmojiKeyboardView to container: " + e.getMessage(), e);
+                }
+            }
+        }
+
         if (mEmojiKeyboardView == null) {
             Log.e("EMOJI_DEBUG", "ERROR: mEmojiKeyboardView is NULL!");
-            Log.d("EMOJI_DEBUG", "mInputViewContainer: " + (mInputViewContainer != null ? "exists" : "NULL"));
-            Log.d("EMOJI_DEBUG", "mInputView: " + (mInputView != null ? "exists" : "NULL"));
             return;
         }
 
