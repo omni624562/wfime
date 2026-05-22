@@ -1,4 +1,4 @@
-/*
+﻿/*
  *
  *  *
  *  **    Copyright 2015, The LimeIME Open Source Project
@@ -360,7 +360,7 @@ public class LIMEService extends InputMethodService implements
 
             Notification notification = builder
                     .setContentTitle(getString(R.string.app_name))
-                    .setContentText("輸入法�??�執行中")
+                    .setContentText("輸入法服務執行中")
                     .setSmallIcon(R.drawable.logo)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
@@ -757,7 +757,7 @@ public class LIMEService extends InputMethodService implements
                 Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode, physKey=" + physKeyConnected + ")");
                 mCandidateInInputView.setVisibility(View.VISIBLE);
 
-                // Restore children ??but honour physical-keyboard state:
+                // Restore children — but honour physical-keyboard state:
                 // the virtual keyboard view inside the container must stay GONE when a
                 // physical keyboard is connected (same rule as updateInputViewContainer).
                 if (mCandidateInInputView instanceof android.view.ViewGroup) {
@@ -921,6 +921,7 @@ public class LIMEService extends InputMethodService implements
         if (DEBUG)
             Log.i(TAG, "clearComposing()");
 
+        // Log.i(TAG, "===========> clear composing");
 
         try {
             // Jeremy '11,8,14
@@ -987,7 +988,7 @@ public class LIMEService extends InputMethodService implements
     public void onComputeInsets(InputMethodService.Insets outInsets) {
         super.onComputeInsets(outInsets);
         // Let the system handle insets automatically.
-        // Note: Do NOT set TOUCHABLE_INSETS_CONTENT here ??doing so interferes with
+        // Note: Do NOT set TOUCHABLE_INSETS_CONTENT here — doing so interferes with
         // touch event distribution to the candidate bar on Samsung One UI.
     }
 
@@ -1294,11 +1295,11 @@ public class LIMEService extends InputMethodService implements
             // Method 1: Shift + Key
             if (event.isShiftPressed() || hasShiftPress) {
                 String symbol = null;
-                if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "�?;
-                else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "??;
-                else if (keyCode == KeyEvent.KEYCODE_SLASH) symbol = "�?;
-                else if (keyCode == KeyEvent.KEYCODE_1) symbol = "�?;
-                else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) symbol = "�?;
+                if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "，";
+                else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "。";
+                else if (keyCode == KeyEvent.KEYCODE_SLASH) symbol = "？";
+                else if (keyCode == KeyEvent.KEYCODE_1) symbol = "！";
+                else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) symbol = "：";
                 
                 if (symbol != null) {
                     commitTyped(getCurrentInputConnection());
@@ -1320,12 +1321,12 @@ public class LIMEService extends InputMethodService implements
                 }
                 if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
                     String symbol = null;
-                    if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "�?;
-                    else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "??;
-                    else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) symbol = "??;
+                    if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "，";
+                    else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "。";
+                    else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) symbol = "、";
                     else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) {
-                        if (event.isShiftPressed() || hasShiftPress) symbol = "�?;
-                        else symbol = "�?;
+                        if (event.isShiftPressed() || hasShiftPress) symbol = "：";
+                        else symbol = "；";
                     }
     
                     if (symbol != null) {
@@ -1553,7 +1554,7 @@ public class LIMEService extends InputMethodService implements
                         LIMEMetaKeyKeyListener.META_ALT_ON) > 0
                         && mLIMEPref.getPhysicalKeyboardType().equals("milestone2")))
                     break;
-            case KeyEvent.KEYCODE_GRAVE: // ` (key left of 1) ??Ctrl+` cycles internal IMs (大�??�注??
+            case KeyEvent.KEYCODE_GRAVE: // ` (key left of 1) — Ctrl+\ cycles internal IMs (大易↔注音)
                 if (hasCtrlPress || event.isCtrlPressed()) {
                     switchToNextActivatedIM(true);
                     return true;
@@ -1565,13 +1566,13 @@ public class LIMEService extends InputMethodService implements
                     }
                 }
                 break;
-            case KeyEvent.KEYCODE_PERIOD: // Cmd+. ??toggle emoji picker
+            case KeyEvent.KEYCODE_PERIOD: // Cmd+. — toggle emoji picker
                 if (event.isMetaPressed()) {
                     requestShowSelf(0); // Force show IME window if hidden by physical keyboard
                     toggleEmojiVisibility();
                     return true;
                 }
-                // No Cmd: normal '.' key ??fall through to translateKeyDown
+                // No Cmd: normal '.' key — fall through to translateKeyDown
                 if (!hasMenuPress) {
                     if (translateKeyDown(keyCode, event)) {
                         return true;
@@ -1580,12 +1581,10 @@ public class LIMEService extends InputMethodService implements
                 break;
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
-                    // Dayi Fast Candidate Selection: 0, ', [, ], -, \ select candidates 0 through 5
+                    // Dayi Fast Candidate Selection: ', [, ], -, \ select candidates 1 through 5
                     if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
                         int candidateIndex = -1;
-                        if (keyCode == KeyEvent.KEYCODE_0) {
-                            candidateIndex = 0;
-                        } else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
+                        if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
                             candidateIndex = 1;
                         } else if (keyCode == KeyEvent.KEYCODE_LEFT_BRACKET) {
                             candidateIndex = 2;
@@ -2429,7 +2428,7 @@ public class LIMEService extends InputMethodService implements
     }
 
     /**
-     * Display the active IM name in the composing-text popup (字根?�) for 1.5 seconds.
+     * Display the active IM name in the composing-text popup (字根區) for 1.5 seconds.
      * The composing popup is more prominent and natural than Toast (which hides behind
      * the keyboard panel in IME service context on Samsung Android 16).
      */
@@ -2553,7 +2552,7 @@ public class LIMEService extends InputMethodService implements
         buildActivatedIMList();
 
         // MaterialAlertDialogBuilder requires an AppCompat theme context, but the IME
-        // service context does not carry one ??wrapping it fixes the crash.
+        // service context does not carry one — wrapping it fixes the crash.
         android.view.ContextThemeWrapper themedCtx = new android.view.ContextThemeWrapper(
                 this, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog);
         androidx.appcompat.app.AlertDialog.Builder builder =
