@@ -1470,7 +1470,7 @@ public class LIMEService extends InputMethodService implements
                         LIMEMetaKeyKeyListener.META_ALT_ON) > 0
                         && mLIMEPref.getPhysicalKeyboardType().equals("milestone2")))
                     break;
-            case KeyEvent.KEYCODE_GRAVE: // ` (key left of 1) — Ctrl+` cycles internal IMs (大易↔注音)
+            case KeyEvent.KEYCODE_BACKSLASH: // \ — Ctrl+\ cycles internal IMs (大易↔注音)
                 if (hasCtrlPress || event.isCtrlPressed()) {
                     switchToNextActivatedIM(true);
                     return true;
@@ -1484,7 +1484,7 @@ public class LIMEService extends InputMethodService implements
                 break;
             case KeyEvent.KEYCODE_E: // Ctrl+E — toggle emoji picker (like Win+. on Windows)
                 if (hasCtrlPress || event.isCtrlPressed()) {
-                    android.widget.Toast.makeText(this, "Ctrl+E reached!", android.widget.Toast.LENGTH_SHORT).show();
+                    requestShowSelf(0); // Force show IME window if hidden by physical keyboard
                     toggleEmojiVisibility();
                     return true;
                 }
