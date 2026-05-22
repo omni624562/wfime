@@ -171,7 +171,8 @@ public class LIMEService extends InputMethodService implements
     Mapping committedCandidate; // Jeremy '12,5,7 renamed from tempMatched
     StringBuffer tempEnglishWord;
     List<Mapping> tempEnglishList;
-    boolean hasPhysicalKeyPressed;
+    public boolean hasPhysicalKeyPressed;
+    private boolean mDayiSymbolPrefix = false;
     LinkedList<Mapping> mCandidateList; // Jeremy '12,5,7 renamed from templist
     // private boolean hasSearchPress = false; // Jeremy '11,5,29
     // private boolean hasSearchProcessed = false; // Jeremy '11,5,29
@@ -187,6 +188,7 @@ public class LIMEService extends InputMethodService implements
     boolean hasShiftPress = false;
     boolean onlyShiftPress = false; // Jeremy '15,5,30 shift only to switch between chi/eng
     boolean hasCtrlPress = false; // Jeremy '11,5,13
+    boolean hasCtrlWithShift = false; // Sticky flag: true when Ctrl+Shift chord was formed (survives Ctrl keyUp before Shift keyUp)
     boolean lastKeyCtrl = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing space
                                  // down event
     boolean spaceKeyPress = false; // Jeremy '15,5,30 for process physical keyboard ctrl-space with missing
@@ -746,23 +748,35 @@ public class LIMEService extends InputMethodService implements
         if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
             Log.d("EMOJI_DEBUG", "Closing emoji picker");
             mEmojiKeyboardView.setVisibility(View.GONE);
-            if (mInputView != null) {
-                Log.d("EMOJI_DEBUG", "Showing keyboard again");
-                mInputView.setVisibility(View.VISIBLE);
-            }
-            // Restore candidate view in fixed mode
-            if (mFixedCandidateViewOn && mCandidateInInputView != null) {
-                Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode)");
+
+            Configuration closeCfg = getResources().getConfiguration();
+            boolean physKeyConnected = closeCfg.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+
+            // Restore candidate view in fixed mode (physical keyboard always uses fixed mode)
+            if ((mFixedCandidateViewOn || physKeyConnected) && mCandidateInInputView != null) {
+                Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode, physKey=" + physKeyConnected + ")");
                 mCandidateInInputView.setVisibility(View.VISIBLE);
 
-                // Restore children visibility
+                // Restore children — but honour physical-keyboard state:
+                // the virtual keyboard view inside the container must stay GONE when a
+                // physical keyboard is connected (same rule as updateInputViewContainer).
                 if (mCandidateInInputView instanceof android.view.ViewGroup) {
                     android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
                     for (int i = 0; i < group.getChildCount(); i++) {
-                        group.getChildAt(i).setVisibility(View.VISIBLE);
-                        Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
+                        android.view.View child = group.getChildAt(i);
+                        // Keep virtual keyboard hidden when physical keyboard is attached
+                        if (physKeyConnected && child.getId() == R.id.keyboard) {
+                            child.setVisibility(View.GONE);
+                            Log.d("EMOJI_DEBUG", "  Keeping keyboard child GONE (physical keyboard connected)");
+                        } else {
+                            child.setVisibility(View.VISIBLE);
+                            Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
+                        }
                     }
                 }
+            } else if (mInputView != null && !physKeyConnected) {
+                Log.d("EMOJI_DEBUG", "Showing virtual keyboard again");
+                mInputView.setVisibility(View.VISIBLE);
             }
         } else {
             Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
@@ -1276,6 +1290,57 @@ public class LIMEService extends InputMethodService implements
             spaceKeyPress = false;
         }
 
+        // Dayi Punctuation Fast Input
+        if (activeIM != null && activeIM.startsWith("dayi") && !mEnglishOnly) {
+            // Method 1: Shift + Key
+            if (event.isShiftPressed() || hasShiftPress) {
+                String symbol = null;
+                if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "，";
+                else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "。";
+                else if (keyCode == KeyEvent.KEYCODE_SLASH) symbol = "？";
+                else if (keyCode == KeyEvent.KEYCODE_1) symbol = "！";
+                else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) symbol = "：";
+                
+                if (symbol != null) {
+                    commitTyped(getCurrentInputConnection());
+                    getCurrentInputConnection().commitText(symbol, 1);
+                    return true;
+                }
+            }
+
+            // Method 2: = Prefix
+            if (keyCode == KeyEvent.KEYCODE_EQUALS && !event.isShiftPressed() && !hasShiftPress) {
+                mDayiSymbolPrefix = true;
+                return true;
+            }
+
+            if (mDayiSymbolPrefix) {
+                if (keyCode == KeyEvent.KEYCODE_ESCAPE) {
+                    mDayiSymbolPrefix = false;
+                    return true;
+                }
+                if (keyCode != KeyEvent.KEYCODE_SHIFT_LEFT && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
+                    String symbol = null;
+                    if (keyCode == KeyEvent.KEYCODE_COMMA) symbol = "，";
+                    else if (keyCode == KeyEvent.KEYCODE_PERIOD) symbol = "。";
+                    else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) symbol = "、";
+                    else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) {
+                        if (event.isShiftPressed() || hasShiftPress) symbol = "：";
+                        else symbol = "；";
+                    }
+    
+                    if (symbol != null) {
+                        commitTyped(getCurrentInputConnection());
+                        getCurrentInputConnection().commitText(symbol, 1);
+                        mDayiSymbolPrefix = false;
+                        return true;
+                    } else {
+                        mDayiSymbolPrefix = false;
+                    }
+                }
+            }
+        }
+
         switch (keyCode) {
             // Jeremy '11,5,29 Bypass search and menu combination keys.
             case KeyEvent.KEYCODE_MENU:
@@ -1284,31 +1349,36 @@ public class LIMEService extends InputMethodService implements
                 break;
             // Add by Jeremy '10, 3, 29. DPAD selection on candidate view
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                // Log.i("ART","select:"+1);
                 if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
                     mCandidateView.selectNext();
                     return true;
                 }
                 break;
+            case KeyEvent.KEYCODE_PAGE_UP:
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
+                    if (activeIM != null && activeIM.startsWith("dayi") && hasPhysicalKeyPressed) {
+                        mCandidateView.pagePrev();
+                    } else {
+                        mCandidateView.selectPrevRow();
+                    }
+                    return true;
+                }
+                break;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                // Log.i("ART","select:"+2);
                 if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
                     mCandidateView.selectPrev();
                     return true;
                 }
                 break;
-            // Jeremy '11,8,28 for expanded canddiateviewi
-            case KeyEvent.KEYCODE_DPAD_UP:
-                // Log.i("ART","select:"+2);
-                if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
-                    mCandidateView.selectPrevRow();
-                    return true;
-                }
-                break;
+            case KeyEvent.KEYCODE_PAGE_DOWN:
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                // Log.i("ART","select:"+2);
                 if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
-                    mCandidateView.selectNextRow();
+                    if (activeIM != null && activeIM.startsWith("dayi") && hasPhysicalKeyPressed) {
+                        mCandidateView.pageNext();
+                    } else {
+                        mCandidateView.selectNextRow();
+                    }
                     return true;
                 }
                 break;
@@ -1445,8 +1515,22 @@ public class LIMEService extends InputMethodService implements
                         hasMenuProcessed = true;
                     hasSpaceProcessed = true;
                     return true;
-                } else
+                } else {
+                    if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty() && hasPhysicalKeyPressed) {
+                        int candidateIndex = -1;
+                        if (mCandidateView != null && mCandidateView.retrieveSelectedIndex() != -1) {
+                            candidateIndex = mCandidateView.retrieveSelectedIndex();
+                        } else {
+                            int offset = (mCandidateView != null) ? mCandidateView.getCurrentPageOffset() : 0;
+                            candidateIndex = offset;
+                        }
+                        if (candidateIndex < mCandidateList.size()) {
+                            this.pickCandidateManually(candidateIndex);
+                        }
+                        return true;
+                    }
                     return translateKeyDown(keyCode, event);
+                }
 
             case MY_KEYCODE_SWITCH_CHARSET: // experia pro earth key
             case 1000: // milestone chi/eng key
@@ -1482,13 +1566,13 @@ public class LIMEService extends InputMethodService implements
                     }
                 }
                 break;
-            case KeyEvent.KEYCODE_E: // Ctrl+E — toggle emoji picker (like Win+. on Windows)
-                if (hasCtrlPress || event.isCtrlPressed()) {
+            case KeyEvent.KEYCODE_PERIOD: // Cmd+. — toggle emoji picker
+                if (event.isMetaPressed()) {
                     requestShowSelf(0); // Force show IME window if hidden by physical keyboard
                     toggleEmojiVisibility();
                     return true;
                 }
-                // No Ctrl: normal 'e' key — fall through to translateKeyDown
+                // No Cmd: normal '.' key — fall through to translateKeyDown
                 if (!hasMenuPress) {
                     if (translateKeyDown(keyCode, event)) {
                         return true;
@@ -1497,6 +1581,33 @@ public class LIMEService extends InputMethodService implements
                 break;
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
+                    // Dayi Fast Candidate Selection: 0, ', [, ], -, \ select candidates 0 through 5
+                    if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
+                        int candidateIndex = -1;
+                        if (keyCode == KeyEvent.KEYCODE_0) {
+                            candidateIndex = 0;
+                        } else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
+                            candidateIndex = 1;
+                        } else if (keyCode == KeyEvent.KEYCODE_LEFT_BRACKET) {
+                            candidateIndex = 2;
+                        } else if (keyCode == KeyEvent.KEYCODE_RIGHT_BRACKET) {
+                            candidateIndex = 3;
+                        } else if (keyCode == KeyEvent.KEYCODE_MINUS) {
+                            candidateIndex = 4;
+                        } else if (keyCode == KeyEvent.KEYCODE_BACKSLASH) {
+                            candidateIndex = 5;
+                        }
+                        
+                        if (candidateIndex != -1) {
+                            int offset = (mCandidateView != null) ? mCandidateView.getCurrentPageOffset() : 0;
+                            candidateIndex += offset;
+                            if (candidateIndex < mCandidateList.size()) {
+                                this.pickCandidateManually(candidateIndex);
+                            }
+                            return true; // Consume the key event even if candidate doesn't exist to prevent typing the symbol
+                        }
+                    }
+
                     if (translateKeyDown(keyCode, event)) {
                         if (DEBUG)
                             Log.i(TAG, "Onkeydown():tranlatekeydown:true");
@@ -1639,16 +1750,8 @@ public class LIMEService extends InputMethodService implements
                 // '11,8,28 Jeremy popup keyboard picker instead of nextIM when onIM
                 // '11,5,14 Jeremy ctrl-shift switch to next available keyboard;
                 // '11,5,24 blocking switching if full-shape symbol
-                if (!hasSymbolEntered && (hasMenuPress || hasCtrlPress)) { // Jeremy '12,4,29 use
-                                                                                            // mEnglishOnly instead of
-                                                                                            // onIM
-                    // Ctrl+Shift: cycle internal IMs (大易↔注音) instead of showing the
-                    // system IME picker — same logic as PhysicalKeyHandler.onKeyUp().
-                    if (hasCtrlPress) {
-                        switchToNextActivatedIM(true);
-                    } else {
-                        showIMPicker(); // Menu+Shift: keep showing system picker
-                    }
+                if (!hasSymbolEntered && hasMenuPress) { 
+                    showIMPicker(); // Menu+Shift: keep showing system picker
                     if (hasMenuPress) {
                         hasMenuProcessed = true;
                         hasMenuPress = false;
@@ -2326,6 +2429,25 @@ public class LIMEService extends InputMethodService implements
         startActivity(intent);
     }
 
+    /**
+     * Display the active IM name in the composing-text popup (字根區) for 1.5 seconds.
+     * The composing popup is more prominent and natural than Toast (which hides behind
+     * the keyboard panel in IME service context on Samsung Android 16).
+     */
+    private void showIMSwitchNotification(String imName) {
+        if (imName == null || imName.isEmpty()) return;
+
+        initComposingPopup();
+        showComposingPopup(imName);
+
+        // Auto-hide after 1.5 s, but only if user has not started composing
+        mMainHandler.postDelayed(() -> {
+            if (mComposing.length() == 0) {
+                hideComposingPopup();
+            }
+        }, 1500);
+    }
+
     // Package-private so PhysicalKeyHandler can invoke IM cycling via Ctrl+`
     void switchToNextActivatedIM(boolean forward) { // forward: true, next IM; false prev. IM
         if (DEBUG)
@@ -2347,7 +2469,10 @@ public class LIMEService extends InputMethodService implements
         mEnglishOnly = false;
         mLIMEPref.setLanguageMode(false);
         initialIMKeyboard();
-        Toast.makeText(this, activeIMName, Toast.LENGTH_SHORT).show();
+        // Show the newly active IM name in the candidate bar for 1.5 s.
+        // Toast is unreliable in IME service context on Samsung Android 16
+        // (the keyboard panel occludes the bottom-of-screen toast).
+        showIMSwitchNotification(activeIMName);
 
         try {
             mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());

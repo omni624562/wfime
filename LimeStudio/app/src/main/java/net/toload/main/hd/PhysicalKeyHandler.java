@@ -101,6 +101,10 @@ class PhysicalKeyHandler {
             case KeyEvent.KEYCODE_SHIFT_RIGHT:
                 service.hasShiftPress = true;
                 service.onlyShiftPress = true;
+                // Sticky flag: if Ctrl is already held when Shift goes down, mark the combo.
+                if (service.hasCtrlPress) {
+                    service.hasCtrlWithShift = true;
+                }
                 service.mMetaState = LIMEMetaKeyKeyListener.handleKeyDown(service.mMetaState, keyCode, event);
                 break;
             case KeyEvent.KEYCODE_ALT_LEFT:
@@ -111,6 +115,10 @@ class PhysicalKeyHandler {
             case MY_KEYCODE_CTRL_RIGHT:
                 service.hasCtrlPress = true;
                 service.lastKeyCtrl = true;
+                // Sticky flag so Ctrl+Shift still works even when Ctrl keyUp arrives before Shift keyUp
+                if (service.hasShiftPress) {
+                    service.hasCtrlWithShift = true;
+                }
                 break;
             case MY_KEYCODE_WINDOWS_START:
                 service.hasWinPress = true;
@@ -222,8 +230,14 @@ class PhysicalKeyHandler {
                         service.hasMenuProcessed = true;
                     service.hasSpaceProcessed = true;
                     return true;
-                } else
+                } else {
+                    // Dayi Fast Candidate Selection: Space selects candidate 0
+                    if ("dayi".equals(service.activeIM) && service.hasCandidatesShown && service.mCandidateList != null && !service.mCandidateList.isEmpty()) {
+                        service.pickCandidateManually(0);
+                        return true;
+                    }
                     return service.translateKeyDown(keyCode, event);
+                }
 
             case MY_KEYCODE_SWITCH_CHARSET: // experia pro earth key
             case 1000: // milestone chi/eng key
@@ -249,6 +263,29 @@ class PhysicalKeyHandler {
                     break;
             default:
                 if (!(service.hasCtrlPress || event.isCtrlPressed() || service.hasMenuPress)) {
+                    // Dayi Fast Candidate Selection: ', [, ], -, \ select candidates 1 through 5
+                    if ("dayi".equals(service.activeIM) && service.hasCandidatesShown && service.mCandidateList != null && !service.mCandidateList.isEmpty()) {
+                        int candidateIndex = -1;
+                        if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
+                            candidateIndex = 1;
+                        } else if (keyCode == KeyEvent.KEYCODE_LEFT_BRACKET) {
+                            candidateIndex = 2;
+                        } else if (keyCode == KeyEvent.KEYCODE_RIGHT_BRACKET) {
+                            candidateIndex = 3;
+                        } else if (keyCode == KeyEvent.KEYCODE_MINUS) {
+                            candidateIndex = 4;
+                        } else if (keyCode == KeyEvent.KEYCODE_BACKSLASH) {
+                            candidateIndex = 5;
+                        }
+                        
+                        if (candidateIndex != -1) {
+                            if (candidateIndex < service.mCandidateList.size()) {
+                                service.pickCandidateManually(candidateIndex);
+                            }
+                            return true; // Consume the key event even if candidate doesn't exist to prevent typing the symbol
+                        }
+                    }
+
                     if (service.translateKeyDown(keyCode, event)) {
                         if (service.DEBUG)
                             Log.i(service.TAG, "Onkeydown():tranlatekeydown:true");
@@ -379,21 +416,14 @@ class PhysicalKeyHandler {
                 // '11,8,28 Jeremy popup keyboard picker instead of nextIM when onIM
                 // '11,5,14 Jeremy ctrl-shift switch to next available keyboard;
                 // '11,5,24 blocking switching if full-shape symbol
-                if (!service.hasSymbolEntered && (service.hasMenuPress || service.hasCtrlPress)) {
-                    // Ctrl+Shift: always cycle through the user's activated internal IMs
-                    // (大易 ↔ 注音 etc.). The system IME picker is accessible via the
-                    // Samsung navigation-bar keyboard button instead.
-                    // NOTE: switchToNextActivatedIM() builds the list internally if needed,
-                    // so no null-check on activatedIMList is required here.
-                    if (service.hasCtrlPress) {
-                        service.switchToNextActivatedIM(true);
-                    } else {
-                        service.showIMPicker(); // Menu+Shift: keep showing system picker
-                    }
+                // Use hasCtrlWithShift so Ctrl+Shift still fires even if Ctrl keyUp arrived first.
+                if (!service.hasSymbolEntered && service.hasMenuPress) {
+                    service.showIMPicker(); // Menu+Shift: keep showing system picker
                     if (service.hasMenuPress) {
                         service.hasMenuProcessed = true;
                         service.hasMenuPress = false;
                     }
+                    service.hasCtrlWithShift = false; // Clear sticky flag after handling
                     service.mMetaState = LIMEMetaKeyKeyListener.adjustMetaAfterKeypress(service.mMetaState);
                     service.setInputConnectionMetaStateAsCurrentMetaKeyKeyListenerState();
                     return true;
@@ -409,6 +439,10 @@ class PhysicalKeyHandler {
             case MY_KEYCODE_CTRL_LEFT:
             case MY_KEYCODE_CTRL_RIGHT:
                 service.hasCtrlPress = false;
+                // Only clear the sticky flag if Shift is no longer held (i.e., Shift already went up).
+                if (!service.hasShiftPress) {
+                    service.hasCtrlWithShift = false;
+                }
                 break;
             case MY_KEYCODE_WINDOWS_START:
                 if (service.hasSpaceProcessed) // Jeremy '12,5,20 long press to show IM picker, switch chi/eng otherwise for
