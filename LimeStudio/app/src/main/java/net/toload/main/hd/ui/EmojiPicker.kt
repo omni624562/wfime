@@ -46,12 +46,13 @@ fun EmojiPicker(
         EmojiData.initialize(context) // Load emojis from JSON once
     }
 
-    var selectedCategoryIndex by remember { mutableIntStateOf(0) } // Default to Smileys
     // Recent Emojis State
     var recentEmojis by remember { mutableStateOf(loadRecentEmojis(context)) }
+    var selectedCategoryIndex by remember { mutableIntStateOf(if (recentEmojis.isEmpty()) 1 else 0) } 
 
     // Categories (using Material Icons to match Gboard style)
     val categories: List<ImageVector> = listOf(
+        Icons.Filled.Schedule,            // Recent
         Icons.Filled.Mood,                // Smileys
         Icons.Filled.EmojiPeople,         // People
         Icons.Filled.EmojiNature,         // Animals & Nature (Bee + Flower)
@@ -77,7 +78,7 @@ fun EmojiPicker(
         saveRecentEmojis(context, newList)
     }
 
-    val pagerState = rememberPagerState(pageCount = { categories.size })
+    val pagerState = rememberPagerState(initialPage = selectedCategoryIndex, pageCount = { categories.size })
     val coroutineScope = rememberCoroutineScope()
 
     // Sync selectedCategoryIndex with pager state for tab highlighting
@@ -138,7 +139,6 @@ fun EmojiPicker(
             }
         }
 
-        // Emoji Pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -146,10 +146,14 @@ fun EmojiPicker(
                 .fillMaxWidth()
         ) { page ->
             // Read directly (no remember) so Compose reacts when EmojiData.initialize() completes
-            val emojisForPage = EmojiData.getListByCategory(page + 1)
+            val emojisForPage = if (page == 0) {
+                recentEmojis.map { Emoji(it, emptyList(), false) }
+            } else {
+                EmojiData.getListByCategory(page)
+            }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(8),
+                columns = GridCells.Adaptive(minSize = 48.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 4.dp),
