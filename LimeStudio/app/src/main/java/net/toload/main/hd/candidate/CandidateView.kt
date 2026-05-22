@@ -84,6 +84,7 @@ open class CandidateView @JvmOverloads constructor(
     private var mService: LIMEService? = null
     private var suggestions by mutableStateOf<List<Mapping>>(emptyList())
     private var selectedIndex by mutableIntStateOf(-1)
+    private var currentPage by mutableIntStateOf(0)
     private var _composingText by mutableStateOf("")
     private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
     // Cached font size scale — read from SharedPreferences once, updated via updateFontSize()
@@ -226,6 +227,7 @@ open class CandidateView @JvmOverloads constructor(
     ) {
         this.suggestions = suggestions?.toList() ?: emptyList()
         this.selectedIndex = -1
+        this.currentPage = 0
     }
 
     open fun setSuggestions(
@@ -239,6 +241,7 @@ open class CandidateView @JvmOverloads constructor(
     open fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
         this.suggestions = suggestions?.toList() ?: emptyList()
         this.selectedIndex = selectedIndex
+        this.currentPage = 0
     }
 
     open fun setSuggestions(
@@ -251,6 +254,7 @@ open class CandidateView @JvmOverloads constructor(
     open fun clear() {
         suggestions = emptyList()
         selectedIndex = -1
+        currentPage = 0
         _composingText = ""
         _rawKeycode = ""
     }
@@ -288,14 +292,21 @@ open class CandidateView @JvmOverloads constructor(
     @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
     fun CandidateRow() {
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        val isDayi = activeIM?.startsWith("dayi") == true
+        
         // Stable Color — remembered so the object is not re-created on every recomposition
         val gboardDark = remember { Color(0xFF2B2B2B) }
         val scrollState = rememberScrollState()
 
         // Font size only recalculates when _fontSizeScale or density changes
         val density = LocalDensity.current
-        val candidateFontSize = remember(density, _fontSizeScale) {
-            with(density) { (baseCandidateFontSizePx * _fontSizeScale).toSp() }
+        val candidateFontSize = remember(density, _fontSizeScale, isDayi, isPhysicalKeyboard) {
+            with(density) { 
+                val base = if (isDayi && isPhysicalKeyboard) baseCandidateFontSizePx * 0.85f else baseCandidateFontSizePx
+                (base * _fontSizeScale).toSp() 
+            }
         }
         
         // Reset scroll position when suggestions change
@@ -309,12 +320,15 @@ open class CandidateView @JvmOverloads constructor(
                 scrollState.value >= scrollState.maxValue
             }
         }
+        // Determine base height based on input method and physical keyboard state
+        val isDayiPhysical = isDayi && isPhysicalKeyboard
+        val baseHeight = if (isDayiPhysical) 36 else 48
         
         // Use BoxWithConstraints to handle infinite width constraints gracefully
         androidx.compose.foundation.layout.BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp) // Fixed height to prevent filling screen
+                .height((baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp) // Thinner for physical keyboard
                 .background(gboardDark)
         ) {
             // Only render the scrollable content if we have a finite maximum width.
@@ -329,6 +343,7 @@ open class CandidateView @JvmOverloads constructor(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Show raw keycode as first item (if not empty)
+                    // Show raw keycode as first item (if not empty)
                     if (_rawKeycode.isNotEmpty()) {
                         RawKeycodeItem(
                             keycode = _rawKeycode,
@@ -340,22 +355,59 @@ open class CandidateView @JvmOverloads constructor(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
+
+                    val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                    val activeIM = mService?.activeIM
+                    val isDayi = activeIM?.startsWith("dayi") == true
+                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
                     
-                    suggestions.forEachIndexed { index, mapping ->
+                    val startIndex = currentPage * pageSize
+                    var endIndex = startIndex + pageSize
+                    if (endIndex > suggestions.size) endIndex = suggestions.size
+                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
+                    val hasNextPage = endIndex < suggestions.size
+                    val hasPrevPage = startIndex > 0
+
+                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                        }
+                    }
+                    
+                    visibleSuggestions.forEachIndexed { i, mapping ->
+                        val actualIndex = startIndex + i
                         CandidateItem(
                             mapping = mapping,
-                            isSelected = index == selectedIndex,
+                            index = actualIndex,
+                            isSelected = actualIndex == selectedIndex,
                             fontSize = candidateFontSize,
                             onClick = {
-                                mService?.pickCandidateManually(index)
-                                selectedIndex = index
+                                mService?.pickCandidateManually(actualIndex)
+                                selectedIndex = actualIndex
                             },
                             onLongClick = {
                                 if (mapping.isRelatedPhraseRecord()) {
-                                    mService?.removeCandidateManually(index)
+                                    mService?.removeCandidateManually(actualIndex)
                                 }
                             }
                         )
+                    }
+
+                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .clickable { pageNext() }
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                        }
                     }
                 }
                 
@@ -384,6 +436,7 @@ open class CandidateView @JvmOverloads constructor(
     @Composable
     fun CandidateItem(
         mapping: Mapping,
+        index: Int,
         isSelected: Boolean,
         fontSize: androidx.compose.ui.unit.TextUnit,
         onClick: () -> Unit,
@@ -393,6 +446,28 @@ open class CandidateView @JvmOverloads constructor(
         val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
         val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
 
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        
+        var displayText = mapping.word ?: ""
+        if (isPhysicalKeyboard && !mapping.isEmojiRecord() && !mapping.isComposingCodeRecord()) {
+            if (activeIM?.startsWith("dayi") == true) {
+                val prefix = when (index % 6) {
+                    0 -> "0. "
+                    1 -> "'. "
+                    2 -> "[. "
+                    3 -> "]. "
+                    4 -> "-. "
+                    5 -> "\\. "
+                    else -> ""
+                }
+                displayText = prefix + displayText
+            } else {
+                val prefix = if (index < 9) "${index + 1}. " else if (index == 9) "0. " else ""
+                displayText = prefix + displayText
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -400,11 +475,11 @@ open class CandidateView @JvmOverloads constructor(
                     onClick = onClick,
                     onLongClick = onLongClick
                 )
-                .padding(horizontal = 16.dp, vertical = 2.dp),
+                .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = mapping.word ?: "",
+                text = displayText,
                 color = textColor,
                 fontSize = fontSize,
                 fontWeight = fontWeight,
@@ -428,7 +503,7 @@ open class CandidateView @JvmOverloads constructor(
                     color = Color(0xFF3A3A3A), // Slightly lighter than gboardDark
                     shape = RoundedCornerShape(4.dp)
                 )
-                .padding(horizontal = 12.dp, vertical = 2.dp),
+                .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -461,13 +536,43 @@ open class CandidateView @JvmOverloads constructor(
     
     open fun selectNext() {
         if (suggestions.isNotEmpty()) {
-            selectedIndex = (selectedIndex + 1).coerceAtMost(suggestions.size - 1)
+            selectedIndex++
+            if (selectedIndex >= suggestions.size) {
+                selectedIndex = 0
+                currentPage = 0
+            } else {
+                val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                val activeIM = mService?.activeIM
+                val isDayi = activeIM?.startsWith("dayi") == true
+                val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                if (pageSize > 0 && selectedIndex >= (currentPage + 1) * pageSize) {
+                    currentPage++
+                }
+            }
         }
     }
     
     open fun selectPrev() {
          if (suggestions.isNotEmpty()) {
-            selectedIndex = (selectedIndex - 1).coerceAtLeast(0)
+            selectedIndex--
+            if (selectedIndex < 0) {
+                selectedIndex = suggestions.size - 1
+                val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                val activeIM = mService?.activeIM
+                val isDayi = activeIM?.startsWith("dayi") == true
+                val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                if (pageSize > 0) {
+                    currentPage = selectedIndex / pageSize
+                }
+            } else {
+                val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                val activeIM = mService?.activeIM
+                val isDayi = activeIM?.startsWith("dayi") == true
+                val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                if (pageSize > 0 && selectedIndex < currentPage * pageSize) {
+                    currentPage--
+                }
+            }
         }
     }
     
@@ -479,7 +584,38 @@ open class CandidateView @JvmOverloads constructor(
     open fun selectPrevRow() {
         selectPrev()
     }
+
+    fun getCurrentPageOffset(): Int {
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        val isDayi = activeIM?.startsWith("dayi") == true
+        val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+        if (pageSize == 0) return 0
+        return currentPage * pageSize
+    }
+
+    fun pageNext() {
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        val isDayi = activeIM?.startsWith("dayi") == true
+        val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+        if (pageSize > 0 && (currentPage + 1) * pageSize < suggestions.size) {
+            currentPage++
+            selectedIndex = -1
+        }
+    }
+
+    fun pagePrev() {
+        if (currentPage > 0) {
+            currentPage--
+            selectedIndex = -1
+        }
+    }
     
+    fun retrieveSelectedIndex(): Int {
+        return selectedIndex
+    }
+
     open fun takeSelectedSuggestion(): Boolean {
         if (selectedIndex >= 0 && selectedIndex < suggestions.size) {
             mService?.pickCandidateManually(selectedIndex)
