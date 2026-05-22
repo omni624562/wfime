@@ -1581,12 +1581,10 @@ public class LIMEService extends InputMethodService implements
                 break;
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
-                    // Dayi Fast Candidate Selection: 0, ', [, ], -, \ select candidates 0 through 5
+                    // Dayi Fast Candidate Selection: ', [, ], -, \ select candidates 1 through 5
                     if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
                         int candidateIndex = -1;
-                        if (keyCode == KeyEvent.KEYCODE_0) {
-                            candidateIndex = 0;
-                        } else if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
+                        if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
                             candidateIndex = 1;
                         } else if (keyCode == KeyEvent.KEYCODE_LEFT_BRACKET) {
                             candidateIndex = 2;
