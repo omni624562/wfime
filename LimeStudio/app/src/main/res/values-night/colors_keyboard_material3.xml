@@ -36,11 +36,12 @@
     -->
     <color name="keyboard_candidate_spacer_material3">@color/md_theme_outline</color>
     <color name="keyboard_selection_keys_material3">#CC6CDBAC</color> <!-- md_theme_primary (dark) @ 80% -->
-    <color name="keyboard_action_key_material3">@color/md_theme_primary</color>
+    <color name="keyboard_action_key_material3">@color/md_theme_primaryContainer</color>
+    <color name="keyboard_action_key_icon_material3">@color/md_theme_onPrimaryContainer</color>
 
     <!--
         Key Press State
     -->
-    <color name="keyboard_key_pressed_material3">@color/md_theme_primaryContainer</color>
+    <color name="keyboard_key_pressed_material3">@color/md_theme_primary</color>
     <color name="keyboard_normal_key_pressed_material3">#20FFFFFF</color> <!-- Semi-transparent white overlay for dark mode -->
 </resources>

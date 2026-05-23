@@ -569,10 +569,10 @@
         <item name="keyTextColorPressed">@color/md_theme_onPrimary</item>
 
         <item name="functionKeyTextColorNormal">@color/keyboard_second_foreground_material3</item>
-        <item name="functionKeyTextColorPressed">@color/md_theme_onPrimary</item>
+        <item name="functionKeyTextColorPressed">@color/keyboard_action_key_icon_material3</item>
 
         <item name="keySubLabelTextColorNormal">@color/keyboard_third_foreground_material3</item>
-        <item name="keySubLabelTextColorPressed">@color/md_theme_onPrimary</item>
+        <item name="keySubLabelTextColorPressed">@color/keyboard_action_key_icon_material3</item>
     </style>
 
     <style name="LIMEBaseKeyboard.Material3" parent="LIMEBaseKeyboard">
