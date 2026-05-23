@@ -22,7 +22,7 @@
     </Row>
 
     <Row>
-        <Key limehd:codes="97" limehd:horizontalGap="5%p" limehd:keyEdgeFlags="left" limehd:keyLabel="a" />
+        <Key limehd:codes="97" limehd:keyWidth="15%p" limehd:horizontalGap="5%p" limehd:keyEdgeFlags="left" limehd:keyLabel="a" />
         <Key limehd:codes="115" limehd:keyLabel="s" />
         <Key limehd:codes="100" limehd:keyLabel="d" />
         <Key limehd:codes="102" limehd:keyLabel="f" />

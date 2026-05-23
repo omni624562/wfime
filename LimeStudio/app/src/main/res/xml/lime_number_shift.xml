@@ -104,6 +104,7 @@
     <Row>
         <Key
             limehd:codes="65"
+            limehd:keyWidth="15%p"
             limehd:horizontalGap="5%p"
             limehd:keyEdgeFlags="left"
             limehd:keyLabel="A" />
