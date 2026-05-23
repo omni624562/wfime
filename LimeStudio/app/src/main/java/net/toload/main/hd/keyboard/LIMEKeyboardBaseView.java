@@ -893,9 +893,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         for (final Key key : keys) {
             int[] drawableState = key.getCurrentDrawableState();
 
-            // Use action key background for Enter key if available
+            // Use action key background for Enter key and More Symbols (hamburger) key
             boolean isActionKey = key.codes != null && key.codes.length > 0
-                    && key.codes[0] == LIMEBaseKeyboard.KEYCODE_ENTER;
+                    && (key.codes[0] == LIMEBaseKeyboard.KEYCODE_ENTER || key.codes[0] == -15);
 
             // Identify functional keys (Delete, Shift, Symbol, Done) - Space (32) removed to match Gboard style
             // Also include keys marked as modifiers in XML for consistency
