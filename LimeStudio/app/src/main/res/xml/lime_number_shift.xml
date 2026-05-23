@@ -198,9 +198,10 @@
             limehd:keyLabel=","
             limehd:keyWidth="10%p" />
         <Key
-            limehd:codes="59"
-            limehd:keyLabel=";"
-            limehd:keyWidth="10%p" />
+            limehd:codes="46"
+            limehd:keyLabel="."
+            limehd:keyWidth="10%p"
+            limehd:popupKeyboard="@xml/popup_c_punctuation" />
         <Key
             limehd:codes="10"
             limehd:isModifier="true"

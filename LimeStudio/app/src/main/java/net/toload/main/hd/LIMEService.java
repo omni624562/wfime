@@ -186,6 +186,7 @@ public class LIMEService extends InputMethodService implements
     boolean hasQuickSwitch = false;
     // Hard Keyboad Shift + Space Status
     boolean hasShiftPress = false;
+    boolean mShiftHandledInOnPress = false;
     boolean onlyShiftPress = false; // Jeremy '15,5,30 shift only to switch between chi/eng
     boolean hasCtrlPress = false; // Jeremy '11,5,13
     boolean hasCtrlWithShift = false; // Sticky flag: true when Ctrl+Shift chord was formed (survives Ctrl keyUp before Shift keyUp)
@@ -2246,8 +2247,10 @@ public class LIMEService extends InputMethodService implements
             if (DEBUG)
                 Log.i(TAG, "OnKey():KEYCODE_SHIFT calling handleShift()");
 
-            // Jeremy '24,1,7: Prevent double-toggle if Shift was already handled in onPress
-            if (!hasShiftPress) {
+            // Prevent double-toggle if Shift was already handled in onPress
+            if (mShiftHandledInOnPress) {
+                mShiftHandledInOnPress = false; // Reset flag and skip duplicate execution
+            } else {
                 handleShift();
             }
         } else if (primaryCode == LIMEBaseKeyboard.KEYCODE_DONE) {// long press on options and shift
@@ -2264,7 +2267,7 @@ public class LIMEService extends InputMethodService implements
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_OPTIONS) {
             toggleEmojiVisibility();
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_SPACE_LONGPRESS) {
-            handleOptions();
+            // Disable options menu on space longpress per user request
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_SYMBOL_KEYBOARD) {
             mEnglishOnly = true;
             mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_PHONE, mImeOptions, false, false,
@@ -4183,6 +4186,7 @@ public class LIMEService extends InputMethodService implements
             if (DEBUG)
                 Log.i(TAG, "onPress():KEYCODE_SHIFT, calling handleShift()");
             hasShiftPress = true;
+            mShiftHandledInOnPress = true; // Set flag to avoid duplicate processing in onKey
             hasShiftCombineKeyPressed = false;
             handleShift();
         } else if (hasShiftPress) {
