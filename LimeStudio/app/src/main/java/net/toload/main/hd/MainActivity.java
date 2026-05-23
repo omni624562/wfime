@@ -361,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
             DBServer dbSrv = new DBServer(this);
             dbSrv.resetMapping(imtable);
             refreshImportStatus();
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

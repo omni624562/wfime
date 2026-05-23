@@ -897,7 +897,7 @@ public class LIMEService extends InputMethodService implements
             }
             // Jeremy '11,8,1 do postfinishinput in searchSrv (learn userdic and LDPhrase).
             SearchSrv.postFinishInput();
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error in postFinishInput: " + e.getMessage());
         }
         // Clear current composing text and candidates.
@@ -908,7 +908,7 @@ public class LIMEService extends InputMethodService implements
         try {
             mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
             mKeyboardSwitcher.setImList(SearchSrv.getImList());
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error getting keyboard/IM list: " + e.getMessage());
         }
 
@@ -1105,7 +1105,7 @@ public class LIMEService extends InputMethodService implements
             if (mKeyboardSwitcher.getKeyboardSize() == 0) {
                 try {
                     mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error loading keyboard list in initOnStartInput: " + e.getMessage());
                 }
             }
@@ -1113,7 +1113,7 @@ public class LIMEService extends InputMethodService implements
             // Reset the IM softkeyboard settings. Jeremy '11,6,19
             try {
                 mKeyboardSwitcher.setImList(SearchSrv.getImList());
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error getting IM list: " + e.getMessage());
             }
 
@@ -2296,7 +2296,7 @@ public class LIMEService extends InputMethodService implements
                         try {
                             String selkey = SearchSrv.getSelkey();
                             mCandidateView.setSuggestions(mCandidateList, hasPhysicalKeyPressed, selkey);
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -2513,7 +2513,7 @@ public class LIMEService extends InputMethodService implements
         try {
             mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
             mKeyboardSwitcher.setImList(SearchSrv.getImList());
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error updating keyboard list: " + e.getMessage());
         }
 
@@ -2656,7 +2656,7 @@ public class LIMEService extends InputMethodService implements
             mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
             mKeyboardSwitcher.setImList(SearchSrv.getImList());
             currentSoftKeyboard = mKeyboardSwitcher.getImKeyboard(activeIM);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error updating keyboard list: " + e.getMessage());
         }
     }
@@ -2763,7 +2763,7 @@ public class LIMEService extends InputMethodService implements
                     try {
                         list.addAll(
                                 SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, getAllRecords));
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -2791,7 +2791,7 @@ public class LIMEService extends InputMethodService implements
                     } else {
                         try {
                             selkey = SearchSrv.getSelkey();
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         String mixedModeSelkey = "`";
@@ -2957,7 +2957,7 @@ public class LIMEService extends InputMethodService implements
                                 List<Mapping> suggestions = null;
                                 try {
                                     suggestions = SearchSrv.getEnglishSuggestions(tempEnglishWord.toString());
-                                } catch (RemoteException e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                                 try {
@@ -3072,7 +3072,7 @@ public class LIMEService extends InputMethodService implements
                                     && !committedCandidate.isChinesePunctuationSymbolRecord()) {
                                 list.addAll(SearchSrv.getRelatedPhrase(committedCandidate.getWord(), getAllRecords));
                             }
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
 
@@ -3658,7 +3658,7 @@ public class LIMEService extends InputMethodService implements
             try {
                 mKeyboardSwitcher.setKeyboardList(SearchSrv.getKeyboardList());
                 mKeyboardSwitcher.setImList(SearchSrv.getImList());
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -3755,7 +3755,7 @@ public class LIMEService extends InputMethodService implements
             if (!(disable_physical_selection && hasPhysicalKeyPressed)) {
                 try {
                     selkey = SearchSrv.getSelkey();
-                } catch (RemoteException ignored) {
+                } catch (Exception ignored) {
                     ignored.printStackTrace();
                 }
 

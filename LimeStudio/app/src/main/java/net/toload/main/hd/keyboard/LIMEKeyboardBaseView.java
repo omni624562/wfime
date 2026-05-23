@@ -262,6 +262,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      */
     private final Rect mDirtyRect = new Rect();
     /**
+     * The dirty region in the keyboard bitmap
+     */
+    private final Rect mTextBounds = new Rect();
+    /**
      * The keyboard bitmap for faster updates
      */
     private Bitmap mBuffer;
@@ -991,10 +995,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     labelHeight = mTextHeightCache.get(labelSize);
                     labelWidth = mTextWidthCache.get(labelSize);
                 } else {
-                    Rect textBounds = new Rect();
-                    paint.getTextBounds(KEY_LABEL_HEIGHT_REFERENCE_CHAR, 0, 1, textBounds);
-                    labelHeight = textBounds.height();
-                    labelWidth = textBounds.width();
+                    paint.getTextBounds(KEY_LABEL_HEIGHT_REFERENCE_CHAR, 0, 1, mTextBounds);
+                    labelHeight = mTextBounds.height();
+                    labelWidth = mTextBounds.width();
                     mTextHeightCache.put(labelSize, labelHeight);
                     mTextWidthCache.put(labelSize, labelWidth);
                 }
@@ -1030,10 +1033,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         subLabelWidth = mTextWidthCache.get(subLabelSize);
                     } else {
 
-                        Rect textBounds = new Rect();
-                        paint.getTextBounds(KEY_LABEL_HEIGHT_REFERENCE_CHAR, 0, 1, textBounds);
-                        subLabelHeight = textBounds.height();
-                        subLabelWidth = textBounds.width();
+                        paint.getTextBounds(KEY_LABEL_HEIGHT_REFERENCE_CHAR, 0, 1, mTextBounds);
+                        subLabelHeight = mTextBounds.height();
+                        subLabelWidth = mTextBounds.width();
                         mTextHeightCache.put(subLabelSize, subLabelHeight);
                         mTextWidthCache.put(subLabelSize, subLabelWidth);
                     }

@@ -27,7 +27,7 @@ package net.toload.main.hd;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.RemoteException;
+
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -81,7 +81,7 @@ public class DBServer {
         SearchServer.resetCache(true);
     }
 
-    public static void backupDatabase() throws RemoteException {
+    public static void backupDatabase() {
         if (DEBUG)
             Log.i(TAG, "backupDatabase()");
         // showNotificationMessage(appContext.getText(R.string.l3_initial_backup_start) + "");
@@ -134,12 +134,12 @@ public class DBServer {
             fileSharedPrefsBackup.delete();
     }
 
-    public static void restoreDatabase() throws RemoteException {
+    public static void restoreDatabase() {
         File backupFile = new File(new File(appContext.getFilesDir(), "backups"), LIME.DATABASE_BACKUP_NAME);
         restoreDatabase(backupFile.getAbsolutePath());
     }
 
-    public static void restoreDatabase(String srcFilePath) throws RemoteException {
+    public static void restoreDatabase(String srcFilePath) {
 
         File check = new File(srcFilePath);
 
@@ -254,7 +254,7 @@ public class DBServer {
         }
     }
 
-    public static void closeDatabse() throws RemoteException {
+    public static void closeDatabse() {
         Log.i(TAG, "closeDatabase()");
         if (datasource != null) {
             datasource.close();
@@ -326,14 +326,14 @@ public class DBServer {
     }
 
     public void loadMapping(String filename, String tablename, LIMEProgressListener progressListener)
-            throws RemoteException {
+            {
 
         File sourcefile = new File(filename);
         loadMapping(sourcefile, tablename, progressListener);
     }
 
     public void loadMapping(File sourcefile, String tablename, LIMEProgressListener progressListener)
-            throws RemoteException {
+            {
         if (DEBUG)
             Log.i(TAG, "loadMapping() on " + loadingTablename);
 
@@ -352,7 +352,7 @@ public class DBServer {
         resetCache();
     }
 
-    public void resetMapping(final String tablename) throws RemoteException {
+    public void resetMapping(final String tablename) {
 
         if (DEBUG)
             Log.i(TAG, "resetMapping() on " + loadingTablename);
@@ -408,44 +408,44 @@ public class DBServer {
         return datasource.getCount();
     }
 
-    public String getImInfo(String im, String field) throws RemoteException {
+    public String getImInfo(String im, String field) {
         // if (datasource == null) {loadLimeDB();}
         return datasource.getImInfo(im, field);
     }
 
-    public String getKeyboardInfo(String keyboardCode, String field) throws RemoteException {
+    public String getKeyboardInfo(String keyboardCode, String field) {
         // if (datasource == null) {loadLimeDB();}
         return datasource.getKeyboardInfo(keyboardCode, field);
     }
 
     public void removeImInfo(String im, String field)
-            throws RemoteException {
+            {
         // if (datasource == null) {loadLimeDB();}
         datasource.removeImInfo(im, field);
 
     }
 
-    public void resetImInfo(String im) throws RemoteException {
+    public void resetImInfo(String im) {
         // if (datasource == null) {loadLimeDB();}
         datasource.resetImInfo(im);
 
     }
 
     public void setImInfo(String im, String field, String value)
-            throws RemoteException {
+            {
         // if (datasource == null) {loadLimeDB();}
         datasource.setImInfo(im, field, value);
 
     }
 
     public void setIMKeyboard(String im, String value,
-            String keyboard) throws RemoteException {
+            String keyboard) {
 
         datasource.setIMKeyboard(im, value, keyboard);
     }
 
     public String getKeyboardCode(String im)
-            throws RemoteException {
+            {
         // if (datasource == null) {loadLimeDB();}
         return datasource.getKeyboardCode(im);
     }
@@ -592,7 +592,7 @@ public class DBServer {
         datasource.checkPhoneticKeyboardSetting();
     }
 
-    public int getLoadingMappingPercentageDone() throws RemoteException {
+    public int getLoadingMappingPercentageDone() {
         if (remoteFileDownloading)
             return 0;
         else

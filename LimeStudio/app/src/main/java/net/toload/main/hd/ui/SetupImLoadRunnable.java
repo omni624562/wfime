@@ -228,7 +228,7 @@ public class SetupImLoadRunnable implements Runnable {
         // Remove Imtype and related info
         try {
             dbsrv.resetMapping(imtype);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

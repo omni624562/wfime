@@ -26,7 +26,7 @@ package net.toload.main.hd;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.RemoteException;
+
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
@@ -182,7 +182,7 @@ public class SearchServer {
                     try {
                         // bypass run-time suggestion for prefetch queries
                         getMappingByCode(key, true, false, true);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         Log.e(TAG, "Error in prefetch: " + e.getMessage());
                     }
                 }
@@ -195,7 +195,7 @@ public class SearchServer {
     }
 
     // TODO: Should cache related phrase 15,6,8 Jeremy
-    public List<Mapping> getRelatedPhrase(String word, boolean getAllRecords) throws RemoteException {
+    public List<Mapping> getRelatedPhrase(String word, boolean getAllRecords) {
 
         return dbadapter.getRelatedPhrase(word, getAllRecords);
     }
@@ -205,7 +205,7 @@ public class SearchServer {
      */
 
     // Add by jeremy '10, 4,1
-    public void getCodeListStringFromWord(final String word) throws RemoteException {
+    public void getCodeListStringFromWord(final String word) {
 
         String result = dbadapter.getCodeListStringByWord(word);
         if (result != null && !result.equals("")) {
@@ -634,7 +634,7 @@ public class SearchServer {
     }
 
     public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
-            throws RemoteException {
+            {
         return getMappingByCode(code, softkeyboard, getAllRecords, false);
     }
 
@@ -661,7 +661,7 @@ public class SearchServer {
 
     public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords,
             boolean prefetchCache)
-            throws RemoteException {
+            {
         if (DEBUG || dumpRunTimeSuggestion)
             Log.i(TAG, "getMappingByCode(): code=" + code);
         // Check if system need to reset cache
@@ -942,7 +942,7 @@ public class SearchServer {
     public void initialCache() {
         try {
             clear();
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // e.printStackTrace();
             Log.e(TAG, e.getMessage());
         }
@@ -1034,7 +1034,7 @@ public class SearchServer {
 
     }
 
-    public void postFinishInput() throws RemoteException {
+    public void postFinishInput() {
 
         if (scorelistSnapshot == null)
             scorelistSnapshot = new LinkedList<>();
@@ -1342,7 +1342,7 @@ public class SearchServer {
             if (code.length() == 1)// prefetch if code length ==1
                 try {
                     getMappingByCode(code, !isPhysicalKeyboardPressed, false, true);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
         }
@@ -1370,7 +1370,7 @@ public class SearchServer {
     public void learnRelatedPhraseAndUpdateScore(Mapping updateMapping)
             // String id, String code, String word,
             // String pword, int score, boolean isDictionary)
-            throws RemoteException {
+            {
         if (DEBUG)
             Log.i(TAG, "learnRelatedPhraseAndUpdateScore() ");
 
@@ -1418,17 +1418,17 @@ public class SearchServer {
 
     }
 
-    public List<KeyboardObj> getKeyboardList() throws RemoteException {
+    public List<KeyboardObj> getKeyboardList() {
         // if(dbadapter == null){dbadapter = new LimeDB(ctx);}
         return dbadapter.getKeyboardList();
     }
 
-    public List<ImObj> getImList() throws RemoteException {
+    public List<ImObj> getImList() {
         // if(dbadapter == null){dbadapter = new LimeDB(ctx);}
         return dbadapter.getImList();
     }
 
-    public void clear() throws RemoteException {
+    public void clear() {
         if (scorelist != null) {
             scorelist.clear();
         }
@@ -1450,7 +1450,7 @@ public class SearchServer {
         }
     }
 
-    public List<Mapping> getEnglishSuggestions(String word) throws RemoteException {
+    public List<Mapping> getEnglishSuggestions(String word) {
 
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {
@@ -1494,7 +1494,7 @@ public class SearchServer {
     }
 
     /*
-     * public boolean isImKeys(char c) throws RemoteException {
+     * public boolean isImKeys(char c) {
      * if (imKeysMap.get(tablename) == null || imKeysMap.size() == 0) {
      * //if(dbadapter == null){dbadapter = new LimeDB(ctx);}
      * imKeysMap.put(tablename, dbadapter.getImInfo(tablename, "imkeys"));
@@ -1503,7 +1503,7 @@ public class SearchServer {
      * return !(imkeys == null || imkeys.equals("")) && (imkeys.indexOf(c) >= 0);
      * }
      */
-    public String getSelkey() throws RemoteException {
+    public String getSelkey() {
         if (DEBUG)
             Log.i(TAG, "getSelkey():hasNumber:" + hasNumberMapping + "hasSymbol:" + hasSymbolMapping);
         String selkey;

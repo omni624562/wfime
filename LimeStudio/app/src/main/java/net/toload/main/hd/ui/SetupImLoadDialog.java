@@ -690,7 +690,7 @@ public class SetupImLoadDialog extends DialogFragment {
                     handler.cancelProgress();
                 }
             });
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -30,7 +30,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Looper;
-import android.os.RemoteException;
+
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
@@ -3774,7 +3774,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         * }
         */
     private Mapping isMappingExistOnDB(SQLiteDatabase db, String table, String code, String word)
-            throws RemoteException {
+            {
         if (DEBUG)
             Log.i(TAG, "isMappingExistOnDB(), code = '" + code + "'");
         Mapping munit = null;
@@ -3846,7 +3846,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * f
      * Jeremy '12,4,6 core of getHightestScore()
      */
-    private int getHighestScoreOnDB(SQLiteDatabase db, String word) throws RemoteException {
+    private int getHighestScoreOnDB(SQLiteDatabase db, String word) {
         // '14,12,28 use word instead of code when evaluating scores
 
         int highestScore = 0;
@@ -3931,7 +3931,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * Jeremy '12/4/16 core of isUserDictExist()
      */
-    private Mapping isRelatedPhraseExistOnDB(SQLiteDatabase db, String pword, String cword) throws RemoteException {
+    private Mapping isRelatedPhraseExistOnDB(SQLiteDatabase db, String pword, String cword) {
 
         Mapping munit = null;
         if (pword != null && !pword.trim().equals("")) {
