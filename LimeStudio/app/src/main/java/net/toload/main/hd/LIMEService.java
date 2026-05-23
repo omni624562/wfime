@@ -444,6 +444,35 @@ public class LIMEService extends InputMethodService implements
 
         initialViewAndSwitcher(true); // Jeremy '12,4,29. will do buildactivekeyboardlist in init startInput
 
+        android.app.Dialog dialog = getWindow();
+        if (dialog != null && dialog.getWindow() != null) {
+            android.view.Window window = dialog.getWindow();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                android.view.View decorView = window.getDecorView();
+                int flags = decorView.getSystemUiVisibility();
+                
+                boolean isMaterial3 = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Material3;
+                boolean isLightTheme = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Light;
+                boolean isSystemDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                boolean isLightMode = isLightTheme || (isMaterial3 && !isSystemDarkMode);
+
+                if (isLightMode) {
+                    flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    if (isMaterial3) {
+                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
+                    } else {
+                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.keyboard_background_light, mThemeContext.getTheme()));
+                    }
+                } else {
+                    flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    if (isMaterial3) {
+                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
+                    }
+                }
+                decorView.setSystemUiVisibility(flags);
+            }
+        }
+
         Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
         Log.d("EMOJI_DEBUG", "mFixedCandidateViewOn = " + mFixedCandidateViewOn);
 

@@ -1100,6 +1100,17 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     icon.setState(drawableState);
                 }
 
+                // Apply tint to ALL icons based on key state and type
+                int iconTintColor = isActionKey
+                        ? mFunctionKeyTextColorPressed  // action key always contrasts against primary background
+                        : key.isFunctionalKey()
+                                ? (key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal)
+                                : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
+                
+                icon.mutate();
+                icon.setColorFilter(iconTintColor, PorterDuff.Mode.SRC_IN);
+                icon.setAlpha(255);
+
                 // Special handing for the upper-right number hint icons
                 final int drawableWidth;
                 final int drawableHeight;
@@ -1110,38 +1121,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     drawableHeight = drawHeight;
                     drawableX = 0;
                     drawableY = NUMBER_HINT_VERTICAL_ADJUSTMENT_PIXEL;
-                } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -100) { // KEYCODE_OPTIONS
-                                                                                                // (Emoji)
-                    // Emoji Key: Scale to 55% of key height for consistency with Translate icon
-                    float scaleFactor = 0.55f;
+                } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == LIMEBaseKeyboard.KEYCODE_SHIFT) {
+                    // Shift Key: Scale to 65% of key height for better visibility
+                    float scaleFactor = 0.65f;
                     drawableHeight = (int) (drawHeight * scaleFactor);
-
-                    // Apply tint to ensure visibility, as ic_emoji_vector uses ?attr/colorControlNormal
-                    // which may not resolve correctly in all theme contexts
-                    icon.mutate();
-                    int tintColor = key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal;
-                    icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
-                    icon.setAlpha(255);
-
-                    // Maintain aspect ratio if intrinsic dimensions are available
-                    if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
-                        drawableWidth = icon.getIntrinsicWidth() * drawableHeight / icon.getIntrinsicHeight();
-                    } else {
-                        drawableWidth = drawableHeight;
-                    }
-                    drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
-                    drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
-                } else if (key.codes != null && key.codes.length > 0 && key.codes[0] == -10) { // Language Switch
-                    // Language Switch Key: Scale to 55% of key height to match text label size
-                    float scaleFactor = 0.55f;
-                    drawableHeight = (int) (drawHeight * scaleFactor);
-
-                    // Apply tint to ensure visibility, as ic_translate uses ?attr/colorControlNormal
-                    // which may not resolve correctly in all theme contexts
-                    icon.mutate();
-                    int tintColor = key.pressed ? mFunctionKeyTextColorPressed : mFunctionKeyTextColorNormal;
-                    icon.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
-                    icon.setAlpha(255);
 
                     // Maintain aspect ratio if intrinsic dimensions are available
                     if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
@@ -1152,7 +1135,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     drawableX = (drawWidth + padding.left - padding.right - drawableWidth) / 2;
                     drawableY = (drawHeight + padding.top - padding.bottom - drawableHeight) / 2;
                 } else {
-                    // Default icon scaling (Delete, Return, etc.)
+                    // Default icon scaling (Emoji, Translate, Delete, Return, etc.)
                     // Use 55% of key height to match Emoji and Translate icons
                     float scaleFactor = 0.55f;
                     drawableHeight = (int) (drawHeight * scaleFactor);
