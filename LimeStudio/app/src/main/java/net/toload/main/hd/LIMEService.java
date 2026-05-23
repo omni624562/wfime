@@ -1188,6 +1188,15 @@ public class LIMEService extends InputMethodService implements
 
         InputConnection ic = getCurrentInputConnection();
 
+        if (ic != null) {
+            CharSequence before = ic.getTextBeforeCursor(1, 0);
+            if (before != null && before.length() > 0) {
+                SearchServer.setLastCommittedChar(before.toString());
+            } else {
+                SearchServer.setLastCommittedChar(null);
+            }
+        }
+
         if (mComposing.length() > 0
                 && !(candidatesEnd == candidatesStart) // Jeremy '12,7,2 bug fixed on composition being clear after
                                                        // second word in chrome

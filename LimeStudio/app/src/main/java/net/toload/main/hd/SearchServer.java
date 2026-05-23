@@ -100,6 +100,7 @@ public class SearchServer {
     // LinkedList<>();
     private static String lastEnglishWord = null;
     private static boolean noSuggestionsForLastEnglishWord = false;
+    private static String lastCommittedChar = null;
     private final LIMEPreferenceManager mLIMEPref;
     // Jeremy '11,6,6
     private final HashMap<String, String> selKeyMap = new HashMap<>();
@@ -126,6 +127,14 @@ public class SearchServer {
 
     public String getTablename() {
         return tablename;
+    }
+
+    public static void setLastCommittedChar(String c) {
+        lastCommittedChar = c;
+    }
+
+    public static String getLastCommittedChar() {
+        return lastCommittedChar;
     }
 
     public void setTablename(String table, boolean numberMapping, boolean symbolMapping) {
@@ -737,6 +746,34 @@ public class SearchServer {
         }
         if (DEBUG)
             Log.i(TAG, "getMappingByCode() result.size()=" + result.size());
+
+        if (lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
+            try {
+                List<Mapping> related = dbadapter.getRelatedPhrase(lastCommittedChar, false);
+                if (related != null && !related.isEmpty()) {
+                    final java.util.List<String> relatedChars = new java.util.ArrayList<>();
+                    for (Mapping m : related) {
+                        if (m.getWord() != null && m.getWord().length() > 1) {
+                            relatedChars.add(m.getWord().substring(1, 2));
+                        }
+                    }
+                    if (!relatedChars.isEmpty()) {
+                        java.util.Collections.sort(result, new java.util.Comparator<Mapping>() {
+                            public int compare(Mapping m1, Mapping m2) {
+                                boolean b1 = relatedChars.contains(m1.getWord());
+                                boolean b2 = relatedChars.contains(m2.getWord());
+                                if (b1 == b2) return 0;
+                                return b1 ? -1 : 1;
+                            }
+                        });
+                        if (DEBUG)
+                            Log.i(TAG, "getMappingByCode() Context-aware sorting applied for char: " + lastCommittedChar);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         return result;
     }
