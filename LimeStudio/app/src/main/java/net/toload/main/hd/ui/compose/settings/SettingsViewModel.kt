@@ -81,7 +81,11 @@ data class SettingsUiState(
 
     // IM loading status
     val isPhoneticImported: Boolean = false,
-    val isDayiImported: Boolean = false
+    val isDayiImported: Boolean = false,
+
+    // IM activation status
+    val enableDayi: Boolean = true,
+    val enablePhonetic: Boolean = true
 )
 
 /**
@@ -178,7 +182,9 @@ class SettingsViewModel(
                     acceptNumberIndex = preferenceManager.getParameterBoolean("accept_number_index", false),
                     acceptSymbolIndex = preferenceManager.getParameterBoolean("accept_symbol_index", false),
                     isPhoneticImported = isPhonetic,
-                    isDayiImported = isDayi
+                    isDayiImported = isDayi,
+                    enableDayi = preferenceManager.getIMActivatedState().contains("0"),
+                    enablePhonetic = preferenceManager.getIMActivatedState().contains("1")
                 )
             }
         }
@@ -348,6 +354,52 @@ class SettingsViewModel(
     fun setAcceptSymbolIndex(value: Boolean) {
         preferenceManager.setParameter("accept_symbol_index", value)
         _uiState.update { it.copy(acceptSymbolIndex = value) }
+    }
+
+    fun setEnableDayi(enable: Boolean) {
+        val state = preferenceManager.getIMActivatedState()
+        val hasDayi = state.contains("0")
+        val hasPhonetic = state.contains("1")
+
+        if (!enable && !hasPhonetic) {
+            // 防呆：不能同時停用大易與注音，必須至少保留一個啟用的中文輸入法
+            return
+        }
+
+        val newState = if (enable) {
+            if (!hasDayi) {
+                state + "0;"
+            } else {
+                state
+            }
+        } else {
+            state.replace("0;", "").replace("0", "")
+        }
+        preferenceManager.setIMActivatedState(newState)
+        loadPreferences()
+    }
+
+    fun setEnablePhonetic(enable: Boolean) {
+        val state = preferenceManager.getIMActivatedState()
+        val hasDayi = state.contains("0")
+        val hasPhonetic = state.contains("1")
+
+        if (!enable && !hasDayi) {
+            // 防呆：不能同時停用大易與注音，必須至少保留一個啟用的中文輸入法
+            return
+        }
+
+        val newState = if (enable) {
+            if (!hasPhonetic) {
+                state + "1;"
+            } else {
+                state
+            }
+        } else {
+            state.replace("1;", "").replace("1", "")
+        }
+        preferenceManager.setIMActivatedState(newState)
+        loadPreferences()
     }
 }
 

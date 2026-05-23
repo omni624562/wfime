@@ -548,4 +548,14 @@
         <item>15</item>
     </string-array>
 
+    <string name="enable_dayi">啟用大易輸入法</string>
+    <string name="enable_dayi_summary_on">切換輸入法時會出現大易鍵盤</string>
+    <string name="enable_dayi_summary_off">切換輸入法時不出現大易鍵盤</string>
+    <string name="enable_dayi_summary_disabled">請先在上方載入大易對照表</string>
+    
+    <string name="enable_phonetic">啟用注音輸入法</string>
+    <string name="enable_phonetic_summary_on">切換輸入法時會出現注音鍵盤</string>
+    <string name="enable_phonetic_summary_off">切換輸入法時不出現注音鍵盤</string>
+    <string name="enable_phonetic_summary_disabled">請先在上方載入注音對照表</string>
+
 </resources>

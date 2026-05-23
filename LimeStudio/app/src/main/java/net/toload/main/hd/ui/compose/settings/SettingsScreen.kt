@@ -484,6 +484,34 @@ fun ImSettingsSection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
+        // 啟用大易輸入法
+        SwitchPreference(
+            title = stringResource(R.string.enable_dayi),
+            summary = if (uiState.isDayiImported) {
+                if (uiState.enableDayi) stringResource(R.string.enable_dayi_summary_on) else stringResource(R.string.enable_dayi_summary_off)
+            } else {
+                stringResource(R.string.enable_dayi_summary_disabled)
+            },
+            checked = uiState.enableDayi && uiState.isDayiImported,
+            onCheckedChange = { viewModel.setEnableDayi(it) },
+            enabled = uiState.isDayiImported
+        )
+
+        // 啟用注音輸入法
+        SwitchPreference(
+            title = stringResource(R.string.enable_phonetic),
+            summary = if (uiState.isPhoneticImported) {
+                if (uiState.enablePhonetic) stringResource(R.string.enable_phonetic_summary_on) else stringResource(R.string.enable_phonetic_summary_off)
+            } else {
+                stringResource(R.string.enable_phonetic_summary_disabled)
+            },
+            checked = uiState.enablePhonetic && uiState.isPhoneticImported,
+            onCheckedChange = { viewModel.setEnablePhonetic(it) },
+            enabled = uiState.isPhoneticImported
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Auto Chinese Symbol
         SwitchPreference(
             title = stringResource(R.string.auto_chinese_symbol),
