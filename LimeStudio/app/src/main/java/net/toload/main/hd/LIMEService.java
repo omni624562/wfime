@@ -1908,6 +1908,13 @@ public class LIMEService extends InputMethodService implements
             ic.commitText(text, 1);
         }
 
+        if (text.length() > 0) {
+            String lastChar = text.substring(text.length() - 1);
+            if (lastChar.charAt(0) > 127) {
+                SearchServer.setLastCommittedChar(lastChar);
+            }
+        }
+
         // Clear composing state
         clearComposing(true);
         hideComposingPopup();
@@ -1989,6 +1996,13 @@ public class LIMEService extends InputMethodService implements
                             }
                             if (ic != null)
                                 ic.commitText(SearchSrv.hanConvert(wordToCommit), firstMatchedLength);
+                        }
+
+                        if (wordToCommit != null && wordToCommit.length() > 0) {
+                            String lastChar = wordToCommit.substring(wordToCommit.length() - 1);
+                            if (lastChar.charAt(0) > 127) {
+                                SearchServer.setLastCommittedChar(lastChar);
+                            }
                         }
 
                         // Art '30,Sep,2011 when show related then clear composing
