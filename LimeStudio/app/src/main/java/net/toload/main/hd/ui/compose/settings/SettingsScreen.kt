@@ -102,13 +102,6 @@ fun SettingsScreen(
                         .padding(vertical = 24.dp, horizontal = 16.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.action_preference), // 麥田輸入法
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                    Text(
                         text = "設定主控台 v1.3.0",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
