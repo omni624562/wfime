@@ -260,7 +260,7 @@ public class LIMEPreferenceManager {
         if (imhm.get(Lime.IM_CUSTOM) != null)   { sb.append("0"); }
         if (imhm.get(Lime.IM_DAYI) != null)      { if (sb.length() > 0) sb.append(";"); sb.append("5"); }
         if (imhm.get(Lime.IM_PHONETIC) != null)  { if (sb.length() > 0) sb.append(";"); sb.append("6"); }
-        if (imhm.get(Lime.IM_EZ) != null)        { if (sb.length() > 0) sb.append(";"); sb.append("7"); }
+
 
         setIMActivatedState(sb.toString());
     }

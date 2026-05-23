@@ -3897,7 +3897,7 @@ public class LIMEService extends InputMethodService implements
                 getComposingDisplayString(mComposing.toString());
                 updateCandidates();
                 // misMatched = mComposing.toString();
-            } else if (hasSymbolMapping && !hasNumberMapping && activeIM.equals("array")
+            } else if (hasSymbolMapping && !hasNumberMapping
                     && mComposing != null && mComposing.length() >= 1
                     && getCurrentInputConnection().getTextBeforeCursor(1, 1).charAt(0) == 'w'
                     && Character.isDigit((char) primaryCode)

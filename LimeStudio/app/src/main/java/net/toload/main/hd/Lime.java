@@ -95,7 +95,6 @@ public class Lime {
     public static final String DB_TABLE_CUSTOM = "custom";
     public static final String DB_TABLE_DAYI = "dayi";
     public static final String DB_TABLE_PHONETIC = "phonetic";
-    public static final String DB_TABLE_EZ = "ez";
 
     // ==================== IM Type Names ====================
     public static final String IM_CUSTOM = "custom";
@@ -106,11 +105,6 @@ public class Lime {
     public static final String IM_PHONETIC_BIG5 = "phonetic_big5";
     public static final String IM_PHONETIC_ADV = "phonetic_adv";
     public static final String IM_PHONETIC_ADV_BIG5 = "phonetic_adv_big5";
-    public static final String IM_EZ = "ez";
-    public static final String IM_HS = "hs";
-    public static final String IM_HS_V1 = "hs_v1";
-    public static final String IM_HS_V2 = "hs_v2";
-    public static final String IM_HS_V3 = "hs_v3";
 
     // ==================== Database Columns ====================
     public static final String DB_COLUMN_ID = "_id";

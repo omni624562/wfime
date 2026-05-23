@@ -1365,11 +1365,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             keyString = getImInfo(table, "imkeys");
             keynameString = getImInfo(table, "imkeynames");
 
-            // Force the system to use the Default KeyString for Array Keyboard
-            if (table.equals("array")) {
-                keyString = "";
-                keynameString = "";
-            }
+
 
             if (DEBUG)
                 Log.i(TAG, "keyToKeyname(): load from db: imkeys:keyString=" + keyString + ", imkeynames="
@@ -1378,13 +1374,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             if (table.equals("phonetic") || table.equals("dayi") ||
                     keyString.equals("") || keynameString.equals("")) {
                 switch (table) {
-                    case "cj":
-                    case "scj":
-                    case "cj5":
-                    case "ecj":
-                        keyString = CJ_KEY;
-                        keynameString = CJ_CHAR;
-                        break;
+
                     case "phonetic":
                         if (composingText) { // building composing text popup
                             if (phonetickeyboardtype.equals("eten")) {
@@ -1433,10 +1423,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                             keynameString = BPMF_CHAR;
                         }
                         break;
-                    case "array":
-                        keyString = ARRAY_KEY;
-                        keynameString = ARRAY_CHAR;
-                        break;
+
                     case "dayi":
                         if (isPhysicalKeyboardPressed && composingText) { // only do this on composing mapping popup
                             switch (keyboardtype) {
@@ -1822,13 +1809,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     keyRemapString = XPERIAPRO_BPMF_KEY_REMAP;
 
                 } else if (!isPhysicalKeyboardPressed) {
-                    if (tablename.equals("dayi") || tablename.equals("ez")
+                    if (tablename.equals("dayi")
                             || tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
                         keyString = SHIFTED_NUMBERIC_KEY + SHIFTED_SYMBOL_KEY;
                         keyRemapString = SHIFTED_NUMBERIC_KEY_REMAP + SHIFTED_SYMBOL_KEY_REMAP;
-                    } else if (tablename.equals("array")) {
-                        keyString = SHIFTED_SYMBOL_KEY;
-                        keyRemapString = SHIFTED_SYMBOL_KEY_REMAP;
                     }
 
                 }
@@ -2037,9 +2021,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         dualKey = XPERIAPRO_DUALKEY;
                         dualKeyRemap = XPERIAPRO_DUALKEY_REMAP;
                     }
-                } else if (tablename.equals("ez") && !isPhysicalKeyboardPressed) { // jeremy '12,7,5 remap \ to `.
-                    dualKey = "\\";
-                    dualKeyRemap = "`";
                 }
 
                 HashMap<String, String> reMap = new HashMap<>();
@@ -2557,16 +2538,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         validCodeMap.add(code);
                 }
 
-                // 06/Aug/2011 by Art: ignore the result when word == keyToKeyname(code)
-                // Only apply to Array IM
-                try {
-                    if (code != null && code.length() == 1 && tablename.equals("array")) {
-                        if (keyToKeyname(code, tablename, false).equals(m.getWord())) {
-                            continue;
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
+
 
                 // related list always null in between search mode. Jeremy
                 // '15,6,3----------------
@@ -3589,12 +3561,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         setImInfo("phonetic", "imkeynames",
                                 "ㄝ|ㄦ|ㄡ|ㄥ|ㄢ|ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄤ|ㄇ|ㄖ|ㄏ|ㄎ|ㄍ|ㄑ|ㄕ|ㄘ|ㄛ|ㄨ|ㄜ|ㄠ|ㄩ|ㄙ|ㄟ|ㄣ|ㄆ|ㄐ|ㄋ|ㄔ|ㄧ|ㄒ|ㄊ|ㄌ|ㄗ|ㄈ|、|「|」|＼|＝|，|。|？|：|；|『|』|│|～|！|＠|＃|＄|％|︿|＆|＊|（|）|－|＋");
                     }
-                    if (filename.getName().equals("array.lime")) {
-                        setImInfo("array", "selkey", "1234567890");
-                        setImInfo("array", "imkeys", "abcdefghijklmnopqrstuvwxyz./;,?*#1#2#3#4#5#6#7#8#9#0");
-                        setImInfo("array", "imkeynames",
-                                "1-|5⇣|3⇣|3-|3⇡|4-|5-|6-|8⇡|7-|8-|9-|7⇣|6⇣|9⇡|0⇡|1⇡|4⇡|2-|5⇡|7⇡|4⇣|2⇡|2⇣|6⇡|1⇣|9⇣|0⇣|0-|8⇣|？|＊|1|2|3|4|5|6|7|8|9|0");
-                    } else {
+                    if (true) {
                         if (!selkey.equals(""))
                             setImInfo(table, "selkey", selkey);
                         if (!endkey.equals(""))
@@ -3651,18 +3618,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         }
                     } else if (table.equals("dayi")) {
                         kobj = getKeyboardObj("dayi");
-                    } else if (table.equals("cj5")) {
-                        kobj = getKeyboardObj("cj");
-                    } else if (table.equals("ecj")) {
-                        kobj = getKeyboardObj("cj");
-                    } else if (table.equals("array")) {
-                        kobj = getKeyboardObj("arraynum");
-                    } else if (table.equals("array10")) {
-                        kobj = getKeyboardObj("phonenum");
-                    } else if (table.equals("wb")) {
-                        kobj = getKeyboardObj("wb");
-                    } else if (table.equals("hs")) {
-                        kobj = getKeyboardObj("hs");
                     } else if (kobj == null) { // Jeremy '12,5,21 chose english with number keyboard if the optione is
                                                // on for default keyboard.
                         if (mLIMEPref.getParameterBoolean("number_row_in_english", true)) {
