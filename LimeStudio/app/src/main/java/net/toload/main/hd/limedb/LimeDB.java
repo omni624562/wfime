@@ -1053,8 +1053,27 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     // Log.i("TAG RELATED B", srcunit.getId() + " : Related ADD Score :" + score);
 
                 } else {
+                    int newScore = srcunit.getScore() + 1;
+                    if (srcunit.getCode() != null && !srcunit.getCode().trim().equals("")) {
+                        try {
+                            Cursor maxCursor = db.rawQuery("SELECT MAX(" + FIELD_SCORE + ") FROM " + tablename 
+                                    + " WHERE " + FIELD_CODE + " = ?", new String[] { srcunit.getCode() });
+                            if (maxCursor != null) {
+                                if (maxCursor.moveToFirst()) {
+                                    int maxScore = maxCursor.getInt(0);
+                                    if (maxScore >= newScore) {
+                                        newScore = maxScore + 1;
+                                    }
+                                }
+                                maxCursor.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     ContentValues cv = new ContentValues();
-                    cv.put(FIELD_SCORE, srcunit.getScore() + 1);
+                    cv.put(FIELD_SCORE, newScore);
                     // Jeremy 11',7,29 update according to word instead of ID, may have multiple
                     // records mathing word but with diff code/id
                     db.update(tablename, cv, FIELD_WORD + " = ?", new String[] { srcunit.getWord() });
