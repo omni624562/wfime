@@ -1,4 +1,4 @@
-﻿/*
+/*
  *
  *  *
  *  **    Copyright 2015, The LimeIME Open Source Project
