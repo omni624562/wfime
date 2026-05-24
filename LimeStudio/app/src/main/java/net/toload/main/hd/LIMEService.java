@@ -4347,7 +4347,7 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void swipeUp() {
-        handleOptions();
+        // handleOptions(); // Disabled to prevent accidental options menu triggers when sliding up from the space key or typing
     }
 
     /**
