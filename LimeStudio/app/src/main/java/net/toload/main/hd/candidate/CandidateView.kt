@@ -31,6 +31,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -600,55 +610,88 @@ open class CandidateView @JvmOverloads constructor(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val translateCursorPosition by remember { LIMEService.translateCursorPositionState }
-                    val textFieldValue = remember(translateQuery, translateCursorPosition) {
-                        androidx.compose.ui.text.input.TextFieldValue(
-                            text = translateQuery,
-                            selection = androidx.compose.ui.text.TextRange(translateCursorPosition)
-                        )
-                    }
-                    val focusRequester = remember { FocusRequester() }
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    val density = LocalDensity.current
 
-                    LaunchedEffect(Unit) {
-                        try {
-                            focusRequester.requestFocus()
-                        } catch (e: Exception) {
-                            Log.e("TRANSLATION_ROW", "Failed to request focus: ${e.message}")
-                        }
-                    }
-
-                    androidx.compose.foundation.text.BasicTextField(
-                        value = textFieldValue,
-                        onValueChange = { newValue ->
-                            if (newValue.selection.start != translateCursorPosition) {
-                                mService?.updateTranslateCursorPosition(newValue.selection.start)
-                            }
-                        },
-                        readOnly = true,
-                        textStyle = androidx.compose.ui.text.TextStyle(
-                            color = Color.White,
-                            fontSize = 14.sp
-                        ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF00E676)),
+                    // 1. 統一的觸控與渲染區域，填滿全部高度與可用寬度
+                    Box(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .focusRequester(focusRequester),
-                        decorationBox = { innerTextField ->
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
-                                if (translateQuery.isEmpty()) {
-                                    Text(
-                                        text = "在這裡輸入要翻譯的內容",
-                                        color = Color.Gray,
-                                        fontSize = 13.sp
-                                    )
+                            .pointerInput(translateQuery) {
+                                detectTapGestures { offset ->
+                                    val layoutResult = textLayoutResult
+                                    if (layoutResult != null) {
+                                        val clickedOffset = layoutResult.getOffsetForPosition(offset)
+                                        mService?.updateTranslateCursorPosition(clickedOffset)
+                                    } else {
+                                        mService?.updateTranslateCursorPosition(0)
+                                    }
                                 }
-                                innerTextField()
+                            },
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (translateQuery.isEmpty()) {
+                            Text(
+                                text = "在這裡輸入要翻譯的內容",
+                                color = Color.Gray,
+                                fontSize = 13.sp
+                            )
+                            // 當輸入框為空時，依然渲染一個置左閃爍的翠綠游標，表示已準備好輸入！
+                            val infiniteTransition = rememberInfiniteTransition(label = "cursor")
+                            val alpha by infiniteTransition.animateFloat(
+                                initialValue = 1f,
+                                targetValue = 0f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(durationMillis = 500, easing = LinearEasing),
+                                    repeatMode = RepeatMode.Reverse
+                                ),
+                                label = "alpha"
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(18.dp)
+                                    .background(Color(0xFF00E676).copy(alpha = alpha))
+                            )
+                        } else {
+                            // 渲染主要輸入文字，並取得 TextLayoutResult
+                            Text(
+                                text = translateQuery,
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                onTextLayout = { textLayoutResult = it },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            // 根據 TextLayoutResult 繪製自訂閃爍綠色游標
+                            val layoutResult = textLayoutResult
+                            if (layoutResult != null) {
+                                val cursorIndex = translateCursorPosition.coerceIn(0, translateQuery.length)
+                                val cursorRect = layoutResult.getCursorRect(cursorIndex)
+                                val infiniteTransition = rememberInfiniteTransition(label = "cursor")
+                                val alpha by infiniteTransition.animateFloat(
+                                    initialValue = 1f,
+                                    targetValue = 0f,
+                                    animationSpec = infiniteRepeatable(
+                                        animation = tween(durationMillis = 500, easing = LinearEasing),
+                                        repeatMode = RepeatMode.Reverse
+                                    ),
+                                    label = "alpha"
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .offset(
+                                            x = with(density) { cursorRect.left.toDp() },
+                                            y = with(density) { cursorRect.top.toDp() }
+                                        )
+                                        .width(2.dp)
+                                        .height(with(density) { cursorRect.height.toDp() })
+                                        .background(Color(0xFF00E676).copy(alpha = alpha))
+                                )
                             }
                         }
-                    )
+                    }
 
                     if (translatedResult.isNotEmpty()) {
                         Text(
