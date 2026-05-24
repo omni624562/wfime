@@ -896,7 +896,7 @@ open class CandidateView @JvmOverloads constructor(
         if (isPhysicalKeyboard && !mapping.isEmojiRecord() && !mapping.isComposingCodeRecord()) {
             if (activeIM?.startsWith("dayi") == true) {
                 val prefix = when (index % 6) {
-                    0 -> "0. "
+                    0 -> "\u2423. "
                     1 -> "'. "
                     2 -> "[. "
                     3 -> "]. "
