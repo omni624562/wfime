@@ -45,6 +45,12 @@ import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
@@ -372,10 +378,10 @@ open class CandidateView @JvmOverloads constructor(
                     )
                 }
 
-                // 4. 即時翻譯 (Phase 1 顯示提示)
+                // 4. 即時翻譯
                 IconButton(
                     onClick = {
-                        Toast.makeText(context, "即時翻譯功能已在規劃中，敬請期待！", Toast.LENGTH_SHORT).show()
+                        mService?.toggleTranslationMode(true)
                     },
                     modifier = Modifier.width(36.dp).height(36.dp)
                 ) {
@@ -406,6 +412,141 @@ open class CandidateView @JvmOverloads constructor(
                         tint = Color.White
                     )
                 }
+                }
+            }
+        }
+
+    @Composable
+    fun TranslationRow(
+        translateQuery: String,
+        translatedResult: String,
+        candidateFontSize: androidx.compose.ui.unit.TextUnit
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .background(Color(0xFF1E1E1E)) // 極致暗黑色調
+                .padding(vertical = 4.dp, horizontal = 8.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 1. 頂部語言選擇列
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 返回鍵
+                IconButton(
+                    onClick = {
+                        mService?.toggleTranslationMode(false)
+                    },
+                    modifier = Modifier.width(32.dp).height(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // 源語言膠囊
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF0F3E3E)) // 經典綠色
+                        .padding(horizontal = 14.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "偵測語言",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // 交換箭頭
+                IconButton(
+                    onClick = {
+                        Toast.makeText(context, "交換語言功能已在規劃中！", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.width(32.dp).height(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SwapHoriz,
+                        contentDescription = "Swap",
+                        tint = Color.Gray
+                    )
+                }
+
+                // 目標語言膠囊
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFF0F3E3E))
+                        .padding(horizontal = 14.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "英文",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            // 2. 底部 Outlined 圓角翻譯輸入框
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF2A2A2A))
+                    .border(1.dp, Color(0xFF00796B), RoundedCornerShape(22.dp)) // 翠綠色圓角邊框
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // 文字查詢
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (translateQuery.isEmpty()) {
+                        Text(
+                            text = "在這裡輸入要翻譯的內容",
+                            color = Color.Gray,
+                            fontSize = 13.sp
+                        )
+                    } else {
+                        Text(
+                            text = translateQuery,
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                        if (translatedResult.isNotEmpty()) {
+                            Text(
+                                text = " -> $translatedResult",
+                                color = Color(0xFF80DEEA), // 亮青綠色
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // 最右側語音圖示
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = "Voice",
+                    tint = Color.Gray,
+                    modifier = Modifier.width(20.dp).height(20.dp)
+                )
             }
         }
     }
@@ -416,6 +557,11 @@ open class CandidateView @JvmOverloads constructor(
         val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
         val activeIM = mService?.activeIM
         val isDayi = activeIM?.startsWith("dayi") == true
+        
+        // 訂閱來自 LIMEService 的反應式即時翻譯狀態
+        val isTranslationMode by remember { LIMEService.isTranslationModeState }
+        val translateQuery by remember { LIMEService.translateQueryState }
+        val translatedResult by remember { LIMEService.translatedResultState }
         
         // Stable Color — remembered so the object is not re-created on every recomposition
         val gboardDark = remember { Color(0xFF2B2B2B) }
@@ -445,97 +591,105 @@ open class CandidateView @JvmOverloads constructor(
         val isDayiPhysical = isDayi && isPhysicalKeyboard
         val baseHeight = if (isDayiPhysical) 36 else 48
         
+        // 即時翻譯模式時將高度拓寬為 96.dp，以容納雙層科技感控制面板
+        val heightDp = if (isTranslationMode) 96.dp else (baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp
+        
         // Use BoxWithConstraints to handle infinite width constraints gracefully
         androidx.compose.foundation.layout.BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height((baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp) // Thinner for physical keyboard
+                .height(heightDp)
                 .background(gboardDark)
         ) {
             // Only render the scrollable content if we have a finite maximum width.
             // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
             if (constraints.maxWidth != androidx.compose.ui.unit.Constraints.Infinity) {
-                val isToolbarMode = suggestions.isEmpty() && _composingText.isEmpty() && _rawKeycode.isEmpty()
-                if (isToolbarMode) {
-                    ToolbarRow(candidateFontSize)
+                if (isTranslationMode) {
+                    TranslationRow(translateQuery, translatedResult, candidateFontSize)
                 } else {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight()
-                            .horizontalScroll(scrollState)
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                    // Show raw keycode as first item (if not empty)
-                    // Show raw keycode as first item (if not empty)
-                    if (_rawKeycode.isNotEmpty()) {
-                        RawKeycodeItem(
-                            keycode = _rawKeycode,
-                            fontSize = candidateFontSize,
-                            onClick = {
-                                // Input raw keycode directly
-                                mService?.commitTyped(_rawKeycode)
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
-                    val activeIM = mService?.activeIM
-                    val isDayi = activeIM?.startsWith("dayi") == true
-                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
-                    
-                    val startIndex = currentPage * pageSize
-                    var endIndex = startIndex + pageSize
-                    if (endIndex > suggestions.size) endIndex = suggestions.size
-                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
-                    val hasNextPage = endIndex < suggestions.size
-                    val hasPrevPage = startIndex > 0
-
-                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
-                        Box(
+                    val isToolbarMode = suggestions.isEmpty() && _composingText.isEmpty() && _rawKeycode.isEmpty()
+                    if (isToolbarMode) {
+                        ToolbarRow(candidateFontSize)
+                    } else {
+                        Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .fillMaxHeight()
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                            contentAlignment = Alignment.Center
+                                .horizontalScroll(scrollState)
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                        }
-                    }
-                    
-                    visibleSuggestions.forEachIndexed { i, mapping ->
-                        val actualIndex = startIndex + i
-                        CandidateItem(
-                            mapping = mapping,
-                            index = actualIndex,
-                            isSelected = actualIndex == selectedIndex,
-                            fontSize = candidateFontSize,
-                            onClick = {
-                                mService?.pickCandidateManually(actualIndex)
-                                selectedIndex = actualIndex
-                            },
-                            onLongClick = {
-                                if (mapping.isRelatedPhraseRecord()) {
-                                    mService?.removeCandidateManually(actualIndex)
+                        // Show raw keycode as first item (if not empty)
+                        // Show raw keycode as first item (if not empty)
+                        if (_rawKeycode.isNotEmpty()) {
+                            RawKeycodeItem(
+                                keycode = _rawKeycode,
+                                fontSize = candidateFontSize,
+                                onClick = {
+                                    // Input raw keycode directly
+                                    mService?.commitTyped(_rawKeycode)
                                 }
-                            }
-                        )
-                    }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
 
-                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .clickable { pageNext() }
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                        val activeIM = mService?.activeIM
+                        val isDayi = activeIM?.startsWith("dayi") == true
+                        val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                        
+                        val startIndex = currentPage * pageSize
+                        var endIndex = startIndex + pageSize
+                        if (endIndex > suggestions.size) endIndex = suggestions.size
+                        val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
+                        val hasNextPage = endIndex < suggestions.size
+                        val hasPrevPage = startIndex > 0
+
+                        if (hasPrevPage && isDayi && isPhysicalKeyboard) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                            }
+                        }
+                        
+                        visibleSuggestions.forEachIndexed { i, mapping ->
+                            val actualIndex = startIndex + i
+                            CandidateItem(
+                                mapping = mapping,
+                                index = actualIndex,
+                                isSelected = actualIndex == selectedIndex,
+                                fontSize = candidateFontSize,
+                                onClick = {
+                                    mService?.pickCandidateManually(actualIndex)
+                                    selectedIndex = actualIndex
+                                },
+                                onLongClick = {
+                                    if (mapping.isRelatedPhraseRecord()) {
+                                        mService?.removeCandidateManually(actualIndex)
+                                    }
+                                }
+                            )
+                        }
+
+                        if (hasNextPage && isDayi && isPhysicalKeyboard) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .clickable { pageNext() }
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                            }
                         }
                     }
                 }
             }
+        }
                 
                 // Fade edge indicator on right side when more content is available
                 if (suggestions.isNotEmpty() && !isAtEnd.value) {
@@ -556,7 +710,6 @@ open class CandidateView @JvmOverloads constructor(
                 }
             }
         }
-    }
 
     @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable

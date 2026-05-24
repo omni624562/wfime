@@ -135,6 +135,20 @@ public class LIMEService extends InputMethodService implements
     // Keep keydown event
     KeyEvent mKeydownEvent = null;
     LIMEKeyboardView mInputView = null;
+
+    // 即時翻譯模式狀態 (用於 Phase 2)
+    public boolean isTranslationModeActive = false;
+    public StringBuilder translateQuery = new StringBuilder();
+    public String translatedResult = "";
+
+    // Compose 可以無縫訂閱與反應式渲染的 Live 狀態
+    public static final androidx.compose.runtime.MutableState<Boolean> isTranslationModeState =
+            androidx.compose.runtime.SnapshotStateKt.mutableStateOf(false, androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
+    public static final androidx.compose.runtime.MutableState<String> translateQueryState =
+            androidx.compose.runtime.SnapshotStateKt.mutableStateOf("", androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
+    public static final androidx.compose.runtime.MutableState<String> translatedResultState =
+            androidx.compose.runtime.SnapshotStateKt.mutableStateOf("", androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
+
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
     CandidateView mCandidateView = null;
@@ -1903,9 +1917,15 @@ public class LIMEService extends InputMethodService implements
         if (text == null || text.isEmpty())
             return;
 
-        InputConnection ic = getCurrentInputConnection();
-        if (ic != null) {
-            ic.commitText(text, 1);
+        if (isTranslationModeActive) {
+            translateQuery.append(text);
+            translateQueryState.setValue(translateQuery.toString());
+            performTranslationAsync(translateQuery.toString());
+        } else {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.commitText(text, 1);
+            }
         }
 
         if (text.length() > 0) {
@@ -1970,32 +1990,39 @@ public class LIMEService extends InputMethodService implements
                             Log.i(TAG, "commitTyped() committed Length="
                                     + firstMatchedLength);
 
-                        // Do hanConvert before commit
-                        // '10, 4, 17 Jeremy
-                        if (mLIMEPref.getHanCovertOption() == 0) {
-                            if (ic != null)
-                                ic.commitText(wordToCommit, firstMatchedLength);
+                        if (isTranslationModeActive) {
+                            final String actualWord = (mLIMEPref.getHanCovertOption() == 0) ? wordToCommit : SearchSrv.hanConvert(wordToCommit);
+                            translateQuery.append(actualWord);
+                            translateQueryState.setValue(translateQuery.toString());
+                            performTranslationAsync(translateQuery.toString());
                         } else {
-                            if (mLIMEPref.getHanConvertNotify()) {
+                            // Do hanConvert before commit
+                            // '10, 4, 17 Jeremy
+                            if (mLIMEPref.getHanCovertOption() == 0) {
+                                if (ic != null)
+                                    ic.commitText(wordToCommit, firstMatchedLength);
+                            } else {
+                                if (mLIMEPref.getHanConvertNotify()) {
 
-                                Calendar now = Calendar.getInstance();
+                                    Calendar now = Calendar.getInstance();
 
-                                long nowvalue = now.getTimeInMillis();
-                                long storevalue = mLIMEPref.getParameterLong("han_notify_interval", 0);
+                                    long nowvalue = now.getTimeInMillis();
+                                    long storevalue = mLIMEPref.getParameterLong("han_notify_interval", 0);
 
-                                // 1 minute idle time
-                                if (nowvalue - storevalue > 60000) {
-                                    if (mLIMEPref.getHanCovertOption() == 1) {
-                                        Toast.makeText(this, R.string.han_convert_ts, Toast.LENGTH_SHORT).show();
-                                    } else if (mLIMEPref.getHanCovertOption() == 2) {
-                                        Toast.makeText(this, R.string.han_convert_st, Toast.LENGTH_SHORT).show();
+                                    // 1 minute idle time
+                                    if (nowvalue - storevalue > 60000) {
+                                        if (mLIMEPref.getHanCovertOption() == 1) {
+                                            Toast.makeText(this, R.string.han_convert_ts, Toast.LENGTH_SHORT).show();
+                                        } else if (mLIMEPref.getHanCovertOption() == 2) {
+                                            Toast.makeText(this, R.string.han_convert_st, Toast.LENGTH_SHORT).show();
+                                        }
                                     }
-                                }
 
-                                mLIMEPref.setParameter("han_notify_interval", now.getTimeInMillis());
+                                    mLIMEPref.setParameter("han_notify_interval", now.getTimeInMillis());
+                                }
+                                if (ic != null)
+                                    ic.commitText(SearchSrv.hanConvert(wordToCommit), firstMatchedLength);
                             }
-                            if (ic != null)
-                                ic.commitText(SearchSrv.hanConvert(wordToCommit), firstMatchedLength);
                         }
 
                         if (wordToCommit != null && wordToCommit.length() > 0) {
@@ -3413,16 +3440,21 @@ public class LIMEService extends InputMethodService implements
             hideCandidateView();
         } else {
             // No composing text - send backspace to editor
-            try {
-                if (mEnglishOnly && mLIMEPref.getEnglishPrediction() && mPredictionOn
-                        && (!hasPhysicalKeyPressed || mLIMEPref.getEnglishPredictionOnPhysicalKeyboard())) {
-                    if (tempEnglishWord != null && tempEnglishWord.length() > 0) {
-                        tempEnglishWord.deleteCharAt(tempEnglishWord.length() - 1);
-                        updateEnglishPrediction();
+            if (isTranslationModeActive && translateQuery.length() > 0) {
+                translateQuery.deleteCharAt(translateQuery.length() - 1);
+                translateQueryState.setValue(translateQuery.toString());
+                performTranslationAsync(translateQuery.toString());
+            } else {
+                try {
+                    if (mEnglishOnly && mLIMEPref.getEnglishPrediction() && mPredictionOn
+                            && (!hasPhysicalKeyPressed || mLIMEPref.getEnglishPredictionOnPhysicalKeyboard())) {
+                        if (tempEnglishWord != null && tempEnglishWord.length() > 0) {
+                            tempEnglishWord.deleteCharAt(tempEnglishWord.length() - 1);
+                            updateEnglishPrediction();
+                        }
                     }
-                }
 
-                if (ic != null) {
+                    if (ic != null) {
                     // Get a larger chunk of text to properly handle multi-codepoint emojis
                     CharSequence before = ic.getTextBeforeCursor(32, 0);
 
@@ -3466,6 +3498,7 @@ public class LIMEService extends InputMethodService implements
                 }
             }
         }
+    }
     }
 
     public void setCandidatesViewShown(boolean shown) {
@@ -3606,6 +3639,99 @@ public class LIMEService extends InputMethodService implements
                     Toast.LENGTH_SHORT).show();
         }
         clearSuggestions(); // Jeremy '11,9,5
+    }
+
+    public void toggleTranslationMode(boolean active) {
+        isTranslationModeActive = active;
+        isTranslationModeState.setValue(active);
+        
+        InputConnection ic = getCurrentInputConnection();
+        if (!active) {
+            if (translateQuery.length() > 0 && ic != null) {
+                ic.finishComposingText();
+            }
+            translateQuery.setLength(0);
+            translateQueryState.setValue("");
+            translatedResult = "";
+            translatedResultState.setValue("");
+        } else {
+            translateQuery.setLength(0);
+            translateQueryState.setValue("");
+            translatedResult = "";
+            translatedResultState.setValue("");
+        }
+        
+
+    }
+
+    public void performTranslationAsync(final String query) {
+        if (query == null || query.trim().isEmpty()) {
+            translatedResult = "";
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    translatedResultState.setValue("");
+                    InputConnection ic = getCurrentInputConnection();
+                    if (ic != null && isTranslationModeActive) {
+                        ic.setComposingText("", 0);
+                    }
+                }
+            });
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
+                    String urlStr = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=" + encodedQuery;
+                    
+                    java.net.URL url = new java.net.URL(urlStr);
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(3000);
+                    conn.setReadTimeout(3000);
+                    
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == 200) {
+                        java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
+                        StringBuilder response = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+                        
+                        String res = response.toString();
+                        if (res.startsWith("[[[")) {
+                            int firstQuote = res.indexOf("\"", 3);
+                            if (firstQuote != -1) {
+                                int secondQuote = res.indexOf("\"", firstQuote + 1);
+                                if (secondQuote != -1) {
+                                    final String translated = res.substring(firstQuote + 1, secondQuote);
+                                    
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            translatedResult = translated;
+                                            translatedResultState.setValue(translated);
+                                            
+                                            InputConnection ic = getCurrentInputConnection();
+                                            if (ic != null && isTranslationModeActive) {
+                                                ic.setComposingText(translated, 1);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("TRANSLATE_DEBUG", "Failed to translate: " + e.getMessage(), e);
+                }
+            }
+        }).start();
     }
 
     @SuppressLint("InflateParams")
