@@ -5,6 +5,9 @@
 package net.toload.main.hd.candidate
 
 import android.content.Context
+import android.content.ClipboardManager
+import android.content.Intent
+import android.widget.Toast
 import android.graphics.Color as AndroidColor
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -33,6 +36,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Mood
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -289,6 +300,116 @@ open class CandidateView @JvmOverloads constructor(
         // mService?.doVibrateSound(0)
     }
 
+    @Composable
+    fun ToolbarRow(
+        candidateFontSize: androidx.compose.ui.unit.TextUnit
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. 左側 Menu 圖標 (Apps)
+            Icon(
+                imageVector = Icons.Default.Apps,
+                contentDescription = "Menu",
+                tint = Color(0xFFB0BEC5),
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .width(22.dp)
+                    .height(22.dp)
+            )
+
+            // 功能圖標列
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                // 2. 智慧剪貼簿一鍵貼上
+                IconButton(
+                    onClick = {
+                        try {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clipData = clipboard.primaryClip
+                            if (clipData != null && clipData.itemCount > 0) {
+                                val text = clipData.getItemAt(0).text
+                                if (!text.isNullOrEmpty()) {
+                                    mService?.currentInputConnection?.commitText(text.toString(), 1)
+                                } else {
+                                    Toast.makeText(context, "剪貼簿目前沒有文字內容", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(context, "剪貼簿目前為空", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Log.e("TOOLBAR_DEBUG", "Failed to paste from clipboard: ${e.message}")
+                        }
+                    },
+                    modifier = Modifier.width(36.dp).height(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentPaste,
+                        contentDescription = "Paste",
+                        tint = Color.White
+                    )
+                }
+
+                // 3. 表情符號面板
+                IconButton(
+                    onClick = {
+                        mService?.toggleEmojiVisibility()
+                    },
+                    modifier = Modifier.width(36.dp).height(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mood,
+                        contentDescription = "Emoji",
+                        tint = Color.White
+                    )
+                }
+
+                // 4. 即時翻譯 (Phase 1 顯示提示)
+                IconButton(
+                    onClick = {
+                        Toast.makeText(context, "即時翻譯功能已在規劃中，敬請期待！", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.width(36.dp).height(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = "Translate",
+                        tint = Color.White
+                    )
+                }
+
+                // 5. 設定主控台
+                IconButton(
+                    onClick = {
+                        try {
+                            val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
+                        }
+                    },
+                    modifier = Modifier.width(36.dp).height(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+    }
+
     @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
     fun CandidateRow() {
@@ -334,14 +455,18 @@ open class CandidateView @JvmOverloads constructor(
             // Only render the scrollable content if we have a finite maximum width.
             // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
             if (constraints.maxWidth != androidx.compose.ui.unit.Constraints.Infinity) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .horizontalScroll(scrollState)
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                val isToolbarMode = suggestions.isEmpty() && _composingText.isEmpty() && _rawKeycode.isEmpty()
+                if (isToolbarMode) {
+                    ToolbarRow(candidateFontSize)
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .horizontalScroll(scrollState)
+                            .padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                     // Show raw keycode as first item (if not empty)
                     // Show raw keycode as first item (if not empty)
                     if (_rawKeycode.isNotEmpty()) {
@@ -410,6 +535,7 @@ open class CandidateView @JvmOverloads constructor(
                         }
                     }
                 }
+            }
                 
                 // Fade edge indicator on right side when more content is available
                 if (suggestions.isNotEmpty() && !isAtEnd.value) {
