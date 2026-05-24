@@ -422,6 +422,11 @@ open class CandidateView @JvmOverloads constructor(
         translatedResult: String,
         candidateFontSize: androidx.compose.ui.unit.TextUnit
     ) {
+        val scrollState = rememberScrollState()
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        val isDayi = activeIM?.startsWith("dayi") == true
+        
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -430,73 +435,146 @@ open class CandidateView @JvmOverloads constructor(
                 .padding(vertical = 4.dp, horizontal = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // 1. 頂部語言選擇列
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(38.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 返回鍵
-                IconButton(
-                    onClick = {
-                        mService?.toggleTranslationMode(false)
-                    },
-                    modifier = Modifier.width(32.dp).height(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // 源語言膠囊
-                Box(
+            // 1. 頂部列：如果 suggestions 為空，則顯示語言選擇列；若 suggestions 不為空，則顯示候選字列！
+            if (suggestions.isEmpty()) {
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF0F3E3E)) // 經典綠色
-                        .padding(horizontal = 14.dp, vertical = 4.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .height(38.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "偵測語言",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                    // 返回鍵
+                    IconButton(
+                        onClick = {
+                            mService?.toggleTranslationMode(false)
+                        },
+                        modifier = Modifier.width(32.dp).height(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
 
-                // 交換箭頭
-                IconButton(
-                    onClick = {
-                        Toast.makeText(context, "交換語言功能已在規劃中！", Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.width(32.dp).height(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.SwapHoriz,
-                        contentDescription = "Swap",
-                        tint = Color.Gray
-                    )
-                }
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                // 目標語言膠囊
-                Box(
+                    // 源語言膠囊
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF0F3E3E)) // 經典綠色
+                            .padding(horizontal = 14.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "偵測語言",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // 交換箭頭
+                    IconButton(
+                        onClick = {
+                            Toast.makeText(context, "交換語言功能已在規劃中！", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.width(32.dp).height(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = "Swap",
+                            tint = Color.Gray
+                        )
+                    }
+
+                    // 目標語言膠囊
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF0F3E3E))
+                            .padding(horizontal = 14.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "英文",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            } else {
+                // 有候選字時，在頂部顯示橫向捲動的選字列！
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0xFF0F3E3E))
-                        .padding(horizontal = 14.dp, vertical = 4.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .height(38.dp)
+                        .horizontalScroll(scrollState),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "英文",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    // Show raw keycode as first item (if not empty)
+                    if (_rawKeycode.isNotEmpty()) {
+                        RawKeycodeItem(
+                            keycode = _rawKeycode,
+                            fontSize = candidateFontSize,
+                            onClick = {
+                                mService?.commitTyped(_rawKeycode)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                    val startIndex = currentPage * pageSize
+                    var endIndex = startIndex + pageSize
+                    if (endIndex > suggestions.size) endIndex = suggestions.size
+                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
+                    val hasNextPage = endIndex < suggestions.size
+                    val hasPrevPage = startIndex > 0
+
+                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                        }
+                    }
+
+                    visibleSuggestions.forEachIndexed { i, mapping ->
+                        val actualIndex = startIndex + i
+                        CandidateItem(
+                            mapping = mapping,
+                            index = actualIndex,
+                            isSelected = actualIndex == selectedIndex,
+                            fontSize = candidateFontSize,
+                            onClick = {
+                                mService?.pickCandidateManually(actualIndex)
+                                selectedIndex = actualIndex
+                            },
+                            onLongClick = {
+                                if (mapping.isRelatedPhraseRecord()) {
+                                    mService?.removeCandidateManually(actualIndex)
+                                }
+                            }
+                        )
+                    }
+
+                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .clickable { pageNext() }
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                        }
+                    }
                 }
             }
 

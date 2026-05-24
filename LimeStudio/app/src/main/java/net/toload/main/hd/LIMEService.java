@@ -3641,6 +3641,27 @@ public class LIMEService extends InputMethodService implements
         clearSuggestions(); // Jeremy '11,9,5
     }
 
+    @Override
+    public android.view.inputmethod.InputConnection getCurrentInputConnection() {
+        android.view.inputmethod.InputConnection ic = super.getCurrentInputConnection();
+        if (ic == null) return null;
+        if (isTranslationModeActive) {
+            return new android.view.inputmethod.InputConnectionWrapper(ic, true) {
+                @Override
+                public boolean commitText(CharSequence text, int newCursorPosition) {
+                    if (isTranslationModeActive) {
+                        translateQuery.append(text);
+                        translateQueryState.setValue(translateQuery.toString());
+                        performTranslationAsync(translateQuery.toString());
+                        return true;
+                    }
+                    return super.commitText(text, newCursorPosition);
+                }
+            };
+        }
+        return ic;
+    }
+
     public void toggleTranslationMode(boolean active) {
         isTranslationModeActive = active;
         isTranslationModeState.setValue(active);
