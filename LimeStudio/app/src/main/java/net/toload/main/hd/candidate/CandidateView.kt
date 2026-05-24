@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -49,8 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Translate
@@ -330,103 +330,59 @@ open class CandidateView @JvmOverloads constructor(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. 左側 Menu 圖標 (Apps)
-            Icon(
-                imageVector = Icons.Default.Apps,
-                contentDescription = "Menu",
-                tint = Color(0xFFB0BEC5),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .width(22.dp)
-                    .height(22.dp)
-            )
-
-            // 功能圖標列
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier.weight(1f)
+            // 1. 備忘錄面板
+            IconButton(
+                onClick = {
+                    mService?.toggleMemoVisibility()
+                },
+                modifier = Modifier.size(40.dp)
             ) {
-                // 2. 智慧剪貼簿一鍵貼上
-                IconButton(
-                    onClick = {
-                        try {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clipData = clipboard.primaryClip
-                            if (clipData != null && clipData.itemCount > 0) {
-                                val text = clipData.getItemAt(0).text
-                                if (!text.isNullOrEmpty()) {
-                                    mService?.currentInputConnection?.commitText(text.toString(), 1)
-                                } else {
-                                    Toast.makeText(context, "剪貼簿目前沒有文字內容", Toast.LENGTH_SHORT).show()
-                                }
-                            } else {
-                                Toast.makeText(context, "剪貼簿目前為空", Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (e: Exception) {
-                            Log.e("TOOLBAR_DEBUG", "Failed to paste from clipboard: ${e.message}")
+                Icon(
+                    imageVector = Icons.Default.Assignment,
+                    contentDescription = "Memo",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // 2. 表情符號面板
+            IconButton(
+                onClick = {
+                    mService?.toggleEmojiVisibility()
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mood,
+                    contentDescription = "Emoji",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // 3. 設定主控台
+            IconButton(
+                onClick = {
+                    try {
+                        val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
-                    },
-                    modifier = Modifier.width(36.dp).height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentPaste,
-                        contentDescription = "Paste",
-                        tint = Color.White
-                    )
-                }
-
-                // 3. 表情符號面板
-                IconButton(
-                    onClick = {
-                        mService?.toggleEmojiVisibility()
-                    },
-                    modifier = Modifier.width(36.dp).height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mood,
-                        contentDescription = "Emoji",
-                        tint = Color.White
-                    )
-                }
-
-                // 4. 即時翻譯
-                IconButton(
-                    onClick = {
-                        mService?.toggleTranslationMode(true)
-                    },
-                    modifier = Modifier.width(36.dp).height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Translate,
-                        contentDescription = "Translate",
-                        tint = Color.White
-                    )
-                }
-
-                // 5. 設定主控台
-                IconButton(
-                    onClick = {
-                        try {
-                            val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
-                        }
-                    },
-                    modifier = Modifier.width(36.dp).height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = Color.White
-                    )
-                }
-                }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
+                    }
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
+    }
 
     @Composable
     fun TranslationRow(

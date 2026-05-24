@@ -22,6 +22,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.lifecycle.ViewModelStore
 import net.toload.main.hd.ui.EmojiPicker
+import net.toload.main.hd.ui.MemoPanel
 import net.toload.main.hd.ui.compose.settings.SettingsScreen
 import net.toload.main.hd.ui.compose.settings.SettingsViewModel
 import net.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
@@ -161,6 +162,120 @@ object ComposeBridge {
             }
         } catch (e: Exception) {
             android.util.Log.e("EMOJI_DEBUG", "FAILED to create Emoji Picker View: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Creates a memo panel view using Jetpack Compose.
+     *
+     * @param context Android context
+     * @param service IME service for handling memo input and callback
+     * @return View containing the memo panel UI
+     */
+    fun createMemoPanelView(context: Context, service: LIMEService): View? {
+        if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "=== ComposeBridge: createMemoPanelView() called ===")
+
+        return try {
+            val coroutineScope = CoroutineScope(SupervisorJob() + AndroidUiDispatcher.Main)
+            val recomposer = Recomposer(AndroidUiDispatcher.Main)
+            coroutineScope.launch {
+                recomposer.runRecomposeAndApplyChanges()
+            }
+
+            val composeLifecycleOwner = ComposeLifecycleOwner().apply {
+                performRestore(null)
+                handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+                handleLifecycleEvent(Lifecycle.Event.ON_START)
+            }
+
+            val heightDp = 300
+            val density = context.resources.displayMetrics.density
+            val heightPx = (heightDp * density).toInt()
+            val systemBarPaddingDp = 0 
+
+            val dbServer = DBServer(context)
+
+            val composeView = ComposeView(context).apply {
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    heightPx
+                )
+                setParentCompositionContext(recomposer)
+                setViewTreeLifecycleOwner(composeLifecycleOwner)
+                setViewTreeSavedStateRegistryOwner(composeLifecycleOwner)
+                setViewTreeViewModelStoreOwner(composeLifecycleOwner)
+                setContent {
+                    LimeTheme {
+                        MemoPanel(
+                            dbServer = dbServer,
+                            onMemoClick = { content ->
+                                if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo clicked: $content")
+                                service.onText(content)
+                            },
+                            onBackClick = {
+                                if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Back clicked")
+                                service.closeMemoPanel()
+                            },
+                            bottomPaddingDp = systemBarPaddingDp
+                        )
+                    }
+                }
+            }
+
+            object : android.widget.FrameLayout(context) {
+                private var mBottomInset = 0
+
+                override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
+                    val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                        val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
+                        val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
+                        java.lang.Math.max(navBarBottom, gestureBottom)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        insets.systemWindowInsetBottom
+                    }
+                    if (bottom != mBottomInset) {
+                        mBottomInset = bottom
+                        setPadding(0, 0, 0, mBottomInset)
+                        if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo wrapper dynamic bottom padding set to $mBottomInset px")
+                    }
+                    return super.onApplyWindowInsets(insets)
+                }
+
+                init {
+                    if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Creating memo wrapper FrameLayout")
+                    layoutParams = android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        heightPx
+                    )
+                    setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
+                    
+                    try {
+                        addView(composeView)
+                        if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Successfully added composeView to wrapper")
+                    } catch (e: Exception) {
+                        android.util.Log.e("MEMO_DEBUG", "FAILED to add composeView to wrapper: ${e.message}", e)
+                    }
+                }
+
+                override fun onAttachedToWindow() {
+                    super.onAttachedToWindow()
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                    if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo wrapper attached — lifecycle RESUMED")
+                    requestApplyInsets()
+                }
+
+                override fun onDetachedFromWindow() {
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                    if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo wrapper detached — lifecycle PAUSED")
+                    super.onDetachedFromWindow()
+                }
+
+                override fun dispatchHoverEvent(event: android.view.MotionEvent): Boolean = true
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MEMO_DEBUG", "FAILED to create Memo Panel View: ${e.message}", e)
             null
         }
     }

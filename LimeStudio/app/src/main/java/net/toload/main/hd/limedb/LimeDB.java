@@ -84,6 +84,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public final static String FIELD_DIC_cword = "cword";
     public final static String FIELD_DIC_score = "score";
     public final static String FIELD_DIC_is = "isDictionary";
+    public static final String DB_MEMO = "memo";
+    public static final String DB_MEMO_COLUMN_ID = "_id";
+    public static final String DB_MEMO_COLUMN_CONTENT = "content";
+    public static final String DB_MEMO_COLUMN_PINNED = "pinned";
+    public static final String DB_MEMO_COLUMN_CREATED_AT = "created_at";
     private static final boolean DEBUG = false;
     private static final String TAG = "LIMEDB";
     private final static int DATABASE_VERSION = 102;
@@ -200,6 +205,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         Lime.DB_IM,
         Lime.DB_RELATED,
         Lime.DB_KEYBOARD,
+        "memo",
         // Backup tables (with _user suffix)
         "custom_user", "dayi_user", "phonetic_user"
     ));
@@ -4888,5 +4894,80 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.hanconvertv2), hanDB2File);
         hanConverter = new LimeHanConverter(mContext);
 
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        try {
+            db.execSQL("CREATE TABLE IF NOT EXISTS memo (" +
+                       "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                       "content TEXT NOT NULL, " +
+                       "pinned INTEGER DEFAULT 0, " +
+                       "created_at INTEGER);");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create/ensure memo table", e);
+        }
+    }
+
+    public long insertMemo(String content, int pinned) {
+        if (!checkDBConnection())
+            return -1;
+        ContentValues cv = new ContentValues();
+        cv.put("content", content);
+        cv.put("pinned", pinned);
+        cv.put("created_at", System.currentTimeMillis());
+        return db.insert("memo", null, cv);
+    }
+
+    public List<MemoObj> getMemos() {
+        List<MemoObj> list = new ArrayList<>();
+        if (!checkDBConnection())
+            return list;
+        Cursor cursor = null;
+        try {
+            cursor = db.query("memo", null, null, null, null, null, "pinned DESC, created_at DESC");
+            if (cursor != null && cursor.moveToFirst()) {
+                int idIdx = cursor.getColumnIndex("_id");
+                int contentIdx = cursor.getColumnIndex("content");
+                int pinnedIdx = cursor.getColumnIndex("pinned");
+                int createdIdx = cursor.getColumnIndex("created_at");
+                do {
+                    MemoObj obj = new MemoObj();
+                    obj.setId(cursor.getInt(idIdx));
+                    obj.setContent(cursor.getString(contentIdx));
+                    obj.setPinned(cursor.getInt(pinnedIdx));
+                    obj.setCreatedAt(cursor.getLong(createdIdx));
+                    list.add(obj);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getMemos error", e);
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return list;
+    }
+
+    public int deleteMemo(int id) {
+        if (!checkDBConnection())
+            return -1;
+        return db.delete("memo", "_id = ?", new String[]{String.valueOf(id)});
+    }
+
+    public int updateMemoPin(int id, int pinned) {
+        if (!checkDBConnection())
+            return -1;
+        ContentValues cv = new ContentValues();
+        cv.put("pinned", pinned);
+        return db.update("memo", cv, "_id = ?", new String[]{String.valueOf(id)});
+    }
+
+    public int updateMemoContent(int id, String content) {
+        if (!checkDBConnection())
+            return -1;
+        ContentValues cv = new ContentValues();
+        cv.put("content", content);
+        return db.update("memo", cv, "_id = ?", new String[]{String.valueOf(id)});
     }
 }

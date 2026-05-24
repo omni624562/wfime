@@ -250,6 +250,7 @@ public class LIMEService extends InputMethodService implements
     private android.widget.FrameLayout mInputViewContainer;
     private net.toload.main.hd.ComposeLifecycleOwner mComposeLifecycleOwner;
     android.view.View mEmojiKeyboardView; // ComposeView
+    android.view.View mMemoKeyboardView; // ComposeView
 
     // Helper classes for better code organization
     private IMSwitchHelper mIMSwitchHelper;
@@ -656,6 +657,30 @@ public class LIMEService extends InputMethodService implements
                 Log.e("KBD_DEBUG", "FAILED to add mEmojiKeyboardView to container: " + e.getMessage(), e);
             }
         }
+
+        // Re-add memo keyboard view only if it was already created (lazy loading)
+        if (mMemoKeyboardView != null) {
+            Log.d("KBD_DEBUG", "Re-adding existing memo picker in container");
+            if (mMemoKeyboardView.getParent() != null) {
+                ((android.view.ViewGroup) mMemoKeyboardView.getParent()).removeView(mMemoKeyboardView);
+            }
+
+            // Set owners directly on memo view too
+            ensureComposeLifecycleOwner();
+            androidx.lifecycle.ViewTreeLifecycleOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+            androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+            androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+
+            try {
+                android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                lp.gravity = android.view.Gravity.BOTTOM;
+                mInputViewContainer.addView(mMemoKeyboardView, lp);
+            } catch (Exception e) {
+                Log.e("KBD_DEBUG", "FAILED to add mMemoKeyboardView to container: " + e.getMessage(), e);
+            }
+        }
     }
 
 
@@ -691,6 +716,11 @@ public class LIMEService extends InputMethodService implements
 
     public void toggleEmojiVisibility() {
         Log.d("EMOJI_DEBUG", "=== toggleEmojiVisibility() called ===");
+
+        // If memo panel is open, close it first
+        if (mMemoKeyboardView != null && mMemoKeyboardView.getVisibility() == View.VISIBLE) {
+            closeMemoPanel();
+        }
 
         // Lazy load emoji picker view only when user actually clicks it
         if (mEmojiKeyboardView == null && mInputViewContainer != null) {
@@ -828,6 +858,121 @@ public class LIMEService extends InputMethodService implements
             }
         } else {
             Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
+        }
+    }
+
+    public void toggleMemoVisibility() {
+        Log.d("MEMO_DEBUG", "=== toggleMemoVisibility() called ===");
+
+        // If emoji picker is open, close it first
+        if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
+            closeEmojiPicker();
+        }
+
+        // Lazy load memo view only when user actually clicks it
+        if (mMemoKeyboardView == null && mInputViewContainer != null) {
+            Log.d("MEMO_DEBUG", "Creating memo view lazily via ComposeBridge");
+            mMemoKeyboardView = net.toload.main.hd.ComposeBridge.INSTANCE.createMemoPanelView(this, this);
+            if (mMemoKeyboardView != null) {
+                mMemoKeyboardView.setVisibility(View.GONE);
+
+                // Set owners
+                ensureComposeLifecycleOwner();
+                androidx.lifecycle.ViewTreeLifecycleOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+                androidx.savedstate.ViewTreeSavedStateRegistryOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+                androidx.lifecycle.ViewTreeViewModelStoreOwner.set(mMemoKeyboardView, mComposeLifecycleOwner);
+
+                try {
+                    android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lp.gravity = android.view.Gravity.BOTTOM;
+                    mInputViewContainer.addView(mMemoKeyboardView, lp);
+                } catch (Exception e) {
+                    Log.e("MEMO_DEBUG", "FAILED to add mMemoKeyboardView to container: " + e.getMessage(), e);
+                }
+            }
+        }
+
+        if (mMemoKeyboardView == null) {
+            Log.e("MEMO_DEBUG", "ERROR: mMemoKeyboardView is NULL!");
+            return;
+        }
+
+        Log.d("MEMO_DEBUG", "mMemoKeyboardView exists, current visibility: " + mMemoKeyboardView.getVisibility());
+
+        if (mMemoKeyboardView.getVisibility() == View.VISIBLE) {
+            Log.d("MEMO_DEBUG", "Memo panel is VISIBLE, closing it...");
+            closeMemoPanel();
+        } else {
+            Log.d("MEMO_DEBUG", "Memo panel is HIDDEN, showing it...");
+
+            // FIRST: Hide other views to prevent overlap
+            if (mInputView != null) {
+                Log.d("MEMO_DEBUG", "Hiding mInputView");
+                mInputView.setVisibility(View.GONE);
+            }
+
+            // Hide candidate view BEFORE showing memo panel
+            if (mFixedCandidateViewOn && mCandidateInInputView != null) {
+                Log.d("MEMO_DEBUG", "Hiding mCandidateInInputView (fixed mode)");
+                mCandidateInInputView.setVisibility(View.GONE);
+
+                // Also hide all children of CandidateInInputView to prevent any overlap
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        group.getChildAt(i).setVisibility(View.GONE);
+                    }
+                }
+            } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
+                Log.d("MEMO_DEBUG", "Hiding candidate view");
+                hideCandidateView();
+            }
+
+            // THEN: Show memo panel
+            mMemoKeyboardView.setVisibility(View.VISIBLE);
+            mMemoKeyboardView.bringToFront(); // Force to front
+            mMemoKeyboardView.invalidate(); // Force redraw
+
+            mMemoKeyboardView.requestLayout();
+
+            // Force layout update
+            mInputViewContainer.requestLayout();
+            mInputViewContainer.invalidate();
+        }
+    }
+
+    public void closeMemoPanel() {
+        Log.d("MEMO_DEBUG", "=== closeMemoPanel() called ===");
+        if (mMemoKeyboardView != null && mMemoKeyboardView.getVisibility() == View.VISIBLE) {
+            Log.d("MEMO_DEBUG", "Closing memo panel");
+            mMemoKeyboardView.setVisibility(View.GONE);
+
+            Configuration closeCfg = getResources().getConfiguration();
+            boolean physKeyConnected = closeCfg.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+
+            // Restore candidate view in fixed mode
+            if ((mFixedCandidateViewOn || physKeyConnected) && mCandidateInInputView != null) {
+                Log.d("MEMO_DEBUG", "Restoring mCandidateInInputView (fixed mode, physKey=" + physKeyConnected + ")");
+                mCandidateInInputView.setVisibility(View.VISIBLE);
+
+                if (mCandidateInInputView instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        android.view.View child = group.getChildAt(i);
+                        // Keep virtual keyboard hidden when physical keyboard is attached
+                        if (physKeyConnected && child.getId() == R.id.keyboard) {
+                            child.setVisibility(View.GONE);
+                        } else {
+                            child.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            } else if (mInputView != null && !physKeyConnected) {
+                Log.d("MEMO_DEBUG", "Showing virtual keyboard again");
+                mInputView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -1476,6 +1621,12 @@ public class LIMEService extends InputMethodService implements
                     // Jeremy '24,1,7: Handle emoji view back
                     if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
                         closeEmojiPicker();
+                        return true;
+                    }
+
+                    // Handle memo view back
+                    if (mMemoKeyboardView != null && mMemoKeyboardView.getVisibility() == View.VISIBLE) {
+                        closeMemoPanel();
                         return true;
                     }
 

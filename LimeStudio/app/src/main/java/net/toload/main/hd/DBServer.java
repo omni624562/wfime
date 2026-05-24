@@ -57,6 +57,7 @@ import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEProgressListener;
 import net.toload.main.hd.global.LIMEUtilities;
 import net.toload.main.hd.limedb.LimeDB;
+import net.toload.main.hd.limedb.MemoObj;
 
 //Jeremy '12,5,1 renamed from DBServer and change from service to ordinary class.
 public class DBServer {
@@ -616,6 +617,41 @@ public class DBServer {
         if (datasource != null)
             kobj = datasource.getKeyboardObj(table);
         return kobj;
+    }
+
+    public long insertMemo(String content, int pinned) {
+        if (datasource != null) {
+            return datasource.insertMemo(content, pinned);
+        }
+        return -1;
+    }
+
+    public List<MemoObj> getMemos() {
+        if (datasource != null) {
+            return datasource.getMemos();
+        }
+        return new ArrayList<>();
+    }
+
+    public int deleteMemo(int id) {
+        if (datasource != null) {
+            return datasource.deleteMemo(id);
+        }
+        return -1;
+    }
+
+    public int updateMemoPin(int id, int pinned) {
+        if (datasource != null) {
+            return datasource.updateMemoPin(id, pinned);
+        }
+        return -1;
+    }
+
+    public int updateMemoContent(int id, String content) {
+        if (datasource != null) {
+            return datasource.updateMemoContent(id, content);
+        }
+        return -1;
     }
 
     public boolean isDatabseOnHold() {
