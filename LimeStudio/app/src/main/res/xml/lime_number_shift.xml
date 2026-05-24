@@ -178,7 +178,7 @@
             limehd:codes="-2"
             limehd:isModifier="true"
             limehd:keyLabel="@string/label_symbol_mode"
-            limehd:keyWidth="10%p" />
+            limehd:keyWidth="15%p" />
         <Key
             limehd:codes="-10"
             limehd:isModifier="true"
@@ -188,7 +188,7 @@
             limehd:codes="32"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_flat_keyboard_space"
-            limehd:keyWidth="45%p" />
+            limehd:keyWidth="40%p" />
         <Key
             limehd:codes="44"
             limehd:keyLabel=","
