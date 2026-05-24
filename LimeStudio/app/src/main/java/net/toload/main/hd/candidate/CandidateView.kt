@@ -63,6 +63,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
@@ -592,7 +594,9 @@ open class CandidateView @JvmOverloads constructor(
             ) {
                 // 文字查詢
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val translateCursorPosition by remember { LIMEService.translateCursorPositionState }
@@ -602,34 +606,49 @@ open class CandidateView @JvmOverloads constructor(
                             selection = androidx.compose.ui.text.TextRange(translateCursorPosition)
                         )
                     }
+                    val focusRequester = remember { FocusRequester() }
 
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (translateQuery.isEmpty()) {
-                            Text(
-                                text = "在這裡輸入要翻譯的內容",
-                                color = Color.Gray,
-                                fontSize = 13.sp
-                            )
+                    LaunchedEffect(Unit) {
+                        try {
+                            focusRequester.requestFocus()
+                        } catch (e: Exception) {
+                            Log.e("TRANSLATION_ROW", "Failed to request focus: ${e.message}")
                         }
-                        androidx.compose.foundation.text.BasicTextField(
-                            value = textFieldValue,
-                            onValueChange = { newValue ->
-                                if (newValue.selection.start != translateCursorPosition) {
-                                    mService?.updateTranslateCursorPosition(newValue.selection.start)
-                                }
-                            },
-                            readOnly = true,
-                            textStyle = androidx.compose.ui.text.TextStyle(
-                                color = Color.White,
-                                fontSize = 14.sp
-                            ),
-                            cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF00E676)),
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     }
+
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = textFieldValue,
+                        onValueChange = { newValue ->
+                            if (newValue.selection.start != translateCursorPosition) {
+                                mService?.updateTranslateCursorPosition(newValue.selection.start)
+                            }
+                        },
+                        readOnly = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = Color.White,
+                            fontSize = 14.sp
+                        ),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF00E676)),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .focusRequester(focusRequester),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (translateQuery.isEmpty()) {
+                                    Text(
+                                        text = "在這裡輸入要翻譯的內容",
+                                        color = Color.Gray,
+                                        fontSize = 13.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
 
                     if (translatedResult.isNotEmpty()) {
                         Text(
