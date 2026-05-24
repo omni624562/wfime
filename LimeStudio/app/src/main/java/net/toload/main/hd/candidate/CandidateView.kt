@@ -667,7 +667,7 @@ open class CandidateView @JvmOverloads constructor(
                             // 根據 TextLayoutResult 繪製自訂閃爍綠色游標
                             val layoutResult = textLayoutResult
                             if (layoutResult != null) {
-                                val cursorIndex = translateCursorPosition.coerceIn(0, translateQuery.length)
+                                val cursorIndex = translateCursorPosition.coerceIn(0, layoutResult.layoutInput.text.length)
                                 val cursorRect = layoutResult.getCursorRect(cursorIndex)
                                 val infiniteTransition = rememberInfiniteTransition(label = "cursor")
                                 val alpha by infiniteTransition.animateFloat(
