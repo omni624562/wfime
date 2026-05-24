@@ -595,26 +595,50 @@ open class CandidateView @JvmOverloads constructor(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (translateQuery.isEmpty()) {
-                        Text(
-                            text = "在這裡輸入要翻譯的內容",
-                            color = Color.Gray,
-                            fontSize = 13.sp
-                        )
-                    } else {
-                        Text(
+                    val translateCursorPosition by remember { LIMEService.translateCursorPositionState }
+                    val textFieldValue = remember(translateQuery, translateCursorPosition) {
+                        androidx.compose.ui.text.input.TextFieldValue(
                             text = translateQuery,
-                            color = Color.White,
-                            fontSize = 14.sp
+                            selection = androidx.compose.ui.text.TextRange(translateCursorPosition)
                         )
-                        if (translatedResult.isNotEmpty()) {
+                    }
+
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (translateQuery.isEmpty()) {
                             Text(
-                                text = " -> $translatedResult",
-                                color = Color(0xFF80DEEA), // 亮青綠色
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                text = "在這裡輸入要翻譯的內容",
+                                color = Color.Gray,
+                                fontSize = 13.sp
                             )
                         }
+                        androidx.compose.foundation.text.BasicTextField(
+                            value = textFieldValue,
+                            onValueChange = { newValue ->
+                                if (newValue.selection.start != translateCursorPosition) {
+                                    mService?.updateTranslateCursorPosition(newValue.selection.start)
+                                }
+                            },
+                            readOnly = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                color = Color.White,
+                                fontSize = 14.sp
+                            ),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF00E676)),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    if (translatedResult.isNotEmpty()) {
+                        Text(
+                            text = " -> $translatedResult",
+                            color = Color(0xFF80DEEA), // 亮青綠色
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
                     }
                 }
 

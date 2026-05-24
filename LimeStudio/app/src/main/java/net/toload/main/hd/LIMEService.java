@@ -148,6 +148,10 @@ public class LIMEService extends InputMethodService implements
             androidx.compose.runtime.SnapshotStateKt.mutableStateOf("", androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
     public static final androidx.compose.runtime.MutableState<String> translatedResultState =
             androidx.compose.runtime.SnapshotStateKt.mutableStateOf("", androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
+    
+    public int translateCursorPosition = 0;
+    public static final androidx.compose.runtime.MutableState<Integer> translateCursorPositionState =
+            androidx.compose.runtime.SnapshotStateKt.mutableStateOf(0, androidx.compose.runtime.SnapshotStateKt.structuralEqualityPolicy());
 
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
@@ -1918,7 +1922,9 @@ public class LIMEService extends InputMethodService implements
             return;
 
         if (isTranslationModeActive) {
-            translateQuery.append(text);
+            translateQuery.insert(translateCursorPosition, text);
+            translateCursorPosition += text.length();
+            translateCursorPositionState.setValue(translateCursorPosition);
             translateQueryState.setValue(translateQuery.toString());
             performTranslationAsync(translateQuery.toString());
         } else {
@@ -1992,7 +1998,9 @@ public class LIMEService extends InputMethodService implements
 
                         if (isTranslationModeActive) {
                             final String actualWord = (mLIMEPref.getHanCovertOption() == 0) ? wordToCommit : SearchSrv.hanConvert(wordToCommit);
-                            translateQuery.append(actualWord);
+                            translateQuery.insert(translateCursorPosition, actualWord);
+                            translateCursorPosition += actualWord.length();
+                            translateCursorPositionState.setValue(translateCursorPosition);
                             translateQueryState.setValue(translateQuery.toString());
                             performTranslationAsync(translateQuery.toString());
                         } else {
@@ -3440,8 +3448,10 @@ public class LIMEService extends InputMethodService implements
             hideCandidateView();
         } else {
             // No composing text - send backspace to editor
-            if (isTranslationModeActive && translateQuery.length() > 0) {
-                translateQuery.deleteCharAt(translateQuery.length() - 1);
+            if (isTranslationModeActive && translateCursorPosition > 0) {
+                translateQuery.deleteCharAt(translateCursorPosition - 1);
+                translateCursorPosition--;
+                translateCursorPositionState.setValue(translateCursorPosition);
                 translateQueryState.setValue(translateQuery.toString());
                 performTranslationAsync(translateQuery.toString());
             } else {
@@ -3650,7 +3660,9 @@ public class LIMEService extends InputMethodService implements
                 @Override
                 public boolean commitText(CharSequence text, int newCursorPosition) {
                     if (isTranslationModeActive) {
-                        translateQuery.append(text);
+                        translateQuery.insert(translateCursorPosition, text);
+                        translateCursorPosition += text.length();
+                        translateCursorPositionState.setValue(translateCursorPosition);
                         translateQueryState.setValue(translateQuery.toString());
                         performTranslationAsync(translateQuery.toString());
                         return true;
@@ -3675,14 +3687,23 @@ public class LIMEService extends InputMethodService implements
             translateQueryState.setValue("");
             translatedResult = "";
             translatedResultState.setValue("");
+            translateCursorPosition = 0;
+            translateCursorPositionState.setValue(0);
         } else {
             translateQuery.setLength(0);
             translateQueryState.setValue("");
             translatedResult = "";
             translatedResultState.setValue("");
+            translateCursorPosition = 0;
+            translateCursorPositionState.setValue(0);
         }
-        
+    }
 
+    public void updateTranslateCursorPosition(int position) {
+        if (position >= 0 && position <= translateQuery.length()) {
+            translateCursorPosition = position;
+            translateCursorPositionState.setValue(position);
+        }
     }
 
     public void performTranslationAsync(final String query) {
