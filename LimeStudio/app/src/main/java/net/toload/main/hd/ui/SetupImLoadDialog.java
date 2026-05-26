@@ -437,17 +437,19 @@ public class SetupImLoadDialog extends DialogFragment {
 
         boolean restorelearning = chkSetupImRestoreLearning.isChecked();
 
-        boolean isConnected = false;
+        boolean isConnected = true; // Default to true so we always try by default
         try {
             NetworkCapabilities caps = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
-            isConnected = caps != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
-        } catch (SecurityException e) {
-            Log.w("SetupImLoadDialog", "ACCESS_NETWORK_STATE permission not granted: " + e.getMessage());
-            isConnected = false;
+            if (caps != null) {
+                isConnected = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        || caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        || caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        || caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                        || caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
+            }
         } catch (Exception e) {
-            isConnected = false;
+            Log.w("SetupImLoadDialog", "Network capability check bypassed due to exception: " + e.getMessage());
+            isConnected = true;
         }
         if (isConnected) {
 
