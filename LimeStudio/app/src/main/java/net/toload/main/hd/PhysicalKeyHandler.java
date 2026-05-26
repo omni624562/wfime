@@ -296,7 +296,7 @@ class PhysicalKeyHandler {
         }
 
         if ((service.hasCtrlPress || service.hasMenuPress) && !service.mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-            int primaryKey = event.getUnicodeChar(LIMEMetaKeyKeyListener.getMetaState(service.mMetaState));
+            int primaryKey = event.getUnicodeChar(0);
             char t = (char) primaryKey;
 
             if (service.hasCtrlPress && // Only working with ctrl Jeremy '11,8,22
@@ -349,7 +349,7 @@ class PhysicalKeyHandler {
                 String s = ChineseSymbol.getSymbol(t);
                 if (s != null) {
                     service.clearSuggestions();
-                    service.getCurrentInputConnection().commitText(s, 0);
+                    service.getCurrentInputConnection().commitText(s, 1);
                     service.hasSymbolEntered = true;
                     if (service.hasMenuPress)
                         service.hasMenuProcessed = true;
