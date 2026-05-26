@@ -1792,7 +1792,7 @@ public class LIMEService extends InputMethodService implements
                     return true;
                 }
                 // No Cmd: normal '.' key — fall through to translateKeyDown
-                if (!hasMenuPress) {
+                if (!hasMenuPress && !(hasCtrlPress || event.isCtrlPressed())) {
                     if (translateKeyDown(keyCode, event)) {
                         return true;
                     }
