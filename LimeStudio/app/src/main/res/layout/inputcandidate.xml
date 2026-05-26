@@ -32,15 +32,28 @@
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:minHeight="44dp"
         android:background="@android:color/transparent">
 
         <net.toload.main.hd.candidate.CandidateView
             android:id="@+id/candidatesView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="44dp"
+            android:layout_marginEnd="@dimen/candidate_view_right_margin"
             android:gravity="center_vertical" />
+
+        <!-- The TextView for the IME abbreviation on tablets -->
+        <TextView
+            android:id="@+id/candidate_ime_name"
+            android:layout_width="@dimen/candidate_view_right_margin"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp"
+            android:textSize="@dimen/composing_text_size"
+            android:textColor="@color/second_foreground_light"
+            android:visibility="gone" />
 
         <!-- Small expand button on the right -->
         <ImageButton

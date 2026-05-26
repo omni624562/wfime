@@ -52,10 +52,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:minHeight="44dp" />
+            android:background="@android:color/transparent" />
 
-
+        <TextView
+            android:id="@+id/candidate_ime_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:textSize="@dimen/composing_text_size"
+            android:textColor="@color/second_foreground_light"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/candidate_right"

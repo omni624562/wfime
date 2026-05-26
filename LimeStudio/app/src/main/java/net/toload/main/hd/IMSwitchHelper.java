@@ -74,6 +74,19 @@ public class IMSwitchHelper {
     }
 
     /**
+     * Get the short name of the currently active IM.
+     */
+    public String getActiveIMShortName() {
+        buildActivatedIMList();
+        for (int i = 0; i < activatedIMList.size(); i++) {
+            if (activeIM.equals(activatedIMList.get(i))) {
+                return activatedIMShortNameList.get(i);
+            }
+        }
+        return "";
+    }
+
+    /**
      * Set the current active IM code.
      */
     public void setActiveIM(String im) {

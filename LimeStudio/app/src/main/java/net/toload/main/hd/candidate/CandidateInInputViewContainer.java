@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import net.toload.main.hd.R;
 
@@ -52,6 +53,8 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
 
     }
 
+    private TextView mImeNameView;
+
     public void initViews() {
         if (DEBUG)
             Log.i(TAG, "initViews()");
@@ -67,6 +70,41 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
             mCandidateView.setBackgroundColor(mCandidateView.mColorBackground);
             mRightButton.setBackgroundColor(mCandidateView.mColorBackground);
             this.setBackgroundColor(mCandidateView.mColorBackground);
+
+            mImeNameView = findViewById(R.id.candidate_ime_name);
+            if (mImeNameView != null) {
+                if (net.toload.main.hd.BuildConfig.IS_TABLET) {
+                    mImeNameView.setVisibility(VISIBLE);
+                    int textColor = mCandidateView.mColorComposingText;
+                    if (textColor == 0 || textColor == android.graphics.Color.TRANSPARENT) {
+                        textColor = getContext().getResources().getColor(R.color.second_foreground_light);
+                    }
+                    mImeNameView.setTextColor(textColor);
+                } else {
+                    mImeNameView.setVisibility(GONE);
+                }
+            }
+        }
+    }
+
+    public void setImeName(String name) {
+        if (mImeNameView != null) {
+            mImeNameView.setText(name);
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (mCandidateView != null && mImeNameView != null && net.toload.main.hd.BuildConfig.IS_TABLET) {
+            int candidateHeight = mCandidateView.getMeasuredHeight();
+            if (candidateHeight > 0) {
+                android.view.ViewGroup.LayoutParams lp = mImeNameView.getLayoutParams();
+                if (lp.height != candidateHeight) {
+                    lp.height = candidateHeight;
+                    mImeNameView.setLayoutParams(lp);
+                }
+            }
         }
     }
 

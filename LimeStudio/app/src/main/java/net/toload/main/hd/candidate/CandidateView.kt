@@ -134,7 +134,7 @@ open class CandidateView @JvmOverloads constructor(
     @JvmField var mDrawableCloseButton: Drawable? = null
     
     // Internal fields for theme
-    private var mColorComposingText: Int = 0
+    @JvmField var mColorComposingText: Int = 0
     private var mColorComposingBackground: Int = 0
     private var mColorNormalTextHighlight: Int = 0
     private var mColorComposingCode: Int = 0
@@ -151,9 +151,9 @@ open class CandidateView @JvmOverloads constructor(
         LIMEPreferenceManager(context)
     }
     
-    // Base font size from resources (18sp)
+    // Base font size from resources (composing_text_size)
     private val baseCandidateFontSizePx: Float by lazy {
-        context.resources.getDimension(R.dimen.candidate_font_size)
+        context.resources.getDimension(R.dimen.composing_text_size)
     }
 
     init {

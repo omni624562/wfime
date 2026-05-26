@@ -980,6 +980,16 @@ public class LIMEService extends InputMethodService implements
         handleBackspace();
     }
 
+    private void updateImeNameOnTablet() {
+        String shortName = mEnglishOnly ? "英" : (mIMSwitchHelper != null ? mIMSwitchHelper.getActiveIMShortName() : "");
+        if (mCandidateViewContainer != null) {
+            mCandidateViewContainer.setImeName(shortName);
+        }
+        if (mCandidateInInputView != null) {
+            mCandidateInInputView.setImeName(shortName);
+        }
+    }
+
     /**
      * Create and return the view hierarchy used to show candidates.
      * This will be called once, when the candidates are first displayed.
@@ -998,6 +1008,7 @@ public class LIMEService extends InputMethodService implements
                 .inflate(R.layout.candidates, null);
         candidateViewContainer.initViews();
         mCandidateViewContainer = candidateViewContainer;
+        updateImeNameOnTablet();
 
         mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
         mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
@@ -2676,6 +2687,10 @@ public class LIMEService extends InputMethodService implements
     private void showIMSwitchNotification(String imName) {
         if (imName == null || imName.isEmpty()) return;
 
+        if (net.toload.main.hd.BuildConfig.IS_TABLET) {
+            return;
+        }
+
         initComposingPopup();
         showComposingPopup(imName);
 
@@ -3772,7 +3787,7 @@ public class LIMEService extends InputMethodService implements
 
         // Update keyboard xml information
         currentSoftKeyboard = mKeyboardSwitcher.getImKeyboard(activeIM);
-
+        updateImeNameOnTablet();
     }
 
     /**
@@ -3800,6 +3815,7 @@ public class LIMEService extends InputMethodService implements
                     Toast.LENGTH_SHORT).show();
         }
         clearSuggestions(); // Jeremy '11,9,5
+        updateImeNameOnTablet();
     }
 
     @Override
@@ -3964,6 +3980,7 @@ public class LIMEService extends InputMethodService implements
                 hasDistinctMultitouch = mInputView.hasDistinctMultitouch();
                 mInputView.setHardwareAcceleratedDrawingEnabled(mIsHardwareAcceleratedDrawingEnabled);
                 mCandidateInInputView.initViews();
+                updateImeNameOnTablet();
                 mCandidateViewInInputView = mCandidateInInputView.findViewById(R.id.candidatesView);
                 mCandidateViewInInputView.setService(this);
 
@@ -4050,6 +4067,7 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "switchKeyboard() current keyboard:" +
                     tablename + " hasnumbermapping:" + hasNumberMapping + " hasSymbolMapping:" + hasSymbolMapping);
         SearchSrv.setTablename(tablename, hasNumberMapping, hasSymbolMapping);
+        updateImeNameOnTablet();
     }
 
     boolean handleSelkey(int primaryCode) {

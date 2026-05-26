@@ -34,6 +34,7 @@
     <dimen name="spacebar_preview_top_padding">15dip</dimen>
     <dimen name="spacebar_preview_text_size">36sp</dimen>
 
+    <dimen name="candidate_view_right_margin">80dp</dimen>
     <dimen name="candidate_stripe_height">36sp</dimen>
     <dimen name="candidate_font_size">32sp</dimen>
     <dimen name="candidate_number_font_size">16sp</dimen>
