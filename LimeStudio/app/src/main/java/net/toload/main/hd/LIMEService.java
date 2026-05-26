@@ -1834,11 +1834,11 @@ public class LIMEService extends InputMethodService implements
 
         }
 
-        if ((hasCtrlPress || hasMenuPress) && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-            int primaryKey = event.getUnicodeChar(LIMEMetaKeyKeyListener.getMetaState(mMetaState));
+        if ((hasCtrlPress || event.isCtrlPressed() || hasMenuPress) && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
+            int primaryKey = (hasCtrlPress || event.isCtrlPressed()) ? event.getUnicodeChar(0) : event.getUnicodeChar(LIMEMetaKeyKeyListener.getMetaState(mMetaState));
             char t = (char) primaryKey;
 
-            if (hasCtrlPress && // Only working with ctrl Jeremy '11,8,22
+            if ((hasCtrlPress || event.isCtrlPressed()) && // Only working with ctrl Jeremy '11,8,22
                     mCandidateList != null && mCandidateList.size() > 0
                     && mCandidateView != null && hasCandidatesShown) {
                 switch (keyCode) {
@@ -1888,7 +1888,7 @@ public class LIMEService extends InputMethodService implements
                 String s = ChineseSymbol.getSymbol(t);
                 if (s != null) {
                     clearSuggestions();
-                    getCurrentInputConnection().commitText(s, 0);
+                    getCurrentInputConnection().commitText(s, 1);
                     hasSymbolEntered = true;
                     if (hasMenuPress)
                         hasMenuProcessed = true;
