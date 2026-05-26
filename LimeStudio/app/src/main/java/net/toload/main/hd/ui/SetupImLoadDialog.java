@@ -25,6 +25,7 @@
 package net.toload.main.hd.ui;
 
 import android.Manifest;
+import android.util.Log;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -436,10 +437,18 @@ public class SetupImLoadDialog extends DialogFragment {
 
         boolean restorelearning = chkSetupImRestoreLearning.isChecked();
 
-        NetworkCapabilities caps = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
-        boolean isConnected = caps != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                || caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        boolean isConnected = false;
+        try {
+            NetworkCapabilities caps = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
+            isConnected = caps != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        } catch (SecurityException e) {
+            Log.w("SetupImLoadDialog", "ACCESS_NETWORK_STATE permission not granted: " + e.getMessage());
+            isConnected = false;
+        } catch (Exception e) {
+            isConnected = false;
+        }
         if (isConnected) {
 
             String url = null;
