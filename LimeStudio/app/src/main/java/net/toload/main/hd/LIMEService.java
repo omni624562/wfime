@@ -1499,20 +1499,31 @@ public class LIMEService extends InputMethodService implements
 
         mKeydownEvent = new KeyEvent(event);
 
-        // Cmd / Ctrl / Alt + Space directly commit Dayi composing text (Physical Keyboard Shortcut)
+        // Cmd / Ctrl / Alt / Shift + (Space or Enter) directly commit Dayi composing text (Physical Keyboard Shortcut)
         if (activeIM != null && activeIM.startsWith("dayi") && mComposing != null && mComposing.length() > 0) {
-            if (keyCode == KeyEvent.KEYCODE_SPACE && (event.isMetaPressed() || hasWinPress 
-                    || event.isCtrlPressed() || hasCtrlPress 
-                    || event.isAltPressed() || hasMenuPress)) {
+            boolean isSpaceCombo = keyCode == KeyEvent.KEYCODE_SPACE && 
+                (event.isMetaPressed() || hasWinPress 
+                 || event.isCtrlPressed() || hasCtrlPress 
+                 || event.isAltPressed() || hasMenuPress 
+                 || event.isShiftPressed() || hasShiftPress);
+            
+            boolean isEnterCombo = keyCode == KeyEvent.KEYCODE_ENTER && 
+                (event.isMetaPressed() || hasWinPress 
+                 || event.isCtrlPressed() || hasCtrlPress 
+                 || event.isAltPressed() || hasMenuPress 
+                 || event.isShiftPressed() || hasShiftPress);
+
+            if (isSpaceCombo || isEnterCombo) {
                 InputConnection ic = getCurrentInputConnection();
                 if (ic != null) {
-                    ic.commitText(mComposing, mComposing.length());
+                    ic.commitText(mComposing.toString(), mComposing.length());
                     clearComposing(false);
                 }
                 // Reset modifier press states
                 hasWinPress = false;
                 hasCtrlPress = false;
                 hasMenuPress = false;
+                hasShiftPress = false;
                 return true;
             }
         }
