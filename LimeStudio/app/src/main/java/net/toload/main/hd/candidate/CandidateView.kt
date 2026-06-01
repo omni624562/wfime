@@ -864,7 +864,14 @@ open class CandidateView @JvmOverloads constructor(
                                                     maxLines = 1
                                                 )
                                                 if (_composingText.isNotEmpty()) {
-                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .width(1.dp)
+                                                            .height(14.dp)
+                                                            .background(Color(0xFF00796B).copy(alpha = 0.6f)) // 與外框呼應的精緻墨綠分界線
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
                                                 }
                                             }
                                             if (_composingText.isNotEmpty()) {
