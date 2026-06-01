@@ -1514,11 +1514,7 @@ public class LIMEService extends InputMethodService implements
                  || event.isShiftPressed() || hasShiftPress);
 
             if (isSpaceCombo || isEnterCombo) {
-                InputConnection ic = getCurrentInputConnection();
-                if (ic != null) {
-                    ic.commitText(mComposing.toString(), mComposing.length());
-                    clearComposing(false);
-                }
+                commitTyped(mComposing.toString());
                 // Reset modifier press states
                 hasWinPress = false;
                 hasCtrlPress = false;
