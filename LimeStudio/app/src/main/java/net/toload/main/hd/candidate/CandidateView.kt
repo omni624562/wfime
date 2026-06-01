@@ -322,151 +322,64 @@ open class CandidateView @JvmOverloads constructor(
     fun ToolbarRow(
         candidateFontSize: androidx.compose.ui.unit.TextUnit
     ) {
-        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
-        val activeIM = mService?.activeIM
-        val isDayi = activeIM?.startsWith("dayi") == true
-        val isDayiPhysical = isDayi && isPhysicalKeyboard
-
-        val buttonSize = if (isDayiPhysical) 24.dp else 40.dp
-        val iconSize = if (isDayiPhysical) 16.dp else 24.dp
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxHeight()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isDayiPhysical) {
-                // A beautiful, low-profile floating dark-slate pill for the toolbar icons (visual height reduced to 28dp)
-                Row(
-                    modifier = Modifier
-                        .height(28.dp)
-                        .background(
-                            color = Color(0xFF1E272C), // Matching premium dark slate background
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFF37474F), // Muted dark border
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        .padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // 1. 備忘錄面板
-                    IconButton(
-                        onClick = {
-                            mService?.toggleMemoVisibility()
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Assignment,
-                            contentDescription = "Memo",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
-                    }
+            // 1. 備忘錄面板
+            IconButton(
+                onClick = {
+                    mService?.toggleMemoVisibility()
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Assignment,
+                    contentDescription = "Memo",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
-                    // 2. 表情符號面板
-                    IconButton(
-                        onClick = {
-                            mService?.toggleEmojiVisibility()
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Mood,
-                            contentDescription = "Emoji",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
-                    }
+            // 2. 表情符號面板
+            IconButton(
+                onClick = {
+                    mService?.toggleEmojiVisibility()
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mood,
+                    contentDescription = "Emoji",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
-                    // 3. 設定主控台
-                    IconButton(
-                        onClick = {
-                            try {
-                                val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
-                            }
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
+            // 3. 設定主控台
+            IconButton(
+                onClick = {
+                    try {
+                        val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
                     }
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // 1. 備忘錄面板
-                    IconButton(
-                        onClick = {
-                            mService?.toggleMemoVisibility()
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Assignment,
-                            contentDescription = "Memo",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
-                    }
-
-                    // 2. 表情符號面板
-                    IconButton(
-                        onClick = {
-                            mService?.toggleEmojiVisibility()
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Mood,
-                            contentDescription = "Emoji",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
-                    }
-
-                    // 3. 設定主控台
-                    IconButton(
-                        onClick = {
-                            try {
-                                val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
-                            }
-                        },
-                        modifier = Modifier.size(buttonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color.White,
-                            modifier = Modifier.size(iconSize)
-                        )
-                    }
-                }
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
