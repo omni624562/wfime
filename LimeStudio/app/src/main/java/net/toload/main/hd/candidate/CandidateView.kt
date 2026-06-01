@@ -322,6 +322,14 @@ open class CandidateView @JvmOverloads constructor(
     fun ToolbarRow(
         candidateFontSize: androidx.compose.ui.unit.TextUnit
     ) {
+        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+        val activeIM = mService?.activeIM
+        val isDayi = activeIM?.startsWith("dayi") == true
+        val isDayiPhysical = isDayi && isPhysicalKeyboard
+
+        val buttonSize = if (isDayiPhysical) 30.dp else 40.dp
+        val iconSize = if (isDayiPhysical) 20.dp else 24.dp
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -335,13 +343,13 @@ open class CandidateView @JvmOverloads constructor(
                 onClick = {
                     mService?.toggleMemoVisibility()
                 },
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(buttonSize)
             ) {
                 Icon(
                     imageVector = Icons.Default.Assignment,
                     contentDescription = "Memo",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(iconSize)
                 )
             }
 
@@ -350,13 +358,13 @@ open class CandidateView @JvmOverloads constructor(
                 onClick = {
                     mService?.toggleEmojiVisibility()
                 },
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(buttonSize)
             ) {
                 Icon(
                     imageVector = Icons.Default.Mood,
                     contentDescription = "Emoji",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(iconSize)
                 )
             }
 
@@ -372,13 +380,13 @@ open class CandidateView @JvmOverloads constructor(
                         Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
                     }
                 },
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(buttonSize)
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(iconSize)
                 )
             }
         }
