@@ -126,12 +126,17 @@ class ComposingTextPopup(private val context: Context) {
             val location = IntArray(2)
             anchor.getLocationInWindow(location) // Window coordinates are safer for IMEs
             
-            // Measure the popup content to know its height
+            // Measure the popup content to know its width and height
             textView?.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            val popupWidth = textView?.measuredWidth ?: 0
             val popupHeight = textView?.measuredHeight ?: 0
             
-            // Calculate position: above the anchor top with vertical margin
-            val x = location[0] + dpToPx(xOffsetDp)
+            // Retrieve candidate_view_right_margin dimension
+            val rightMarginDimId = context.resources.getIdentifier("candidate_view_right_margin", "dimen", context.packageName)
+            val rightMarginPx = if (rightMarginDimId != 0) context.resources.getDimensionPixelSize(rightMarginDimId) else 0
+            
+            // Calculate position: above the anchor top, aligned to the right side before the abbreviation label
+            val x = location[0] + anchor.width - rightMarginPx - popupWidth - dpToPx(xOffsetDp)
             val y = location[1] - popupHeight - dpToPx(yOffsetDp)
 
             if (!isShowing && popupWindow != null) {
