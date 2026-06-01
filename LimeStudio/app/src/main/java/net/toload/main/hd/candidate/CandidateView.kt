@@ -812,7 +812,7 @@ open class CandidateView @JvmOverloads constructor(
         }
                 
                 // Fade edge indicator on right side when more content is available
-                if (suggestions.isNotEmpty() && !isAtEnd.value) {
+                if (suggestions.isNotEmpty() && !isAtEnd.value && _composingText.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
@@ -827,6 +827,42 @@ open class CandidateView @JvmOverloads constructor(
                                 )
                             )
                     )
+                }
+
+                // FLOATING COMPOSING TEXT ON TABLET (RIGHT SIDE, TO THE LEFT OF IME NAME)
+                val isTablet = net.toload.main.hd.BuildConfig.IS_TABLET
+                if (isTablet && _composingText.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .fillMaxHeight()
+                            .background(gboardDark)
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = Color(0xFF1E272C), // Matching premium dark slate background
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = Color(0xFF00796B), // Matching muted slate-teal border
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = _composingText,
+                                color = Color(0xFF4FC3F7), // Beautiful light blue composing color
+                                fontSize = candidateFontSize,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
             }
         }

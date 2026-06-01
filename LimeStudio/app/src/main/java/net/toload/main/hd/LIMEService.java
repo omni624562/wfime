@@ -691,6 +691,9 @@ public class LIMEService extends InputMethodService implements
     }
 
     private void showComposingPopup(String text) {
+        if (net.toload.main.hd.BuildConfig.IS_TABLET) {
+            return; // Skip floating popup on tablet, since it is rendered inline inside the candidate bar
+        }
         // Ensure popup operations run on main thread (may be called from background
         // thread)
         mMainHandler.post(() -> {
