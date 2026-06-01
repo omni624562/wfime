@@ -1498,6 +1498,18 @@ public class LIMEService extends InputMethodService implements
                     + ", event.getMetaState()" + Integer.toHexString(event.getMetaState()));
 
         mKeydownEvent = new KeyEvent(event);
+
+        // Cmd + Space directly commit Dayi composing text (Physical Keyboard Shortcut)
+        if (activeIM != null && activeIM.startsWith("dayi") && mComposing != null && mComposing.length() > 0) {
+            if (keyCode == KeyEvent.KEYCODE_SPACE && event.isMetaPressed()) {
+                InputConnection ic = getCurrentInputConnection();
+                if (ic != null) {
+                    ic.commitText(mComposing, mComposing.length());
+                    clearComposing(false);
+                }
+                return true;
+            }
+        }
         // Record key pressed time and set key processed flags(key down, for physical
         // keys)
         // Jeremy '11,8,22 using getRepeatCount from event to set processed flags
