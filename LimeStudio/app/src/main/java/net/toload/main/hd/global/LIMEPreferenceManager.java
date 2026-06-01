@@ -480,6 +480,30 @@ public class LIMEPreferenceManager {
         }
     }
 
+    public boolean getDayiSmartSelectionEnabled() {
+        return getParameterBoolean("dayi_smart_selection", true);
+    }
+
+    public void setDayiSmartSelectionEnabled(boolean value) {
+        setParameter("dayi_smart_selection", value);
+    }
+
+    public boolean getDayiSmartSelectionRecentEnabled() {
+        return getParameterBoolean("dayi_smart_selection_recent", true);
+    }
+
+    public void setDayiSmartSelectionRecentEnabled(boolean value) {
+        setParameter("dayi_smart_selection_recent", value);
+    }
+
+    public boolean getDayiSmartSelectionContextEnabled() {
+        return getParameterBoolean("dayi_smart_selection_context", true);
+    }
+
+    public void setDayiSmartSelectionContextEnabled(boolean value) {
+        setParameter("dayi_smart_selection_context", value);
+    }
+
     private String preProcessTableName(String table) {
         if (table.endsWith("_") || table.equals("")) {
             return table; // processed already.

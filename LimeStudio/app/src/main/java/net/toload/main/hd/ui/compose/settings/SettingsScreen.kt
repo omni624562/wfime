@@ -497,6 +497,85 @@ fun ImSettingsSection(
             enabled = uiState.isDayiImported
         )
 
+        // 智慧選字設定區塊 (大易專屬)
+        if (uiState.isDayiImported) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(
+                        text = "大易智慧選字設定",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+
+                    SwitchPreference(
+                        title = "啟用智慧選字",
+                        summary = "開啟後，大易候選字將依打字習慣自動調整排序",
+                        checked = uiState.dayiSmartSelection,
+                        onCheckedChange = { viewModel.setDayiSmartSelection(it) }
+                    )
+
+                    SwitchPreference(
+                        title = "近期選字優先",
+                        summary = "最近選過的字享有短期加權",
+                        checked = uiState.dayiSmartSelectionRecent,
+                        onCheckedChange = { viewModel.setDayiSmartSelectionRecent(it) },
+                        enabled = uiState.dayiSmartSelection
+                    )
+
+                    SwitchPreference(
+                        title = "前一字上下文加權",
+                        summary = "常連用的候選字會再往前排",
+                        checked = uiState.dayiSmartSelectionContext,
+                        onCheckedChange = { viewModel.setDayiSmartSelectionContext(it) },
+                        enabled = uiState.dayiSmartSelection
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    var showClearDialog by remember { mutableStateOf(false) }
+
+                    ListItem(
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        headlineContent = { Text("清除智慧選字資料", color = MaterialTheme.colorScheme.error) },
+                        supportingContent = { Text("清除您在大易輸入法下的所有個人習慣統計資料") },
+                        modifier = Modifier.clickable { showClearDialog = true }
+                    )
+
+                    if (showClearDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showClearDialog = false },
+                            title = { Text("確認清除") },
+                            text = { Text("您確定要清除大易輸入法的所有智慧選字學習習慣嗎？此動作無法復原。") },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.clearDayiSmartSelectionData()
+                                        showClearDialog = false
+                                    }
+                                ) {
+                                    Text("確定清除", color = MaterialTheme.colorScheme.error)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showClearDialog = false }) {
+                                    Text("取消")
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
         // 啟用注音輸入法
         SwitchPreference(
             title = stringResource(R.string.enable_phonetic),

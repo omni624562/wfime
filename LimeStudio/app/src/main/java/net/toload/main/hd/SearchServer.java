@@ -50,6 +50,7 @@ import net.toload.main.hd.data.Mapping;
 import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEUtilities;
+import net.toload.main.hd.global.SmartSelectionManager;
 import net.toload.main.hd.limedb.LimeDB;
 
 public class SearchServer {
@@ -747,7 +748,67 @@ public class SearchServer {
         if (DEBUG)
             Log.i(TAG, "getMappingByCode() result.size()=" + result.size());
 
-        if (lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
+        if (tablename.equals("dayi") && mLIMEPref.getDayiSmartSelectionEnabled() && result.size() > 1) {
+            try {
+                final SmartSelectionManager manager = SmartSelectionManager.getInstance(mContext);
+                final boolean recentEnabled = mLIMEPref.getDayiSmartSelectionRecentEnabled();
+                final boolean contextEnabled = mLIMEPref.getDayiSmartSelectionContextEnabled();
+                final String prevChar = lastCommittedChar;
+                final long now = System.currentTimeMillis();
+
+                // Store original indices for stable sorting when scores are equal
+                final java.util.Map<Mapping, Integer> originalIndices = new java.util.HashMap<>();
+                for (int i = 0; i < result.size(); i++) {
+                    originalIndices.put(result.get(i), i);
+                }
+
+                java.util.Collections.sort(result, new java.util.Comparator<Mapping>() {
+                    private double calculateScore(Mapping m) {
+                        String word = m.getWord();
+                        String code = m.getCode();
+                        if (word == null || code == null) return 0.0;
+
+                        SmartSelectionManager.CandidateStats stats = manager.getStats(code, word);
+                        if (stats == null) return 0.0;
+
+                        double score = stats.count;
+
+                        if (contextEnabled && prevChar != null && !prevChar.isEmpty()) {
+                            Integer prevCount = stats.prev.get(prevChar);
+                            if (prevCount != null) {
+                                score += prevCount * 2.0;
+                            }
+                        }
+
+                        if (recentEnabled) {
+                            double ageDays = (double) (now - stats.last) / (1000.0 * 60.0 * 60.0 * 24.0);
+                            if (ageDays < 0) ageDays = 0;
+                            double recentBonus = 3.0 / (1.0 + ageDays / 7.0);
+                            score += recentBonus;
+                        }
+
+                        return score;
+                    }
+
+                    @Override
+                    public int compare(Mapping m1, Mapping m2) {
+                        double score1 = calculateScore(m1);
+                        double score2 = calculateScore(m2);
+                        if (Math.abs(score1 - score2) < 0.0001) {
+                            // Stable sort: preserve original order
+                            return Integer.compare(originalIndices.get(m1), originalIndices.get(m2));
+                        }
+                        return Double.compare(score2, score1); // Descending order
+                    }
+                });
+
+                if (DEBUG || Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "getMappingByCode() Dayi smart selection sorting applied.");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error applying Dayi smart selection sorting", e);
+            }
+        } else if (lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
             try {
                 List<Mapping> related = dbadapter.getRelatedPhrase(lastCommittedChar, false);
                 if (related != null && !related.isEmpty()) {
@@ -1381,6 +1442,24 @@ public class SearchServer {
         // Temp final Mapping Object For updateMapping thread.
         if (updateMapping != null) {
             final Mapping updateMappingTemp = new Mapping(updateMapping);
+
+            if (tablename.equals("dayi") && mLIMEPref.getDayiSmartSelectionEnabled()) {
+                final String prev = lastCommittedChar;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            SmartSelectionManager.getInstance(mContext).recordSelection(
+                                    updateMappingTemp.getCode(),
+                                    updateMappingTemp.getWord(),
+                                    prev
+                            );
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error recording selection in SmartSelectionManager", e);
+                        }
+                    }
+                }).start();
+            }
 
             // Jeremy '11,6,11. Always update score and sort according to preferences.
             scorelist.add(updateMappingTemp);
