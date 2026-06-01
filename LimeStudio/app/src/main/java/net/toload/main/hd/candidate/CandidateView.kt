@@ -746,7 +746,52 @@ open class CandidateView @JvmOverloads constructor(
                                 .fillMaxHeight(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Left side: candidates scrollable box
+                            // Fixed Vertical Up/Down Paging Buttons Panel (Placed at far left)
+                            if (isDayi && isPhysicalKeyboard && suggestions.isNotEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 8.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    // ▲ Up Arrow Button (Prev Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasPrevPage) { pagePrev() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▲",
+                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    // ▼ Down Arrow Button (Next Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasNextPage) { pageNext() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▼",
+                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Center-Right: candidates scrollable box (taking remaining weight)
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
@@ -795,51 +840,6 @@ open class CandidateView @JvmOverloads constructor(
                                                 )
                                             )
                                     )
-                                }
-                            }
-
-                            // Middle-Right: Fixed Vertical Up/Down Paging Buttons Panel
-                            if (isDayi && isPhysicalKeyboard && suggestions.isNotEmpty()) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(horizontal = 8.dp),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    // ▲ Up Arrow Button (Prev Page)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(22.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
-                                            .clickable(enabled = hasPrevPage) { pagePrev() },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "▲",
-                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
-                                            fontSize = (candidateFontSize.value * 0.6f).sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    // ▼ Down Arrow Button (Next Page)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(22.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
-                                            .clickable(enabled = hasNextPage) { pageNext() },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "▼",
-                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
-                                            fontSize = (candidateFontSize.value * 0.6f).sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
                                 }
                             }
 
