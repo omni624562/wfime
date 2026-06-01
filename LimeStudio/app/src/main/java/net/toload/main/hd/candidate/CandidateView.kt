@@ -750,18 +750,6 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Show raw keycode as first item (if not empty)
-                                    if (_rawKeycode.isNotEmpty()) {
-                                        RawKeycodeItem(
-                                            keycode = _rawKeycode,
-                                            fontSize = candidateFontSize,
-                                            onClick = {
-                                                mService?.commitTyped(_rawKeycode)
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                    }
-
                                     val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
                                     val activeIM = mService?.activeIM
                                     val isDayi = activeIM?.startsWith("dayi") == true
@@ -837,7 +825,7 @@ open class CandidateView @JvmOverloads constructor(
                             }
 
                             // Right side: Composing Text in candidate window (placed right-most, directly to the left of "大易")
-                            if (isTablet && _composingText.isNotEmpty()) {
+                            if (isTablet && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
@@ -856,16 +844,39 @@ open class CandidateView @JvmOverloads constructor(
                                                 color = Color(0xFF00796B),
                                                 shape = RoundedCornerShape(6.dp)
                                             )
+                                            .clickable {
+                                                if (_rawKeycode.isNotEmpty()) {
+                                                    mService?.commitTyped(_rawKeycode)
+                                                }
+                                            }
                                             .padding(horizontal = 12.dp, vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            text = _composingText,
-                                            color = Color(0xFF4FC3F7),
-                                            fontSize = candidateFontSize,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (_rawKeycode.isNotEmpty()) {
+                                                Text(
+                                                    text = _rawKeycode,
+                                                    color = Color(0xFF80DEEA), // 亮青綠色
+                                                    fontSize = candidateFontSize,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1
+                                                )
+                                                if (_composingText.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                }
+                                            }
+                                            if (_composingText.isNotEmpty()) {
+                                                Text(
+                                                    text = _composingText,
+                                                    color = Color(0xFF4FC3F7), // 原本的亮藍色
+                                                    fontSize = candidateFontSize,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
