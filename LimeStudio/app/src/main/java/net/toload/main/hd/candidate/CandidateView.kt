@@ -678,6 +678,15 @@ open class CandidateView @JvmOverloads constructor(
         val activeIM = mService?.activeIM
         val isDayi = activeIM?.startsWith("dayi") == true
         
+        // Paging calculations
+        val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+        val startIndex = currentPage * pageSize
+        var endIndex = startIndex + pageSize
+        if (endIndex > suggestions.size) endIndex = suggestions.size
+        val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
+        val hasNextPage = endIndex < suggestions.size
+        val hasPrevPage = startIndex > 0
+        
         // 訂閱來自 LIMEService 的反應式即時翻譯狀態
         val isTranslationMode by remember { LIMEService.isTranslationModeState }
         val translateQuery by remember { LIMEService.translateQueryState }
@@ -750,29 +759,6 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
-                                    val activeIM = mService?.activeIM
-                                    val isDayi = activeIM?.startsWith("dayi") == true
-                                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
-                                    
-                                    val startIndex = currentPage * pageSize
-                                    var endIndex = startIndex + pageSize
-                                    if (endIndex > suggestions.size) endIndex = suggestions.size
-                                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
-                                    val hasNextPage = endIndex < suggestions.size
-                                    val hasPrevPage = startIndex > 0
-
-                                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxHeight()
-                                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                                        }
-                                    }
-                                    
                                     visibleSuggestions.forEachIndexed { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
@@ -790,18 +776,6 @@ open class CandidateView @JvmOverloads constructor(
                                                 }
                                             }
                                         )
-                                    }
-
-                                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxHeight()
-                                                .clickable { pageNext() }
-                                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                                        }
                                     }
                                 }
 
@@ -821,6 +795,51 @@ open class CandidateView @JvmOverloads constructor(
                                                 )
                                             )
                                     )
+                                }
+                            }
+
+                            // Middle-Right: Fixed Vertical Up/Down Paging Buttons Panel
+                            if (isDayi && isPhysicalKeyboard && suggestions.isNotEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 8.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    // ▲ Up Arrow Button (Prev Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasPrevPage) { pagePrev() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▲",
+                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    // ▼ Down Arrow Button (Next Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasNextPage) { pageNext() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▼",
+                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
 
