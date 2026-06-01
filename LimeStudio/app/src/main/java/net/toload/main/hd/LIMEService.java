@@ -1520,6 +1520,14 @@ public class LIMEService extends InputMethodService implements
                 hasCtrlPress = false;
                 hasMenuPress = false;
                 hasShiftPress = false;
+                
+                if (isSpaceCombo) {
+                    spaceKeyPress = true;
+                    hasSpaceProcessed = true;
+                    lastKeyCtrl = false;
+                } else {
+                    hasEnterProcessed = true;
+                }
                 return true;
             }
         }
