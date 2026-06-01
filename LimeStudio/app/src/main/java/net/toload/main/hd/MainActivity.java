@@ -243,8 +243,11 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar == null)
             throw new AssertionError();
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        boolean isTablet = this.getResources().getConfiguration().screenWidthDp >= 600;
+        actionBar.setDisplayShowTitleEnabled(!isTablet);
+        if (!isTablet) {
+            actionBar.setTitle(mTitle);
+        }
     }
 
     @Override
