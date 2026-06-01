@@ -848,42 +848,69 @@ open class CandidateView @JvmOverloads constructor(
         val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
         val activeIM = mService?.activeIM
         
-        var displayText = mapping.word ?: ""
-        if (isPhysicalKeyboard && !mapping.isEmojiRecord() && !mapping.isComposingCodeRecord()) {
-            if (activeIM?.startsWith("dayi") == true) {
-                val prefix = when (index % 6) {
-                    0 -> "\u2423. "
-                    1 -> "'. "
-                    2 -> "[. "
-                    3 -> "]. "
-                    4 -> "-. "
-                    5 -> "\\. "
-                    else -> ""
-                }
-                displayText = prefix + displayText
-            } else {
-                val prefix = if (index < 9) "${index + 1}. " else if (index == 9) "0. " else ""
-                displayText = prefix + displayText
-            }
+        val backgroundModifier = if (isSelected) {
+            Modifier
+                .background(
+                    color = Color(0xFF1E272C), // Premium dark slate background
+                    shape = RoundedCornerShape(6.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFF00796B), // Muted slate-teal border
+                    shape = RoundedCornerShape(6.dp)
+                )
+        } else {
+            Modifier
         }
 
         Box(
             modifier = Modifier
                 .fillMaxHeight()
+                .padding(vertical = 4.dp, horizontal = 2.dp)
+                .then(backgroundModifier)
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
                 )
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = displayText,
-                color = textColor,
-                fontSize = fontSize,
-                fontWeight = fontWeight,
-                maxLines = 1
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = mapping.word ?: "",
+                    color = textColor,
+                    fontSize = fontSize,
+                    fontWeight = fontWeight,
+                    maxLines = 1
+                )
+                if (isPhysicalKeyboard && !mapping.isEmojiRecord() && !mapping.isComposingCodeRecord()) {
+                    val selectionKey = if (activeIM?.startsWith("dayi") == true) {
+                        when (index % 6) {
+                            0 -> "\u2423"
+                            1 -> "'"
+                            2 -> "["
+                            3 -> "]"
+                            4 -> "-"
+                            5 -> "\\"
+                            else -> ""
+                        }
+                    } else {
+                        if (index < 9) "${index + 1}" else if (index == 9) "0" else ""
+                    }
+                    if (selectionKey.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = selectionKey,
+                            color = Color(0xFF80DEEA), // Cyan keycode color
+                            fontSize = fontSize * 0.7f,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.align(Alignment.Top) // raised slightly like superscript
+                        )
+                    }
+                }
+            }
         }
     }
 
