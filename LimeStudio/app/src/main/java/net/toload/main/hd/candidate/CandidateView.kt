@@ -804,6 +804,16 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    if (!isTablet && _rawKeycode.isNotEmpty()) {
+                                        RawKeycodeItem(
+                                            keycode = _rawKeycode,
+                                            fontSize = candidateFontSize,
+                                            onClick = {
+                                                mService?.commitTyped(_rawKeycode)
+                                            }
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
                                     visibleSuggestions.forEachIndexed { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
