@@ -327,67 +327,146 @@ open class CandidateView @JvmOverloads constructor(
         val isDayi = activeIM?.startsWith("dayi") == true
         val isDayiPhysical = isDayi && isPhysicalKeyboard
 
-        val buttonSize = if (isDayiPhysical) 30.dp else 40.dp
-        val iconSize = if (isDayiPhysical) 20.dp else 24.dp
+        val buttonSize = if (isDayiPhysical) 24.dp else 40.dp
+        val iconSize = if (isDayiPhysical) 16.dp else 24.dp
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxHeight(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. 備忘錄面板
-            IconButton(
-                onClick = {
-                    mService?.toggleMemoVisibility()
-                },
-                modifier = Modifier.size(buttonSize)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Assignment,
-                    contentDescription = "Memo",
-                    tint = Color.White,
-                    modifier = Modifier.size(iconSize)
-                )
-            }
-
-            // 2. 表情符號面板
-            IconButton(
-                onClick = {
-                    mService?.toggleEmojiVisibility()
-                },
-                modifier = Modifier.size(buttonSize)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Mood,
-                    contentDescription = "Emoji",
-                    tint = Color.White,
-                    modifier = Modifier.size(iconSize)
-                )
-            }
-
-            // 3. 設定主控台
-            IconButton(
-                onClick = {
-                    try {
-                        val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
+            if (isDayiPhysical) {
+                // A beautiful, low-profile floating dark-slate pill for the toolbar icons (visual height reduced to 28dp)
+                Row(
+                    modifier = Modifier
+                        .height(28.dp)
+                        .background(
+                            color = Color(0xFF1E272C), // Matching premium dark slate background
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF37474F), // Muted dark border
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // 1. 備忘錄面板
+                    IconButton(
+                        onClick = {
+                            mService?.toggleMemoVisibility()
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Assignment,
+                            contentDescription = "Memo",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
                     }
-                },
-                modifier = Modifier.size(buttonSize)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = Color.White,
-                    modifier = Modifier.size(iconSize)
-                )
+
+                    // 2. 表情符號面板
+                    IconButton(
+                        onClick = {
+                            mService?.toggleEmojiVisibility()
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mood,
+                            contentDescription = "Emoji",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+
+                    // 3. 設定主控台
+                    IconButton(
+                        onClick = {
+                            try {
+                                val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
+                            }
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // 1. 備忘錄面板
+                    IconButton(
+                        onClick = {
+                            mService?.toggleMemoVisibility()
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Assignment,
+                            contentDescription = "Memo",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+
+                    // 2. 表情符號面板
+                    IconButton(
+                        onClick = {
+                            mService?.toggleEmojiVisibility()
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mood,
+                            contentDescription = "Emoji",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+
+                    // 3. 設定主控台
+                    IconButton(
+                        onClick = {
+                            try {
+                                val intent = Intent(context, net.toload.main.hd.MainActivity::class.java).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("TOOLBAR_DEBUG", "Failed to start settings: ${e.message}")
+                            }
+                        },
+                        modifier = Modifier.size(buttonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White,
+                            modifier = Modifier.size(iconSize)
+                        )
+                    }
+                }
             }
         }
     }
@@ -715,9 +794,8 @@ open class CandidateView @JvmOverloads constructor(
                 scrollState.value >= scrollState.maxValue
             }
         }
-        // Determine base height based on input method and physical keyboard state
-        val isDayiPhysical = isDayi && isPhysicalKeyboard
-        val baseHeight = if (isDayiPhysical) 36 else 48
+        // Determine base height: use a premium, stable height of 48dp globally to completely eliminate layout shifting.
+        val baseHeight = 48
         
         // 即時翻譯模式時將高度拓寬為 96.dp，以容納雙層科技感控制面板
         val heightDp = if (isTranslationMode) 96.dp else (baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp
