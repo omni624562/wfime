@@ -102,7 +102,7 @@ fun SettingsScreen(
                         .padding(vertical = 24.dp, horizontal = 16.dp)
                 ) {
                     Text(
-                        text = "設定主控台 v1.3.0",
+                        text = "設定主控台 v${net.toload.main.hd.BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -521,7 +521,8 @@ fun ImSettingsSection(
                         title = "啟用智慧選字",
                         summary = "開啟後，大易候選字將依打字習慣自動調整排序",
                         checked = uiState.dayiSmartSelection,
-                        onCheckedChange = { viewModel.setDayiSmartSelection(it) }
+                        onCheckedChange = { viewModel.setDayiSmartSelection(it) },
+                        color = Color.Transparent
                     )
 
                     SwitchPreference(
@@ -529,7 +530,8 @@ fun ImSettingsSection(
                         summary = "最近選過的字享有短期加權",
                         checked = uiState.dayiSmartSelectionRecent,
                         onCheckedChange = { viewModel.setDayiSmartSelectionRecent(it) },
-                        enabled = uiState.dayiSmartSelection
+                        enabled = uiState.dayiSmartSelection,
+                        color = Color.Transparent
                     )
 
                     SwitchPreference(
@@ -537,7 +539,8 @@ fun ImSettingsSection(
                         summary = "常連用的候選字會再往前排",
                         checked = uiState.dayiSmartSelectionContext,
                         onCheckedChange = { viewModel.setDayiSmartSelectionContext(it) },
-                        enabled = uiState.dayiSmartSelection
+                        enabled = uiState.dayiSmartSelection,
+                        color = Color.Transparent
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))

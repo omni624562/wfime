@@ -68,13 +68,14 @@ fun SwitchPreference(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = enabled) { onCheckedChange(!checked) },
-        color = MaterialTheme.colorScheme.surface
+        color = color
     ) {
         Row(
             modifier = Modifier
