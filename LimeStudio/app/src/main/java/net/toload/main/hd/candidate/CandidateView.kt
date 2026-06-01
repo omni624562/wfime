@@ -151,9 +151,9 @@ open class CandidateView @JvmOverloads constructor(
         LIMEPreferenceManager(context)
     }
     
-    // Base font size from resources (composing_text_size)
+    // Base font size from resources (candidate_font_size)
     private val baseCandidateFontSizePx: Float by lazy {
-        context.resources.getDimension(R.dimen.composing_text_size)
+        context.resources.getDimension(R.dimen.candidate_font_size)
     }
 
     init {
