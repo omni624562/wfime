@@ -731,141 +731,151 @@ open class CandidateView @JvmOverloads constructor(
                     if (isToolbarMode) {
                         ToolbarRow(candidateFontSize)
                     } else {
+                        val isTablet = net.toload.main.hd.BuildConfig.IS_TABLET
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight()
-                                .horizontalScroll(scrollState)
-                                .padding(horizontal = 8.dp),
+                                .fillMaxHeight(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                        // Show raw keycode as first item (if not empty)
-                        // Show raw keycode as first item (if not empty)
-                        if (_rawKeycode.isNotEmpty()) {
-                            RawKeycodeItem(
-                                keycode = _rawKeycode,
-                                fontSize = candidateFontSize,
-                                onClick = {
-                                    // Input raw keycode directly
-                                    mService?.commitTyped(_rawKeycode)
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-
-                        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
-                        val activeIM = mService?.activeIM
-                        val isDayi = activeIM?.startsWith("dayi") == true
-                        val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
-                        
-                        val startIndex = currentPage * pageSize
-                        var endIndex = startIndex + pageSize
-                        if (endIndex > suggestions.size) endIndex = suggestions.size
-                        val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
-                        val hasNextPage = endIndex < suggestions.size
-                        val hasPrevPage = startIndex > 0
-
-                        if (hasPrevPage && isDayi && isPhysicalKeyboard) {
+                            // Left side: candidates scrollable box
                             Box(
                                 modifier = Modifier
+                                    .weight(1f)
                                     .fillMaxHeight()
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                            }
-                        }
-                        
-                        visibleSuggestions.forEachIndexed { i, mapping ->
-                            val actualIndex = startIndex + i
-                            CandidateItem(
-                                mapping = mapping,
-                                index = actualIndex,
-                                isSelected = actualIndex == selectedIndex,
-                                fontSize = candidateFontSize,
-                                onClick = {
-                                    mService?.pickCandidateManually(actualIndex)
-                                    selectedIndex = actualIndex
-                                },
-                                onLongClick = {
-                                    if (mapping.isRelatedPhraseRecord()) {
-                                        mService?.removeCandidateManually(actualIndex)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .horizontalScroll(scrollState)
+                                        .padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Show raw keycode as first item (if not empty)
+                                    if (_rawKeycode.isNotEmpty()) {
+                                        RawKeycodeItem(
+                                            keycode = _rawKeycode,
+                                            fontSize = candidateFontSize,
+                                            onClick = {
+                                                mService?.commitTyped(_rawKeycode)
+                                            }
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+
+                                    val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
+                                    val activeIM = mService?.activeIM
+                                    val isDayi = activeIM?.startsWith("dayi") == true
+                                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
+                                    
+                                    val startIndex = currentPage * pageSize
+                                    var endIndex = startIndex + pageSize
+                                    if (endIndex > suggestions.size) endIndex = suggestions.size
+                                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
+                                    val hasNextPage = endIndex < suggestions.size
+                                    val hasPrevPage = startIndex > 0
+
+                                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                                        }
+                                    }
+                                    
+                                    visibleSuggestions.forEachIndexed { i, mapping ->
+                                        val actualIndex = startIndex + i
+                                        CandidateItem(
+                                            mapping = mapping,
+                                            index = actualIndex,
+                                            isSelected = actualIndex == selectedIndex,
+                                            fontSize = candidateFontSize,
+                                            onClick = {
+                                                mService?.pickCandidateManually(actualIndex)
+                                                selectedIndex = actualIndex
+                                            },
+                                            onLongClick = {
+                                                if (mapping.isRelatedPhraseRecord()) {
+                                                    mService?.removeCandidateManually(actualIndex)
+                                                }
+                                            }
+                                        )
+                                    }
+
+                                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .clickable { pageNext() }
+                                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                                        }
                                     }
                                 }
-                            )
-                        }
 
-                        if (hasNextPage && isDayi && isPhysicalKeyboard) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .clickable { pageNext() }
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
+                                // Fade edge indicator on right side when more content is available
+                                if (suggestions.isNotEmpty() && !isAtEnd.value && _composingText.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .width(24.dp)
+                                            .fillMaxHeight()
+                                            .background(
+                                                brush = Brush.horizontalGradient(
+                                                    colors = listOf(
+                                                        Color.Transparent,
+                                                        gboardDark
+                                                    )
+                                                )
+                                            )
+                                    )
+                                }
+                            }
+
+                            // Right side: Composing Text in candidate window (placed right-most, directly to the left of "大易")
+                            if (isTablet && _composingText.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .background(gboardDark)
+                                        .padding(horizontal = 16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color(0xFF1E272C),
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .border(
+                                                width = 1.dp,
+                                                color = Color(0xFF00796B),
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = _composingText,
+                                            color = Color(0xFF4FC3F7),
+                                            fontSize = candidateFontSize,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-                
-                // Fade edge indicator on right side when more content is available
-                if (suggestions.isNotEmpty() && !isAtEnd.value && _composingText.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .width(24.dp)
-                            .fillMaxHeight()
-                            .background(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        gboardDark
-                                    )
-                                )
-                            )
-                    )
-                }
-
-                // FLOATING COMPOSING TEXT ON TABLET (RIGHT SIDE, TO THE LEFT OF IME NAME)
-                val isTablet = net.toload.main.hd.BuildConfig.IS_TABLET
-                if (isTablet && _composingText.isNotEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .fillMaxHeight()
-                            .background(gboardDark)
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = Color(0xFF1E272C), // Matching premium dark slate background
-                                    shape = RoundedCornerShape(6.dp)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = Color(0xFF00796B), // Matching muted slate-teal border
-                                    shape = RoundedCornerShape(6.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = _composingText,
-                                color = Color(0xFF4FC3F7), // Beautiful light blue composing color
-                                fontSize = candidateFontSize,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    }
 
     @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
