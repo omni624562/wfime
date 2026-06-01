@@ -692,6 +692,9 @@ public class LIMEService extends InputMethodService implements
 
     private void showComposingPopup(String text) {
         if (net.toload.main.hd.BuildConfig.IS_TABLET) {
+            if (mCandidateView != null) {
+                mCandidateView.setComposingText(text);
+            }
             return; // Skip floating popup on tablet, since it is rendered inline inside the candidate bar
         }
         // Ensure popup operations run on main thread (may be called from background
@@ -709,6 +712,12 @@ public class LIMEService extends InputMethodService implements
     }
 
     private void hideComposingPopup() {
+        if (net.toload.main.hd.BuildConfig.IS_TABLET) {
+            if (mCandidateView != null) {
+                mCandidateView.setComposingText("");
+            }
+            return;
+        }
         // Ensure popup operations run on main thread
         mMainHandler.post(() -> {
             if (mComposingPopup != null) {
