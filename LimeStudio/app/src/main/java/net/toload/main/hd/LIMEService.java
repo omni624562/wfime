@@ -1499,14 +1499,20 @@ public class LIMEService extends InputMethodService implements
 
         mKeydownEvent = new KeyEvent(event);
 
-        // Cmd + Space directly commit Dayi composing text (Physical Keyboard Shortcut)
+        // Cmd / Ctrl / Alt + Space directly commit Dayi composing text (Physical Keyboard Shortcut)
         if (activeIM != null && activeIM.startsWith("dayi") && mComposing != null && mComposing.length() > 0) {
-            if (keyCode == KeyEvent.KEYCODE_SPACE && event.isMetaPressed()) {
+            if (keyCode == KeyEvent.KEYCODE_SPACE && (event.isMetaPressed() || hasWinPress 
+                    || event.isCtrlPressed() || hasCtrlPress 
+                    || event.isAltPressed() || hasMenuPress)) {
                 InputConnection ic = getCurrentInputConnection();
                 if (ic != null) {
                     ic.commitText(mComposing, mComposing.length());
                     clearComposing(false);
                 }
+                // Reset modifier press states
+                hasWinPress = false;
+                hasCtrlPress = false;
+                hasMenuPress = false;
                 return true;
             }
         }
