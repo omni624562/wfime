@@ -106,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar.setNavigationIcon(null);
 
+        // Hide toolbar/appbar completely on tablet to reclaim screen space
+        boolean isTablet = this.getResources().getConfiguration().screenWidthDp >= 600;
+        if (isTablet) {
+            com.google.android.material.appbar.AppBarLayout appBar = findViewById(R.id.app_bar);
+            if (appBar != null) {
+                appBar.setVisibility(android.view.View.GONE);
+            }
+        }
+
         handler = new MainActivityHandler(this);
 
         progress = new LoadingDialogHelper(this);
@@ -379,6 +388,27 @@ public class MainActivity extends AppCompatActivity {
                 if (settingsViewModel != null) {
                     settingsViewModel.refreshImportStatus();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void showHelpDialog() {
+        runOnUiThread(() -> {
+            try {
+                net.toload.main.hd.ui.HelpDialog helpDialog = new net.toload.main.hd.ui.HelpDialog();
+                helpDialog.show(getSupportFragmentManager(), "helpDialog");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void performReset() {
+        runOnUiThread(() -> {
+            try {
+                showToastMessage(getString(R.string.action_reset), Toast.LENGTH_SHORT);
             } catch (Exception e) {
                 e.printStackTrace();
             }
