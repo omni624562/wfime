@@ -1351,7 +1351,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     keyboardtype = "normal_keyboard";
                     phonetickeyboardtype = "standard";
                 }
-                if (tablename.equals("dayi")) {
+                if (tablename.startsWith("dayi")) {
                     keytable = "dayi";
                     keyboardtype = "normal_keyboard";
                 }
@@ -1377,85 +1377,80 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 Log.i(TAG, "keyToKeyname(): load from db: imkeys:keyString=" + keyString + ", imkeynames="
                         + keynameString);
 
-            if (table.equals("phonetic") || table.equals("dayi") ||
+            if (table.startsWith("phonetic") || table.startsWith("dayi") ||
                     keyString.equals("") || keynameString.equals("")) {
-                switch (table) {
-
-                    case "phonetic":
-                        if (composingText) { // building composing text popup
-                            if (phonetickeyboardtype.equals("eten")) {
-                                keyString = ETEN_KEY;
-                                if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed)
-                                    keynameString = MILESTONE_ETEN_CHAR;
-                                else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed)
-                                    keynameString = MILESTONE2_ETEN_CHAR;
-                                else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed)
-                                    keynameString = MILESTONE3_ETEN_CHAR;
-                                else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed)
-                                    keynameString = DESIREZ_ETEN_CHAR;
-                                else
-                                    keynameString = ETEN_CHAR;
-                            } else if (phonetickeyboardtype.startsWith("eten26")) {
-                                keyString = ETEN26_KEY;
-                                keynameString = ETEN26_CHAR_INITIAL;
-                                finalKeynameString = ETEN26_CHAR_FINAL;
-                            } else if (phonetickeyboardtype.startsWith("hsu")) {
-                                keyString = HSU_KEY;
-                                keynameString = HSU_CHAR_INITIAL;
-                                finalKeynameString = HSU_CHAR_FINAL;
-                            } else if ((keyboardtype.equals("milestone") || keyboardtype.equals("milestone2"))
-                                    && isPhysicalKeyboardPressed) {
-                                keyString = MILESTONE_KEY;
-                                keynameString = MILESTONE_BPMF_CHAR;
-                            } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
-                                keyString = MILESTONE3_KEY;
-                                keynameString = MILESTONE3_BPMF_CHAR;
-                            } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
-                                keyString = DESIREZ_KEY;
-                                keynameString = DESIREZ_BPMF_CHAR;
-                            } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
-                                keyString = CHACHA_KEY;
-                                keynameString = CHACHA_BPMF_CHAR;
-                            } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) {
-                                keyString = XPERIAPRO_KEY;
-                                keynameString = BPMF_CHAR;
-                            } else {
-                                keyString = BPMF_KEY;
-                                keynameString = BPMF_CHAR;
-                            }
-
+                if (table.startsWith("phonetic")) {
+                    if (composingText) { // building composing text popup
+                        if (phonetickeyboardtype.equals("eten")) {
+                            keyString = ETEN_KEY;
+                            if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed)
+                                keynameString = MILESTONE_ETEN_CHAR;
+                            else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed)
+                                keynameString = MILESTONE2_ETEN_CHAR;
+                            else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed)
+                                keynameString = MILESTONE3_ETEN_CHAR;
+                            else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed)
+                                keynameString = DESIREZ_ETEN_CHAR;
+                            else
+                                keynameString = ETEN_CHAR;
+                        } else if (phonetickeyboardtype.startsWith("eten26")) {
+                            keyString = ETEN26_KEY;
+                            keynameString = ETEN26_CHAR_INITIAL;
+                            finalKeynameString = ETEN26_CHAR_FINAL;
+                        } else if (phonetickeyboardtype.startsWith("hsu")) {
+                            keyString = HSU_KEY;
+                            keynameString = HSU_CHAR_INITIAL;
+                            finalKeynameString = HSU_CHAR_FINAL;
+                        } else if ((keyboardtype.equals("milestone") || keyboardtype.equals("milestone2"))
+                                && isPhysicalKeyboardPressed) {
+                            keyString = MILESTONE_KEY;
+                            keynameString = MILESTONE_BPMF_CHAR;
+                        } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
+                            keyString = MILESTONE3_KEY;
+                            keynameString = MILESTONE3_BPMF_CHAR;
+                        } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
+                            keyString = DESIREZ_KEY;
+                            keynameString = DESIREZ_BPMF_CHAR;
+                        } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
+                            keyString = CHACHA_KEY;
+                            keynameString = CHACHA_BPMF_CHAR;
+                        } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) {
+                            keyString = XPERIAPRO_KEY;
+                            keynameString = BPMF_CHAR;
                         } else {
                             keyString = BPMF_KEY;
                             keynameString = BPMF_CHAR;
                         }
-                        break;
 
-                    case "dayi":
-                        if (isPhysicalKeyboardPressed && composingText) { // only do this on composing mapping popup
-                            switch (keyboardtype) {
-                                case "milestone":
-                                case "milestone2":
-                                    keyString = MILESTONE_KEY;
-                                    keynameString = MILESTONE_DAYI_CHAR;
-                                    break;
-                                case "milestone3":
-                                    keyString = MILESTONE3_KEY;
-                                    keynameString = MILESTONE3_DAYI_CHAR;
-                                    break;
-                                case "desireZ":
-                                    keyString = DESIREZ_KEY;
-                                    keynameString = DESIREZ_DAYI_CHAR;
-                                    break;
-                                default:
-                                    keyString = DAYI_KEY;
-                                    keynameString = DAYI_CHAR;
-                                    break;
-                            }
-                        } else {
-                            keyString = DAYI_KEY;
-                            keynameString = DAYI_CHAR;
+                    } else {
+                        keyString = BPMF_KEY;
+                        keynameString = BPMF_CHAR;
+                    }
+                } else if (table.startsWith("dayi")) {
+                    if (isPhysicalKeyboardPressed && composingText) { // only do this on composing mapping popup
+                        switch (keyboardtype) {
+                            case "milestone":
+                            case "milestone2":
+                                keyString = MILESTONE_KEY;
+                                keynameString = MILESTONE_DAYI_CHAR;
+                                break;
+                            case "milestone3":
+                                keyString = MILESTONE3_KEY;
+                                keynameString = MILESTONE3_DAYI_CHAR;
+                                break;
+                            case "desireZ":
+                                keyString = DESIREZ_KEY;
+                                keynameString = DESIREZ_DAYI_CHAR;
+                                break;
+                            default:
+                                keyString = DAYI_KEY;
+                                keynameString = DAYI_CHAR;
+                                break;
                         }
-                        break;
+                    } else {
+                        keyString = DAYI_KEY;
+                        keynameString = DAYI_CHAR;
+                    }
                 }
             }
             if (DEBUG)
@@ -1815,7 +1810,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     keyRemapString = XPERIAPRO_BPMF_KEY_REMAP;
 
                 } else if (!isPhysicalKeyboardPressed) {
-                    if (tablename.equals("dayi")
+                    if (tablename.startsWith("dayi")
                             || tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
                         keyString = SHIFTED_NUMBERIC_KEY + SHIFTED_SYMBOL_KEY;
                         keyRemapString = SHIFTED_NUMBERIC_KEY_REMAP + SHIFTED_SYMBOL_KEY_REMAP;
@@ -3622,7 +3617,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 kobj = getKeyboardObj("hsu");
                                 break;
                         }
-                    } else if (table.equals("dayi")) {
+                    } else if (table.startsWith("dayi")) {
                         kobj = getKeyboardObj("dayi");
                     } else if (kobj == null) { // Jeremy '12,5,21 chose english with number keyboard if the optione is
                                                // on for default keyboard.

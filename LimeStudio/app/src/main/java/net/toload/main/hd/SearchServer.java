@@ -154,8 +154,8 @@ public class SearchServer {
         }
 
         // Jeremy '15,6,21 set max code length
-        if (tablename.equals("dayi")) {
-            maxCodeLength = 3;
+        if (tablename.startsWith("dayi")) {
+            maxCodeLength = 4;
         } else {
             maxCodeLength = 4;
         }
@@ -726,7 +726,7 @@ public class SearchServer {
                         }
                     }
                     // For Dayi 3-code, we STOP after the first successful match level (exact match only)
-                    if (tablename.equals("dayi")) {
+                    if (tablename.startsWith("dayi")) {
                         break;
                     }
                 }
@@ -736,8 +736,8 @@ public class SearchServer {
 
             // Finally add the raw composing code at the beginning
             // Jeremy '24,1,7: Don't add raw code for Dayi to prevent things like "./" showing up
-            // BUT allow it if it's alphanumeric (like "00") so users see a reaction
-            if (!tablename.equals("dayi") || code.matches("[A-Za-z0-9]+")) {
+            // BUT allow it if it's alphanumeric or common Dayi radicals (like ",./") so users see a reaction
+            if (!tablename.startsWith("dayi") || code.matches("[A-Za-z0-9,./]+")) {
                 Mapping self = new Mapping();
                 self.setWord(code);
                 self.setCode(code);
@@ -748,7 +748,7 @@ public class SearchServer {
         if (DEBUG)
             Log.i(TAG, "getMappingByCode() result.size()=" + result.size());
 
-        if (tablename.equals("dayi") && mLIMEPref.getDayiSmartSelectionEnabled() && result.size() > 1) {
+        if (tablename.startsWith("dayi") && mLIMEPref.getDayiSmartSelectionEnabled() && result.size() > 1) {
             try {
                 final SmartSelectionManager manager = SmartSelectionManager.getInstance(mContext);
                 final boolean recentEnabled = mLIMEPref.getDayiSmartSelectionRecentEnabled();
@@ -1443,7 +1443,7 @@ public class SearchServer {
         if (updateMapping != null) {
             final Mapping updateMappingTemp = new Mapping(updateMapping);
 
-            if (tablename.equals("dayi") && mLIMEPref.getDayiSmartSelectionEnabled()) {
+            if (tablename.startsWith("dayi") && mLIMEPref.getDayiSmartSelectionEnabled()) {
                 final String prev = lastCommittedChar;
                 new Thread(new Runnable() {
                     @Override
@@ -1606,9 +1606,9 @@ public class SearchServer {
             } else
                 validSelkey = false;
             // Jeremy '11,6,19 Rewrite for IM has symbol mapping like ETEN
-            if (!validSelkey || tablename.equals("phonetic")) {
+            if (!validSelkey || tablename.startsWith("dayi") || tablename.equals("phonetic")) {
                 if (hasNumberMapping && hasSymbolMapping) {
-                    if (tablename.equals("dayi")
+                    if (tablename.startsWith("dayi")
                             || (tablename.equals("phonetic")
                                     && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
                         selkey = " []-'^&*(";

@@ -2542,9 +2542,23 @@ public class LIMEService extends InputMethodService implements
             // processing.
         } else if (primaryCode == KEYCODE_SWITCH_TO_IM_MODE && mInputView != null) { // eng -> chi
             switchKeyboard(primaryCode);
-        } else if (primaryCode == MY_KEYCODE_SPACE && "dayi".equals(activeIM) && mComposing.length() > 0) {
+        } else if (primaryCode == MY_KEYCODE_SPACE && activeIM != null && activeIM.startsWith("dayi") && mComposing.length() > 0) {
             if (hasCandidatesShown) {
-                pickCandidateManually(0);
+                // If there is an exact match for the current composing length, pick it
+                boolean hasExactMatch = false;
+                if (mCandidateList != null) {
+                    for (int i = 0; i < mCandidateList.size(); i++) {
+                        Mapping m = mCandidateList.get(i);
+                        if (m.getCode() != null && m.getCode().length() == mComposing.length()) {
+                            pickCandidateManually(i);
+                            hasExactMatch = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasExactMatch) {
+                    pickCandidateManually(0);
+                }
             } else {
                 if (mCandidateList != null && !mCandidateList.isEmpty()) {
                     if (mCandidateList.size() == 1) {
@@ -3058,7 +3072,7 @@ public class LIMEService extends InputMethodService implements
                             e.printStackTrace();
                         }
                         String mixedModeSelkey = "`";
-                        if (hasSymbolMapping && !activeIM.equals("dayi")
+                        if (hasSymbolMapping && !activeIM.startsWith("dayi")
                                 && !(activeIM.equals("phonetic")
                                         && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
                             mixedModeSelkey = " ";
@@ -4088,15 +4102,16 @@ public class LIMEService extends InputMethodService implements
                 hasNumberMapping = standardPhonetic;
                 hasSymbolMapping = standardPhonetic;
                 break;
-            case "dayi":
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                hasNumberMapping = true;
-                hasSymbolMapping = true;
-                break;
             default:
-                mKeyboardSwitcher.setKeyboardMode(activeIM,
-                        LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
+                if (activeIM != null && activeIM.startsWith("dayi")) {
+                    mKeyboardSwitcher.setKeyboardMode(activeIM,
+                            LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
+                    hasNumberMapping = true;
+                    hasSymbolMapping = true;
+                } else {
+                    mKeyboardSwitcher.setKeyboardMode(activeIM,
+                            LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
+                }
                 break;
         }
         // Jeremy '11,9,3 for phone numeric key direct input on chacha
@@ -4159,7 +4174,7 @@ public class LIMEService extends InputMethodService implements
                 }
 
                 String mixedModeSelkey = "`";
-                if (hasSymbolMapping && !activeIM.equals("dayi")
+                if (hasSymbolMapping && !activeIM.startsWith("dayi")
                         && !(activeIM.equals("phonetic")
                                 && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
                     mixedModeSelkey = " ";
