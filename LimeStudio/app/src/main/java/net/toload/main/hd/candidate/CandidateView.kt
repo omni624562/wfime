@@ -254,7 +254,12 @@ open class CandidateView @JvmOverloads constructor(
         typedWordValid: Boolean,
         haveMinimalSuggestion: Boolean
     ) {
-        this.suggestions = suggestions?.toList() ?: emptyList()
+        val filtered = if (!net.toload.main.hd.BuildConfig.IS_TABLET) {
+            suggestions?.filter { !it.isComposingCodeRecord() }
+        } else {
+            suggestions
+        }
+        this.suggestions = filtered?.toList() ?: emptyList()
         this.selectedIndex = -1
         this.currentPage = 0
     }
@@ -268,7 +273,12 @@ open class CandidateView @JvmOverloads constructor(
      }
 
     open fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
-        this.suggestions = suggestions?.toList() ?: emptyList()
+        val filtered = if (!net.toload.main.hd.BuildConfig.IS_TABLET) {
+            suggestions?.filter { !it.isComposingCodeRecord() }
+        } else {
+            suggestions
+        }
+        this.suggestions = filtered?.toList() ?: emptyList()
         this.selectedIndex = selectedIndex
         this.currentPage = 0
     }
