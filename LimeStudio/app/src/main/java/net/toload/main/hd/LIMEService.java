@@ -3456,28 +3456,6 @@ public class LIMEService extends InputMethodService implements
             return;
         }
 
-        // Dayi 3-code Logic: Full-code auto-trigger or delay show
-        if ("dayi".equals(activeIM)) {
-            // Count actual Chinese characters (ignore emojis and raw code for auto-trigger logic)
-            int charCount = 0;
-            Mapping uniqueMatch = null;
-            if (suggestions != null) {
-                for (Mapping m : suggestions) {
-                    if (!m.isEmojiRecord() && !m.isComposingCodeRecord()) {
-                        charCount++;
-                        uniqueMatch = m;
-                    }
-                }
-            }
-
-            if (charCount == 1 && mComposing.length() == 3) {
-                pickCandidateManually(suggestions.indexOf(uniqueMatch));
-                return;
-            }
-
-            // Removed delay show logic to ensure characters appear as user types
-        }
-
         if (suggestions != null && suggestions.size() > 0) {
 
             if (DEBUG)
