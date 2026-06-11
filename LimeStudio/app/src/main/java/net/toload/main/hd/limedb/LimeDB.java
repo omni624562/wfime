@@ -317,10 +317,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
     public LimeDB(Context context) {
 
-        super(context, LIME.DATABASE_NAME, null, DATABASE_VERSION);
-        this.mContext = context;
+        super(context.getApplicationContext(), LIME.DATABASE_NAME, null, DATABASE_VERSION);
+        this.mContext = context.getApplicationContext();
 
-        mLIMEPref = new LIMEPreferenceManager(mContext.getApplicationContext());
+        mLIMEPref = new LIMEPreferenceManager(mContext);
 
         blackListCache = new ConcurrentHashMap<>(LIME.LIMEDB_CACHE_SIZE);
 
