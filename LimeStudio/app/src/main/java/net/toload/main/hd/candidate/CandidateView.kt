@@ -502,7 +502,18 @@ open class CandidateView @JvmOverloads constructor(
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    // 頁碼指示(目前頁/總頁數)
+                                    val totalPages = (suggestions.size + pageSize - 1) / pageSize
+                                    if (totalPages > 1) {
+                                        Text(
+                                            text = "${currentPage + 1}/$totalPages",
+                                            color = Color(0xFF80DEEA),
+                                            fontSize = (candidateFontSize.value * 0.45f).sp,
+                                            modifier = Modifier.padding(vertical = 1.dp)
+                                        )
+                                    } else {
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                    }
                                     // ▼ Down Arrow Button (Next Page)
                                     Box(
                                         modifier = Modifier
