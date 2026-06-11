@@ -1245,6 +1245,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             // Mark this tracker "already processed" and remove it from the pointer queue
             tracker.setAlreadyProcessed();
             mPointerQueue.remove(tracker);
+            // The processed tracker will never deliver this key's release event,
+            // so un-press it here — otherwise the key stays stuck drawing with
+            // pressed colors (near-invisible label) after the popup closes.
+            popupKey.pressed = false;
+            invalidateKey(popupKey);
         }
         return result;
     }
