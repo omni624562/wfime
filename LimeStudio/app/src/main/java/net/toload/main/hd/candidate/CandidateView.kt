@@ -477,59 +477,35 @@ open class CandidateView @JvmOverloads constructor(
                                 .fillMaxHeight(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Fixed Vertical Up/Down Paging Buttons Panel (Placed at far left)
-                            if (isDayi && isPhysicalKeyboard && suggestions.isNotEmpty()) {
-                                Column(
+                            // 實體鍵盤模式:固定 4 字寬字根插槽(左置)。大易/注音
+                            // 碼上限為 4 碼,固定寬度讓候選起點不隨碼長左右跳動。
+                            // 只顯示轉換後字根(如 木牛舟);點擊仍可送出原始英文碼。
+                            if (isPhysicalKeyboard && _composingText.isNotEmpty()) {
+                                val slotWidth = with(LocalDensity.current) {
+                                    (candidateFontSize.toPx() * 4f).toDp()
+                                } + 28.dp
+                                Box(
                                     modifier = Modifier
+                                        .padding(start = 8.dp, top = 5.dp, bottom = 5.dp)
+                                        .width(slotWidth)
                                         .fillMaxHeight()
-                                        .padding(horizontal = 8.dp),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                        .background(Color(0xFF1E272C), RoundedCornerShape(6.dp))
+                                        .border(1.dp, Color(0xFF00796B), RoundedCornerShape(6.dp))
+                                        .clickable {
+                                            if (_rawKeycode.isNotEmpty()) {
+                                                mService?.commitTyped(_rawKeycode)
+                                            }
+                                        }
+                                        .padding(horizontal = 10.dp),
+                                    contentAlignment = Alignment.CenterStart
                                 ) {
-                                    // ▲ Up Arrow Button (Prev Page)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(22.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
-                                            .clickable(enabled = hasPrevPage) { pagePrev() },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "▲",
-                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
-                                            fontSize = (candidateFontSize.value * 0.6f).sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    // 頁碼指示(目前頁/總頁數)
-                                    val totalPages = (suggestions.size + pageSize - 1) / pageSize
-                                    if (totalPages > 1) {
-                                        Text(
-                                            text = "${currentPage + 1}/$totalPages",
-                                            color = Color(0xFF80DEEA),
-                                            fontSize = (candidateFontSize.value * 0.45f).sp,
-                                            modifier = Modifier.padding(vertical = 1.dp)
-                                        )
-                                    } else {
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                    }
-                                    // ▼ Down Arrow Button (Next Page)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(22.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
-                                            .clickable(enabled = hasNextPage) { pageNext() },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "▼",
-                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
-                                            fontSize = (candidateFontSize.value * 0.6f).sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
+                                    Text(
+                                        text = _composingText,
+                                        color = Color(0xFF4FC3F7),
+                                        fontSize = candidateFontSize,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1
+                                    )
                                 }
                             }
 
@@ -587,8 +563,65 @@ open class CandidateView @JvmOverloads constructor(
                                 }
                             }
 
-                            // Right side: Composing Text in candidate window (placed right-most, directly to the left of "大易")
-                            if (isTablet && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
+                            // Paging buttons + page indicator (placed at far right, per mockup)
+                            if (isDayi && isPhysicalKeyboard && suggestions.isNotEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 8.dp),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    // ▲ Up Arrow Button (Prev Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasPrevPage) { pagePrev() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▲",
+                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    // 頁碼指示(目前頁/總頁數)
+                                    val totalPages = (suggestions.size + pageSize - 1) / pageSize
+                                    if (totalPages > 1) {
+                                        Text(
+                                            text = "${currentPage + 1}/$totalPages",
+                                            color = Color(0xFF80DEEA),
+                                            fontSize = (candidateFontSize.value * 0.45f).sp,
+                                            modifier = Modifier.padding(vertical = 1.dp)
+                                        )
+                                    } else {
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                    }
+                                    // ▼ Down Arrow Button (Next Page)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .clickable(enabled = hasNextPage) { pageNext() },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "▼",
+                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            fontSize = (candidateFontSize.value * 0.6f).sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Right side: Composing Text in candidate window — soft-keyboard
+                            // tablet mode only; physical-keyboard mode uses the fixed left slot
+                            if (!isPhysicalKeyboard && isTablet && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()

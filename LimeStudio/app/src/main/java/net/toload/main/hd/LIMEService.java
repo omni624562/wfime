@@ -701,11 +701,30 @@ public class LIMEService extends InputMethodService implements
         });
     }
 
+    // Push the root-name string (e.g. 木牛舟) into both candidate views for
+    // the physical-keyboard fixed slot / tablet inline box. Posted to the
+    // main thread because callers may run on the query executor.
+    private void updateComposingRootsDisplay(String roots) {
+        mMainHandler.post(() -> {
+            if (mCandidateViewStandAlone != null)
+                mCandidateViewStandAlone.setComposingText(roots);
+            if (mCandidateViewInInputView != null)
+                mCandidateViewInInputView.setComposingText(roots);
+        });
+    }
+
     private void hideComposingPopup() {
+        // Clear roots + raw code from both candidate views so the
+        // physical-keyboard slot disappears after commit
+        if (mCandidateViewStandAlone != null) {
+            mCandidateViewStandAlone.setComposingText("");
+            mCandidateViewStandAlone.setRawKeycode("");
+        }
+        if (mCandidateViewInInputView != null) {
+            mCandidateViewInInputView.setComposingText("");
+            mCandidateViewInInputView.setRawKeycode("");
+        }
         if (net.toload.main.hd.BuildConfig.IS_TABLET) {
-            if (mCandidateView != null) {
-                mCandidateView.setComposingText("");
-            }
             return;
         }
         // Ensure popup operations run on main thread
@@ -3214,7 +3233,15 @@ public class LIMEService extends InputMethodService implements
                                 return; // terminate thread here, since it is interrupted and more recent
                                         // getMappingByCode will update the suggestions.
                             }
-                            showComposingPopup(keynameString);
+                            // DB keynames are the authoritative root display;
+                            // feed the candidate-bar slot on both views.
+                            updateComposingRootsDisplay(keynameString);
+                            // Floating popup only for soft-keyboard input — in
+                            // physical-keyboard mode the fixed slot shows roots.
+                            if (!finalHasPhysicalKeyPressed)
+                                showComposingPopup(keynameString);
+                        } else {
+                            updateComposingRootsDisplay("");
                         }
                     }
             });
@@ -3641,13 +3668,15 @@ public class LIMEService extends InputMethodService implements
         }
         String result = sb.toString();
 
-        // Update composing text display (now using floating popup)
-        showComposingPopup(result);
-
-        // Pass raw keycode to CandidateView for display as first item
-        if (mCandidateView != null) {
-            mCandidateView.setRawKeycode(rawString);
-        }
+        // Feed raw code into BOTH candidate views: mCandidateView may still
+        // point at the other instance on the very first keystroke (it is
+        // switched later in setSuggestions). The root display itself is fed
+        // from updateCandidates() with the authoritative DB keynames —
+        // RootMapper here can disagree with the DB (e.g. dayi 'i': 金 vs 木).
+        if (mCandidateViewStandAlone != null)
+            mCandidateViewStandAlone.setRawKeycode(rawString);
+        if (mCandidateViewInInputView != null)
+            mCandidateViewInInputView.setRawKeycode(rawString);
 
         // Clear composing text from input field only when a composition starts.
         // Nothing in this IME ever sets a non-empty composing region in the
