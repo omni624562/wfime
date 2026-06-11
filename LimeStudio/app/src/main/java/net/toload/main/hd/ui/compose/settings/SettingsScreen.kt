@@ -672,6 +672,37 @@ fun KeyboardSettingsSection(
                 dialogTitle = stringResource(R.string.show_arrow_keys)
             )
         }
+
+        // 快捷鍵速查:把散落在程式裡的隱藏快捷鍵公開給使用者
+        PreferenceCardGroup(title = "快捷鍵速查 | Shortcuts", icon = Icons.Default.Info) {
+            val shortcuts = listOf(
+                "🌐 地球鍵" to "循環切換 英文 → 大易 → 注音;長按開啟系統輸入法選單",
+                "雙擊 Shift" to "鎖定大寫(再按一次解除)",
+                "大易快速選字(實體鍵盤)" to "Space 選第 1 個候選;' [ ] - \\ 選第 2~6 個;Ctrl+1~9 選第 1~9 個",
+                "大易全形標點(實體鍵盤)" to "Shift+, . / 1 ; 輸出 ，。?!:;「=」前綴+標點輸出 、;:",
+                "中英切換(實體鍵盤)" to "Shift+Space 或 Ctrl+Space",
+                "候選列(實體鍵盤)" to "方向鍵移動;PgUp/PgDn 或 ↑↓ 翻頁;Enter 選取"
+            )
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                shortcuts.forEachIndexed { i, (key, desc) ->
+                    if (i > 0)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                        Text(
+                            text = key,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = desc,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
