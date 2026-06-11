@@ -3567,75 +3567,65 @@ public class LIMEService extends InputMethodService implements
 
     }
 
+    // Keyboard-key code -> root label lookup, rebuilt only when the keyboard
+    // instance changes. Replaces two linear scans over all keys per keystroke.
+    private LIMEBaseKeyboard mKeyLabelMapKeyboard = null;
+    private final java.util.HashMap<Integer, String> mKeyLabelMap = new java.util.HashMap<>();
+
+    private java.util.HashMap<Integer, String> getKeyLabelMap() {
+        LIMEBaseKeyboard kb = (mInputView != null) ? mInputView.getKeyboard() : null;
+        if (kb == null)
+            return null;
+        if (kb != mKeyLabelMapKeyboard) {
+            mKeyLabelMap.clear();
+            java.util.HashSet<Integer> seen = new java.util.HashSet<>();
+            for (LIMEBaseKeyboard.Key k : kb.getKeys()) {
+                if (k.codes == null || k.codes.length == 0)
+                    continue;
+                // Only the first key per code counts (matches old scan's break)
+                if (!seen.add(k.codes[0]))
+                    continue;
+                // Use label ONLY if it is not ASCII (assumed to be a Root)
+                if (k.label != null && k.label.length() > 0 && k.label.charAt(0) > 127)
+                    mKeyLabelMap.put(k.codes[0], k.label.toString());
+            }
+            mKeyLabelMapKeyboard = kb;
+        }
+        return mKeyLabelMap;
+    }
+
     /**
      * Helper to map raw keys to keyboard labels (roots) for display
      */
     String getComposingDisplayString(String rawString) {
         StringBuilder sb = new StringBuilder();
 
-        List<LIMEBaseKeyboard.Key> keys = null;
-        if (mInputView != null && mInputView.getKeyboard() != null) {
-            keys = mInputView.getKeyboard().getKeys();
-        }
-
-        // DEBUG LOG
-        // Log.e(TAG, "DEBUG: getComposingDisplayString input='" + rawString + "'
-        // activeIM='" + activeIM + "'");
+        java.util.HashMap<Integer, String> labelMap = getKeyLabelMap();
 
         for (int i = 0; i < rawString.length(); i++) {
             char c = rawString.charAt(i);
-            boolean puncMatched = false;
 
             // Try visual mapping first (if available and valid)
-            if (keys != null) {
-                boolean found = false;
-                // First pass: exact match
-                for (LIMEBaseKeyboard.Key k : keys) {
-                    if (k.codes != null && k.codes.length > 0 && k.codes[0] == c) {
-                        // Use label ONLY if it is not ASCII (assumed to be a Root)
-                        // OR if we are in English mode (but here we usually want roots)
-                        if (k.label != null && k.label.length() > 0 && k.label.charAt(0) > 127) {
-                            sb.append(k.label);
-                            found = true;
-                        }
-                        break;
-                    }
-                }
-                // Second pass: case-insensitive
-                if (!found) {
+            if (labelMap != null) {
+                String label = labelMap.get((int) c);
+                if (label == null) {
                     int lower = Character.toLowerCase(c);
                     int upper = Character.toUpperCase(c);
-                    if (lower != c || upper != c) {
-                        for (LIMEBaseKeyboard.Key k : keys) {
-                            if (k.codes != null && k.codes.length > 0) {
-                                int code = k.codes[0];
-                                if (code == lower || code == upper) {
-                                    if (k.label != null && k.label.length() > 0 && k.label.charAt(0) > 127) {
-                                        sb.append(k.label);
-                                        found = true;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    if (lower != c)
+                        label = labelMap.get(lower);
+                    if (label == null && upper != c)
+                        label = labelMap.get(upper);
                 }
-                if (found)
+                if (label != null) {
+                    sb.append(label);
                     continue;
+                }
             }
 
             // Fallback to RootMapper
-            char mapped = RootMapper.getRoot(activeIM, c);
-            if (mapped == c && c != ' ') {
-                // Log.e(TAG, "DEBUG: RootMapper returned same char for '" + c + "' (activeIM="
-                // + activeIM + ")");
-            } else {
-                // Log.e(TAG, "DEBUG: RootMapper mapped '" + c + "' -> '" + mapped + "'");
-            }
-            sb.append(mapped);
+            sb.append(RootMapper.getRoot(activeIM, c));
         }
         String result = sb.toString();
-        // Log.e(TAG, "DEBUG: Display String Result: " + result);
 
         // Update composing text display (now using floating popup)
         showComposingPopup(result);
@@ -3645,14 +3635,16 @@ public class LIMEService extends InputMethodService implements
             mCandidateView.setRawKeycode(rawString);
         }
 
-        // Clear composing text from input field (we display it in CandidateView
-        // instead)
-        // Use BatchEdit to ensure atomic update.
-        InputConnection ic = getCurrentInputConnection();
-        if (ic != null) {
-            ic.beginBatchEdit();
-            ic.setComposingText("", 0);
-            ic.endBatchEdit();
+        // Clear composing text from input field only when a composition starts.
+        // Nothing in this IME ever sets a non-empty composing region in the
+        // editor, so repeating this blocking IPC on every keystroke is wasted.
+        if (rawString.length() == 1) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.beginBatchEdit();
+                ic.setComposingText("", 0);
+                ic.endBatchEdit();
+            }
         }
 
         return result;
