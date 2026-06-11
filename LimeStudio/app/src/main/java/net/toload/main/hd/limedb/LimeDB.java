@@ -91,7 +91,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public static final String DB_MEMO_COLUMN_CREATED_AT = "created_at";
     private static final boolean DEBUG = false;
     private static final String TAG = "LIMEDB";
-    private final static int DATABASE_VERSION = 102;
+    private final static int DATABASE_VERSION = 103;
     // Jeremy '11,8,5
     // TODO: should set INITIAL_RESULT_LIMIT according to screen size.
     private final static String INITIAL_RESULT_LIMIT = "15";
@@ -434,6 +434,18 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             for (String tbl : imTables) {
                 try {
                     execSQL(dbin, "CREATE INDEX IF NOT EXISTS idx_" + tbl + "_code ON " + tbl + " (code)");
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        if (oldVersion < 103) {
+            // Add word column index so addScore() UPDATE ... WHERE word = ? doesn't
+            // full-scan the IM table while holding the LimeDB monitor
+            String[] imTables = {"phonetic", "custom", "dayi"};
+            for (String tbl : imTables) {
+                try {
+                    execSQL(dbin, "CREATE INDEX IF NOT EXISTS idx_" + tbl + "_word ON " + tbl + " (word)");
                 } catch (Exception ignored) {
                 }
             }
