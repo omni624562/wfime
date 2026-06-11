@@ -250,4 +250,7 @@
     <string name="preference_smart_chinese_input_message">部份輸入法可能會影響中英混打功能</string>
     <string name="label_symbol_mode">\?123</string>
 
+    <!-- Clipboard paste (剪貼簿貼上) -->
+    <string name="clipboard_empty">剪貼簿沒有內容 | Clipboard is empty</string>
+
 </resources>

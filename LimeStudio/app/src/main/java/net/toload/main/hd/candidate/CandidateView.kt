@@ -44,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.derivedStateOf
@@ -358,7 +359,32 @@ open class CandidateView @JvmOverloads constructor(
                 )
             }
 
-            // 3. 設定主控台
+            // 3. 貼上剪貼簿內容
+            IconButton(
+                onClick = {
+                    try {
+                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val text = cm.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
+                        if (!text.isNullOrEmpty()) {
+                            mService?.commitTyped(text)
+                        } else {
+                            Toast.makeText(context, R.string.clipboard_empty, Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("TOOLBAR_DEBUG", "Paste failed: ${e.message}")
+                    }
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ContentPaste,
+                    contentDescription = "Paste",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // 4. 設定主控台
             IconButton(
                 onClick = {
                     try {
