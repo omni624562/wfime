@@ -2410,13 +2410,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 if (cursor == null || !cursor.moveToFirst()) { // code* returns no valid records add the
                                                                                // code with wildcard to blacklist
                                     blackListCache.put(cacheKey(dualcode + "%"), true);
-                                    // if (DEBUG)
-                                    Log.i(TAG,
-                                            " expandDualCode() blackList wildcard code added, code = " + dualcode + "%"
-                                                    + ", cachekey = :" + cacheKey(dualcode + "%")
-                                                    + ", black list size = " + blackListCache.size()
-                                                    + ", blackListCache.get() = "
-                                                    + blackListCache.get(cacheKey(dualcode + "%")));
+                                    if (DEBUG)
+                                        Log.i(TAG,
+                                                " expandDualCode() blackList wildcard code added, code = " + dualcode + "%"
+                                                        + ", cachekey = :" + cacheKey(dualcode + "%")
+                                                        + ", black list size = " + blackListCache.size()
+                                                        + ", blackListCache.get() = "
+                                                        + blackListCache.get(cacheKey(dualcode + "%")));
 
                                 } else { // only add the code to black list
                                     blackListCache.put(cacheKey(dualcode), true);

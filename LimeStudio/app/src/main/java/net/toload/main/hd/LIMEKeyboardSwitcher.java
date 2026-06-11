@@ -360,11 +360,12 @@ public class LIMEKeyboardSwitcher {
             }
         }
 
-        android.util.Log.d("LIME_KBD", "setKeyboardMode: code=" + code
-                + " imcode=" + imcode
-                + " kbHm=" + (kbHm == null ? "null" : "size=" + kbHm.size() + " keys=" + kbHm.keySet())
-                + " imHm=" + (imHm == null ? "null" : "size=" + imHm.size() + " val=" + (imHm.get(code)))
-                + " kobj=" + (kobj == null ? "null" : kobj.getCode()));
+        if (DEBUG)
+            android.util.Log.d("LIME_KBD", "setKeyboardMode: code=" + code
+                    + " imcode=" + imcode
+                    + " kbHm=" + (kbHm == null ? "null" : "size=" + kbHm.size() + " keys=" + kbHm.keySet())
+                    + " imHm=" + (imHm == null ? "null" : "size=" + imHm.size() + " val=" + (imHm.get(code)))
+                    + " kobj=" + (kobj == null ? "null" : kobj.getCode()));
 
         KeyboardId kid = null;
 

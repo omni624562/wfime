@@ -102,7 +102,7 @@ public class LIMEService extends InputMethodService implements
     static final int MY_KEYCODE_SPACE = 32;
     static final int MY_KEYCODE_SWITCH_CHARSET = 95;
     static final int MY_KEYCODE_WINDOWS_START = 117; // Jeremy '12,4,29 windows start key
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = BuildConfig.DEBUG;
     static final String TAG = "LIMEService";
     private static final String CHANNEL_ID = "lime_ime_service";
     private static final int FOREGROUND_NOTIFICATION_ID = 1001;

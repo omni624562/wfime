@@ -14,7 +14,7 @@ import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
 public class HardKeyHelper {
 
     private static final String TAG = "HardKeyHelper";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
 
     public static boolean translateKeyDown(LIMEService service, int keyCode, KeyEvent event) {
         // move to HandleCharacter '10, 3,26
