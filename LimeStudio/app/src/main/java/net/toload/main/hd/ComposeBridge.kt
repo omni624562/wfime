@@ -8,6 +8,7 @@ import androidx.compose.runtime.Recomposer
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -27,6 +28,15 @@ import net.toload.main.hd.ui.compose.settings.SettingsScreen
 import net.toload.main.hd.ui.compose.settings.SettingsViewModel
 import net.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
 import net.toload.main.hd.ui.compose.theme.LimeTheme
+
+/**
+ * Wrapper view returned by ComposeBridge factories. Exposes dispose() so the
+ * owning service can tear down the Recomposer/coroutine scope it created —
+ * without this the recompose loop runs (and roots the view tree) forever.
+ */
+abstract class ComposeWrapperView(context: Context) : android.widget.FrameLayout(context) {
+    abstract fun dispose()
+}
 
 /**
  * Bridge object for creating Compose-based views that can be integrated into Java code.
@@ -104,8 +114,15 @@ object ComposeBridge {
 
             // Thin wrapper that drives lifecycle across attach/detach cycles.
             // Lifecycle is PAUSED (not DESTROYED) on detach so the Recomposer stays alive for reuse.
-            object : android.widget.FrameLayout(context) {
+            object : ComposeWrapperView(context) {
                 private var mBottomInset = 0
+
+                override fun dispose() {
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                    composeLifecycleOwner.viewModelStore.clear()
+                    recomposer.cancel()
+                    coroutineScope.cancel()
+                }
 
                 override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
                     val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
@@ -223,8 +240,15 @@ object ComposeBridge {
                 }
             }
 
-            object : android.widget.FrameLayout(context) {
+            object : ComposeWrapperView(context) {
                 private var mBottomInset = 0
+
+                override fun dispose() {
+                    composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                    composeLifecycleOwner.viewModelStore.clear()
+                    recomposer.cancel()
+                    coroutineScope.cancel()
+                }
 
                 override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
                     val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {

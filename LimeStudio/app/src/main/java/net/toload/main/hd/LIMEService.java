@@ -1015,6 +1015,13 @@ public class LIMEService extends InputMethodService implements
         if (DEBUG)
             Log.i(TAG, "onCreateCandidatesView()");
 
+        // Tear down the previous Compose candidate view before re-inflating,
+        // otherwise its Recomposer keeps running and roots the old view tree
+        if (mCandidateViewStandAlone != null) {
+            mCandidateViewStandAlone.destroy();
+            mCandidateViewStandAlone = null;
+        }
+
         @SuppressLint("InflateParams")
         CandidateViewContainer candidateViewContainer = (CandidateViewContainer) getLayoutInflater()
                 .inflate(R.layout.candidates, null);
@@ -4010,6 +4017,13 @@ public class LIMEService extends InputMethodService implements
             // Create inputView if it's null
             if (mCandidateInInputView == null || mForceRecreate) {
 
+                // Tear down the old Compose candidate view before re-inflating,
+                // otherwise its Recomposer keeps running and roots the old view tree
+                if (mCandidateViewInInputView != null) {
+                    mCandidateViewInInputView.destroy();
+                    mCandidateViewInInputView = null;
+                }
+
                 mCandidateInInputView = (CandidateInInputViewContainer) LayoutInflater.from(mThemeContext).inflate(
                         R.layout.inputcandidate, null);
                 mInputView = mCandidateInInputView.findViewById(R.id.keyboard);
@@ -4670,6 +4684,47 @@ public class LIMEService extends InputMethodService implements
             }
             // Clear any pending callbacks or handlers
             clearComposing(true);
+        } catch (Exception e) {
+            // Ignore cleanup exceptions
+        }
+
+        // Tear down Compose recomposers and lifecycles created for the IME views
+        try {
+            if (mCandidateViewInInputView != null) {
+                mCandidateViewInInputView.destroy();
+                mCandidateViewInInputView = null;
+            }
+            if (mCandidateViewStandAlone != null) {
+                mCandidateViewStandAlone.destroy();
+                mCandidateViewStandAlone = null;
+            }
+            if (mEmojiKeyboardView instanceof ComposeWrapperView) {
+                ((ComposeWrapperView) mEmojiKeyboardView).dispose();
+            }
+            mEmojiKeyboardView = null;
+            if (mMemoKeyboardView instanceof ComposeWrapperView) {
+                ((ComposeWrapperView) mMemoKeyboardView).dispose();
+            }
+            mMemoKeyboardView = null;
+            if (mComposeLifecycleOwner != null) {
+                mComposeLifecycleOwner.handleLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_DESTROY);
+                mComposeLifecycleOwner.getViewModelStore().clear();
+                mComposeLifecycleOwner = null;
+            }
+        } catch (Exception e) {
+            // Ignore cleanup exceptions
+        }
+
+        // Dismiss any window still attached to this dying service
+        try {
+            if (mOptionsDialog != null && mOptionsDialog.isShowing()) {
+                mOptionsDialog.dismiss();
+            }
+            mOptionsDialog = null;
+            if (mComposingPopup != null) {
+                mComposingPopup.hide();
+                mComposingPopup = null;
+            }
         } catch (Exception e) {
             // Ignore cleanup exceptions
         }
