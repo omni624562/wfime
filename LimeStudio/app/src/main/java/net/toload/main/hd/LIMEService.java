@@ -168,6 +168,11 @@ public class LIMEService extends InputMethodService implements
     boolean mCompletionOn;
     private boolean mCapsLock;
     private boolean mAutoCap;
+    // Cached text before cursor, refreshed by onUpdateSelection's single IPC.
+    // Lets updateShiftKeyState() compute caps mode locally instead of calling
+    // the blocking ic.getCursorCapsMode() round-trip on every keystroke.
+    private CharSequence mTextBeforeCursorCache = null;
+    private boolean mTextBeforeCursorCacheValid = false;
 
     // private String mWordSeparators;
     // private String misMatched; //Removed by Jeremy '13,1,10
@@ -1227,6 +1232,9 @@ public class LIMEService extends InputMethodService implements
         if (DEBUG)
             Log.i(TAG, "onStartInput()");
         super.onStartInput(attribute, restarting);
+        // New field — drop the cached text-before-cursor from the previous one
+        mTextBeforeCursorCache = null;
+        mTextBeforeCursorCacheValid = false;
         initOnStartInput(attribute);
     }
 
@@ -1415,13 +1423,21 @@ public class LIMEService extends InputMethodService implements
         // getTextBeforeCursor is a blocking cross-process round-trip; skip it on
         // the selection updates fired during composition — the previous char only
         // matters for context sorting once text is actually committed.
+        // The same single fetch also feeds the caps-mode cache so
+        // updateShiftKeyState() never needs its own IPC.
         if (ic != null && mComposing.length() == 0) {
-            CharSequence before = ic.getTextBeforeCursor(1, 0);
+            CharSequence before = ic.getTextBeforeCursor(64, 0);
+            mTextBeforeCursorCache = before;
+            mTextBeforeCursorCacheValid = true;
             if (before != null && before.length() > 0) {
-                SearchServer.setLastCommittedChar(before.toString());
+                SearchServer.setLastCommittedChar(
+                        before.subSequence(before.length() - 1, before.length()).toString());
             } else {
                 SearchServer.setLastCommittedChar(null);
             }
+            // Re-evaluate auto-cap from the fresh cache (no extra IPC); setShifted
+            // is a no-op unless the state actually changed.
+            updateShiftKeyState(getCurrentInputEditorInfo());
         }
 
         if (mComposing.length() > 0
@@ -2387,7 +2403,17 @@ public class LIMEService extends InputMethodService implements
             int caps = 0;
             EditorInfo ei = getCurrentInputEditorInfo();
             if (mAutoCap && ei != null && ei.inputType != EditorInfo.TYPE_NULL) {
-                caps = ic.getCursorCapsMode(attr.inputType);
+                if (mTextBeforeCursorCacheValid) {
+                    // Local computation from the cached text — no blocking IPC on
+                    // the per-keystroke path (the cache is refreshed by
+                    // onUpdateSelection after every text change).
+                    CharSequence t = (mTextBeforeCursorCache != null) ? mTextBeforeCursorCache : "";
+                    caps = android.text.TextUtils.getCapsMode(t, t.length(), attr.inputType);
+                } else {
+                    // No selection update seen yet for this field — fall back to
+                    // the editor query once.
+                    caps = ic.getCursorCapsMode(attr.inputType);
+                }
             }
             mInputView.setShifted(mCapsLock || caps != 0);
         } else {
@@ -3679,8 +3705,16 @@ public class LIMEService extends InputMethodService implements
                     }
 
                     if (ic != null) {
-                    // Get a larger chunk of text to properly handle multi-codepoint emojis
-                    CharSequence before = ic.getTextBeforeCursor(32, 0);
+                    // Use the text cached by onUpdateSelection when available —
+                    // getTextBeforeCursor is a blocking cross-process round-trip
+                    // that janks every backspace when the host app is busy
+                    CharSequence before;
+                    if (mTextBeforeCursorCacheValid && mTextBeforeCursorCache != null) {
+                        before = mTextBeforeCursorCache;
+                    } else {
+                        // Get a larger chunk of text to properly handle multi-codepoint emojis
+                        before = ic.getTextBeforeCursor(32, 0);
+                    }
 
                     if (before != null && before.length() > 0) {
                         // Use BreakIterator to find the previous grapheme cluster boundary
@@ -3705,6 +3739,11 @@ public class LIMEService extends InputMethodService implements
                         } else {
                             // Fallback to simple delete
                             ic.deleteSurroundingText(1, 0);
+                        }
+                        // Trim the local cache so consecutive backspaces keep
+                        // computing correct grapheme boundaries without IPC
+                        if (mTextBeforeCursorCacheValid && mTextBeforeCursorCache != null) {
+                            mTextBeforeCursorCache = before.subSequence(0, Math.max(0, start));
                         }
                     } else {
                         keyDownUp(KeyEvent.KEYCODE_DEL, false);

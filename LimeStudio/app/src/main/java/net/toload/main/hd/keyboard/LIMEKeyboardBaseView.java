@@ -457,18 +457,18 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     public void setHardwareAcceleratedDrawingEnabled(final boolean enabled) {
-        // Always use software rendering for keyboard views to prevent OpenGL issues
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
-        mtHardwareAcceleratedDrawingEnabled = false;
+        // All key drawing happens in software into mBuffer (see onBufferDraw);
+        // onDraw only blits that bitmap, which the hardware canvas fully supports.
+        // A forced LAYER_TYPE_SOFTWARE added a third buffer that was re-rasterized
+        // and re-uploaded to the GPU on every key press — a major typing jank source.
+        setLayerType(LAYER_TYPE_NONE, null);
+        mtHardwareAcceleratedDrawingEnabled = enabled;
     }
 
     public LIMEKeyboardBaseView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         mContext = context;
-
-        // Always use software rendering for keyboard to avoid OpenGL issues
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.LIMEKeyboardBaseView, defStyle, R.style.LIMEBaseKeyboard);
