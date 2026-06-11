@@ -92,6 +92,9 @@ public class SearchServer {
      * Jeremy '12,6,5
      */
     private static Map<String, List<String>> coderemapcache = null;
+    // Jeremy '15,6,8 TODO resolved: related phrases are now cached across keystrokes
+    private static Map<String, List<Mapping>> relatedcache = null; // word -> related phrase list
+    private static Map<String, Mapping> relatedPhraseCache = null; // pword\0cword -> Mapping (null = no record)
     private static Thread prefetchThread;
     private static boolean abandonPhraseSuggestion = false;
 
@@ -195,10 +198,20 @@ public class SearchServer {
 
     }
 
-    // TODO: Should cache related phrase 15,6,8 Jeremy
     public List<Mapping> getRelatedPhrase(String word, boolean getAllRecords) {
+        Map<String, List<Mapping>> localCache = relatedcache;
+        if (localCache == null)
+            return dbadapter.getRelatedPhrase(word, getAllRecords);
 
-        return dbadapter.getRelatedPhrase(word, getAllRecords);
+        String key = word + "\0" + getAllRecords;
+        List<Mapping> cached = localCache.get(key);
+        if (cached != null)
+            return cached;
+
+        List<Mapping> result = dbadapter.getRelatedPhrase(word, getAllRecords);
+        if (result != null)
+            localCache.put(key, result);
+        return result;
     }
 
     /*
@@ -254,8 +267,6 @@ public class SearchServer {
     }
 
     private void makeRunTimeSuggestion(String code, List<Mapping> completeCodeResultList) {
-        java.util.HashMap<String, Mapping> relatedPhraseCache = new java.util.HashMap<>();
-
         long startTime = 0;
         if (DEBUG || dumpRunTimeSuggestion) {
             Log.i(TAG, "makeRunTimeSuggestion() code = " + code);
@@ -474,11 +485,13 @@ public class SearchServer {
                                 String pword = phrase.substring(phraseLen - k - 1, phraseLen - k);
                                 String cword = phrase.substring(phraseLen - k, phraseLen);
                                 String relatedKey = pword + "\0" + cword;
-                                if (relatedPhraseCache.containsKey(relatedKey)) {
-                                    relatedMapping = relatedPhraseCache.get(relatedKey);
+                                Map<String, Mapping> rpc = relatedPhraseCache;
+                                if (rpc != null && rpc.containsKey(relatedKey)) {
+                                    relatedMapping = rpc.get(relatedKey);
                                 } else {
                                     relatedMapping = dbadapter.isRelatedPhraseExist(pword, cword);
-                                    relatedPhraseCache.put(relatedKey, relatedMapping);
+                                    if (rpc != null)
+                                        rpc.put(relatedKey, relatedMapping);
                                 }
                                 if (relatedMapping != null)
                                     break;
@@ -696,6 +709,7 @@ public class SearchServer {
             // Descending loop to collect suggestions for current code and its prefixes
             // For Dayi 3-code, we only collect matches for the full code to enable auto-commit
             String currentLoopCode = code;
+            java.util.HashSet<String> seenWords = new java.util.HashSet<>();
             while (currentLoopCode != null && currentLoopCode.length() > 0) {
                 String loopCacheKey = cacheKey(currentLoopCode);
                 List<Mapping> loopCacheTemp = cache.get(loopCacheKey);
@@ -714,14 +728,7 @@ public class SearchServer {
                 if (loopCacheTemp != null && !loopCacheTemp.isEmpty()) {
                     // Only add if it's not already in the result list (avoid duplicates)
                     for (Mapping m : loopCacheTemp) {
-                        boolean duplicate = false;
-                        for (Mapping existing : result) {
-                            if (m.getWord().equals(existing.getWord())) {
-                                duplicate = true;
-                                break;
-                            }
-                        }
-                        if (!duplicate) {
+                        if (seenWords.add(m.getWord())) {
                             result.add(m);
                         }
                     }
@@ -789,9 +796,9 @@ public class SearchServer {
             }
         } else if (lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
             try {
-                List<Mapping> related = dbadapter.getRelatedPhrase(lastCommittedChar, false);
+                List<Mapping> related = getRelatedPhrase(lastCommittedChar, false);
                 if (related != null && !related.isEmpty()) {
-                    final java.util.List<String> relatedChars = new java.util.ArrayList<>();
+                    final java.util.HashSet<String> relatedChars = new java.util.HashSet<>();
                     for (Mapping m : related) {
                         if (m.getWord() != null && m.getWord().length() > 1) {
                             relatedChars.add(m.getWord().substring(1, 2));
@@ -991,6 +998,8 @@ public class SearchServer {
         emojicache = newLruMap(MAX_CACHE_ENTRIES);
         keynamecache = newLruMap(MAX_CACHE_ENTRIES);
         coderemapcache = newLruMap(MAX_CACHE_ENTRIES);
+        relatedcache = newLruMap(MAX_CACHE_ENTRIES);
+        relatedPhraseCache = newLruMap(MAX_CACHE_ENTRIES);
 
         // initial exact match stack here
         suggestionLoL = new LinkedList<>();
@@ -1002,6 +1011,12 @@ public class SearchServer {
             Log.i(TAG, "updateScoreCache(): code=" + cachedMapping.getCode());
 
         dbadapter.addScore(cachedMapping);
+        // Selection may change related-table scores; drop cached related phrases
+        // so the next lookup reflects the new ordering.
+        if (relatedcache != null)
+            relatedcache.clear();
+        if (relatedPhraseCache != null)
+            relatedPhraseCache.clear();
         // Jeremy '11,7,29 update cached here
         if (!cachedMapping.isRelatedPhraseRecord()) {
             String code = cachedMapping.getCode().toLowerCase(Locale.US);
@@ -1122,6 +1137,11 @@ public class SearchServer {
             if (DEBUG)
                 Log.i(TAG, "learnRelatedPhrase(), localScorelist.size=" + localScorelist.size());
             if (mLIMEPref.getLearnRelatedWord() && localScorelist.size() > 1) {
+                // Learning below changes the related table; drop cached related phrases.
+                if (relatedcache != null)
+                    relatedcache.clear();
+                if (relatedPhraseCache != null)
+                    relatedPhraseCache.clear();
                 for (int i = 0; i < localScorelist.size(); i++) {
                     Mapping unit = localScorelist.get(i);
                     if (unit == null) {
@@ -1385,6 +1405,19 @@ public class SearchServer {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+        }
+
+        // Between-search results cached under longer codes can include this code's
+        // records with the old score; drop those keys too (cache is capped at 512).
+        String prefix = cacheKey(code);
+        synchronized (cache) {
+            java.util.Iterator<String> it = cache.keySet().iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                if (key.length() > prefix.length() && key.startsWith(prefix)) {
+                    it.remove();
+                }
+            }
         }
     }
 
