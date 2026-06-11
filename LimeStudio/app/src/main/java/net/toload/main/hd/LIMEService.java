@@ -4652,6 +4652,13 @@ public class LIMEService extends InputMethodService implements
         }
         queryExecutor.shutdownNow();
 
+        // Persist pending smart selection learning data before the service dies
+        try {
+            net.toload.main.hd.global.SmartSelectionManager.flushIfLoaded();
+        } catch (Exception e) {
+            // Ignore cleanup exceptions
+        }
+
         // Clean up resources to prevent callback warnings
         try {
             if (mInputView != null) {

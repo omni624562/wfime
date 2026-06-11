@@ -756,44 +756,23 @@ public class SearchServer {
                 final String prevChar = lastCommittedChar;
                 final long now = System.currentTimeMillis();
 
-                // Store original indices for stable sorting when scores are equal
+                // Store original indices for stable sorting when scores are equal,
+                // and precompute each candidate's score once (O(n)) instead of
+                // re-querying SmartSelectionManager inside the comparator.
                 final java.util.Map<Mapping, Integer> originalIndices = new java.util.HashMap<>();
+                final java.util.Map<Mapping, Double> precomputedScores = new java.util.HashMap<>();
                 for (int i = 0; i < result.size(); i++) {
-                    originalIndices.put(result.get(i), i);
+                    Mapping m = result.get(i);
+                    originalIndices.put(m, i);
+                    precomputedScores.put(m,
+                            manager.getScore(m.getCode(), m.getWord(), prevChar, recentEnabled, contextEnabled, now));
                 }
 
                 java.util.Collections.sort(result, new java.util.Comparator<Mapping>() {
-                    private double calculateScore(Mapping m) {
-                        String word = m.getWord();
-                        String code = m.getCode();
-                        if (word == null || code == null) return 0.0;
-
-                        SmartSelectionManager.CandidateStats stats = manager.getStats(code, word);
-                        if (stats == null) return 0.0;
-
-                        double score = stats.count;
-
-                        if (contextEnabled && prevChar != null && !prevChar.isEmpty()) {
-                            Integer prevCount = stats.prev.get(prevChar);
-                            if (prevCount != null) {
-                                score += prevCount * 2.0;
-                            }
-                        }
-
-                        if (recentEnabled) {
-                            double ageDays = (double) (now - stats.last) / (1000.0 * 60.0 * 60.0 * 24.0);
-                            if (ageDays < 0) ageDays = 0;
-                            double recentBonus = 3.0 / (1.0 + ageDays / 7.0);
-                            score += recentBonus;
-                        }
-
-                        return score;
-                    }
-
                     @Override
                     public int compare(Mapping m1, Mapping m2) {
-                        double score1 = calculateScore(m1);
-                        double score2 = calculateScore(m2);
+                        double score1 = precomputedScores.get(m1);
+                        double score2 = precomputedScores.get(m2);
                         if (Math.abs(score1 - score2) < 0.0001) {
                             // Stable sort: preserve original order
                             return Integer.compare(originalIndices.get(m1), originalIndices.get(m2));
