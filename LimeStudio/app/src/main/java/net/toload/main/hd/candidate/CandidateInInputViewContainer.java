@@ -72,18 +72,7 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
             this.setBackgroundColor(mCandidateView.mColorBackground);
 
             mImeNameView = findViewById(R.id.candidate_ime_name);
-            if (mImeNameView != null) {
-                if (net.toload.main.hd.BuildConfig.IS_TABLET) {
-                    mImeNameView.setVisibility(VISIBLE);
-                    int textColor = mCandidateView.mColorComposingText;
-                    if (textColor == 0 || textColor == android.graphics.Color.TRANSPARENT) {
-                        textColor = getContext().getResources().getColor(R.color.second_foreground_light);
-                    }
-                    mImeNameView.setTextColor(textColor);
-                } else {
-                    mImeNameView.setVisibility(GONE);
-                }
-            }
+            CandidateContainerHelper.setupImeNameView(mImeNameView, mCandidateView);
         }
     }
 
@@ -96,16 +85,7 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (mCandidateView != null && mImeNameView != null && net.toload.main.hd.BuildConfig.IS_TABLET) {
-            int candidateHeight = mCandidateView.getMeasuredHeight();
-            if (candidateHeight > 0) {
-                android.view.ViewGroup.LayoutParams lp = mImeNameView.getLayoutParams();
-                if (lp.height != candidateHeight) {
-                    lp.height = candidateHeight;
-                    mImeNameView.setLayoutParams(lp);
-                }
-            }
-        }
+        CandidateContainerHelper.syncImeNameHeight(mImeNameView, mCandidateView);
     }
 
     @Override
