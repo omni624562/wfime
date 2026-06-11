@@ -2302,7 +2302,6 @@ public class LIMEService extends InputMethodService implements
                                 if (mComposing.length() > 0) { // Jeremy '12,7,11 only fetch remaining composing when
                                                                // length >0
                                     // if (ic != null && mPredictionOn)
-                                    // ic.setComposingText(mComposing, 1);
                                     shouldUpdateCandidates = true;
                                 }
                             }
@@ -3066,7 +3065,6 @@ public class LIMEService extends InputMethodService implements
                     mComposing.append(keyString);
                     // InputConnection ic = getCurrentInputConnection();
                     // if (ic != null && mPredictionOn)
-                    // ic.setComposingText(getComposingDisplayString(keyString), 1);
                     // Just update CandidateView composing text
                     getComposingDisplayString(keyString);
                 }
@@ -3674,8 +3672,6 @@ public class LIMEService extends InputMethodService implements
                 hasCandidatesShown = false; // Reset flag
             } else {
                 // Composing still has text
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
                 // Just update CandidateView composing text
                 getComposingDisplayString(mComposing.toString());
                 updateCandidates();
