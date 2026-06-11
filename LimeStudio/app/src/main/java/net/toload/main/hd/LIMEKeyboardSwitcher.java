@@ -501,9 +501,9 @@ public class LIMEKeyboardSwitcher {
                         key.label = getActiveIMSingleChar();
                         key.icon = null;
                     } else {
-                        // Use Translation Icon for Symbol/English mode
+                        // Globe icon (Gboard-style) for Symbol/English mode
                         key.label = null;
-                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.ic_translate);
+                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_globe_material3);
                     }
                 }
 

@@ -189,7 +189,7 @@
         <Key
             limehd:codes="-9"
             limehd:isModifier="true"
-            limehd:keyLabel="英"
+            limehd:keyIcon="@drawable/sym_keyboard_globe_material3"
             limehd:keyWidth="10%p" />
         <Key
             limehd:codes="32"
