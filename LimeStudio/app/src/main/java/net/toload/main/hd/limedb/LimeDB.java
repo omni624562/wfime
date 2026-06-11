@@ -283,7 +283,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * Black list cache stored code without valid return. Jeremy '12,6,3
      */
-    private static ConcurrentHashMap<String, Boolean> blackListCache = null;
+    private static java.util.Map<String, Boolean> blackListCache = null;
     private final HashMap<String, HashMap<String, String>> keysDefMap = new HashMap<>();
     private final HashMap<String, HashMap<String, String>> keysReMap = new HashMap<>();
     private final HashMap<String, HashMap<String, String>> keysDualMap = new HashMap<>();
@@ -322,7 +322,14 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         mLIMEPref = new LIMEPreferenceManager(mContext);
 
-        blackListCache = new ConcurrentHashMap<>(LIME.LIMEDB_CACHE_SIZE);
+        // Bounded LRU — invalid codes accumulate forever on an unbounded map
+        blackListCache = java.util.Collections.synchronizedMap(
+                new java.util.LinkedHashMap<String, Boolean>(LIME.LIMEDB_CACHE_SIZE, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry(java.util.Map.Entry<String, Boolean> eldest) {
+                        return size() > LIME.LIMEDB_CACHE_SIZE;
+                    }
+                });
 
         // Jeremy '12,4,7 open DB connection in constructor
         openDBConnection(true);
@@ -2800,7 +2807,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             return false;
 
         holdDBConnection();
-        db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
+        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
         db.execSQL("insert into sourceDB." + Lime.DB_RELATED + " select * from " + Lime.DB_RELATED);
         db.execSQL("detach database sourceDB");
         unHoldDBConnection();
@@ -2811,12 +2818,14 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return false;
 
+        String validatedTable = validateTableName(sourcetable);
         holdDBConnection();
-        db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
-        db.execSQL("insert into sourceDB." + Lime.DB_TABLE_CUSTOM + " select * from " + sourcetable);
-        db.execSQL("insert into sourceDB." + Lime.DB_IM + " select * from " + Lime.DB_IM + " WHERE code='" + sourcetable
-                + "'");
-        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "='" + sourcetable + "'");
+        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
+        db.execSQL("insert into sourceDB." + Lime.DB_TABLE_CUSTOM + " select * from " + validatedTable);
+        db.execSQL("insert into sourceDB." + Lime.DB_IM + " select * from " + Lime.DB_IM + " WHERE code=?",
+                new Object[] { validatedTable });
+        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "=?",
+                new Object[] { validatedTable });
         db.execSQL("detach database sourceDB");
         unHoldDBConnection();
         return true;
@@ -2832,7 +2841,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         holdDBConnection();
 
         // Load data from DB File
-        db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
+        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile.getAbsolutePath() });
         db.execSQL("insert into " + Lime.DB_RELATED + " select * from sourceDB." + Lime.DB_RELATED);
         db.execSQL("detach database sourceDB");
         unHoldDBConnection();
@@ -2843,16 +2852,19 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return false;
 
+        String validatedImType = validateTableName(imtype);
         // Reset IM Info
-        deleteAll(imtype);
-        db.execSQL("delete from " + Lime.DB_IM + " where " + Lime.DB_IM_COLUMN_CODE + "='" + imtype + "'");
+        deleteAll(validatedImType);
+        db.execSQL("delete from " + Lime.DB_IM + " where " + Lime.DB_IM_COLUMN_CODE + "=?",
+                new Object[] { validatedImType });
 
         holdDBConnection();
 
         // Load data from DB File
-        db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
-        db.execSQL("insert into " + imtype + " select * from sourceDB." + Lime.DB_TABLE_CUSTOM);
-        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "='" + imtype + "'");
+        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile.getAbsolutePath() });
+        db.execSQL("insert into " + validatedImType + " select * from sourceDB." + Lime.DB_TABLE_CUSTOM);
+        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "=?",
+                new Object[] { validatedImType });
         db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
         db.execSQL("detach database sourceDB");
         unHoldDBConnection();
@@ -2867,14 +2879,15 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         deleteAll(validatedImType);
         holdDBConnection();
         try {
-            db.execSQL("attach database '" + sourcedbfile + "' as sourceDB");
+            db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
 
             // Identify source table name - it might match imtype or be a generic 'phonetic' or 'dayi'
             String sourceTable = null;
             String[] possibleSourceTables = {validatedImType, "phonetic", "dayi", Lime.DB_TABLE_CUSTOM};
-            
+
             for (String table : possibleSourceTables) {
-                Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name='" + table + "'", null);
+                Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name=?",
+                        new String[] { table });
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
                         sourceTable = cursor.getString(0);
@@ -2894,14 +2907,17 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             db.execSQL("insert into " + validatedImType + " select * from sourceDB." + sourceTable);
 
             // Update IM info if present in source
-            Cursor imCursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name='" + Lime.DB_IM + "'", null);
+            Cursor imCursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name=?",
+                    new String[] { Lime.DB_IM });
             if (imCursor != null) {
                 if (imCursor.moveToFirst()) {
-                    db.execSQL("delete from " + Lime.DB_IM + " where code = '" + validatedImType + "'");
+                    db.execSQL("delete from " + Lime.DB_IM + " where code = ?", new Object[] { validatedImType });
                     // We need to ensure we only insert the relevant IM info if there are multiple
-                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM + " where code = '" + sourceTable + "'");
+                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM + " where code = ?",
+                            new Object[] { sourceTable });
                     // Update the code in our DB to match the requested imtype if it was different in source
-                    db.execSQL("update " + Lime.DB_IM + " set code = '" + validatedImType + "' where code = '" + sourceTable + "'");
+                    db.execSQL("update " + Lime.DB_IM + " set code = ? where code = ?",
+                            new Object[] { validatedImType, sourceTable });
                 }
                 imCursor.close();
             }
@@ -3959,8 +3975,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         // Jeremy '12,5,1
         if (!checkDBConnection())
             return;
-        String removeString = "DELETE FROM im WHERE code='" + im + "'";
-        db.execSQL(removeString);
+        db.execSQL("DELETE FROM im WHERE code=?", new Object[] { im });
 
     }
 
@@ -3975,9 +3990,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         String iminfo = "";
         try {
             // String value = "";
-            String selectString = "SELECT * FROM im WHERE code='" + im + "' AND title='" + field + "'";
+            String selectString = "SELECT * FROM im WHERE code=? AND title=?";
 
-            Cursor cursor = db.rawQuery(selectString, null);
+            Cursor cursor = db.rawQuery(selectString, new String[] { im, field });
 
             if (cursor != null) {
                 if (cursor.getCount() > 0) {
@@ -4015,8 +4030,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private void removeImInfoOnDB(SQLiteDatabase dbin, String im, String field) {
         if (DEBUG)
             Log.i(TAG, "removeImInfoOnDB()");
-        String removeString = "DELETE FROM im WHERE code='" + im + "' AND title='" + field + "'";
-        dbin.execSQL(removeString);
+        dbin.execSQL("DELETE FROM im WHERE code=? AND title=?", new Object[] { im, field });
 
     }
 
@@ -4257,24 +4271,24 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return "";
 
+        Cursor cursor = null;
         try {
-            // String value = "";
-            String selectString = "SELECT * FROM im WHERE code='" + im + "' AND title='keyboard'";
+            String selectString = "SELECT * FROM im WHERE code=? AND title='keyboard'";
             // SQLiteDatabase db = this.getSqliteDb(true);
 
-            Cursor cursor = db.rawQuery(selectString, null);
+            cursor = db.rawQuery(selectString, new String[] { im });
 
-            if (cursor != null) {
-                if (cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    int descCol = cursor.getColumnIndex("keyboard");
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                int descCol = cursor.getColumnIndex("keyboard");
 
-                    return cursor.getString(descCol);
-                }
-                cursor.close();
+                return cursor.getString(descCol);
             }
 
         } catch (Exception ignored) {
+        } finally {
+            if (cursor != null)
+                cursor.close();
         }
         return "";
     }
