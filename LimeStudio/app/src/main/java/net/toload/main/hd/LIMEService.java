@@ -1589,7 +1589,14 @@ public class LIMEService extends InputMethodService implements
                 else if (keyCode == KeyEvent.KEYCODE_SEMICOLON) symbol = "：";
                 
                 if (symbol != null) {
-                    commitTyped(getCurrentInputConnection());
+                    // 組字中不自動送出:使用者尚未選字,先消化此鍵讓他完成選字
+                    if (mComposing != null && mComposing.length() > 0)
+                        return true;
+                    // 非組字狀態只送出標點。不可呼叫 commitTyped():候選列若還
+                    // 顯示著關聯詞,selectedCandidate 會是未選取的關聯詞,
+                    // commitTyped() 會把它一起送出(例:打完「險」按 ? 變成「峻?」)
+                    selectedCandidate = null;
+                    clearSuggestions();
                     getCurrentInputConnection().commitText(symbol, 1);
                     return true;
                 }
@@ -1617,7 +1624,13 @@ public class LIMEService extends InputMethodService implements
                     }
     
                     if (symbol != null) {
-                        commitTyped(getCurrentInputConnection());
+                        // 同 Method 1:組字中不自動送出、非組字只送標點
+                        if (mComposing != null && mComposing.length() > 0) {
+                            mDayiSymbolPrefix = false;
+                            return true;
+                        }
+                        selectedCandidate = null;
+                        clearSuggestions();
                         getCurrentInputConnection().commitText(symbol, 1);
                         mDayiSymbolPrefix = false;
                         return true;
