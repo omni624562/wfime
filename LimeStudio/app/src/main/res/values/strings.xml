@@ -250,8 +250,4 @@
     <string name="preference_smart_chinese_input_message">部份輸入法可能會影響中英混打功能</string>
     <string name="label_symbol_mode">\?123</string>
 
-    <string name="translation_consent_title">啟用即時翻譯</string>
-    <string name="translation_consent_message">即時翻譯會將你輸入的文字傳送至 Google 翻譯伺服器處理。密碼欄位不會觸發翻譯。確定要啟用嗎？</string>
-    <string name="translation_consent_agree">同意並啟用</string>
-
 </resources>

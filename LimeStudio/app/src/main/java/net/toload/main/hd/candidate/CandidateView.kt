@@ -33,21 +33,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
@@ -56,18 +46,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Recomposer
@@ -398,297 +382,6 @@ open class CandidateView @JvmOverloads constructor(
         }
     }
 
-    @Composable
-    fun TranslationRow(
-        translateQuery: String,
-        translatedResult: String,
-        candidateFontSize: androidx.compose.ui.unit.TextUnit
-    ) {
-        val scrollState = rememberScrollState()
-        val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
-        val activeIM = mService?.activeIM
-        val isDayi = activeIM?.startsWith("dayi") == true
-        
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(Color(0xFF1E1E1E)) // 極致暗黑色調
-                .padding(vertical = 4.dp, horizontal = 8.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // 1. 頂部列：如果 suggestions 為空，則顯示語言選擇列；若 suggestions 不為空，則顯示候選字列！
-            if (suggestions.isEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(38.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 返回鍵
-                    IconButton(
-                        onClick = {
-                            mService?.toggleTranslationMode(false)
-                        },
-                        modifier = Modifier.width(32.dp).height(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    // 源語言膠囊
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF0F3E3E)) // 經典綠色
-                            .padding(horizontal = 14.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "偵測語言",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    // 交換箭頭
-                    IconButton(
-                        onClick = {
-                            Toast.makeText(context, "交換語言功能已在規劃中！", Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier.width(32.dp).height(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SwapHoriz,
-                            contentDescription = "Swap",
-                            tint = Color.Gray
-                        )
-                    }
-
-                    // 目標語言膠囊
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF0F3E3E))
-                            .padding(horizontal = 14.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "英文",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            } else {
-                // 有候選字時，在頂部顯示橫向捲動的選字列！
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(38.dp)
-                        .horizontalScroll(scrollState),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Show raw keycode as first item (if not empty)
-                    if (_rawKeycode.isNotEmpty()) {
-                        RawKeycodeItem(
-                            keycode = _rawKeycode,
-                            fontSize = candidateFontSize,
-                            onClick = {
-                                mService?.commitTyped(_rawKeycode)
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    val pageSize = if (isPhysicalKeyboard && isDayi) 6 else suggestions.size
-                    val startIndex = currentPage * pageSize
-                    var endIndex = startIndex + pageSize
-                    if (endIndex > suggestions.size) endIndex = suggestions.size
-                    val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
-                    val hasNextPage = endIndex < suggestions.size
-                    val hasPrevPage = startIndex > 0
-
-                    if (hasPrevPage && isDayi && isPhysicalKeyboard) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "◀", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                        }
-                    }
-
-                    visibleSuggestions.forEachIndexed { i, mapping ->
-                        val actualIndex = startIndex + i
-                        CandidateItem(
-                            mapping = mapping,
-                            index = actualIndex,
-                            isSelected = actualIndex == selectedIndex,
-                            fontSize = candidateFontSize,
-                            onClick = {
-                                mService?.pickCandidateManually(actualIndex)
-                                selectedIndex = actualIndex
-                            },
-                            onLongClick = {
-                                if (mapping.isRelatedPhraseRecord()) {
-                                    mService?.removeCandidateManually(actualIndex)
-                                }
-                            }
-                        )
-                    }
-
-                    if (hasNextPage && isDayi && isPhysicalKeyboard) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .clickable { pageNext() }
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "▶", color = Color(0xFF80DEEA), fontSize = candidateFontSize)
-                        }
-                    }
-                }
-            }
-
-            // 2. 底部 Outlined 圓角翻譯輸入框
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFF2A2A2A))
-                    .border(1.dp, Color(0xFF00796B), RoundedCornerShape(22.dp)) // 翠綠色圓角邊框
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // 文字查詢
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val translateCursorPosition by remember { LIMEService.translateCursorPositionState }
-                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-                    val density = LocalDensity.current
-
-                    // 1. 統一的觸控與渲染區域，填滿全部高度與可用寬度
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .pointerInput(translateQuery) {
-                                detectTapGestures { offset ->
-                                    val layoutResult = textLayoutResult
-                                    if (layoutResult != null) {
-                                        val clickedOffset = layoutResult.getOffsetForPosition(offset)
-                                        mService?.updateTranslateCursorPosition(clickedOffset)
-                                    } else {
-                                        mService?.updateTranslateCursorPosition(0)
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (translateQuery.isEmpty()) {
-                            Text(
-                                text = "在這裡輸入要翻譯的內容",
-                                color = Color.Gray,
-                                fontSize = 13.sp
-                            )
-                            // 當輸入框為空時，依然渲染一個置左閃爍的翠綠游標，表示已準備好輸入！
-                            val infiniteTransition = rememberInfiniteTransition(label = "cursor")
-                            val cursorAlpha by infiniteTransition.animateFloat(
-                                initialValue = 1f,
-                                targetValue = 0f,
-                                animationSpec = infiniteRepeatable(
-                                    animation = tween(durationMillis = 500, easing = LinearEasing),
-                                    repeatMode = RepeatMode.Reverse
-                                ),
-                                label = "alpha"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .height(18.dp)
-                                    // Read the animated alpha in the draw phase only,
-                                    // so the blink doesn't recompose the row every frame
-                                    .graphicsLayer { alpha = cursorAlpha }
-                                    .background(Color(0xFF00E676))
-                            )
-                        } else {
-                            // 渲染主要輸入文字，並取得 TextLayoutResult
-                            Text(
-                                text = translateQuery,
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                onTextLayout = { textLayoutResult = it },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            // 根據 TextLayoutResult 繪製自訂閃爍綠色游標
-                            val layoutResult = textLayoutResult
-                            if (layoutResult != null) {
-                                val cursorIndex = translateCursorPosition.coerceIn(0, layoutResult.layoutInput.text.length)
-                                val cursorRect = layoutResult.getCursorRect(cursorIndex)
-                                val infiniteTransition = rememberInfiniteTransition(label = "cursor")
-                                val cursorAlpha by infiniteTransition.animateFloat(
-                                    initialValue = 1f,
-                                    targetValue = 0f,
-                                    animationSpec = infiniteRepeatable(
-                                        animation = tween(durationMillis = 500, easing = LinearEasing),
-                                        repeatMode = RepeatMode.Reverse
-                                    ),
-                                    label = "alpha"
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .offset(
-                                            x = with(density) { cursorRect.left.toDp() },
-                                            y = with(density) { cursorRect.top.toDp() }
-                                        )
-                                        .width(2.dp)
-                                        .height(with(density) { cursorRect.height.toDp() })
-                                        // Draw-phase alpha read — avoids per-frame recomposition
-                                        .graphicsLayer { alpha = cursorAlpha }
-                                        .background(Color(0xFF00E676))
-                                )
-                            }
-                        }
-                    }
-
-                    if (translatedResult.isNotEmpty()) {
-                        Text(
-                            text = " -> $translatedResult",
-                            color = Color(0xFF80DEEA), // 亮青綠色
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
-                }
-
-                // 最右側語音圖示
-                Icon(
-                    imageVector = Icons.Default.Mic,
-                    contentDescription = "Voice",
-                    tint = Color.Gray,
-                    modifier = Modifier.width(20.dp).height(20.dp)
-                )
-            }
-        }
-    }
 
     @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
     @Composable
@@ -705,11 +398,6 @@ open class CandidateView @JvmOverloads constructor(
         val visibleSuggestions = if (startIndex < suggestions.size) suggestions.subList(startIndex, endIndex) else emptyList()
         val hasNextPage = endIndex < suggestions.size
         val hasPrevPage = startIndex > 0
-        
-        // 訂閱來自 LIMEService 的反應式即時翻譯狀態
-        val isTranslationMode by remember { LIMEService.isTranslationModeState }
-        val translateQuery by remember { LIMEService.translateQueryState }
-        val translatedResult by remember { LIMEService.translatedResultState }
         
         // Stable Color — remembered so the object is not re-created on every recomposition
         val gboardDark = remember { Color(0xFF2B2B2B) }
@@ -740,8 +428,7 @@ open class CandidateView @JvmOverloads constructor(
         // Determine base height: use a premium, stable height of 48dp globally to completely eliminate layout shifting.
         val baseHeight = 48
         
-        // 即時翻譯模式時將高度拓寬為 96.dp，以容納雙層科技感控制面板
-        val heightDp = if (isTranslationMode) 96.dp else (baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp
+        val heightDp = (baseHeight * _fontSizeScale).coerceIn(32f, 60f).dp
         
         // Use BoxWithConstraints to handle infinite width constraints gracefully
         androidx.compose.foundation.layout.BoxWithConstraints(
@@ -753,9 +440,6 @@ open class CandidateView @JvmOverloads constructor(
             // Only render the scrollable content if we have a finite maximum width.
             // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
             if (constraints.maxWidth != androidx.compose.ui.unit.Constraints.Infinity) {
-                if (isTranslationMode) {
-                    TranslationRow(translateQuery, translatedResult, candidateFontSize)
-                } else {
                     val isToolbarMode = suggestions.isEmpty() && _composingText.isEmpty() && _rawKeycode.isEmpty()
                     if (isToolbarMode) {
                         ToolbarRow(candidateFontSize)
@@ -941,7 +625,6 @@ open class CandidateView @JvmOverloads constructor(
                             }
                         }
                     }
-                }
             }
         }
     }
