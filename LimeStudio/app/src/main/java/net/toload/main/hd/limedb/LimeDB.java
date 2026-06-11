@@ -1238,7 +1238,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     private LinkedList<Mapping> updateSimilarCodeListInRelatedColumnOnDB(SQLiteDatabase db, String table, String code) {
 
-        String escapedCode = code.replaceAll("'", "''"); // Jeremy '11,9,10 escape '
+        String escapedCode = code.replace("'", "''"); // Jeremy '11,9,10 escape '
         if (DEBUG)
             Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): escapedCodes: " + escapedCode);
 
@@ -1686,7 +1686,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
                     String selectClause;
                     String sortClause;
-                    String escapedCode = code.replaceAll("'", "''");
+                    String escapedCode = code.replace("'", "''");
                     int codeLen = code.length();
 
                     String limitClause = (getAllRecords) ? FINAL_RESULT_LIMIT : INITIAL_RESULT_LIMIT;
@@ -1766,25 +1766,27 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
     private String expandBetweenSearchClause(String searchColumn, String code) {
 
-        String selectClause = "";// searchColumn + "= '" + code.replaceAll("'", "''") + "' or ";
+        StringBuilder selectClause = new StringBuilder();
 
         int len = code.length();
         int end = (len > 5) ? 6 : len;
 
         if (len > 1) {
             for (int j = 0; j < end - 1; j++) {
-                selectClause += searchColumn + "= '" + code.substring(0, j + 1).replaceAll("'", "''") + "' or ";
+                selectClause.append(searchColumn).append("= '")
+                        .append(code.substring(0, j + 1).replace("'", "''")).append("' or ");
             }
         }
         // if(fuzzySearch) code = (len>2) ? code.substring(0,2) : code;
         char[] chArray = code.toCharArray();
         chArray[code.length() - 1]++;
         String nextCode = new String(chArray);
-        selectClause += " (" + searchColumn + " >= '" + code.replaceAll("'", "''") + "' and " + searchColumn
-                + " <'" + nextCode.replaceAll("'", "''") + "') ";
+        selectClause.append(" (").append(searchColumn).append(" >= '")
+                .append(code.replace("'", "''")).append("' and ").append(searchColumn)
+                .append(" <'").append(nextCode.replace("'", "''")).append("') ");
         if (DEBUG)
             Log.i(TAG, "expandBetweenSearchClause() selectClause: " + selectClause);
-        return selectClause;
+        return selectClause.toString();
     }
 
     public String preProcessingRemappingCode(String code) {
@@ -1951,7 +1953,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             }
 
             // Process the escape characters of getMappingByCode
-            // newcode = newcode.replaceAll("'", "''"); // Jeremy '12,7,7 do the code
+            // newcode = newcode.replace("'", "''"); // Jeremy '12,7,7 do the code
             // escaped before getMappingByCode.
             if (DEBUG)
                 Log.i(TAG, "preProcessingRemappingCode():newcode=" + newcode);
@@ -2366,8 +2368,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         noToneCode = dualcode.replaceAll("[3467 ]", "");
                 }
                 // do escape code for codes
-                String queryCode = dualcode.trim().replaceAll("'", "''");
-                String queryNoToneCode = noToneCode.trim().replaceAll("'", "''");
+                String queryCode = dualcode.trim().replace("'", "''");
+                String queryNoToneCode = noToneCode.trim().replace("'", "''");
 
                 if (queryCode.length() == 0)
                     continue;
@@ -2412,7 +2414,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 char[] charray = dualcode.toCharArray();
                                 charray[queryCode.length() - 1]++;
                                 String nextcode = new String(charray);
-                                nextcode = nextcode.replaceAll("'", "''");
+                                nextcode = nextcode.replace("'", "''");
 
                                 selectValidCodeClause = codeCol + " > '" + queryCode + "' AND " + codeCol + " < '"
                                         + nextcode + "'";
@@ -2422,7 +2424,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                     charray = queryNoToneCode.toCharArray();
                                     charray[noToneCode.length() - 1]++;
                                     String nextNoToneCode = new String(charray);
-                                    nextNoToneCode = nextNoToneCode.replaceAll("'", "''");
+                                    nextNoToneCode = nextNoToneCode.replace("'", "''");
                                     selectValidCodeClause = "(" + codeCol + " > '" + queryCode + "' AND " + codeCol
                                             + " < '" + nextcode + "') "
                                             + "OR (" + codeCol + " > '" + queryNoToneCode + "' AND " + codeCol + " < '"
@@ -3783,7 +3785,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
             Cursor cursor;
             // Process the escape characters of query
-            code = code.replaceAll("'", "''");
+            code = code.replace("'", "''");
             if (word == null || word.trim().length() == 0) {
                 cursor = db.query(table, null, FIELD_CODE + " = '"
                         + code + "'", null, null, null, null, null);
@@ -3854,7 +3856,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (word != null && word.trim().length() > 0) {
 
             // Process the escape characters of query
-            word = word.replaceAll("'", "''");
+            word = word.replace("'", "''");
             Cursor cursor = db.query(tablename, null, FIELD_WORD + " = '"
                     + word + "'", null, null, null, FIELD_SCORE + " DESC", null);
 
@@ -3878,7 +3880,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         int ID = -1;
         if (code != null && code.trim().length() > 0) {
             // Process the escape characters of query
-            code = code.replaceAll("'", "''");
+            code = code.replace("'", "''");
             Cursor cursor = db.query(table, null, FIELD_CODE + " = '"
                     + code + "'", null, null, null,
                     FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC", null);
