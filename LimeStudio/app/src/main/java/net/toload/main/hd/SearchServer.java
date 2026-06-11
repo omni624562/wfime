@@ -95,7 +95,8 @@ public class SearchServer {
     // Jeremy '15,6,8 TODO resolved: related phrases are now cached across keystrokes
     private static Map<String, List<Mapping>> relatedcache = null; // word -> related phrase list
     private static Map<String, Mapping> relatedPhraseCache = null; // pword\0cword -> Mapping (null = no record)
-    private static Thread prefetchThread;
+    private static final java.util.concurrent.atomic.AtomicBoolean prefetchRunning =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
     private static boolean abandonPhraseSuggestion = false;
 
     // deprecated and using exact match stack to get real code length now. Jerey
@@ -175,27 +176,31 @@ public class SearchServer {
             keys += ",./;";
         final String finalKeys = keys;
 
-        if (prefetchThread != null && prefetchThread.isAlive())
+        // Run on the shared background executor instead of spawning raw
+        // threads; the flag prevents overlapping prefetch runs.
+        if (!prefetchRunning.compareAndSet(false, true))
             return;
 
-        prefetchThread = new Thread() {
+        backgroundExecutor.execute(new Runnable() {
             public void run() {
-                long startime = System.currentTimeMillis();
-                for (int i = 0; i < finalKeys.length(); i++) {
-                    String key = finalKeys.substring(i, i + 1);
-                    try {
-                        // bypass run-time suggestion for prefetch queries
-                        getMappingByCode(key, true, false, true);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error in prefetch: " + e.getMessage());
+                try {
+                    long startime = System.currentTimeMillis();
+                    for (int i = 0; i < finalKeys.length(); i++) {
+                        String key = finalKeys.substring(i, i + 1);
+                        try {
+                            // bypass run-time suggestion for prefetch queries
+                            getMappingByCode(key, true, false, true);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error in prefetch: " + e.getMessage());
+                        }
                     }
+                    Log.i(TAG, "prefetchCache() on table :" + tablename + " finished.  Elapsed time = "
+                            + (System.currentTimeMillis() - startime) + " ms.");
+                } finally {
+                    prefetchRunning.set(false);
                 }
-                Log.i(TAG, "prefetchCache() on table :" + tablename + " finished.  Elapsed time = "
-                        + (System.currentTimeMillis() - startime) + " ms.");
             }
-        };
-        prefetchThread.start();
-
+        });
     }
 
     public List<Mapping> getRelatedPhrase(String word, boolean getAllRecords) {

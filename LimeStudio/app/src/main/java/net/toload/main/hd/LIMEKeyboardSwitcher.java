@@ -145,8 +145,9 @@ public class LIMEKeyboardSwitcher {
         if (codes.equals(mActivatedIMList) && shortnames.equals(mActivatedIMShortnameList))
             return;
 
-        mActivatedIMList = codes;
-        mActivatedIMShortnameList = shortnames;
+        // Defensive copies: don't alias caller-owned lists from static fields
+        mActivatedIMList = new java.util.ArrayList<>(codes);
+        mActivatedIMShortnameList = new java.util.ArrayList<>(shortnames);
     }
 
     public List<String> getActivatedIMShortnameList() {
