@@ -167,12 +167,16 @@ public class IMSwitchHelper {
             activatedIMList.clear();
             activatedIMShortNameList.clear();
 
+            boolean hasInvalidIndex = false;
             for (String value : s) {
                 if (value.isEmpty())
                     continue;
                 int index = Integer.parseInt(value);
 
                 if (index < items.length) {
+                    // Skip duplicated entries (legacy state may repeat an index)
+                    if (activatedIMList.contains(codes[index].toString()))
+                        continue;
                     activatedIMNameList.add(items[index].toString());
                     activatedIMShortNameList.add(shortNames[index].toString());
                     activatedIMList.add(codes[index].toString());
@@ -180,9 +184,19 @@ public class IMSwitchHelper {
                         Log.i(TAG, "buildActivatedIMList(): [" + index + "] = "
                                 + codes[index].toString() + " ;" + shortNames[index].toString());
                 } else {
+                    // Index from a legacy version with more IMs than the current build
+                    hasInvalidIndex = true;
                     if (DEBUG)
                         Log.i(TAG, "Invalid index " + index + " >= items.length " + items.length);
                 }
+            }
+
+            // Legacy state with stale indexes no longer maps to the current IM
+            // list reliably — discard it and fall back to defaults below.
+            if (hasInvalidIndex) {
+                activatedIMNameList.clear();
+                activatedIMShortNameList.clear();
+                activatedIMList.clear();
             }
 
             // If list is still empty after parsing, reset to defaults

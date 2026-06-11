@@ -179,7 +179,7 @@
             limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="15%p" />
         <Key
-            limehd:codes="-9"
+            limehd:codes="-16"
             limehd:isModifier="true"
             limehd:keyIcon="@drawable/sym_keyboard_globe_material3"
             limehd:keyWidth="10%p" />

@@ -93,6 +93,8 @@ public class LIMEService extends InputMethodService implements
     static final int KEYCODE_SWITCH_TO_ENGLISH_MODE = -9;
     static final int KEYCODE_SWITCH_TO_IM_MODE = -10;
     static final int KEYCODE_SWITCH_SYMBOL_KEYBOARD = -15;
+    // Globe key: cycles English -> IM1 -> IM2 -> ... -> English (Gboard style)
+    static final int KEYCODE_CYCLE_IM = -16;
     // Replace Keycode.KEYCODE_CTRL_LEFT/RIGHT, ESC on android 3.x
     // for backward compatibility of 2.x
     static final int MY_KEYCODE_ESC = 111;
@@ -2573,6 +2575,8 @@ public class LIMEService extends InputMethodService implements
             switchToNextActivatedIM(true);
         } else if (primaryCode == LIMEKeyboardView.KEYCODE_PREV_IM) {
             switchToNextActivatedIM(false);
+        } else if (primaryCode == KEYCODE_CYCLE_IM && mInputView != null) { // globe key
+            cycleInputMode();
         } else if (primaryCode == KEYCODE_SWITCH_TO_ENGLISH_MODE && mInputView != null) { // chi->eng
             switchKeyboard(primaryCode);
             // Jeremy '11,5,31 Rewrite softkeybaord enter/space and english separator
@@ -2796,6 +2800,29 @@ public class LIMEService extends InputMethodService implements
                 hideComposingPopup();
             }
         }, 1500);
+    }
+
+    /**
+     * Globe key handler: cycles English -> IM1 -> IM2 -> ... -> English.
+     * The dedicated EN keys (KEYCODE_SWITCH_TO_ENGLISH_MODE) on symbol
+     * keyboards keep their direct chi->eng behavior.
+     */
+    private void cycleInputMode() {
+        buildActivatedIMList();
+        java.util.List<String> imList = mIMSwitchHelper.getActivatedIMList();
+        if (mEnglishOnly) {
+            switchKeyboard(KEYCODE_SWITCH_TO_IM_MODE);
+        } else if (!imList.isEmpty() && mIMSwitchHelper.getCurrentIMIndex() < imList.size() - 1) {
+            switchToNextActivatedIM(true);
+        } else {
+            // Last IM -> English. Park activeIM at the first IM so the next
+            // globe press from English restarts the cycle from the beginning.
+            if (!imList.isEmpty()) {
+                mIMSwitchHelper.setActiveIM(imList.get(0));
+                activeIM = mIMSwitchHelper.getActiveIM();
+            }
+            switchKeyboard(KEYCODE_SWITCH_TO_ENGLISH_MODE);
+        }
     }
 
     // Package-private so PhysicalKeyHandler can invoke IM cycling via Ctrl+`
