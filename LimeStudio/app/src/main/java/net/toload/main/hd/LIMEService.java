@@ -1412,7 +1412,10 @@ public class LIMEService extends InputMethodService implements
 
         InputConnection ic = getCurrentInputConnection();
 
-        if (ic != null) {
+        // getTextBeforeCursor is a blocking cross-process round-trip; skip it on
+        // the selection updates fired during composition — the previous char only
+        // matters for context sorting once text is actually committed.
+        if (ic != null && mComposing.length() == 0) {
             CharSequence before = ic.getTextBeforeCursor(1, 0);
             if (before != null && before.length() > 0) {
                 SearchServer.setLastCommittedChar(before.toString());

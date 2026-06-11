@@ -655,7 +655,9 @@ public class SearchServer {
         public List<Mapping> emojiConvert(String code, int type) {
         if (code != null) {
             if (emojicache == null) {
-                emojicache = new ConcurrentHashMap<>(LIME.SEARCHSRV_RESET_CACHE_SIZE);
+                // Late init must use the same bounded LRU as initialCache(),
+                // not an unbounded map that bypasses eviction
+                emojicache = newLruMap(MAX_CACHE_ENTRIES);
             }
             String cacheKey = code + "_" + type;
             List<Mapping> results = emojicache.get(cacheKey);
@@ -942,7 +944,7 @@ public class SearchServer {
                     suggestionLoL.get(suggestionLoL.size() - 1));
             final String selectedWord = selectedMapping.getWord();
 
-            Thread learnLDPhraseThread = new Thread() {
+            backgroundExecutor.execute(new Runnable() {
                 public void run() {
 
                     if (!bestSuggestionList.isEmpty()) {
@@ -966,13 +968,18 @@ public class SearchServer {
                     }
 
                 }
-            };
-            learnLDPhraseThread.start();
+            });
 
         }
 
         return realCodeLen;
     }
+
+    // Single shared worker for score/phrase learning DB writes. One thread keeps
+    // submission order (selection score before finish-input learning) and stops
+    // the old pattern of spawning 2+ short-lived threads on every selection.
+    private static final java.util.concurrent.ExecutorService backgroundExecutor =
+            java.util.concurrent.Executors.newSingleThreadExecutor();
 
     private static <K, V> Map<K, V> newLruMap(int maxSize) {
         return Collections.synchronizedMap(new LinkedHashMap<K, V>(maxSize, 0.75f, true) {
@@ -1098,9 +1105,9 @@ public class SearchServer {
 
         if (DEBUG)
             Log.i(TAG, "postFinishInput(), creating offline updating thread");
-        // Jeremy '11,7,31 The updating process takes some time. Create a new thread to
-        // do this.
-        Thread UpdatingThread = new Thread() {
+        // Jeremy '11,7,31 The updating process takes some time. Run it on the
+        // shared background worker.
+        backgroundExecutor.execute(new Runnable() {
             public void run() {
                 // for thread-safe operation, duplicate local copy of scorelist and
                 // LDphraselistarray
@@ -1127,8 +1134,7 @@ public class SearchServer {
                 learnLDPhrase(localLDPhraseListArray);
 
             }
-        };
-        UpdatingThread.start();
+        });
 
     }
 
@@ -1457,7 +1463,7 @@ public class SearchServer {
 
             if (tablename.startsWith("dayi") && mLIMEPref.getDayiSmartSelectionEnabled()) {
                 final String prev = lastCommittedChar;
-                new Thread(new Runnable() {
+                backgroundExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -1470,17 +1476,16 @@ public class SearchServer {
                             Log.e(TAG, "Error recording selection in SmartSelectionManager", e);
                         }
                     }
-                }).start();
+                });
             }
 
             // Jeremy '11,6,11. Always update score and sort according to preferences.
             scorelist.add(updateMappingTemp);
-            Thread UpdatingThread = new Thread() {
+            backgroundExecutor.execute(new Runnable() {
                 public void run() {
                     updateScoreCache(updateMappingTemp);
                 }
-            };
-            UpdatingThread.start();
+            });
         }
     }
 
