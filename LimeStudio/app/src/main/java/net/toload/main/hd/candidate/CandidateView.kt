@@ -546,18 +546,8 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (!isTablet && _rawKeycode.isNotEmpty()) {
-                                        item(key = "rawKeycode") {
-                                            RawKeycodeItem(
-                                                keycode = _rawKeycode,
-                                                fontSize = candidateFontSize,
-                                                onClick = {
-                                                    mService?.commitTyped(_rawKeycode)
-                                                }
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                        }
-                                    }
+                                    // 不顯示英文原始碼項目(如 i2.)——大易使用者看英文字根
+                                    // 只會混淆;字根轉換顯示(木牛舟)已在組字浮窗呈現。
                                     itemsIndexed(visibleSuggestions) { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
@@ -625,38 +615,17 @@ open class CandidateView @JvmOverloads constructor(
                                             .padding(horizontal = 12.dp, vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            if (_rawKeycode.isNotEmpty()) {
-                                                Text(
-                                                    text = _rawKeycode,
-                                                    color = Color(0xFF80DEEA), // 亮青綠色
-                                                    fontSize = candidateFontSize,
-                                                    fontWeight = FontWeight.Bold,
-                                                    maxLines = 1
-                                                )
-                                                if (_composingText.isNotEmpty()) {
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .width(1.dp)
-                                                            .height(14.dp)
-                                                            .background(Color(0xFF00796B).copy(alpha = 0.6f)) // 與外框呼應的精緻墨綠分界線
-                                                    )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                }
-                                            }
-                                            if (_composingText.isNotEmpty()) {
-                                                Text(
-                                                    text = _composingText,
-                                                    color = Color(0xFF4FC3F7), // 原本的亮藍色
-                                                    fontSize = candidateFontSize,
-                                                    fontWeight = FontWeight.Bold,
-                                                    maxLines = 1
-                                                )
-                                            }
-                                        }
+                                        // 只顯示轉換後的字根(如 木牛舟),不顯示英文原始碼
+                                        // (如 i2.)——使用者打大易看到英文碼只會混淆。
+                                        // 點擊仍可送出原始碼,保留中英混打能力。
+                                        val displayText = if (_composingText.isNotEmpty()) _composingText else _rawKeycode
+                                        Text(
+                                            text = displayText,
+                                            color = Color(0xFF4FC3F7),
+                                            fontSize = candidateFontSize,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1
+                                        )
                                     }
                                 }
                             }
@@ -746,34 +715,6 @@ open class CandidateView @JvmOverloads constructor(
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    fun RawKeycodeItem(
-        keycode: String,
-        fontSize: androidx.compose.ui.unit.TextUnit,
-        onClick: () -> Unit
-    ) {
-        // Distinct style: bordered box with different background
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .clickable(onClick = onClick)
-                .background(
-                    color = Color(0xFF3A3A3A), // Slightly lighter than gboardDark
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(horizontal = 12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = keycode,
-                color = Color(0xFF80DEEA), // Cyan color to distinguish from candidates
-                fontSize = fontSize,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
-            )
         }
     }
 

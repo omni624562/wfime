@@ -3097,16 +3097,19 @@ public class LIMEService extends InputMethodService implements
                         notifyDbQueryError();
                     }
 
-                    // Filter out the raw code (composing text) if it appears as a candidate
-                    // This fixes the issue where ASCII code like "nh1" shows up as the first candidate
+                    // Filter out the raw code (composing text) if it appears as a candidate.
+                    // isComposingCodeRecord() catches the raw-code record reliably — the old
+                    // [A-Za-z0-9]+ regex missed codes containing punctuation (e.g. Dayi "i2.")
+                    // so the ASCII code leaked into the candidate row on tablet and shifted
+                    // pick indices on phone.
                     if (list.size() > 0) {
                         java.util.Iterator<Mapping> iterator = list.iterator();
                         while (iterator.hasNext()) {
                             Mapping m = iterator.next();
                             String word = m.getWord();
-                            // Only remove if it's an exact ASCII match to the code
-                            // We don't want to remove actual Chinese characters that might match the code
-                            if (word != null && word.matches("[A-Za-z0-9]+") && word.equalsIgnoreCase(finalKeyString)) {
+                            if (m.isComposingCodeRecord()
+                                    || (word != null && word.matches("[A-Za-z0-9]+")
+                                            && word.equalsIgnoreCase(finalKeyString))) {
                                 iterator.remove();
                             }
                         }
@@ -3551,15 +3554,14 @@ public class LIMEService extends InputMethodService implements
                 mCandidateList = (LinkedList<Mapping>) suggestions;
                 try {
 
-                    if (suggestions.size() > 1 && suggestions.get(1).isExactMatchToCodeRecord()) {
+                    // Default selection: first candidate, unless it is the raw
+                    // composing-code record — then prefer the exact-match word
+                    // after it. (Composing-code records are filtered from Chinese
+                    // queries now; this guard keeps other paths correct.)
+                    selectedCandidate = suggestions.get(0);
+                    if (selectedCandidate.isComposingCodeRecord()
+                            && suggestions.size() > 1 && suggestions.get(1).isExactMatchToCodeRecord()) {
                         selectedCandidate = suggestions.get(1);
-                        // selectedIndex = 1;
-                        // this is for no exact match condition with code. //do not set default
-                        // suggestion for other record type like chinese punctuation symbols1 or related
-                        // phrases. Jeremy '15,6,4
-                    } else if (suggestions.size() > 0) {
-                        selectedCandidate = suggestions.get(0);
-
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
