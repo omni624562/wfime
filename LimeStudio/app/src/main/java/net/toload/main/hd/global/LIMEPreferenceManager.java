@@ -504,6 +504,18 @@ public class LIMEPreferenceManager {
         setParameter("dayi_smart_selection_context", value);
     }
 
+    /**
+     * Whether the user has agreed that translation mode sends typed text to
+     * Google's translation service. Defaults to false (no consent).
+     */
+    public boolean getTranslationConsent() {
+        return getParameterBoolean("translation_consent", false);
+    }
+
+    public void setTranslationConsent(boolean value) {
+        setParameter("translation_consent", value);
+    }
+
     private String preProcessTableName(String table) {
         if (table.endsWith("_") || table.equals("")) {
             return table; // processed already.

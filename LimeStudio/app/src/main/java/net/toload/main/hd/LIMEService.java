@@ -138,6 +138,7 @@ public class LIMEService extends InputMethodService implements
 
     // 即時翻譯模式狀態 (用於 Phase 2)
     public boolean isTranslationModeActive = false;
+    private java.util.concurrent.ExecutorService mTranslationExecutor = null;
     public StringBuilder translateQuery = new StringBuilder();
     public String translatedResult = "";
 
@@ -3886,6 +3887,12 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void toggleTranslationMode(boolean active) {
+        // Translation sends typed text to Google's servers — require explicit
+        // one-time consent before the mode can be turned on.
+        if (active && !mLIMEPref.getTranslationConsent()) {
+            showTranslationConsentDialog();
+            return;
+        }
         isTranslationModeActive = active;
         isTranslationModeState.setValue(active);
         
@@ -3917,7 +3924,65 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
+    private void showTranslationConsentDialog() {
+        if (mCandidateViewStandAlone == null || mCandidateViewStandAlone.getWindowToken() == null)
+            return;
+
+        android.view.ContextThemeWrapper themedCtx = new android.view.ContextThemeWrapper(
+                this, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog);
+        androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(themedCtx);
+        builder.setCancelable(true);
+        builder.setTitle(getResources().getString(R.string.translation_consent_title));
+        builder.setMessage(getResources().getString(R.string.translation_consent_message));
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setPositiveButton(R.string.translation_consent_agree,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface di, int which) {
+                        mLIMEPref.setTranslationConsent(true);
+                        di.dismiss();
+                        toggleTranslationMode(true);
+                    }
+                });
+
+        mOptionsDialog = builder.create();
+        Window window = mOptionsDialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams lp = window.getAttributes();
+            lp.token = mCandidateViewStandAlone.getWindowToken();
+            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+            window.setAttributes(lp);
+            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        }
+        mOptionsDialog.show();
+    }
+
+    /**
+     * True when the focused field is any kind of password input — translation
+     * must never send these to the network.
+     */
+    private boolean isPasswordInputField() {
+        EditorInfo ei = getCurrentInputEditorInfo();
+        if (ei == null)
+            return false;
+        int cls = ei.inputType & EditorInfo.TYPE_MASK_CLASS;
+        int variation = ei.inputType & EditorInfo.TYPE_MASK_VARIATION;
+        if (cls == EditorInfo.TYPE_CLASS_TEXT) {
+            return variation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+                    || variation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    || variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
+        }
+        if (cls == EditorInfo.TYPE_CLASS_NUMBER) {
+            return variation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD;
+        }
+        return false;
+    }
+
     public void performTranslationAsync(final String query) {
+        // Never send password-field content to the network, and never send
+        // anything without the user's explicit consent.
+        if (isPasswordInputField() || !mLIMEPref.getTranslationConsent())
+            return;
         if (query == null || query.trim().isEmpty()) {
             translatedResult = "";
             new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
@@ -3933,29 +3998,33 @@ public class LIMEService extends InputMethodService implements
             return;
         }
 
-        new Thread(new Runnable() {
+        if (mTranslationExecutor == null || mTranslationExecutor.isShutdown()) {
+            mTranslationExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
+        }
+        mTranslationExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                java.net.HttpURLConnection conn = null;
+                java.io.BufferedReader in = null;
                 try {
                     String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
                     String urlStr = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=" + encodedQuery;
-                    
+
                     java.net.URL url = new java.net.URL(urlStr);
-                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn = (java.net.HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
                     conn.setConnectTimeout(3000);
                     conn.setReadTimeout(3000);
-                    
+
                     int responseCode = conn.getResponseCode();
                     if (responseCode == 200) {
-                        java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
+                        in = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
                         StringBuilder response = new StringBuilder();
                         String inputLine;
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
                         }
-                        in.close();
-                        
+
                         String res = response.toString();
                         if (res.startsWith("[[[")) {
                             int firstQuote = res.indexOf("\"", 3);
@@ -3982,9 +4051,19 @@ public class LIMEService extends InputMethodService implements
                     }
                 } catch (Exception e) {
                     android.util.Log.e("TRANSLATE_DEBUG", "Failed to translate: " + e.getMessage(), e);
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (java.io.IOException ignored) {
+                        }
+                    }
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
                 }
             }
-        }).start();
+        });
     }
 
     @SuppressLint("InflateParams")
@@ -4665,6 +4744,10 @@ public class LIMEService extends InputMethodService implements
             queryFuture = null;
         }
         queryExecutor.shutdownNow();
+        if (mTranslationExecutor != null) {
+            mTranslationExecutor.shutdownNow();
+            mTranslationExecutor = null;
+        }
 
         // Persist pending smart selection learning data before the service dies
         try {
