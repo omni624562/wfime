@@ -847,14 +847,19 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return 0;
         int total = 0;
+        Cursor cursor = null;
         try {
 
-            total += db.rawQuery(
+            cursor = db.rawQuery(
                     "SELECT * FROM related where " + FIELD_DIC_score + " > 0",
-                    null).getCount();
+                    null);
+            total += cursor.getCount();
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (cursor != null)
+                cursor.close();
         }
         return total;
     }
@@ -1233,69 +1238,73 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         LinkedList<Mapping> newMappingList = new LinkedList<>();
 
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                HashSet<String> duplicateCheck = new HashSet<>();
+        try {
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    HashSet<String> duplicateCheck = new HashSet<>();
 
-                // int idColumn = cursor.getColumnIndex(FIELD_ID);
-                // int codeColumn = cursor.getColumnIndex(FIELD_CODE);
-                int wordColumn = cursor.getColumnIndex(FIELD_WORD);
-                // int scoreColumn = cursor.getColumnIndex(FIELD_SCORE);
-                do {
+                    // int idColumn = cursor.getColumnIndex(FIELD_ID);
+                    // int codeColumn = cursor.getColumnIndex(FIELD_CODE);
+                    int wordColumn = cursor.getColumnIndex(FIELD_WORD);
+                    // int scoreColumn = cursor.getColumnIndex(FIELD_SCORE);
+                    do {
 
-                    Mapping munit = new Mapping();
-                    munit.setCode(code);
-                    munit.setPartialMatchToCodeRecord();
-                    munit.setWord(cursor.getString(wordColumn));
-                    munit.setId(null);
-                    munit.setScore(0);
+                        Mapping munit = new Mapping();
+                        munit.setCode(code);
+                        munit.setPartialMatchToCodeRecord();
+                        munit.setWord(cursor.getString(wordColumn));
+                        munit.setId(null);
+                        munit.setScore(0);
 
-                    if (munit.getWord() == null || munit.getWord().trim().equals(""))
-                        continue;
+                        if (munit.getWord() == null || munit.getWord().trim().equals(""))
+                            continue;
 
-                    if (duplicateCheck.add(munit.getWord())) {
-                        newMappingList.add(munit);
+                        if (duplicateCheck.add(munit.getWord())) {
+                            newMappingList.add(munit);
+                        }
+                    } while (cursor.moveToNext());
+
+                    // Rebuild the related list string and update the record.
+                    String newRelatedlist;
+
+                    newRelatedlist = "";
+                    for (Mapping munit : newMappingList) {
+                        if (newRelatedlist.equals(""))
+                            newRelatedlist = munit.getWord();
+                        else
+                            newRelatedlist = newRelatedlist + "|" + munit.getWord();
+
                     }
-                } while (cursor.moveToNext());
-
-                // Rebuild the related list string and update the record.
-                String newRelatedlist;
-
-                newRelatedlist = "";
-                for (Mapping munit : newMappingList) {
-                    if (newRelatedlist.equals(""))
-                        newRelatedlist = munit.getWord();
-                    else
-                        newRelatedlist = newRelatedlist + "|" + munit.getWord();
+                    ContentValues cv = new ContentValues();
+                    cv.put(FIELD_RELATED, newRelatedlist);
+                    int highestScoreID = getHighestScoreIDOnDB(db, table, code);
+                    if (highestScoreID > 0) {
+                        db.update(table, cv, FIELD_ID + " = " + highestScoreID, null);
+                        if (DEBUG)
+                            Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): updating code =" + code
+                                    + ", the new relatedlist:" + newRelatedlist);
+                    } else {
+                        cv.put(FIELD_CODE, code);
+                        cv.put(FIELD_SCORE, 0);
+                        cv.put(FIELD_BASESCORE, 0);
+                        if (table.equals("phonetic"))
+                            cv.put(FIELD_NO_TONE_CODE, code.replaceAll("[3467 ]", "'")); // Jeremy '12,6,6 should build
+                                                                                         // noToneCode for phonetic
+                        db.insert(table, null, cv);
+                        if (DEBUG)
+                            Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): insert new code =" + code
+                                    + ", the new relatedlist:" + newRelatedlist);
+                    }
 
                 }
-                ContentValues cv = new ContentValues();
-                cv.put(FIELD_RELATED, newRelatedlist);
-                int highestScoreID = getHighestScoreIDOnDB(db, table, code);
-                if (highestScoreID > 0) {
-                    db.update(table, cv, FIELD_ID + " = " + highestScoreID, null);
-                    if (DEBUG)
-                        Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): updating code =" + code
-                                + ", the new relatedlist:" + newRelatedlist);
-                } else {
-                    cv.put(FIELD_CODE, code);
-                    cv.put(FIELD_SCORE, 0);
-                    cv.put(FIELD_BASESCORE, 0);
-                    if (table.equals("phonetic"))
-                        cv.put(FIELD_NO_TONE_CODE, code.replaceAll("[3467 ]", "'")); // Jeremy '12,6,6 should build
-                                                                                     // noToneCode for phonetic
-                    db.insert(table, null, cv);
-                    if (DEBUG)
-                        Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): insert new code =" + code
-                                + ", the new relatedlist:" + newRelatedlist);
-                }
+                if (DEBUG)
+                    Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): scorelist.size() =  "
+                            + newMappingList.size());
 
             }
-            if (DEBUG)
-                Log.i(TAG, "updateSimilarCodeListInRelatedColumnOnDB(): scorelist.size() =  " + newMappingList.size());
-
-            // cursor.deactivate();
-            cursor.close();
+        } finally {
+            if (cursor != null)
+                cursor.close();
         }
         return newMappingList;
     }
@@ -1626,9 +1635,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         try {
             if (!code.equals("")) {
 
+                Cursor cursor = null;
                 try {
 
-                    Cursor cursor;
                     // Jeremy '11,8,2 Query noToneCode instead of code for code contains no tone
                     // symbols
                     // Jeremy '12,6,5 rewrite to consistent with expanddualcode
@@ -1712,11 +1721,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
                     if (cursor != null) {
                         result = buildQueryResult(code, codeorig, cursor, getAllRecords);
-                        cursor.close();
                     }
 
                 } catch (SQLiteException e) {
                     e.printStackTrace();
+                } finally {
+                    if (cursor != null)
+                        cursor.close();
                 }
             }
         } catch (Exception e) {
@@ -2351,6 +2362,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 } else {
                     // Jeremy '11,8, 26 move valid code list building to buildqueryresult to avoid
                     // repeat query.
+                    Cursor cursor = null;
                     try {
                         String selectValidCodeClause = codeCol + " = '" + queryCode + "'";
                         if (!dualcode.equals(noToneCode)) { // code with tones. should strip tone symbols and add to the
@@ -2362,7 +2374,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         if (DEBUG)
                             Log.i(TAG, "expandDualCode() selectClause for exactmatch = " + selectValidCodeClause);
 
-                        Cursor cursor = db.query(tablename, col, selectValidCodeClause, null, null, null, null, "1");
+                        cursor = db.query(tablename, col, selectValidCodeClause, null, null, null, null, "1");
                         if (cursor != null) {
                             if (cursor.moveToFirst()) { // fist entry exist, the code is valid.
                                 if (DEBUG)
@@ -2420,7 +2432,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
                                 } else { // only add the code to black list
                                     blackListCache.put(cacheKey(dualcode), true);
-                                    cursor.close();
                                     if (DEBUG)
                                         Log.i(TAG, " expandDualCode() blackList code added, code = " + dualcode);
                                 }
@@ -2429,6 +2440,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                    } finally {
+                        if (cursor != null)
+                            cursor.close();
                     }
 
                 }
@@ -2735,31 +2749,34 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                             limitClause);
                 }
                 if (cursor != null) {
+                    try {
+                        if (cursor.moveToFirst()) {
 
-                    if (cursor.moveToFirst()) {
-
-                        int rsize = 0;
-                        do {
-                            Mapping munit = new Mapping();
-                            munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
-                            munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
-                            munit.setCode("");
-                            munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
-                            munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
-                            munit.setBasescore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
-                            munit.setRelatedPhraseRecord();
-                            result.add(munit);
-                            rsize++;
-                        } while (cursor.moveToNext());
-                        // Removed "..." indicator - now using horizontal scroll in CandidateView
-                        // Mapping temp = new Mapping();
-                        // temp.setCode("has_more_records");
-                        // temp.setWord("...");
-                        // temp.setHasMoreRecordsMarkRecord();
-                        // if ((!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT)))
-                        // result.add(temp);
+                            int rsize = 0;
+                            do {
+                                Mapping munit = new Mapping();
+                                munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
+                                munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
+                                munit.setCode("");
+                                munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
+                                munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
+                                munit.setBasescore(
+                                        cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
+                                munit.setRelatedPhraseRecord();
+                                result.add(munit);
+                                rsize++;
+                            } while (cursor.moveToNext());
+                            // Removed "..." indicator - now using horizontal scroll in CandidateView
+                            // Mapping temp = new Mapping();
+                            // temp.setCode("has_more_records");
+                            // temp.setWord("...");
+                            // temp.setHasMoreRecordsMarkRecord();
+                            // if ((!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT)))
+                            // result.add(temp);
+                        }
+                    } finally {
+                        cursor.close();
                     }
-                    cursor.close();
                 }
             }
         }
@@ -3902,17 +3919,22 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         + cword + "'", null, null, null, null, null);
             }
 
-            if (cursor.moveToFirst()) {
-                munit = new Mapping();
-                munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
-                munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
-                munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
-                munit.setBasescore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
-                munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
-                munit.setRelatedPhraseRecord();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        munit = new Mapping();
+                        munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
+                        munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
+                        munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
+                        munit.setBasescore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
+                        munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
+                        munit.setRelatedPhraseRecord();
 
+                    }
+                } finally {
+                    cursor.close();
+                }
             }
-            cursor.close();
 
         }
         return munit;
