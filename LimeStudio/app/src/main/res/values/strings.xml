@@ -253,4 +253,7 @@
     <!-- Clipboard paste (剪貼簿貼上) -->
     <string name="clipboard_empty">剪貼簿沒有內容 | Clipboard is empty</string>
 
+    <!-- Database error notice (字庫查詢錯誤提示) -->
+    <string name="db_query_error">字庫查詢失敗,請到設定重新載入輸入法字庫 | Dictionary query failed, please reload the IM tables in Settings</string>
+
 </resources>

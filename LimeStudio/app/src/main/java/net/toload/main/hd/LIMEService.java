@@ -2760,6 +2760,19 @@ public class LIMEService extends InputMethodService implements
      * The composing popup is more prominent and natural than Toast (which hides behind
      * the keyboard panel in IME service context on Samsung Android 16).
      */
+    // Surface DB query failures to the user instead of dying silently in the
+    // log — without this the keyboard just "stops giving candidates" with no
+    // hint. Rate-limited so a broken DB doesn't toast on every keystroke.
+    private volatile long mLastDbErrorNoticeTime = 0;
+
+    void notifyDbQueryError() {
+        long now = System.currentTimeMillis();
+        if (now - mLastDbErrorNoticeTime < 30000)
+            return;
+        mLastDbErrorNoticeTime = now;
+        mMainHandler.post(() -> Toast.makeText(this, R.string.db_query_error, Toast.LENGTH_LONG).show());
+    }
+
     private void showIMSwitchNotification(String imName) {
         if (imName == null || imName.isEmpty()) return;
 
@@ -3081,6 +3094,7 @@ public class LIMEService extends InputMethodService implements
                                 SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, getAllRecords));
                     } catch (Exception e) {
                         e.printStackTrace();
+                        notifyDbQueryError();
                     }
 
                     // Filter out the raw code (composing text) if it appears as a candidate
