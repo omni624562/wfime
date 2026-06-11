@@ -44,6 +44,9 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -64,6 +67,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Recomposer
@@ -605,7 +609,7 @@ open class CandidateView @JvmOverloads constructor(
                             )
                             // 當輸入框為空時，依然渲染一個置左閃爍的翠綠游標，表示已準備好輸入！
                             val infiniteTransition = rememberInfiniteTransition(label = "cursor")
-                            val alpha by infiniteTransition.animateFloat(
+                            val cursorAlpha by infiniteTransition.animateFloat(
                                 initialValue = 1f,
                                 targetValue = 0f,
                                 animationSpec = infiniteRepeatable(
@@ -618,7 +622,10 @@ open class CandidateView @JvmOverloads constructor(
                                 modifier = Modifier
                                     .width(2.dp)
                                     .height(18.dp)
-                                    .background(Color(0xFF00E676).copy(alpha = alpha))
+                                    // Read the animated alpha in the draw phase only,
+                                    // so the blink doesn't recompose the row every frame
+                                    .graphicsLayer { alpha = cursorAlpha }
+                                    .background(Color(0xFF00E676))
                             )
                         } else {
                             // 渲染主要輸入文字，並取得 TextLayoutResult
@@ -636,7 +643,7 @@ open class CandidateView @JvmOverloads constructor(
                                 val cursorIndex = translateCursorPosition.coerceIn(0, layoutResult.layoutInput.text.length)
                                 val cursorRect = layoutResult.getCursorRect(cursorIndex)
                                 val infiniteTransition = rememberInfiniteTransition(label = "cursor")
-                                val alpha by infiniteTransition.animateFloat(
+                                val cursorAlpha by infiniteTransition.animateFloat(
                                     initialValue = 1f,
                                     targetValue = 0f,
                                     animationSpec = infiniteRepeatable(
@@ -653,7 +660,9 @@ open class CandidateView @JvmOverloads constructor(
                                         )
                                         .width(2.dp)
                                         .height(with(density) { cursorRect.height.toDp() })
-                                        .background(Color(0xFF00E676).copy(alpha = alpha))
+                                        // Draw-phase alpha read — avoids per-frame recomposition
+                                        .graphicsLayer { alpha = cursorAlpha }
+                                        .background(Color(0xFF00E676))
                                 )
                             }
                         }
@@ -704,7 +713,9 @@ open class CandidateView @JvmOverloads constructor(
         
         // Stable Color — remembered so the object is not re-created on every recomposition
         val gboardDark = remember { Color(0xFF2B2B2B) }
-        val scrollState = rememberScrollState()
+        // LazyRow only composes the visible candidates; the old Row + horizontalScroll
+        // composed all (up to 210) items on every keystroke
+        val candidateListState = rememberLazyListState()
 
         // Font size only recalculates when _fontSizeScale or density changes
         val density = LocalDensity.current
@@ -717,13 +728,13 @@ open class CandidateView @JvmOverloads constructor(
         
         // Reset scroll position when suggestions change
         LaunchedEffect(suggestions) {
-            scrollState.scrollTo(0)
+            candidateListState.scrollToItem(0)
         }
-        
+
         // Check if we're at the end of scroll
         val isAtEnd = remember {
             derivedStateOf {
-                scrollState.value >= scrollState.maxValue
+                !candidateListState.canScrollForward
             }
         }
         // Determine base height: use a premium, stable height of 48dp globally to completely eliminate layout shifting.
@@ -807,24 +818,26 @@ open class CandidateView @JvmOverloads constructor(
                                     .weight(1f)
                                     .fillMaxHeight()
                             ) {
-                                Row(
+                                LazyRow(
+                                    state = candidateListState,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .horizontalScroll(scrollState)
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     if (!isTablet && _rawKeycode.isNotEmpty()) {
-                                        RawKeycodeItem(
-                                            keycode = _rawKeycode,
-                                            fontSize = candidateFontSize,
-                                            onClick = {
-                                                mService?.commitTyped(_rawKeycode)
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        item(key = "rawKeycode") {
+                                            RawKeycodeItem(
+                                                keycode = _rawKeycode,
+                                                fontSize = candidateFontSize,
+                                                onClick = {
+                                                    mService?.commitTyped(_rawKeycode)
+                                                }
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                        }
                                     }
-                                    visibleSuggestions.forEachIndexed { i, mapping ->
+                                    itemsIndexed(visibleSuggestions) { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
                                             mapping = mapping,
