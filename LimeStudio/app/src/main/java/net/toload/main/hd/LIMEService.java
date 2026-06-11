@@ -4153,93 +4153,36 @@ public class LIMEService extends InputMethodService implements
                         + (primaryCode == MY_KEYCODE_SPACE && activeIM.equals("phonetic"))
                         + " mEnglishOnly:" + mEnglishOnly);
 
-            if ((!hasSymbolMapping) && (primaryCode == ',' || primaryCode == '.')) { // Chinese , and . processing
-                                                                                     // //Jeremy '12,4,29 use
-                                                                                     // mEnglishOnly instead of onIM
-                mComposing.append((char) primaryCode);
-                // InputConnection ic=getCurrentInputConnection();
-                // InputConnection ic=getCurrentInputConnection();
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
-                // misMatched = mComposing.toString();
-            } else if (!hasSymbolMapping && !hasNumberMapping // Jeremy '11,10.19 fixed to bypass number key in et26 and
-                                                              // hsu
-                    && (isValidLetter(primaryCode)
-                            || (primaryCode == MY_KEYCODE_SPACE && activeIM.equals("phonetic"))) // Jeremy '11,9,6 for
-                                                                                                 // et26 and hsu
-                    && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                // Log.i(TAG,"handlecharacter(), onIM and no number and no symbol mapping");
-                mComposing.append((char) primaryCode);
-                // InputConnection ic=getCurrentInputConnection();
-                // InputConnection ic=getCurrentInputConnection();
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
-                // misMatched = mComposing.toString();
-            } else if (!hasSymbolMapping
-                    && hasNumberMapping
-                    && (isValidLetter(primaryCode) || isValidDigit(primaryCode))
-                    && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                mComposing.append((char) primaryCode);
-                // InputConnection ic=getCurrentInputConnection();
-                // InputConnection ic=getCurrentInputConnection();
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
-                // misMatched = mComposing.toString();
-            } else if (hasSymbolMapping
-                    && !hasNumberMapping
-                    && (isValidLetter(primaryCode) || isValidSymbol(primaryCode)
-                            || (primaryCode == MY_KEYCODE_SPACE && activeIM.equals("phonetic"))) // Jeremy '11,9,6 for
-                                                                                                 // chacha
-                    && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                mComposing.append((char) primaryCode);
-                // InputConnection ic=getCurrentInputConnection();
-                // InputConnection ic=getCurrentInputConnection();
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
-                // misMatched = mComposing.toString();
-            } else if (hasSymbolMapping && !hasNumberMapping
-                    && mComposing != null && mComposing.length() >= 1
-                    && getCurrentInputConnection().getTextBeforeCursor(1, 1).charAt(0) == 'w'
-                    && Character.isDigit((char) primaryCode)
-                    && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                // 27.May.2011 Art : This is the method to check user input type
-                // if first previous character is w and second char is number then enable im
-                // mode.
-                mComposing.append((char) primaryCode);
-                // InputConnection ic=getCurrentInputConnection();
-                // InputConnection ic=getCurrentInputConnection();
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
-                // misMatched = mComposing.toString();
-            } else if (hasSymbolMapping
-                    && hasNumberMapping
-                    && (isValidSymbol(primaryCode)
-                            || (primaryCode == MY_KEYCODE_SPACE && activeIM.equals("phonetic"))
-                            || isValidLetter(primaryCode) || isValidDigit(primaryCode))
-                    && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                // Fixed: Ensure proper character handling for dayi input method
-                mComposing.append((char) primaryCode);
-                // if (ic != null)
-                // ic.setComposingText(getComposingDisplayString(mComposing.toString()), 1);
-                // Just update CandidateView composing text
-                getComposingDisplayString(mComposing.toString());
-                updateCandidates();
+            // Decide whether this key extends the composing code. The mapping
+            // flags (hasSymbolMapping/hasNumberMapping) pick which key classes
+            // are valid roots for the active IM; the action afterwards is the
+            // same for every branch (append + refresh display + query).
+            boolean phoneticSpace = primaryCode == MY_KEYCODE_SPACE && activeIM.equals("phonetic");
+            boolean compose;
+            if (!hasSymbolMapping) {
+                // Chinese , and . processing; et26/hsu bypass number keys
+                compose = (primaryCode == ',' || primaryCode == '.')
+                        || isValidLetter(primaryCode) || phoneticSpace
+                        || (hasNumberMapping && isValidDigit(primaryCode));
+            } else if (!hasNumberMapping) {
+                compose = isValidLetter(primaryCode) || isValidSymbol(primaryCode) || phoneticSpace;
+                // 27.May.2011 Art: if previous char is 'w' and this is a digit,
+                // treat it as code input (e.g. w-number addresses)
+                if (!compose && mComposing != null && mComposing.length() >= 1
+                        && Character.isDigit((char) primaryCode) && ic != null) {
+                    CharSequence before = ic.getTextBeforeCursor(1, 1);
+                    compose = before != null && before.length() > 0 && before.charAt(0) == 'w';
+                }
+            } else {
+                compose = isValidSymbol(primaryCode) || phoneticSpace
+                        || isValidLetter(primaryCode) || isValidDigit(primaryCode);
+            }
 
+            if (compose) {
+                mComposing.append((char) primaryCode);
+                // Just update CandidateView composing text
+                getComposingDisplayString(mComposing.toString());
+                updateCandidates();
             } else {
                 // Fixed: Simplified character handling - directly commit if no other conditions
                 // match
