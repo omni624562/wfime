@@ -483,8 +483,8 @@ public class LIMEService extends InputMethodService implements
             }
         }
 
-        Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
-        Log.d("EMOJI_DEBUG", "mFixedCandidateViewOn = " + mFixedCandidateViewOn);
+        if (DEBUG) Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
+        if (DEBUG) Log.d("EMOJI_DEBUG", "mFixedCandidateViewOn = " + mFixedCandidateViewOn);
 
         if (mInputViewContainer == null) {
             Log.d("KBD_DEBUG", "Creating new FrameLayout for input container");
@@ -717,7 +717,7 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void toggleEmojiVisibility() {
-        Log.d("EMOJI_DEBUG", "=== toggleEmojiVisibility() called ===");
+        if (DEBUG) Log.d("EMOJI_DEBUG", "=== toggleEmojiVisibility() called ===");
 
         // If memo panel is open, close it first
         if (mMemoKeyboardView != null && mMemoKeyboardView.getVisibility() == View.VISIBLE) {
@@ -726,7 +726,7 @@ public class LIMEService extends InputMethodService implements
 
         // Lazy load emoji picker view only when user actually clicks it
         if (mEmojiKeyboardView == null && mInputViewContainer != null) {
-            Log.d("EMOJI_DEBUG", "Creating emoji picker view lazily via ComposeBridge");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Creating emoji picker view lazily via ComposeBridge");
             mEmojiKeyboardView = net.toload.main.hd.ComposeBridge.INSTANCE.createEmojiPickerView(this, this);
             if (mEmojiKeyboardView != null) {
                 mEmojiKeyboardView.setVisibility(View.GONE);
@@ -754,25 +754,25 @@ public class LIMEService extends InputMethodService implements
             return;
         }
 
-        Log.d("EMOJI_DEBUG", "mEmojiKeyboardView exists, current visibility: " + mEmojiKeyboardView.getVisibility());
-        Log.d("EMOJI_DEBUG",
+        if (DEBUG) Log.d("EMOJI_DEBUG", "mEmojiKeyboardView exists, current visibility: " + mEmojiKeyboardView.getVisibility());
+        if (DEBUG) Log.d("EMOJI_DEBUG",
                 "View.VISIBLE=" + View.VISIBLE + ", View.GONE=" + View.GONE + ", View.INVISIBLE=" + View.INVISIBLE);
 
         if (mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
-            Log.d("EMOJI_DEBUG", "Emoji picker is VISIBLE, closing it...");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Emoji picker is VISIBLE, closing it...");
             closeEmojiPicker();
         } else {
-            Log.d("EMOJI_DEBUG", "Emoji picker is HIDDEN, showing it...");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Emoji picker is HIDDEN, showing it...");
 
             // FIRST: Hide other views to prevent overlap
             if (mInputView != null) {
-                Log.d("EMOJI_DEBUG", "Hiding mInputView");
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Hiding mInputView");
                 mInputView.setVisibility(View.GONE);
             }
 
             // Hide candidate view BEFORE showing emoji picker
             if (mFixedCandidateViewOn && mCandidateInInputView != null) {
-                Log.d("EMOJI_DEBUG", "Hiding mCandidateInInputView (fixed mode)");
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Hiding mCandidateInInputView (fixed mode)");
                 mCandidateInInputView.setVisibility(View.GONE);
 
                 // Also hide all children of CandidateInInputView to prevent any overlap
@@ -780,12 +780,12 @@ public class LIMEService extends InputMethodService implements
                     android.view.ViewGroup group = (android.view.ViewGroup) mCandidateInInputView;
                     for (int i = 0; i < group.getChildCount(); i++) {
                         group.getChildAt(i).setVisibility(View.GONE);
-                        Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: "
+                        if (DEBUG) Log.d("EMOJI_DEBUG", "  Hiding child " + i + " of CandidateInInputView: "
                                 + group.getChildAt(i).getClass().getSimpleName());
                     }
                 }
             } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
-                Log.d("EMOJI_DEBUG", "Hiding candidate view");
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Hiding candidate view");
                 hideCandidateView();
             }
 
@@ -802,20 +802,20 @@ public class LIMEService extends InputMethodService implements
             mInputViewContainer.requestLayout();
             mInputViewContainer.invalidate();
 
-            Log.d("EMOJI_DEBUG", "Emoji picker should now be visible!");
-            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView visibility after: " + mEmojiKeyboardView.getVisibility());
-            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView height: " + mEmojiKeyboardView.getHeight());
-            Log.d("EMOJI_DEBUG", "mEmojiKeyboardView width: " + mEmojiKeyboardView.getWidth());
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Emoji picker should now be visible!");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "mEmojiKeyboardView visibility after: " + mEmojiKeyboardView.getVisibility());
+            if (DEBUG) Log.d("EMOJI_DEBUG", "mEmojiKeyboardView height: " + mEmojiKeyboardView.getHeight());
+            if (DEBUG) Log.d("EMOJI_DEBUG", "mEmojiKeyboardView width: " + mEmojiKeyboardView.getWidth());
             if (mCandidateInInputView != null) {
-                Log.d("EMOJI_DEBUG", "mCandidateInInputView visibility: " + mCandidateInInputView.getVisibility());
+                if (DEBUG) Log.d("EMOJI_DEBUG", "mCandidateInInputView visibility: " + mCandidateInInputView.getVisibility());
             }
 
             // Debug: Check all children in container
             if (mInputViewContainer != null) {
-                Log.d("EMOJI_DEBUG", "Container children count: " + mInputViewContainer.getChildCount());
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Container children count: " + mInputViewContainer.getChildCount());
                 for (int i = 0; i < mInputViewContainer.getChildCount(); i++) {
                     android.view.View child = mInputViewContainer.getChildAt(i);
-                    Log.d("EMOJI_DEBUG", "  Child " + i + ": " + child.getClass().getSimpleName() +
+                    if (DEBUG) Log.d("EMOJI_DEBUG", "  Child " + i + ": " + child.getClass().getSimpleName() +
                             " visibility=" + child.getVisibility() +
                             " z=" + child.getZ());
                 }
@@ -824,9 +824,9 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void closeEmojiPicker() {
-        Log.d("EMOJI_DEBUG", "=== closeEmojiPicker() called ===");
+        if (DEBUG) Log.d("EMOJI_DEBUG", "=== closeEmojiPicker() called ===");
         if (mEmojiKeyboardView != null && mEmojiKeyboardView.getVisibility() == View.VISIBLE) {
-            Log.d("EMOJI_DEBUG", "Closing emoji picker");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Closing emoji picker");
             mEmojiKeyboardView.setVisibility(View.GONE);
 
             Configuration closeCfg = getResources().getConfiguration();
@@ -834,7 +834,7 @@ public class LIMEService extends InputMethodService implements
 
             // Restore candidate view in fixed mode (physical keyboard always uses fixed mode)
             if ((mFixedCandidateViewOn || physKeyConnected) && mCandidateInInputView != null) {
-                Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode, physKey=" + physKeyConnected + ")");
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Restoring mCandidateInInputView (fixed mode, physKey=" + physKeyConnected + ")");
                 mCandidateInInputView.setVisibility(View.VISIBLE);
 
                 // Restore children — but honour physical-keyboard state:
@@ -847,19 +847,19 @@ public class LIMEService extends InputMethodService implements
                         // Keep virtual keyboard hidden when physical keyboard is attached
                         if (physKeyConnected && child.getId() == R.id.keyboard) {
                             child.setVisibility(View.GONE);
-                            Log.d("EMOJI_DEBUG", "  Keeping keyboard child GONE (physical keyboard connected)");
+                            if (DEBUG) Log.d("EMOJI_DEBUG", "  Keeping keyboard child GONE (physical keyboard connected)");
                         } else {
                             child.setVisibility(View.VISIBLE);
-                            Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
+                            if (DEBUG) Log.d("EMOJI_DEBUG", "  Restoring child " + i + " visibility");
                         }
                     }
                 }
             } else if (mInputView != null && !physKeyConnected) {
-                Log.d("EMOJI_DEBUG", "Showing virtual keyboard again");
+                if (DEBUG) Log.d("EMOJI_DEBUG", "Showing virtual keyboard again");
                 mInputView.setVisibility(View.VISIBLE);
             }
         } else {
-            Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
+            if (DEBUG) Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
         }
     }
 
@@ -1493,7 +1493,6 @@ public class LIMEService extends InputMethodService implements
      */
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
-        Log.e(TAG, "onKeyDown() called with keyCode=" + keyCode + " event=" + event);
         // Clean code by jeremy '11,8,22
         if (DEBUG)
             Log.i(TAG, "OnKeyDown():keyCode:" + keyCode
