@@ -175,33 +175,23 @@ public class SmartSelectionManager {
     }
 
     /**
-     * Compute the ranking score for one candidate under the manager's lock,
-     * so callers never touch mutable CandidateStats internals unsynchronized.
+     * Pure context signal per spec: how many times this word was chosen for
+     * this code right after prevChar. No global counts, no recency — the
+     * candidate order must stay muscle-memory stable; the caller promotes at
+     * most ONE context-predicted candidate to the front. Runs under the
+     * manager's lock so callers never touch CandidateStats unsynchronized.
      */
-    public synchronized double getScore(String code, String word, String prevChar,
-            boolean recentEnabled, boolean contextEnabled, long now) {
-        if (code == null || word == null) return 0.0;
+    public synchronized int getContextCount(String code, String word, String prevChar) {
+        if (code == null || word == null || prevChar == null || prevChar.isEmpty())
+            return 0;
         Map<String, CandidateStats> wordStats = statsMap.get(code.trim().toLowerCase());
-        if (wordStats == null) return 0.0;
+        if (wordStats == null)
+            return 0;
         CandidateStats stats = wordStats.get(word);
-        if (stats == null) return 0.0;
-
-        double score = stats.count;
-
-        if (contextEnabled && prevChar != null && !prevChar.isEmpty()) {
-            Integer prevCount = stats.prev.get(prevChar);
-            if (prevCount != null) {
-                score += prevCount * 2.0;
-            }
-        }
-
-        if (recentEnabled) {
-            double ageDays = (double) (now - stats.last) / (1000.0 * 60.0 * 60.0 * 24.0);
-            if (ageDays < 0) ageDays = 0;
-            score += 3.0 / (1.0 + ageDays / 7.0);
-        }
-
-        return score;
+        if (stats == null)
+            return 0;
+        Integer prevCount = stats.prev.get(prevChar);
+        return prevCount != null ? prevCount : 0;
     }
 
     public synchronized void clearData() {

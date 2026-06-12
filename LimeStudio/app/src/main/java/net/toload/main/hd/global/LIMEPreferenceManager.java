@@ -488,21 +488,8 @@ public class LIMEPreferenceManager {
         setParameter("dayi_smart_selection", value);
     }
 
-    public boolean getDayiSmartSelectionRecentEnabled() {
-        return getParameterBoolean("dayi_smart_selection_recent", true);
-    }
-
-    public void setDayiSmartSelectionRecentEnabled(boolean value) {
-        setParameter("dayi_smart_selection_recent", value);
-    }
-
-    public boolean getDayiSmartSelectionContextEnabled() {
-        return getParameterBoolean("dayi_smart_selection_context", true);
-    }
-
-    public void setDayiSmartSelectionContextEnabled(boolean value) {
-        setParameter("dayi_smart_selection_context", value);
-    }
+    // Recent/context sub-toggles removed per spec change: smart selection is
+    // now pure context prediction (no recency weighting, no global re-sort).
 
     private String preProcessTableName(String table) {
         if (table.endsWith("_") || table.equals("")) {

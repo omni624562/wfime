@@ -801,31 +801,9 @@ fun ImSettingsSection(
 
                     SwitchPreference(
                         title = "啟用智慧選字",
-                        summary = "開啟後，大易候選字將依打字習慣自動調整排序",
+                        summary = "依前一個字預測,最多把一個候選提到第 1 位;其餘候選維持固定順序(肌肉記憶安全)",
                         checked = uiState.dayiSmartSelection,
                         onCheckedChange = { viewModel.setDayiSmartSelection(it) },
-                        color = Color.Transparent
-                    )
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-
-                    SwitchPreference(
-                        title = "近期選字優先",
-                        summary = "最近選過的字享有短期加權",
-                        checked = uiState.dayiSmartSelectionRecent,
-                        onCheckedChange = { viewModel.setDayiSmartSelectionRecent(it) },
-                        enabled = uiState.dayiSmartSelection,
-                        color = Color.Transparent
-                    )
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-
-                    SwitchPreference(
-                        title = "前一字上下文加權",
-                        summary = "常連用的候選字會再往前排",
-                        checked = uiState.dayiSmartSelectionContext,
-                        onCheckedChange = { viewModel.setDayiSmartSelectionContext(it) },
-                        enabled = uiState.dayiSmartSelection,
                         color = Color.Transparent
                     )
 

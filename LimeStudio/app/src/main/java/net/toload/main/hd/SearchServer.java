@@ -134,7 +134,15 @@ public class SearchServer {
         return tablename;
     }
 
+    // The char committed before lastCommittedChar — used to de-pollute
+    // context learning when the commit path updates lastCommittedChar to the
+    // just-picked word before recordSelection() runs.
+    private static String prevBeforeLastCommittedChar = null;
+
     public static void setLastCommittedChar(String c) {
+        if (c != null && !c.equals(lastCommittedChar)) {
+            prevBeforeLastCommittedChar = lastCommittedChar;
+        }
         lastCommittedChar = c;
     }
 
@@ -763,45 +771,35 @@ public class SearchServer {
             Log.i(TAG, "getMappingByCode() result.size()=" + result.size());
 
         if (tablename.startsWith("dayi") && mLIMEPref.getDayiSmartSelectionEnabled() && result.size() > 1) {
+            // 純上下文預測(肌肉記憶安全):只看「前一個字之後,這個碼選過
+            // 哪個字」的記錄,把最有把握的一個候選提到第 1 位;其餘候選
+            // 維持字庫原始順序,不做任何全域重排。
             try {
                 final SmartSelectionManager manager = SmartSelectionManager.getInstance(mContext);
-                final boolean recentEnabled = mLIMEPref.getDayiSmartSelectionRecentEnabled();
-                final boolean contextEnabled = mLIMEPref.getDayiSmartSelectionContextEnabled();
                 final String prevChar = lastCommittedChar;
-                final long now = System.currentTimeMillis();
-
-                // Store original indices for stable sorting when scores are equal,
-                // and precompute each candidate's score once (O(n)) instead of
-                // re-querying SmartSelectionManager inside the comparator.
-                final java.util.Map<Mapping, Integer> originalIndices = new java.util.HashMap<>();
-                final java.util.Map<Mapping, Double> precomputedScores = new java.util.HashMap<>();
-                for (int i = 0; i < result.size(); i++) {
-                    Mapping m = result.get(i);
-                    originalIndices.put(m, i);
-                    precomputedScores.put(m,
-                            manager.getScore(m.getCode(), m.getWord(), prevChar, recentEnabled, contextEnabled, now));
-                }
-
-                java.util.Collections.sort(result, new java.util.Comparator<Mapping>() {
-                    @Override
-                    public int compare(Mapping m1, Mapping m2) {
-                        double score1 = precomputedScores.get(m1);
-                        double score2 = precomputedScores.get(m2);
-                        if (Math.abs(score1 - score2) < 0.0001) {
-                            // Stable sort: preserve original order
-                            return Integer.compare(originalIndices.get(m1), originalIndices.get(m2));
+                if (prevChar != null && !prevChar.isEmpty()) {
+                    int bestIndex = -1;
+                    int bestCount = 0;
+                    for (int i = 0; i < result.size(); i++) {
+                        Mapping m = result.get(i);
+                        int c = manager.getContextCount(m.getCode(), m.getWord(), prevChar);
+                        if (c > bestCount) { // strictly greater: ties keep the earlier (DB-order) candidate
+                            bestCount = c;
+                            bestIndex = i;
                         }
-                        return Double.compare(score2, score1); // Descending order
                     }
-                });
-
-                if (DEBUG || Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "getMappingByCode() Dayi smart selection sorting applied.");
+                    if (bestIndex > 0) {
+                        result.add(0, result.remove(bestIndex));
+                        if (DEBUG)
+                            Log.d(TAG, "getMappingByCode() context prediction promoted index "
+                                    + bestIndex + " (count=" + bestCount + ")");
+                    }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error applying Dayi smart selection sorting", e);
+                Log.e(TAG, "Error applying Dayi context prediction", e);
             }
-        } else if (lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
+        } else if (!tablename.startsWith("dayi")
+                && lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
             try {
                 List<Mapping> related = getRelatedPhrase(lastCommittedChar, false);
                 if (related != null && !related.isEmpty()) {
@@ -1056,6 +1054,11 @@ public class SearchServer {
                     sort = mLIMEPref.getPhysicalKeyboardSortSuggestions();
                 else
                     sort = mLIMEPref.getSortSuggestions();
+
+                // 肌肉記憶安全規格:大易候選順序固定,不做使用頻率冒泡重排
+                // (分數仍累計入 DB;唯一的順序調整是查詢時的純上下文單一提升)
+                if (tablename != null && tablename.startsWith("dayi"))
+                    sort = false;
 
                 if (sort) { // Jeremy '12,5,22 do not update the order of exact match list if the sort
                             // option is off
@@ -1467,7 +1470,13 @@ public class SearchServer {
             final Mapping updateMappingTemp = new Mapping(updateMapping);
 
             if (tablename.startsWith("dayi") && mLIMEPref.getDayiSmartSelectionEnabled()) {
-                final String prev = lastCommittedChar;
+                // If lastCommittedChar is already the picked word itself (the
+                // commit path updated it first), the real context is the char
+                // before it.
+                String prevTmp = lastCommittedChar;
+                if (prevTmp != null && prevTmp.equals(updateMappingTemp.getWord()))
+                    prevTmp = prevBeforeLastCommittedChar;
+                final String prev = prevTmp;
                 backgroundExecutor.execute(new Runnable() {
                     @Override
                     public void run() {

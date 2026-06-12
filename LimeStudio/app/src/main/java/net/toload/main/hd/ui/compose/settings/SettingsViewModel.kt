@@ -89,9 +89,7 @@ data class SettingsUiState(
     val enablePhonetic: Boolean = true,
 
     // Dayi smart selection
-    val dayiSmartSelection: Boolean = true,
-    val dayiSmartSelectionRecent: Boolean = true,
-    val dayiSmartSelectionContext: Boolean = true
+    val dayiSmartSelection: Boolean = true
 )
 
 /**
@@ -191,9 +189,7 @@ class SettingsViewModel(
                     isDayiImported = isDayi,
                     enableDayi = preferenceManager.getIMActivatedState().contains("0"),
                     enablePhonetic = preferenceManager.getIMActivatedState().contains("1"),
-                    dayiSmartSelection = preferenceManager.getDayiSmartSelectionEnabled(),
-                    dayiSmartSelectionRecent = preferenceManager.getDayiSmartSelectionRecentEnabled(),
-                    dayiSmartSelectionContext = preferenceManager.getDayiSmartSelectionContextEnabled()
+                    dayiSmartSelection = preferenceManager.getDayiSmartSelectionEnabled()
                 )
             }
         }
@@ -414,16 +410,6 @@ class SettingsViewModel(
     fun setDayiSmartSelection(value: Boolean) {
         preferenceManager.setDayiSmartSelectionEnabled(value)
         _uiState.update { it.copy(dayiSmartSelection = value) }
-    }
-
-    fun setDayiSmartSelectionRecent(value: Boolean) {
-        preferenceManager.setDayiSmartSelectionRecentEnabled(value)
-        _uiState.update { it.copy(dayiSmartSelectionRecent = value) }
-    }
-
-    fun setDayiSmartSelectionContext(value: Boolean) {
-        preferenceManager.setDayiSmartSelectionContextEnabled(value)
-        _uiState.update { it.copy(dayiSmartSelectionContext = value) }
     }
 
     fun clearDayiSmartSelectionData() {
