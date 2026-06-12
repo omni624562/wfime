@@ -89,104 +89,104 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public static final String DB_MEMO_COLUMN_CONTENT = "content";
     public static final String DB_MEMO_COLUMN_PINNED = "pinned";
     public static final String DB_MEMO_COLUMN_CREATED_AT = "created_at";
-    private static final boolean DEBUG = false;
-    private static final String TAG = "LIMEDB";
+    static final boolean DEBUG = false;
+    static final String TAG = "LIMEDB";
     private final static int DATABASE_VERSION = 103;
     // Jeremy '11,8,5
     // TODO: should set INITIAL_RESULT_LIMIT according to screen size.
-    private final static String INITIAL_RESULT_LIMIT = "15";
-    private final static String FINAL_RESULT_LIMIT = "210";
+    final static String INITIAL_RESULT_LIMIT = "15";
+    final static String FINAL_RESULT_LIMIT = "210";
     private final static int INITIAL_RELATED_LIMIT = 5;
-    private final static int COMPOSING_CODE_LENGTH_LIMIT = 16; // Jeremy '12,5,30 changed from 12 to 16 because of
+    final static int COMPOSING_CODE_LENGTH_LIMIT = 16; // Jeremy '12,5,30 changed from 12 to 16 because of
                                                                // improved performance using binary tree.
-    private final static int DUALCODE_COMPOSING_LIMIT = 16; // Jeremy '12,5,30 changed from 7 to 16 because of improved
+    final static int DUALCODE_COMPOSING_LIMIT = 16; // Jeremy '12,5,30 changed from 7 to 16 because of improved
                                                             // performance using binary tree.
-    private final static int DUALCODE_NO_CHECK_LIMIT = 2; // Jeremy '12,5,30 changed from 5 to 3 for phonetic correct
+    final static int DUALCODE_NO_CHECK_LIMIT = 2; // Jeremy '12,5,30 changed from 5 to 3 for phonetic correct
                                                           // valid code display.
     private final static int BETWEEN_SEARCH_WAY_BACK_LEVELS = 5; // Jeremy '15,6,30
     // for keyToChar
-    private final static String DAYI_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
-    private final static String DAYI_CHAR = "言|牛|目|四|王|門|田|米|足|金|石|山|一|工|糸|火|艸|木|口|耳|人|革|日|土|手|鳥|月|立|女|虫|心|水|鹿|禾|馬|魚|雨|力|舟|竹";
-    private final static String BPMF_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
-    private final static String BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
-    private final static String SHIFTED_NUMBERIC_KEY = "!@#$%^&*()";
-    private final static String SHIFTED_NUMBERIC_KEY_REMAP = "1234567890";
-    private final static String SHIFTED_SYMBOL_KEY = "<>?_:+\"";
-    private final static String SHIFTED_SYMBOL_KEY_REMAP = ",./-;='";
-    private final static String ETEN_KEY = "abcdefghijklmnopqrstuvwxyz12347890-=;',./!@#$&*()<>?_+:\"";
-    private final static String ETEN_KEY_REMAP = "81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg7634f0p;5tg/yh-";
-    private final static String ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ" +
+    final static String DAYI_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
+    final static String DAYI_CHAR = "言|牛|目|四|王|門|田|米|足|金|石|山|一|工|糸|火|艸|木|口|耳|人|革|日|土|手|鳥|月|立|女|虫|心|水|鹿|禾|馬|魚|雨|力|舟|竹";
+    final static String BPMF_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
+    final static String BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
+    final static String SHIFTED_NUMBERIC_KEY = "!@#$%^&*()";
+    final static String SHIFTED_NUMBERIC_KEY_REMAP = "1234567890";
+    final static String SHIFTED_SYMBOL_KEY = "<>?_:+\"";
+    final static String SHIFTED_SYMBOL_KEY_REMAP = ",./-;='";
+    final static String ETEN_KEY = "abcdefghijklmnopqrstuvwxyz12347890-=;',./!@#$&*()<>?_+:\"";
+    final static String ETEN_KEY_REMAP = "81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg7634f0p;5tg/yh-";
+    final static String ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ" +
             "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄓ|ㄔ|ㄕ|ㄥ|ㄦ|ㄗ|ㄘ";
-    private final static String ETEN26_KEY = "qazwsxedcrfvtgbyhnujmikolp,.";
-    private final static String ETEN26_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
-    private final static String ETEN26_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
-    private final static String ETEN26_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String ETEN26_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String ETEN26_CHAR_INITIAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|ㄉ|(ㄕ/ㄒ)|ㄜ|ㄈ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ㄖ|(ㄇ/ㄢ)|ㄞ|ㄎ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
-    private final static String ETEN26_CHAR_FINAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|˙|(ㄕ/ㄒ)|ㄜ|ˊ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ˇ|(ㄇ/ㄢ)|ㄞ|ˋ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
-    private final static String MILESTONE3_DAYI_CHAR = "言|石|人|心|牛|山|革|水|目|一|日|鹿|四|工|土|禾|王|糸|手|馬|門|火|鳥|魚|田|" +
+    final static String ETEN26_KEY = "qazwsxedcrfvtgbyhnujmikolp,.";
+    final static String ETEN26_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
+    final static String ETEN26_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
+    final static String ETEN26_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String ETEN26_DUALKEY = "yhvewrscpaxqs3467";
+    final static String ETEN26_CHAR_INITIAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|ㄉ|(ㄕ/ㄒ)|ㄜ|ㄈ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ㄖ|(ㄇ/ㄢ)|ㄞ|ㄎ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
+    final static String ETEN26_CHAR_FINAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|˙|(ㄕ/ㄒ)|ㄜ|ˊ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ˇ|(ㄇ/ㄢ)|ㄞ|ˋ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
+    final static String MILESTONE3_DAYI_CHAR = "言|石|人|心|牛|山|革|水|目|一|日|鹿|四|工|土|禾|王|糸|手|馬|門|火|鳥|魚|田|" +
             "艸|月|雨|米|木|立|(力/虫)|足|口|女|舟|金|耳|竹";
-    private final static String MILESTONE3_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|" +
+    final static String MILESTONE3_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|" +
             "ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|(ㄠ/ㄤ)|(ㄡ/ㄥ)|ㄢ|ㄣ|ㄥ";
 
     private final static String CJ_KEY = "abcdefghijklmnopqrstuvwxyz";
     private final static String CJ_CHAR = "日|月|金|木|水|火|土|竹|戈|十|大|中|一|弓|人|心|手|口|尸|廿|山|女|田|難|卜";
-    private final static String MILESTONE_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    private final static String MILESTONE_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    private final static String MILESTONE_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
-    private final static String MILESTONE_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    private final static String MILESTONE_DUALKEY = "yhvewrscpaxq3467";
-    private final static String MILESTONE_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String MILESTONE_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String MILESTONE_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String MILESTONE2_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    private final static String MILESTONE2_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    private final static String MILESTONE2_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    private final static String MILESTONE2_DUALKEY = "yhvewrscpaxq3467";
-    private final static String MILESTONE2_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String MILESTONE2_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String MILESTONE2_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String MILESTONE3_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    private final static String MILESTONE3_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    private final static String MILESTONE3_DUALKEY = "yhvewrscpaxq3467";
-    private final static String MILESTONE3_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String MILESTONE3_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String MILESTONE3_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String MILESTONE3_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String MILESTONE3_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String DESIREZ_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String DESIREZ_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    private final static String DESIREZ_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
-    private final static String DESIREZ_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    private final static String DESIREZ_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String DESIREZ_DUALKEY = "yhvewrscpaxq3467";
-    private final static String DESIREZ_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String DESIREZ_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String DESIREZ_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String DESIREZ_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String DESIREZ_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String CHACHA_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String CHACHA_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    private final static String CHACHA_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String CHACHA_DUALKEY = "yhvewrscpaxq3467";
-    private final static String CHACHA_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String CHACHA_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String CHACHA_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String CHACHA_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String CHACHA_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String XPERIAPRO_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String XPERIAPRO_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    private final static String XPERIAPRO_DUALKEY = "yhvewrscpaxq3467";
-    private final static String XPERIAPRO_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    private final static String XPERIAPRO_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String XPERIAPRO_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    private final static String HSU_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
-    private final static String HSU_CHAR_INITIAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
-    private final static String HSU_CHAR_FINAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
-    private final static String HSU_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
-    private final static String HSU_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
-    private final static String HSU_DUALKEY = "yhvewrscpaxqs3467";
-    private final static String HSU_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String MILESTONE_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    final static String MILESTONE_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    final static String MILESTONE_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
+    final static String MILESTONE_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    final static String MILESTONE_DUALKEY = "yhvewrscpaxq3467";
+    final static String MILESTONE_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String MILESTONE_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String MILESTONE_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String MILESTONE2_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    final static String MILESTONE2_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    final static String MILESTONE2_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    final static String MILESTONE2_DUALKEY = "yhvewrscpaxq3467";
+    final static String MILESTONE2_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String MILESTONE2_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String MILESTONE2_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String MILESTONE3_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
+    final static String MILESTONE3_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    final static String MILESTONE3_DUALKEY = "yhvewrscpaxq3467";
+    final static String MILESTONE3_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String MILESTONE3_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String MILESTONE3_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String MILESTONE3_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    final static String MILESTONE3_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String DESIREZ_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String DESIREZ_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    final static String DESIREZ_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
+    final static String DESIREZ_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
+    final static String DESIREZ_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String DESIREZ_DUALKEY = "yhvewrscpaxq3467";
+    final static String DESIREZ_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String DESIREZ_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String DESIREZ_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String DESIREZ_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    final static String DESIREZ_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String CHACHA_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String CHACHA_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
+    final static String CHACHA_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String CHACHA_DUALKEY = "yhvewrscpaxq3467";
+    final static String CHACHA_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String CHACHA_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String CHACHA_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String CHACHA_BPMF_DUALKEY = "yhvewrscpaxqs3467";
+    final static String CHACHA_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String XPERIAPRO_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String XPERIAPRO_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
+    final static String XPERIAPRO_DUALKEY = "yhvewrscpaxq3467";
+    final static String XPERIAPRO_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
+    final static String XPERIAPRO_ETEN_DUALKEY = "yhvewrscpaxqs3467";
+    final static String XPERIAPRO_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
+    final static String HSU_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
+    final static String HSU_CHAR_INITIAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
+    final static String HSU_CHAR_FINAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
+    final static String HSU_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
+    final static String HSU_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
+    final static String HSU_DUALKEY = "yhvewrscpaxqs3467";
+    final static String HSU_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
     private final static String ARRAY_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
     private final static String ARRAY_CHAR = "1-|2-|3-|4-|5-|6-|7-|8-|9-|0-|1⇡|2⇡|3⇡|4⇡|5⇡|6⇡|7⇡|8⇡|9⇡|0⇡|1⇣|2⇣|3⇣|4⇣|5⇣|6⇣|7⇣|8⇣|9⇣|0⇣|？|＊|．|，|。";
 
@@ -273,28 +273,23 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return tableName.trim().toLowerCase(Locale.ROOT);
     }
 
-    private static final boolean probePerformance = false;
-    private static SQLiteDatabase db = null; // Jeremy '12,5,1 add static modifier. Shared db instance for dbserver and
+    static final boolean probePerformance = false;
+    static SQLiteDatabase db = null; // Jeremy '12,5,1 add static modifier. Shared db instance for dbserver and
                                              // searchserver
     // private final static Boolean fuzzySearch = false;
     // hold database connection when database is in maintainable. Jeremy '15,5,23
     private static boolean databaseOnHold = false;
-    private static boolean codeDualMapped = false;
+    static boolean codeDualMapped = false;
     /**
      * Black list cache stored code without valid return. Jeremy '12,6,3
      */
-    private static java.util.Map<String, Boolean> blackListCache = null;
-    private final HashMap<String, HashMap<String, String>> keysDefMap = new HashMap<>();
-    private final HashMap<String, HashMap<String, String>> keysReMap = new HashMap<>();
-    private final HashMap<String, HashMap<String, String>> keysDualMap = new HashMap<>();
-    private final LIMEPreferenceManager mLIMEPref;
+    static java.util.Map<String, Boolean> blackListCache = null;
+    final LIMEPreferenceManager mLIMEPref;
     private final Context mContext;
     // Cache for Related Score
     private final HashMap<String, Integer> relatedscore = new HashMap<>();
-    private String lastCode = "";
-    private String lastValidDualCodeList = "";
     private File filename = null;
-    private String tablename = "custom";
+    String tablename = "custom";
     private int count = 0;
     // Jeremy '15,5,23 for new progress listener progress status update
     private int progressPercentageDone = 0;
@@ -303,14 +298,14 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // private int ncount = 0;
     private boolean finish = false;
     // private boolean relatedfinish = false;
-    // Jeremy '11,6,16 keep the soft/physical keyboard flag from getmapping()
-    private boolean isPhysicalKeyboardPressed = false;
     // Db loading loadingMappingThread.
     private Thread loadingMappingThread = null;
     private boolean threadAborted = false;
     // Han and Emoji Databases
     private LimeHanConverter hanConverter;
     private EmojiConverter emojiConverter;
+    // 重構二期:打字熱路徑查詢引擎,見 LimeQueryEngine
+    private final LimeQueryEngine queryEngine = new LimeQueryEngine(this);
 
     /*
      * Initialize LIME database, Context and LIMEPreferenceManager
@@ -754,7 +749,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      *
      * @return return true if db connection is ready.
      */
-    private synchronized boolean checkDBConnection() {
+    synchronized boolean checkDBConnection() {
         // Jeremy '12,5,1 mapping loading. db is locked
         if (DEBUG)
             Log.i(TAG, "checkDBConnection()");
@@ -1334,977 +1329,23 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      *
      */
     public String keyToKeyname(String code, String table, Boolean composingText) {
-        // Jeremy '11,8,30
-        if (composingText && code.length() > COMPOSING_CODE_LENGTH_LIMIT)
-            return code;
-
-        String keyboardtype = mLIMEPref.getPhysicalKeyboardType();
-        String phonetickeyboardtype = mLIMEPref.getPhoneticKeyboardType();
-        String keytable = table;
-
-        if (DEBUG)
-            Log.i(TAG, "keyToKeyname():code:" + code +
-                    " lastValidDualCodeList=" + lastValidDualCodeList +
-                    " table:" + table + " tablename:" + tablename +
-                    " isPhysicalKeybaordPressed:" + isPhysicalKeyboardPressed +
-                    " keyboardtype: " + keyboardtype +
-                    " composingText:" + composingText);
-
-        if (isPhysicalKeyboardPressed) {
-            if (composingText && table.equals("phonetic")) {// doing composing popup
-                keytable = table + keyboardtype + phonetickeyboardtype;
-            } else if (composingText)
-                keytable = table + keyboardtype;
-        } else if (composingText && tablename.equals("phonetic")) {
-            keytable = table + phonetickeyboardtype;
-        }
-        if (DEBUG)
-            Log.i(TAG, "keyToKeyname():keytable:" + keytable);
-
-        if (composingText) {// building composing text and get dual mapped codes
-
-            if (!code.equals(lastCode)) {
-                // unsynchronized cache. do the preprocessing again.
-                // preProcessingForExtraQueryConditions(preProcessingRemappingCode(code));
-                getMappingByCode(code, false, false);
-            }
-            // String dualCodeList = lastValidDualCodeList;
-            if (lastValidDualCodeList != null) {
-                if (DEBUG)
-                    Log.i(TAG, "keyToKeyname():lastValidDualCodeList:" + lastValidDualCodeList +
-                            " table:" + table + " tablename:" + tablename);
-                // code = dualCodeList;
-                if (tablename.equals("phonetic")) {
-                    keytable = "phonetic";
-                    keyboardtype = "normal_keyboard";
-                    phonetickeyboardtype = "standard";
-                }
-                if (tablename.startsWith("dayi")) {
-                    keytable = "dayi";
-                    keyboardtype = "normal_keyboard";
-                }
-
-            }
-        }
-
-        if (DEBUG)
-            Log.i(TAG, "keyToKeyname():code:" + code +
-                    " table:" + table + " tablename:" + tablename + " keytable:" + keytable);
-
-        if (keysDefMap.get(keytable) == null
-                || keysDefMap.get(keytable).size() == 0) {
-
-            String keyString, keynameString, finalKeynameString = null;
-            // Jeremy 11,6,4 Load keys and keynames from im table.
-            keyString = getImInfo(table, "imkeys");
-            keynameString = getImInfo(table, "imkeynames");
-
-
-
-            if (DEBUG)
-                Log.i(TAG, "keyToKeyname(): load from db: imkeys:keyString=" + keyString + ", imkeynames="
-                        + keynameString);
-
-            if (table.startsWith("phonetic") || table.startsWith("dayi") ||
-                    keyString.equals("") || keynameString.equals("")) {
-                if (table.startsWith("phonetic")) {
-                    if (composingText) { // building composing text popup
-                        if (phonetickeyboardtype.equals("eten")) {
-                            keyString = ETEN_KEY;
-                            if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed)
-                                keynameString = MILESTONE_ETEN_CHAR;
-                            else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed)
-                                keynameString = MILESTONE2_ETEN_CHAR;
-                            else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed)
-                                keynameString = MILESTONE3_ETEN_CHAR;
-                            else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed)
-                                keynameString = DESIREZ_ETEN_CHAR;
-                            else
-                                keynameString = ETEN_CHAR;
-                        } else if (phonetickeyboardtype.startsWith("eten26")) {
-                            keyString = ETEN26_KEY;
-                            keynameString = ETEN26_CHAR_INITIAL;
-                            finalKeynameString = ETEN26_CHAR_FINAL;
-                        } else if (phonetickeyboardtype.startsWith("hsu")) {
-                            keyString = HSU_KEY;
-                            keynameString = HSU_CHAR_INITIAL;
-                            finalKeynameString = HSU_CHAR_FINAL;
-                        } else if ((keyboardtype.equals("milestone") || keyboardtype.equals("milestone2"))
-                                && isPhysicalKeyboardPressed) {
-                            keyString = MILESTONE_KEY;
-                            keynameString = MILESTONE_BPMF_CHAR;
-                        } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
-                            keyString = MILESTONE3_KEY;
-                            keynameString = MILESTONE3_BPMF_CHAR;
-                        } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
-                            keyString = DESIREZ_KEY;
-                            keynameString = DESIREZ_BPMF_CHAR;
-                        } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
-                            keyString = CHACHA_KEY;
-                            keynameString = CHACHA_BPMF_CHAR;
-                        } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) {
-                            keyString = XPERIAPRO_KEY;
-                            keynameString = BPMF_CHAR;
-                        } else {
-                            keyString = BPMF_KEY;
-                            keynameString = BPMF_CHAR;
-                        }
-
-                    } else {
-                        keyString = BPMF_KEY;
-                        keynameString = BPMF_CHAR;
-                    }
-                } else if (table.startsWith("dayi")) {
-                    if (isPhysicalKeyboardPressed && composingText) { // only do this on composing mapping popup
-                        switch (keyboardtype) {
-                            case "milestone":
-                            case "milestone2":
-                                keyString = MILESTONE_KEY;
-                                keynameString = MILESTONE_DAYI_CHAR;
-                                break;
-                            case "milestone3":
-                                keyString = MILESTONE3_KEY;
-                                keynameString = MILESTONE3_DAYI_CHAR;
-                                break;
-                            case "desireZ":
-                                keyString = DESIREZ_KEY;
-                                keynameString = DESIREZ_DAYI_CHAR;
-                                break;
-                            default:
-                                keyString = DAYI_KEY;
-                                keynameString = DAYI_CHAR;
-                                break;
-                        }
-                    } else {
-                        keyString = DAYI_KEY;
-                        keynameString = DAYI_CHAR;
-                    }
-                }
-            }
-            if (DEBUG)
-                Log.i(TAG,
-                        "keyToKeyname():keyboardtype:" + keyboardtype + " phonetickeyboardtype:" + phonetickeyboardtype
-                                +
-                                " composing?:" + composingText +
-                                " keyString:" + keyString + " keynameString:" + keynameString + " finalkeynameString:"
-                                + finalKeynameString);
-            if (keyString != null && keyString.length() > 0) {
-                HashMap<String, String> keyMap = new HashMap<>();
-                HashMap<String, String> finalKeyMap = null;
-                if (finalKeynameString != null)
-                    finalKeyMap = new HashMap<>();
-
-                String[] charlist = keynameString.split("\\|");
-                String[] finalCharlist = null;
-
-                if (finalKeyMap != null)
-                    finalCharlist = finalKeynameString.split("\\|");
-
-                // Ignore the exception of key name mapping.
-                try {
-                    for (int i = 0; i < keyString.length(); i++) {
-                        keyMap.put(keyString.substring(i, i + 1), charlist[i]);
-                        if (finalKeyMap != null)
-                            finalKeyMap.put(keyString.substring(i, i + 1), finalCharlist[i]);
-                    }
-                } catch (Exception ignored) {
-                }
-
-                keyMap.put("|", "|"); // put the seperator for multi-code display
-                keysDefMap.put(keytable, keyMap);
-                if (finalKeyMap != null)
-                    keysDefMap.put("final_" + keytable, finalKeyMap);
-            }
-
-        }
-
-        // Starting doing key to keyname conversion ------------------------------------
-        if (keysDefMap.get(keytable) == null
-                || keysDefMap.get(keytable).size() == 0) {
-            if (DEBUG)
-                Log.i(TAG, "keyToKeyname():nokeysDefMap found!!");
-            return code;
-
-        } else {
-            if (composingText &&
-                    (lastValidDualCodeList != null)) // Jeremy '11,10,6 bug fixed on rmapping returning orignal code.
-                code = lastValidDualCodeList;
-            if (DEBUG)
-                Log.i(TAG, "keyToKeyname():lastValidDualCodeList=" + lastValidDualCodeList);
-
-            String result = "";
-            HashMap<String, String> keyMap = keysDefMap.get(keytable);
-            HashMap<String, String> finalKeyMap = keysDefMap.get("final_" + keytable);
-            // do the real conversion
-
-            if (finalKeyMap == null) {
-                for (int i = 0; i < code.length(); i++) {
-                    String c = keyMap.get(code.substring(i, i + 1));
-                    if (c != null)
-                        result = result + c;
-                }
-            } else {
-
-                if (code.length() == 1) {
-
-                    String c = "";
-                    if (phonetickeyboardtype.startsWith("eten26") &&
-                            (code.equals("q") || code.equals("w")
-                                    || code.equals("d") || code.equals("f")
-                                    || code.equals("j") || code.equals("k"))) {
-                        // Dual mapped INITIALS have words mapped for ��and �� for ETEN26
-                        c = keyMap.get(code);
-                    } else if (phonetickeyboardtype.startsWith("hsu")) // Jeremy '12,5,31 process hsu with dual code
-                                                                       // mapping only.
-                        c = keyMap.get(code);
-                    // }else{
-                    // c = finalKeyMap.get(code);
-                    // }
-                    if (c != null)
-                        result = c.trim();
-                } else {
-                    for (int i = 0; i < code.length(); i++) {
-                        String c;
-                        if (i > 0) {
-                            // Jeremy '12,6,3 If the last character is a tone symbol, the preceding will be
-                            // intial
-                            if (tablename.equals("phonetic")
-                                    && i > 1
-                                    && code.substring(0, i).matches(".+[sdfj ]$")
-                                    && phonetickeyboardtype.startsWith("hsu")) {
-                                if (DEBUG)
-                                    Log.i(TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                            + code.substring(0, i));
-                                c = keyMap.get(code.substring(i, i + 1));
-                            } else if (tablename.equals("phonetic")
-                                    && i > 1
-                                    && code.substring(0, i).matches(".+[dfjk ]$")
-                                    && phonetickeyboardtype.startsWith("eten26")) {
-                                if (DEBUG)
-                                    Log.i(TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                            + code.substring(0, i));
-                                c = keyMap.get(code.substring(i, i + 1));
-                            } else
-                                c = finalKeyMap.get(code.substring(i, i + 1));
-                        } else {
-                            c = keyMap.get(code.substring(i, i + 1));
-                        }
-                        if (c != null)
-                            result = result + c.trim();
-                    }
-
-                }
-            }
-            if (DEBUG)
-                Log.i(TAG, "keyToKeyname():returning:" + result);
-
-            if (result.equals("")) {
-                return code;
-            } else {
-                return result;
-            }
-        }
-
+        // 重構二期:本體移至 LimeQueryEngine
+        return queryEngine.keyToKeyname(code, table, composingText);
     }
 
     /**
      * Retrieve matched records
      */
     public List<Mapping> getMappingByCode(String code, boolean softKeyboard, boolean getAllRecords) {
-
-        String codeorig = code;
-
-        long startTime = 0;
-        if (DEBUG || probePerformance) {
-            startTime = System.currentTimeMillis();
-            Log.i(TAG,
-                    "getMappingByCode(): code='" + code + ", table=" + tablename + ", getAllRecords=" + getAllRecords);
-        }
-
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return null;
-
-        boolean sort;
-        if (softKeyboard)
-            sort = mLIMEPref.getSortSuggestions();
-        else
-            sort = mLIMEPref.getPhysicalKeyboardSortSuggestions();
-        isPhysicalKeyboardPressed = !softKeyboard;
-
-        // Add by Jeremy '10, 3, 27. Extension on multi table query.
-        lastCode = code;
-        lastValidDualCodeList = null; // reset the lastValidDualCodeList
-        List<Mapping> result = null;
-
-        // Two-steps query with code pre-processing. Jeremy '11,6,15
-        // Step.1 Code re-mapping.
-        code = preProcessingRemappingCode(code);
-        code = code.toLowerCase(Locale.US); // Jeremy '12,4,1 moved from SearchService.getMappingByCode();
-        // Step.2 Build extra getMappingByCode conditions. (e.g. dualcode remap)
-        Pair<String, String> extraConditions = preProcessingForExtraQueryConditions(code);
-        String extraSelectClause = "";
-        String extraExactMatchClause = "";
-        if (extraConditions != null) {
-            extraSelectClause = extraConditions.first;
-            extraExactMatchClause = extraConditions.second;
-        }
-        // Jeremy '11,6,11 separated suggestions sorting option for physical keyboard
-
-        try {
-            if (!code.equals("")) {
-
-                Cursor cursor = null;
-                try {
-
-                    // Jeremy '11,8,2 Query noToneCode instead of code for code contains no tone
-                    // symbols
-                    // Jeremy '12,6,5 rewrite to consistent with expanddualcode
-                    // Jeremy '15,6,6 always search no tone code for phonetic. The db will be
-                    // upgraded in onUprade if code3r is not present
-
-                    String codeCol = FIELD_CODE;
-
-                    final boolean tonePresent = code.matches(".+[3467 ].*"); // Tone symbols present in any locoation
-                                                                             // except the first character
-                    final boolean toneNotLast = code.matches(".+[3467 ].+"); // Tone symbols present in any locoation
-                                                                             // except the first and last character
-
-                    if (tablename.equals("phonetic")) {
-                        if (tonePresent) {
-                            // LD phrase if tone symbols present but not in last character or in last
-                            // character but the length > 4
-                            // (phonetic combinations never has length >4)
-                            if (toneNotLast || (code.length() > 4))
-                                code = code.replaceAll("[3467 ]", "");
-
-                        } else { // no tone symbols present, check NoToneCode column
-                            codeCol = FIELD_NO_TONE_CODE;
-                        }
-                        code = code.trim();
-                    }
-
-                    String selectClause;
-                    String sortClause;
-                    String escapedCode = code.replace("'", "''");
-                    int codeLen = code.length();
-
-                    String limitClause = (getAllRecords) ? FINAL_RESULT_LIMIT : INITIAL_RESULT_LIMIT;
-
-                    // Jeremy '15, 6, 1 between search clause without using related column for
-                    // better sorting order.
-                    // if(betweenSearch){
-                    selectClause = expandBetweenSearchClause(codeCol, code) + extraSelectClause;
-                    String exactMatchCondition = " (" + codeCol + " ='" + escapedCode + "' " + extraExactMatchClause
-                            + ") ";
-                    sortClause = "( exactmatch = 1 and ( score > 0 or  basescore >0) and length(word)=1) desc, exactmatch desc,"
-                            + " (length(" + codeCol + ") >= " + codeLen + " ) desc, "
-                            + "(length(" + codeCol + ") <= " + ((codeLen > 5) ? 5 : codeLen) + " )*length(" + codeCol
-                            + ") desc, ";
-
-                    if (sort)
-                        sortClause += " score desc, basescore desc, ";
-                    sortClause += "_id asc";
-
-                    String selectString = "select _id, code, code3r, word, score, basescore, " + exactMatchCondition
-                            + " as exactmatch  ";
-
-                    selectString += " from " + tablename + " where word is not null and " + selectClause + " order by "
-                            + sortClause
-                            + " limit " + limitClause;
-                    cursor = db.rawQuery(selectString, null);
-
-                    if (DEBUG)
-                        Log.i(TAG, "getMappingByCode() between search select string:" + selectString);
-                    /*
-                     * }
-                     * else{
-                     * selectClause = codeCol + " = '" + escapedCode + "' " + extraSelectClause;
-                     * if (sort)
-                     * sortClause = FIELD_SCORE + " DESC, +" + FIELD_BASESCORE + " DESC, " +
-                     * "_id ASC";
-                     * else
-                     * sortClause = "_id ASC";
-                     * cursor = db.query(tablename, null, selectClause, null, null, null,
-                     * sortClause, limitClause);
-                     * if (DEBUG)
-                     * Log.i(TAG, "getMappingByCode(): code = '" + code + "' selectClause=" +
-                     * selectClause);
-                     * 
-                     * }
-                     */
-
-                    // Jeremy '11,8,5 limit initial getMappingByCode to limited records
-                    // Jeremy '11,6,15 Using getMappingByCode with preprocessed code and extra
-                    // getMappingByCode conditions.
-
-                    if (cursor != null) {
-                        result = buildQueryResult(code, codeorig, cursor, getAllRecords);
-                    }
-
-                } catch (SQLiteException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (cursor != null)
-                        cursor.close();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (DEBUG || probePerformance) {
-            Log.i(TAG, "getMappingByCode() time elapsed = " + (System.currentTimeMillis() - startTime));
-        }
-
-        return result;
-    }
-
-    /*
-     * Jeremy '15,5,1 expand the search clause to include cod = abc, ab, c
-     * descending
-     */
-    private String expandBetweenSearchClause(String searchColumn, String code) {
-
-        StringBuilder selectClause = new StringBuilder();
-
-        int len = code.length();
-        int end = (len > 5) ? 6 : len;
-
-        if (len > 1) {
-            for (int j = 0; j < end - 1; j++) {
-                selectClause.append(searchColumn).append("= '")
-                        .append(code.substring(0, j + 1).replace("'", "''")).append("' or ");
-            }
-        }
-        // if(fuzzySearch) code = (len>2) ? code.substring(0,2) : code;
-        char[] chArray = code.toCharArray();
-        chArray[code.length() - 1]++;
-        String nextCode = new String(chArray);
-        selectClause.append(" (").append(searchColumn).append(" >= '")
-                .append(code.replace("'", "''")).append("' and ").append(searchColumn)
-                .append(" <'").append(nextCode.replace("'", "''")).append("') ");
-        if (DEBUG)
-            Log.i(TAG, "expandBetweenSearchClause() selectClause: " + selectClause);
-        return selectClause.toString();
+        // 重構二期:本體移至 LimeQueryEngine
+        return queryEngine.getMappingByCode(code, softKeyboard, getAllRecords);
     }
 
     public String preProcessingRemappingCode(String code) {
-        if (DEBUG)
-            Log.i(TAG, "preProcessingRemappingCode(): tablename = " + tablename + " , code=" + code);
-        if (code != null) {
-            String keyboardtype = mLIMEPref.getPhysicalKeyboardType();
-            String phonetickeyboardtype = mLIMEPref.getPhoneticKeyboardType();
-            String keyString = "", keyRemapString = "", finalKeyRemapString = null;
-            String newcode = code;
-            String remaptable = tablename;
-
-            // Build cached hashmap remapping table name
-            if (isPhysicalKeyboardPressed) {
-                if (tablename.equals("phonetic"))
-                    remaptable = tablename + keyboardtype + phonetickeyboardtype;
-                else
-                    remaptable = tablename + keyboardtype;
-            } else if (tablename.equals("phonetic"))
-                remaptable = tablename + phonetickeyboardtype;
-
-            // Build cached hashmap remapping table if it's not exist
-            if (keysReMap.get(remaptable) == null
-                    || keysReMap.get(remaptable).size() == 0) {
-
-                if (tablename.equals("phonetic") && phonetickeyboardtype.startsWith("eten26")) {
-                    keyString = ETEN26_KEY;
-                    keyRemapString = ETEN26_KEY_REMAP_INITIAL;
-                    finalKeyRemapString = ETEN26_KEY_REMAP_FINAL;
-                } else if (tablename.equals("phonetic") && phonetickeyboardtype.startsWith("hsu")) {
-                    keyString = HSU_KEY;
-                    keyRemapString = HSU_KEY_REMAP_INITIAL;
-                    finalKeyRemapString = HSU_KEY_REMAP_FINAL;
-                } else if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                    keyString = ETEN_KEY;
-                    // + SHIFTED_NUMBERIC_KEY + SHIFTED_SYMBOL_KEY;
-                    keyRemapString = ETEN_KEY_REMAP;
-                    // + SHIFTED_NUMBERIC_ETEN_KEY_REMAP + SHIFTED_SYMBOL_ETEN_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && tablename.equals("phonetic") && keyboardtype.equals("desireZ")) {
-                    // Desire Z phonetic keybaord
-                    keyString = DESIREZ_KEY;
-                    keyRemapString = DESIREZ_BPMF_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && tablename.equals("phonetic") && keyboardtype.equals("chacha")) {
-                    // Desire Z phonetic keybaord
-                    keyString = CHACHA_KEY;
-                    keyRemapString = CHACHA_BPMF_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && tablename.equals("phonetic") && keyboardtype.equals("xperiapro")) {
-                    // XPERIA PRO phonetic keybaord
-                    keyString = XPERIAPRO_KEY;
-                    keyRemapString = XPERIAPRO_BPMF_KEY_REMAP;
-
-                } else if (!isPhysicalKeyboardPressed) {
-                    if (tablename.startsWith("dayi")
-                            || tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        keyString = SHIFTED_NUMBERIC_KEY + SHIFTED_SYMBOL_KEY;
-                        keyRemapString = SHIFTED_NUMBERIC_KEY_REMAP + SHIFTED_SYMBOL_KEY_REMAP;
-                    }
-
-                }
-
-                if (DEBUG)
-                    Log.i(TAG, "preProcessingRemappingCode(): keyString=\"" + keyString + "\";keyRemapString=\""
-                            + keyRemapString + "\"");
-
-                if (!keyString.equals("")) {
-                    HashMap<String, String> reMap = new HashMap<>();
-                    HashMap<String, String> finalReMap = null;
-                    if (finalKeyRemapString != null)
-                        finalReMap = new HashMap<>();
-
-                    for (int i = 0; i < keyString.length(); i++) {
-                        reMap.put(keyString.substring(i, i + 1), keyRemapString.substring(i, i + 1));
-                        if (finalReMap != null)
-                            finalReMap.put(keyString.substring(i, i + 1), finalKeyRemapString.substring(i, i + 1));
-                    }
-                    keysReMap.put(remaptable, reMap);
-                    if (finalReMap != null)
-                        keysReMap.put("final_" + remaptable, finalReMap);
-                }
-            }
-
-            // Do the remapping here using the cached remapping table
-
-            // if(keysReMap.get(remaptable)==null
-            // || keysReMap.get(remaptable).size()==0){
-            // return code; //Jeremy '12,5,21 need to do escape. should not return here.
-            // }
-            // else{
-            if (keysReMap.get(remaptable) != null
-                    && keysReMap.get(remaptable).size() != 0) {
-                HashMap<String, String> reMap = keysReMap.get(remaptable);
-                HashMap<String, String> finalReMap = keysReMap.get("final_" + remaptable);
-
-                newcode = "";
-                String c;
-
-                if (finalReMap == null) {
-                    for (int i = 0; i < code.length(); i++) {
-                        String s = code.substring(i, i + 1);
-                        c = reMap.get(s);
-                        if (c != null)
-                            newcode = newcode + c;
-                        else
-                            newcode = newcode + s;
-                    }
-
-                } else {
-
-                    if (code.length() == 1) {
-                        if (phonetickeyboardtype.startsWith("eten26") &&
-                                (code.equals("q") || code.equals("w")
-                                        || code.equals("d") || code.equals("f")
-                                        || code.equals("j") || code.equals("k"))) {
-                            c = reMap.get(code);
-                        } else if (phonetickeyboardtype.startsWith("hsu") &&
-                                (code.equals("a") || code.equals("e") ||
-                                        code.equals("s") || code.equals("d") || code.equals("f") || code.equals("j"))) {
-                            c = reMap.get(code);
-                        } else {
-                            c = finalReMap.get(code);
-                        }
-                        if (c != null)
-                            newcode = c;
-                        else
-                            newcode = code;
-
-                    } else {
-                        for (int i = 0; i < code.length(); i++) {
-                            String s = code.substring(i, i + 1);
-                            if (i > 0) {
-                                // Jeremy '12,6,3 If the last character is a tone symbol, the preceding will be
-                                // intial
-                                if (tablename.equals("phonetic")
-                                        && i > 1
-                                        && code.substring(0, i).matches(".+[sdfj ]$")
-                                        && phonetickeyboardtype.startsWith("hsu")) {
-                                    if (DEBUG)
-                                        Log.i(TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                                + code.substring(0, i));
-                                    c = reMap.get(s);
-                                } else if (tablename.equals("phonetic")
-                                        && i > 1
-                                        && code.substring(0, i).matches(".+[dfjk ]$")
-                                        && phonetickeyboardtype.startsWith("eten26")) {
-                                    if (DEBUG)
-                                        Log.i(TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                                + code.substring(0, i));
-                                    c = reMap.get(s);
-                                } else
-                                    c = finalReMap.get(s);
-                            } else
-                                c = reMap.get(s);
-
-                            if (c != null)
-                                newcode = newcode + c;
-                            else
-                                newcode = newcode + s;
-                        }
-                    }
-                }
-            }
-
-            // Process the escape characters of getMappingByCode
-            // newcode = newcode.replace("'", "''"); // Jeremy '12,7,7 do the code
-            // escaped before getMappingByCode.
-            if (DEBUG)
-                Log.i(TAG, "preProcessingRemappingCode():newcode=" + newcode);
-            return newcode;
-        } else
-            return "";
+        // 重構二期:本體移至 LimeQueryEngine
+        return queryEngine.preProcessingRemappingCode(code);
     }
 
-    // Jeremy '12,4,5 add db parameter because db open/closed is handled in
-    // searchservice now.
-    private Pair<String, String> preProcessingForExtraQueryConditions(String code) {
-        if (DEBUG)
-            Log.i(TAG, "preProcessingForExtraQueryConditions(): code = '" + code
-                    + "', isPhysicalKeyboardPressed=" + isPhysicalKeyboardPressed);
-
-        if (code != null) {
-            String keyboardtype = mLIMEPref.getPhysicalKeyboardType();
-            String phonetickeyboardtype = mLIMEPref.getPhoneticKeyboardType();
-            String dualcode;
-            String dualKey = "";
-            String dualKeyRemap = "";
-            String remaptable = tablename;
-            if (isPhysicalKeyboardPressed) {
-                if (tablename.equals("phonetic"))
-                    remaptable = tablename + keyboardtype + phonetickeyboardtype;
-                else
-                    remaptable = tablename + keyboardtype;
-            } else if (tablename.equals("phonetic")) {
-                remaptable = tablename + phonetickeyboardtype;
-            }
-
-            if (keysDualMap.get(remaptable) == null
-                    || keysDualMap.get(remaptable).size() == 0) {
-                if (tablename.equals("phonetic") && phonetickeyboardtype.startsWith("eten26")) {
-                    dualKey = ETEN26_DUALKEY;
-                    dualKeyRemap = ETEN26_DUALKEY_REMAP;
-                } else if (tablename.equals("phonetic") && phonetickeyboardtype.startsWith("hsu")) {
-                    dualKey = HSU_DUALKEY;
-                    dualKeyRemap = HSU_DUALKEY_REMAP;
-                } else if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed) {
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = MILESTONE_ETEN_DUALKEY;
-                        dualKeyRemap = MILESTONE_ETEN_DUALKEY_REMAP;
-                    } else {
-                        dualKey = MILESTONE_DUALKEY;
-                        dualKeyRemap = MILESTONE_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed) {
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = MILESTONE2_ETEN_DUALKEY;
-                        dualKeyRemap = MILESTONE2_ETEN_DUALKEY_REMAP;
-                    } else {
-                        dualKey = MILESTONE2_DUALKEY;
-                        dualKeyRemap = MILESTONE2_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = MILESTONE3_ETEN_DUALKEY;
-                        dualKeyRemap = MILESTONE3_ETEN_DUALKEY_REMAP;
-                    } else if (tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = MILESTONE3_BPMF_DUALKEY;
-                        dualKeyRemap = MILESTONE3_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = MILESTONE3_DUALKEY;
-                        dualKeyRemap = MILESTONE3_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = DESIREZ_ETEN_DUALKEY;
-                        dualKeyRemap = DESIREZ_ETEN_DUALKEY_REMAP;
-                    } else if (tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = DESIREZ_BPMF_DUALKEY;
-                        dualKeyRemap = DESIREZ_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = DESIREZ_DUALKEY;
-                        dualKeyRemap = DESIREZ_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = CHACHA_ETEN_DUALKEY;
-                        dualKeyRemap = CHACHA_ETEN_DUALKEY_REMAP;
-                    } else if (tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = CHACHA_BPMF_DUALKEY;
-                        dualKeyRemap = CHACHA_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = CHACHA_DUALKEY;
-                        dualKeyRemap = CHACHA_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) { // Jeremy '12,4,1
-                    if (tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = XPERIAPRO_ETEN_DUALKEY;
-                        dualKeyRemap = XPERIAPRO_ETEN_DUALKEY_REMAP;
-                    } else if (tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        // no dual key here
-                        dualKey = "";
-                        dualKeyRemap = "";
-                    } else {
-                        dualKey = XPERIAPRO_DUALKEY;
-                        dualKeyRemap = XPERIAPRO_DUALKEY_REMAP;
-                    }
-                }
-
-                HashMap<String, String> reMap = new HashMap<>();
-                if (DEBUG)
-                    Log.i(TAG, "preProcessingForExtraQueryConditions(): dualKey=" + dualKey + " dualKeyRemap="
-                            + dualKeyRemap);
-                for (int i = 0; i < dualKey.length(); i++) {
-                    String key = dualKey.substring(i, i + 1);
-                    String value = dualKeyRemap.substring(i, i + 1);
-                    reMap.put(key, value);
-                    reMap.put(value, value);
-                }
-                keysDualMap.put(remaptable, reMap);
-            }
-            // do real precessing now
-            if (keysDualMap.get(remaptable) == null
-                    || keysDualMap.get(remaptable).size() == 0) {
-                codeDualMapped = false;
-                dualcode = code;
-            } else {
-                codeDualMapped = true;
-                HashMap<String, String> reMap = keysDualMap.get(remaptable);
-                dualcode = "";
-                // testing if code contains dual mapped characters.
-                for (int i = 0; i < code.length(); i++) {
-                    String c = reMap.get(code.substring(i, i + 1));
-                    if (c != null)
-                        dualcode = dualcode + c;
-                }
-                if (DEBUG)
-                    Log.i(TAG, "preProcessingForExtraQueryConditions(): dualcode=" + dualcode);
-
-            }
-            // Jeremy '11,8,12 if phonetic has tone symbol in the middle do the
-            // expanddualcode
-            if (!dualcode.equalsIgnoreCase(code)
-                    || !code.equalsIgnoreCase(lastCode) // '11,8,18 Jeremy
-                    || (tablename.equals("phonetic") && code.matches(".+[ 3467].+"))) {
-                return expandDualCode(code, remaptable);
-            }
-        }
-        return null;
-    }
-
-    private HashSet<String> buildDualCodeList(String code, String keytablename) {
-
-        if (DEBUG)
-            Log.i(TAG, "buildDualCodeList(): code:" + code + ", keytablename=" + keytablename);
-
-        HashMap<String, String> codeDualMap = keysDualMap.get(keytablename);
-        HashSet<String> treeDualCodeList = new HashSet<>();
-
-        if (codeDualMap != null && codeDualMap.size() > 0) {
-
-            // Jeremy '12,6,4
-            SparseArray<List<String>> treemap = new SparseArray<>();
-            for (int i = 0; i < code.length(); i++) {
-                if (DEBUG)
-                    Log.i(TAG, "buildDualCodeList() level : " + i);
-
-                List<String> levelnMap = new LinkedList<>();
-                List<String> lastLevelMap;
-                if (i == 0) {
-                    lastLevelMap = new LinkedList<>();
-                    lastLevelMap.add(code);
-                } else
-                    lastLevelMap = treemap.get(i - 1);
-
-                String c;
-                String n;
-
-                if (lastLevelMap == null || (lastLevelMap.size() == 0)) {
-                    if (DEBUG)
-                        Log.i(TAG, "buildDualCodeList() level : " + i + " ended because last level map is empty");
-                    continue;
-                }
-                if (DEBUG)
-                    Log.i(TAG, "buildDualCodeList() level : " + i + " lastlevelmap size = " + lastLevelMap.size());
-                for (String entry : lastLevelMap) {
-                    if (DEBUG)
-                        Log.i(TAG, "buildDualCodeList() level : " + i + ", entry = " + entry);
-
-                    if (entry.length() == 1)
-                        c = entry;
-                    else
-                        c = entry.substring(i, i + 1);
-
-                    boolean codeMapped = false;
-                    do {
-                        if (DEBUG)
-                            Log.i(TAG, "buildDualCodeList() newCode = '" + entry
-                                    + "' blacklistKey = '" + cacheKey(entry.substring(0, i + 1) + "%")
-                                    + "' blacklistValue = "
-                                    + blackListCache.get(cacheKey(entry.substring(0, i + 1) + "%")));
-
-                        if (entry.length() == 1 && !levelnMap.contains(entry)) {
-                            if (blackListCache.get(cacheKey(entry)) == null)
-                                treeDualCodeList.add(entry);
-                            levelnMap.add(entry);
-                            if (DEBUG)
-                                Log.i(TAG, "buildDualCodeList() entry.length()==1 new code = '" + entry
-                                        + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = true;
-
-                        } else if ((entry.length() > 1 && !levelnMap.contains(entry))
-                                && blackListCache.get(cacheKey(entry.substring(0, i + 1) + "%")) == null) {
-                            if (blackListCache.get(cacheKey(entry)) == null)
-                                treeDualCodeList.add(entry);
-                            levelnMap.add(entry);
-                            if (DEBUG)
-                                Log.i(TAG, "buildDualCodeList() new code = '" + entry
-                                        + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = true;
-
-                        } else if (codeDualMap.get(c) != null && !codeDualMap.get(c).equals(c)) {
-                            n = codeDualMap.get(c);
-                            String newCode;
-
-                            if (entry.length() == 1)
-                                newCode = n;
-                            else if (i == 0)
-                                newCode = n + entry.substring(1);
-                            else if (i == entry.length() - 1)
-                                newCode = entry.substring(0, entry.length() - 1) + n;
-                            else
-                                newCode = entry.substring(0, i) + n
-                                        + entry.substring(i + 1);
-                            if (DEBUG)
-                                Log.i(TAG, "buildDualCodeList() newCode = '" + newCode
-                                        + "' blacklistKey = '" + cacheKey(newCode)
-                                        + "' blacklistValue = " + blackListCache.get(cacheKey(newCode))
-                                        + "' blacklistKey = '" + cacheKey(newCode.substring(0, i + 1) + "%")
-                                        + "' blacklistValue = "
-                                        + blackListCache.get(cacheKey(newCode.substring(0, i + 1) + "%")));
-
-                            if (newCode.length() == 1 && !levelnMap.contains(newCode)) {
-                                if (blackListCache.get(cacheKey(newCode)) == null)
-                                    treeDualCodeList.add(newCode);
-                                levelnMap.add(newCode);
-                                if (DEBUG)
-                                    Log.i(TAG,
-                                            "buildDualCodeList() newCode.length()==1 treeDualCodeList new code = '"
-                                                    + newCode
-                                                    + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                                codeMapped = true;
-                            } else if ((newCode.length() > 1 && !levelnMap.contains(newCode))
-                                    && blackListCache.get(cacheKey(newCode.substring(0, i + 1) + "%")) == null) {
-                                levelnMap.add(newCode);
-
-                                if (blackListCache.get(cacheKey(newCode)) == null)
-                                    treeDualCodeList.add(newCode);
-                                if (DEBUG)
-                                    Log.i(TAG, "buildDualCodeList() treeDualCodeList new code = '" + newCode
-                                            + ", c = " + c
-                                            + ", n = " + n
-                                            + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-
-                                codeMapped = true;
-
-                            } else if (DEBUG)
-                                Log.i(TAG,
-                                        "buildDualCodeList()  blacklisted code = '" + newCode.substring(0, i + 1) + "%"
-                                                + "'");
-
-                            c = n;
-                        } else {
-                            if (DEBUG)
-                                Log.i(TAG, "buildDualCodeList() level : " + i
-                                        + " ended. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = false;
-                        }
-
-                    } while (codeMapped);
-                    treemap.put(i, levelnMap);
-
-                }
-            }
-
-            // Jeremy '11,8,12 added for continuous typing.
-            if (tablename.equals("phonetic")) {
-                HashSet<String> tempList = new HashSet<>(treeDualCodeList);
-                for (String iterator_code : tempList) {
-                    if (iterator_code.matches(".+[ 3467].+")) { // regular expression mathes tone in the middle
-                        String newCode = iterator_code.replaceAll("[3467 ]", "");
-                        // Jeremy '12,6,3 look-up the blacklist cache before add to the list.
-                        if (DEBUG)
-                            Log.i(TAG, "buildDualCodeList(): processing no tone code :" + newCode);
-                        if (newCode.length() > 0
-                                && !treeDualCodeList.contains(newCode)
-                                && !checkBlackList(cacheKey(newCode), false)) {
-                            treeDualCodeList.add(newCode);
-                            if (DEBUG)
-                                Log.i(TAG, "buildDualCodeList(): no tone code added:" + newCode);
-
-                        }
-                    }
-                }
-            }
-
-        }
-
-        if (DEBUG)
-            Log.i(TAG, "buildDualCodeList(): treeDualCodeList.size()=" + treeDualCodeList.size());
-        return treeDualCodeList;
-
-    }
-
-    /**
-     * Jeremy '12,6,4 check black list on code , code + wildcard and reduced code
-     * with wildcard
-     *
-     * @param code blacklist query code
-     * @return true if the cod is black listed
-     */
-    private boolean checkBlackList(String code, Boolean wildCardOnly) {
-        Boolean isBlacklisted = false;
-        if (code.length() < DUALCODE_NO_CHECK_LIMIT) { // code too short, add anyway
-            isBlacklisted = false;
-            if (DEBUG)
-                Log.i(TAG, "buildDualCodeList(): code too short add without check code=" + code);
-        } else if (!wildCardOnly && blackListCache.get(cacheKey(code)) != null) { // the code is blacklisted
-            isBlacklisted = true;
-            if (DEBUG)
-                Log.i(TAG, "buildDualCodeList(): black listed code:" + code);
-            /*
-             * }else if(blackListCache.get(cacheKey(code+"%")) != null){ //the code with
-             * wildcard is blacklisted
-             * if(DEBUG)
-             * Log.i(TAG, "buildDualCodeList(): check black list code:"+ code
-             * +
-             * ", blackListCache.get(cacheKey(codeToCheck+%))="+blackListCache.get(cacheKey(
-             * code+"%")));
-             * isBlacklisted = true;
-             * if(DEBUG)
-             * Log.i(TAG, "buildDualCodeList(): black listed code:"+ code+"%");
-             */
-        } else {
-            for (int i = DUALCODE_NO_CHECK_LIMIT - 1; i <= code.length(); i++) {
-                String codeToCheck = code.substring(0, i) + "%";
-                if (blackListCache.get(cacheKey(codeToCheck)) != null) {
-                    isBlacklisted = true;
-                    if (DEBUG)
-                        Log.i(TAG, "buildDualCodeList(): black listed code:" + codeToCheck);
-                    break;
-                }
-
-            }
-
-        }
-        return isBlacklisted;
-    }
 
     /**
      * Jeremy '12,6,4 check black list on code , code + wildcard and reduced code
@@ -2323,375 +1364,16 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
-    private Pair<String, String> expandDualCode(String code, String keytablename) {
-
-        if (DEBUG)
-            Log.i(TAG, "expandDualCode() code=" + code + ", keytablename = " + keytablename);
-
-        HashSet<String> dualCodeList = buildDualCodeList(code, keytablename);
-        String selectClause = "";
-        String exactMatchClause = "";
-        String validDualCodeList = "";
-
-        if (dualCodeList != null) {
-            final boolean NOCheckOnExpand = code.length() < DUALCODE_NO_CHECK_LIMIT;
-            final boolean searchNoToneCode = tablename.equals("phonetic");
-
-            for (String dualcode : dualCodeList) {
-                if (DEBUG)
-                    Log.i(TAG, "expandDualCode(): processing dual code = '" + dualcode + "'" + ". result = "
-                            + selectClause);
-
-                String noToneCode = dualcode;
-                String codeCol = FIELD_CODE;
-                String[] col = { codeCol };
-
-                if (tablename.equals("phonetic")) {
-                    final boolean tonePresent = dualcode.matches(".+[3467 ].*"); // Tone symbols present in any
-                                                                                 // locoation except the first character
-                    final boolean toneNotLast = dualcode.matches(".+[3467 ].+"); // Tone symbols present in any
-                                                                                 // locoation except the first and last
-                                                                                 // character
-
-                    if (searchNoToneCode) { // noToneCode (phonetic combination without tones) is present
-                        if (tonePresent) {
-                            // LD phrase if tone symbols present but not in last character or in last
-                            // character but the length > 4 (phonetic combinations never has length >4)
-                            if (toneNotLast || (dualcode.length() > 4))
-                                noToneCode = dualcode.replaceAll("[3467 ]", "");
-
-                        } else { // no tone symbols present, check noToneCode column
-                            codeCol = FIELD_NO_TONE_CODE;
-                        }
-                    } else if (tonePresent && (toneNotLast || (dualcode.length() > 4))) // LD phrase and no noToneCode
-                                                                                        // column present
-                        noToneCode = dualcode.replaceAll("[3467 ]", "");
-                }
-                // do escape code for codes
-                String queryCode = dualcode.trim().replace("'", "''");
-                String queryNoToneCode = noToneCode.trim().replace("'", "''");
-
-                if (queryCode.length() == 0)
-                    continue;
-
-                if (NOCheckOnExpand) {
-                    if (!dualcode.equals(code)) {
-                        // result = result + " OR " + codeCol + "= '" + queryCode + "'";
-                        selectClause += " or (" + expandBetweenSearchClause(codeCol, dualcode) + ") ";
-                        exactMatchClause += " or " + codeCol + " ='" + queryCode + "' ";
-                    }
-                } else {
-                    // Jeremy '11,8, 26 move valid code list building to buildqueryresult to avoid
-                    // repeat query.
-                    Cursor cursor = null;
-                    try {
-                        String selectValidCodeClause = codeCol + " = '" + queryCode + "'";
-                        if (!dualcode.equals(noToneCode)) { // code with tones. should strip tone symbols and add to the
-                                                            // select condition.
-                            selectValidCodeClause = FIELD_CODE + " = '" + queryCode + "' OR " + FIELD_NO_TONE_CODE
-                                    + " = '" + queryNoToneCode + "'";
-                        }
-
-                        if (DEBUG)
-                            Log.i(TAG, "expandDualCode() selectClause for exactmatch = " + selectValidCodeClause);
-
-                        cursor = db.query(tablename, col, selectValidCodeClause, null, null, null, null, "1");
-                        if (cursor != null) {
-                            if (cursor.moveToFirst()) { // fist entry exist, the code is valid.
-                                if (DEBUG)
-                                    Log.i(TAG, "expandDualCode()  code = '" + dualcode + "' is valid code");
-                                if (validDualCodeList.equals(""))
-                                    validDualCodeList = dualcode;
-                                else
-                                    validDualCodeList = validDualCodeList + "|" + dualcode;
-                                if (!dualcode.equals(code)) {
-                                    // result = result + " OR " + codeCol + "= '" + queryCode + "'";
-                                    selectClause += " or (" + expandBetweenSearchClause(codeCol, dualcode) + ") ";
-                                    exactMatchClause += " or (" + codeCol + " ='" + queryCode + "') ";
-                                }
-                            } else { // the code is not valid, keep it in the black list cache. Jeremy '12,6,3
-
-                                char[] charray = dualcode.toCharArray();
-                                charray[queryCode.length() - 1]++;
-                                String nextcode = new String(charray);
-                                nextcode = nextcode.replace("'", "''");
-
-                                selectValidCodeClause = codeCol + " > '" + queryCode + "' AND " + codeCol + " < '"
-                                        + nextcode + "'";
-
-                                if (!dualcode.equals(noToneCode)) { // code with tones. should strip tone symbols and
-                                                                    // add to the select condition.
-                                    charray = queryNoToneCode.toCharArray();
-                                    charray[noToneCode.length() - 1]++;
-                                    String nextNoToneCode = new String(charray);
-                                    nextNoToneCode = nextNoToneCode.replace("'", "''");
-                                    selectValidCodeClause = "(" + codeCol + " > '" + queryCode + "' AND " + codeCol
-                                            + " < '" + nextcode + "') "
-                                            + "OR (" + codeCol + " > '" + queryNoToneCode + "' AND " + codeCol + " < '"
-                                            + nextNoToneCode + "')";
-
-                                }
-                                cursor.close();
-                                if (DEBUG)
-                                    Log.i(TAG, "expandDualCode() dualcode = '" + dualcode + "' noToneCode = '"
-                                            + noToneCode + "' selectValidCodeClause for no exact match = "
-                                            + selectValidCodeClause);
-
-                                cursor = db.query(tablename, col, selectValidCodeClause,
-                                        null, null, null, null, "1");
-
-                                if (cursor == null || !cursor.moveToFirst()) { // code* returns no valid records add the
-                                                                               // code with wildcard to blacklist
-                                    blackListCache.put(cacheKey(dualcode + "%"), true);
-                                    if (DEBUG)
-                                        Log.i(TAG,
-                                                " expandDualCode() blackList wildcard code added, code = " + dualcode + "%"
-                                                        + ", cachekey = :" + cacheKey(dualcode + "%")
-                                                        + ", black list size = " + blackListCache.size()
-                                                        + ", blackListCache.get() = "
-                                                        + blackListCache.get(cacheKey(dualcode + "%")));
-
-                                } else { // only add the code to black list
-                                    blackListCache.put(cacheKey(dualcode), true);
-                                    if (DEBUG)
-                                        Log.i(TAG, " expandDualCode() blackList code added, code = " + dualcode);
-                                }
-
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (cursor != null)
-                            cursor.close();
-                    }
-
-                }
-            }
-
-            if (validDualCodeList.equals(""))
-                lastValidDualCodeList = null;
-            else
-                lastValidDualCodeList = validDualCodeList;
-
-        }
-
-        if (DEBUG)
-            Log.i(TAG, "expandDualCode(): result:" + selectClause + " validDualCodeList:" + validDualCodeList);
-        return new Pair<>(selectClause, exactMatchClause);
-
-    }
 
     /**
      * Jeremy '12,6,3 Build unique cache key for black list cache.
      */
 
-    private String cacheKey(String code) {
+    String cacheKey(String code) {
 
         return tablename + "_" + code;
     }
 
-    /**
-     * Process search results
-     */
-    private synchronized List<Mapping> buildQueryResult(String query_code, String codeorig, Cursor cursor,
-            Boolean getAllRecords) {
-
-        long startTime = 0;
-        if (DEBUG || probePerformance) {
-            startTime = System.currentTimeMillis();
-            Log.i(TAG, "buildQueryResult()");
-        }
-
-        List<Mapping> result = new ArrayList<>();
-
-        HashSet<String> duplicateCheck = new HashSet<>();
-        HashSet<String> validCodeMap = new HashSet<>(); // Jeremy '11,8,26
-        int rsize = 0;
-        // jeremy '11,8,30 reset lastVaidDualCodeList first.
-        final boolean buildValidCodeList = lastValidDualCodeList == null;
-
-        boolean searchNoToneColumn = tablename.equals("phonetic")
-                && !query_code.matches(".+[3467 ].*");
-        if (DEBUG)
-            Log.i(TAG, "buildQueryResutl(): cursor.getCount()=" + cursor.getCount()
-                    + ". lastValidDualCodeList = " + lastValidDualCodeList);
-        if (cursor.moveToFirst()) {
-
-            int idColumn = cursor.getColumnIndex(FIELD_ID);
-            int codeColumn = cursor.getColumnIndex(FIELD_CODE);
-            int noToneCodeColumn = cursor.getColumnIndex(FIELD_NO_TONE_CODE); // Jeremy '12,5,31 renamed from noToneCode
-                                                                              // Column
-            int wordColumn = cursor.getColumnIndex(FIELD_WORD);
-            int scoreColumn = cursor.getColumnIndex(FIELD_SCORE);
-            int baseScoreColumn = cursor.getColumnIndex(FIELD_BASESCORE);
-            int relatedColumn = cursor.getColumnIndex(FIELD_RELATED);
-            int exactMatchColumn = cursor.getColumnIndex("exactmatch");
-            // HashMap<String, String> relatedMap = new HashMap<>();
-
-            int sLimit = mLIMEPref.getSimilarCodeCandidates();
-            int sCount = 0;
-            if (DEBUG)
-                Log.i(TAG, "buildQueryResult(): code=" + query_code + ", similar code limit=" + sLimit);
-
-            do {
-                String word = cursor.getString(wordColumn);
-                // skip if word is null
-                if (word == null || word.trim().equals(""))
-                    continue;
-                String code = cursor.getString(codeColumn);
-                Mapping m = new Mapping();
-                m.setCode(code);
-                m.setCodeorig(codeorig);
-                m.setWord(word);
-                m.setId(cursor.getString(idColumn));
-                m.setScore(cursor.getInt(scoreColumn));
-                m.setBasescore(cursor.getInt(baseScoreColumn));
-
-                // String relatedlist = (betweenSearch)?null: cursor.getString(relatedColumn);
-
-                Boolean exactMatch = cursor.getString(exactMatchColumn).equals("1"); // Jeremy '15,6,3 new exact match
-                                                                                     // virtual column built in query
-                                                                                     // time.
-                // m.setHighLighted((betweenSearch) && !exactMatch);//Jeremy '12,5,30 exact
-                // match, not from related list
-
-                // Jeremy 15,6,3 new exact or partial record type
-                if (exactMatch)
-                    m.setExactMatchToCodeRecord();
-                else
-                    m.setPartialMatchToCodeRecord();
-
-                // Jeremy '11,8,26 build valid code map
-                // jeremy '11,8,30 add limit for valid code words for composing display
-                if (buildValidCodeList) {
-                    String noToneCode = cursor.getString(noToneCodeColumn);
-                    if (searchNoToneColumn && noToneCode != null
-                            && noToneCode.trim().length() == query_code.replaceAll("[3467 ]", "").trim().length()
-                            && validCodeMap.size() < DUALCODE_COMPOSING_LIMIT)
-                        validCodeMap.add(noToneCode);
-                    else if (code != null && code.length() == query_code.length())
-                        validCodeMap.add(code);
-                }
-
-
-
-                // related list always null in between search mode. Jeremy
-                // '15,6,3----------------
-                /*
-                 * if ( relatedlist != null && relatedMap.get(code) == null) {
-                 * relatedMap.put(code, relatedlist);
-                 * if (DEBUG)
-                 * Log.i(TAG, "buildQueryResult() build relatedmap on code = '" + code +
-                 * "' relatedlist = " + relatedlist);
-                 * 
-                 * }
-                 */
-                // -----------------------------------------------------------------------------------------------
-
-                if (duplicateCheck.add(m.getWord())) {
-                    result.add(m);
-
-                    if (m.isPartialMatchToCodeRecord()) {
-                        sCount++;
-                        if (sCount > sLimit)
-                            break;
-                    }
-                }
-                rsize++;
-                if (DEBUG)
-                    Log.i(TAG, "buildQueryResult():  current code = " + m.getCode() + ", current word =" + m.getWord()
-                            + ", similar code count=" + sCount + ", record counts" + rsize);
-            } while (cursor.moveToNext());
-
-            // Jeremy '11,8,26 build valid code map
-            if (buildValidCodeList && validCodeMap.size() > 0) {
-                for (String validCode : validCodeMap) {
-                    if (DEBUG)
-                        Log.i(TAG, "buildQueryResult(): buildValidCodeList: valicode=" + validCode);
-                    if (lastValidDualCodeList == null)
-                        lastValidDualCodeList = validCode;
-                    else
-                        lastValidDualCodeList = lastValidDualCodeList + "|" + validCode;
-                }
-            }
-
-            // Jeremy '11,6,1 The related field may have only one word and thus no "|"
-            // inside
-            // Jeremy '11,6,11 allow multiple relatedlist from different codes.
-            // Jeremy '15,6,3 not used in between search mode
-            // ---------------------------------------
-            /*
-             * if (!betweenSearch) {
-             * int scount = 0;
-             * for (Entry<String, String> entry : relatedMap.entrySet()) {
-             * String relatedlist = entry.getValue();
-             * if (ssize > 0 && relatedlist != null && scount <= ssize) {
-             * String templist[] = relatedlist.split("\\|");
-             * 
-             * for (String unit : templist) {
-             * if (scount > ssize) {
-             * break;
-             * }
-             * if (duplicateCheck.add(unit)) {
-             * Mapping munit = new Mapping();
-             * munit.setCode(entry.getKey());
-             * munit.setWord(unit);
-             * munit.setPartialMatchToCodeRecord();
-             * munit.setScore(0);
-             * //Jeremy '11,6,18 skip if word is empty
-             * if (munit.getWord() == null || munit.getWord().trim().equals(""))
-             * continue;
-             * relatedresult.add(munit);
-             * scount++;
-             * // Jeremy '11, 8, 5 break if limit number exceeds
-             * if (!getAllRecords && scount == INITIAL_RELATED_LIMIT) break;
-             * }
-             * }
-             * }
-             * }
-             * }
-             */
-            // ----------------------------------------------------------------------------------------------------
-        }
-
-        // Add full shaped punctuation symbol to the third place , and .
-        if (query_code.length() == 1) {
-
-            if ((query_code.equals(",") || query_code.equals("<")) && duplicateCheck.add("，")) {
-                Mapping temp = new Mapping();
-                temp.setCode(query_code);
-                temp.setWord("，");
-                if (result.size() > 3)
-                    result.add(3, temp);
-                else
-                    result.add(temp);
-            }
-            if ((query_code.equals(".") || query_code.equals(">")) && duplicateCheck.add("。")) {
-                Mapping temp = new Mapping();
-                temp.setCode(query_code);
-                temp.setWord("。");
-                if (result.size() > 3)
-                    result.add(3, temp);
-                else
-                    result.add(temp);
-            }
-        }
-
-        // Removed "..." indicator - now using horizontal scroll in CandidateView
-        // Mapping hasMore = new Mapping();
-        // hasMore.setCode("has_more_records");
-        // hasMore.setWord("...");
-        // hasMore.setHasMoreRecordsMarkRecord();
-        // if (!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT))
-        // result.add(hasMore);
-
-        if (DEBUG || probePerformance)
-            Log.i(TAG, "buildQueryResult():query_code:" + query_code + " query_code.length:" + query_code.length()
-                    + " result.size=" + result.size() + " query size:" + rsize + ", time elapsed = "
-                    + (System.currentTimeMillis() - startTime));
-        return result;
-    }
 
     /**
      * @return Cursor for
