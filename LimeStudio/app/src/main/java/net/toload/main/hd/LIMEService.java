@@ -110,7 +110,7 @@ public class LIMEService extends InputMethodService implements
     private static final int FOREGROUND_NOTIFICATION_ID = 1001;
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
     // show candidate view in short time.
-    private static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
+    static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
     private static final long SHIFT_LOCK_TIMEOUT = 500; // Jeremy '24,1,7: Double-tap timeout for caps lock
     private static final int POS_SETTINGS = 0;
     private static final int POS_HANCONVERT = 1; // Jeremy '11,9,17
@@ -131,6 +131,7 @@ public class LIMEService extends InputMethodService implements
     private volatile java.util.concurrent.Future<?> queryFuture;
     final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
+    final CandidateController mCandidateController = new CandidateController(this);
     public boolean hasMappingList = false;
     public String activeIM; // Jeremy '12,4,30 renamed from keyboardSelection
     LIMEKeyboardSwitcher mKeyboardSwitcher;
@@ -701,19 +702,12 @@ public class LIMEService extends InputMethodService implements
         });
     }
 
-    // Push the root-name string (e.g. 木牛舟) into both candidate views for
-    // the physical-keyboard fixed slot / tablet inline box. Posted to the
-    // main thread because callers may run on the query executor.
+    // Delegates to CandidateController
     private void updateComposingRootsDisplay(String roots) {
-        mMainHandler.post(() -> {
-            if (mCandidateViewStandAlone != null)
-                mCandidateViewStandAlone.setComposingText(roots);
-            if (mCandidateViewInInputView != null)
-                mCandidateViewInInputView.setComposingText(roots);
-        });
+        mCandidateController.updateComposingRootsDisplay(roots);
     }
 
-    private void hideComposingPopup() {
+    void hideComposingPopup() {
         // Clear roots + raw code from both candidate views so the
         // physical-keyboard slot disappears after commit
         if (mCandidateViewStandAlone != null) {
@@ -1185,29 +1179,9 @@ public class LIMEService extends InputMethodService implements
     /**
      * Clear suggestions or candidates in candidate view.
      */
+    // Delegates to CandidateController
     void clearSuggestions() {
-        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
-            mMainHandler.post(this::clearSuggestions);
-            return;
-        }
-        if (mCandidateView != null) {
-            if (DEBUG)
-                Log.i(TAG, "clearSuggestions(): "
-                        + ", hasCandidatesShown:" + hasCandidatesShown);
-
-            if (!mEnglishOnly && mLIMEPref.getAutoChineseSymbol() // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-                    && (hasCandidatesShown || mFixedCandidateViewOn)) { // Change isCandiateShown() to hasCandiatesShown
-                mCandidateView.clear();
-                if (hasCandidatesShown)
-                    updateChineseSymbol(); // Jeremy '12.5,23 do not show chinesesymbol when init for fixed candidate
-                                           // view.
-            } else {
-                mCandidateView.clear();
-                hideCandidateView();
-            }
-
-        }
-        hideComposingPopup();
+        mCandidateController.clearSuggestions();
     }
 
     /**
@@ -3474,138 +3448,29 @@ public class LIMEService extends InputMethodService implements
         return list;
     }
 
+    // Delegates to CandidateController
     private void initCandidateView() {
-        if (DEBUG)
-            Log.i(TAG, "initCandidateView()");
-
-        mCandidateViewHandler.showCandidateView();
-        mCandidateViewHandler.hideCandidateView();
+        mCandidateController.initCandidateView();
     }
 
+    // Delegates to CandidateController
     void showCandidateView() {
-        if (DEBUG)
-            Log.i(TAG, "showCandidateView()");
-        if (hasPhysicalKeyPressed) {
-            requestShowSelf(0);
-        }
-
-        Configuration config = getResources().getConfiguration();
-        boolean isPhysicalKeyboardConnected = config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-        boolean useFixedMode = mFixedCandidateViewOn || isPhysicalKeyboardConnected;
-
-        if (!useFixedMode) {
-            mCandidateViewHandler.showCandidateView();
-        }
+        mCandidateController.showCandidateView();
     }
 
+    // Delegates to CandidateController
     void hideCandidateView() {
-        if (DEBUG)
-            Log.i(TAG, "hideCandidateView()");
-        if (mCandidateView != null)
-            mCandidateView.clear();
-        hasCandidatesShown = false;
-        hasChineseSymbolCandidatesShown = false;
-        if (mCandidateViewStandAlone == null || (!mCandidateViewStandAlone.isShown()))
-            return; // escape if mCandidateViewStandAlone is not created or it's not shown '12,5,6,
-                    // Jeremy
-
-        mCandidateViewHandler.hideCandidateViewDelayed(DELAY_BEFORE_HIDE_CANDIDATE_VIEW);
-
+        mCandidateController.hideCandidateView();
     }
 
+    // Delegates to CandidateController
     private void forceHideCandidateView() {
-        if (DEBUG)
-            Log.i(TAG, "forceHideCandidateView()");
-
-        if (mComposing != null && mComposing.length() > 0)
-            mComposing.setLength(0);
-
-        selectedCandidate = null;
-        // selectedIndex = 0;
-
-        if (mCandidateList != null)
-            mCandidateList.clear();
-
-        if (mFixedCandidateViewOn) {
-            mCandidateViewInInputView.forceHide();
-        } else {
-            hideCandidateView();
-        }
+        mCandidateController.forceHideCandidateView();
     }
 
+    // Delegates to CandidateController
     public void setSuggestions(List<Mapping> suggestions, boolean showNumber, String diplaySelkey) {
-        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
-            mMainHandler.post(() -> setSuggestions(suggestions, showNumber, diplaySelkey));
-            return;
-        }
-
-        if (suggestions != null && suggestions.size() > 0) {
-
-            if (DEBUG)
-                Log.i(TAG, "setSuggestion():suggestions.size=" + suggestions.size()
-                        + ", mComposing = " + mComposing
-                        + ", mFixedCandidateViewOn:" + mFixedCandidateViewOn
-                        + ", hasPhysicalKeyPressed:" + hasPhysicalKeyPressed);
-
-            Configuration config = getResources().getConfiguration();
-            boolean isPhysicalKeyboardConnected = config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-
-            if (isPhysicalKeyboardConnected) {
-                // When physical keyboard is connected, we use the candidate view inside InputView
-                // which is forced by updateInputViewContainer()
-                if (mCandidateViewInInputView != null) {
-                    mCandidateView = mCandidateViewInInputView;
-                    if (mCandidateViewStandAlone != null) mCandidateViewStandAlone.clear();
-                }
-                
-                // Ensure IME window is shown but don't force separate candidate window
-                requestShowSelf(0);
-                setCandidatesViewShown(false); 
-            } else if (!mFixedCandidateViewOn && mCandidateView != mCandidateViewStandAlone) {
-                mCandidateViewInInputView.clear();
-                mCandidateView = mCandidateViewStandAlone;
-            } else if (mFixedCandidateViewOn && mCandidateView != mCandidateViewInInputView) {
-                mCandidateViewStandAlone.clear();
-                hideCandidateView();
-                mCandidateView = mCandidateViewInInputView;
-                if (mCandidateViewStandAlone != null)
-                    mCandidateViewStandAlone.setEmbeddedComposingView(null);
-            }
-
-            showCandidateView();
-
-            hasCandidatesShown = true; // Jeremy '15,6,1 move after hideCandidateView if candidateView is fixed.
-            hasMappingList = true;
-
-            if (mCandidateView != null) {
-                mCandidateList = (LinkedList<Mapping>) suggestions;
-                try {
-
-                    // Default selection: first candidate, unless it is the raw
-                    // composing-code record — then prefer the exact-match word
-                    // after it. (Composing-code records are filtered from Chinese
-                    // queries now; this guard keeps other paths correct.)
-                    selectedCandidate = suggestions.get(0);
-                    if (selectedCandidate.isComposingCodeRecord()
-                            && suggestions.size() > 1 && suggestions.get(1).isExactMatchToCodeRecord()) {
-                        selectedCandidate = suggestions.get(1);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                mCandidateView.setSuggestions(suggestions, showNumber, diplaySelkey);
-                if (DEBUG)
-                    Log.i(TAG, "setSuggestion(): mCandidateList.size: " + mCandidateList.size()
-                            + ", mComposing = " + mComposing);
-            }
-        } else {
-            if (DEBUG)
-                Log.i(TAG, "setSuggestion() with list=null");
-            hasMappingList = false;
-            // Jeremy '11,8,15
-            clearSuggestions();
-        }
-
+        mCandidateController.setSuggestions(suggestions, showNumber, diplaySelkey);
     }
 
     // Keyboard-key code -> root label lookup, rebuilt only when the keyboard
@@ -4332,9 +4197,9 @@ public class LIMEService extends InputMethodService implements
      * 
      * }
      */
-    // Jeremy '12,5,11 add return value from mCandidate.takeselectedsuggestion()
+    // Delegates to CandidateController
     public boolean pickHighlightedCandidate() {
-        return mCandidateView != null && mCandidateView.takeSelectedSuggestion();
+        return mCandidateController.pickHighlightedCandidate();
     }
 
     public void requestFullRecords(boolean isRelatedPhrase) {
@@ -4378,69 +4243,9 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
+    // Delegates to CandidateController
     public void pickCandidateManually(int index) {
-        if (DEBUG)
-            Log.i(TAG, "pickCandidateManually():"
-                    + "Pick up candidate at index : " + index);
-
-        // This is to prevent if user select the index more than the list
-        if (mCandidateList != null && index >= mCandidateList.size()) {
-            return;
-        }
-
-        if (mCandidateList != null && mCandidateList.size() > 0) {
-            selectedCandidate = mCandidateList.get(index);
-            // selectedIndex = index;
-        }
-
-        InputConnection ic = getCurrentInputConnection();
-
-        if (mCompletionOn && mCompletions != null && index >= 0
-                && selectedCandidate.isPartialMatchToCodeRecord()
-                && index < mCompletions.length) { // user picked the completion suggestion item.
-            CompletionInfo ci = mCompletions[index];
-            if (ic != null)
-                ic.commitCompletion(ci);
-            if (DEBUG)
-                Log.i(TAG, "pickSuggestionManually():mCompletionOn:" + mCompletionOn);
-
-        } else if ((mComposing.length() > 0
-                || (selectedCandidate != null && !selectedCandidate.isComposingCodeRecord()))
-                && !mEnglishOnly) { // user picked candidates from composing candidate or related phrase candidates
-            // Jeremy '12,4,29 use mEnglishOnly instead of onIM
-            commitTyped(ic);
-        } else if (mLIMEPref.getEnglishPrediction() && tempEnglishList != null
-                && tempEnglishList.size() > 0) { // user picked English prediction suggestions
-
-            // Log.i("EMOJI-commit-index:", index + "");
-            // Log.i("EMOJI-commit:", tempEnglishList.size() + "");
-
-            if (this.tempEnglishList.get(index).isEmojiRecord()) {
-                if (ic != null)
-                    ic.commitText(
-                            this.tempEnglishList.get(index).getWord() + " ", 0);
-            } else {
-                if (ic != null)
-                    ic.commitText(
-                            this.tempEnglishList.get(index).getWord()
-                                    .substring(tempEnglishWord.length())
-                                    + " ",
-                            0);
-            }
-
-            resetTempEnglishWord();
-
-            clearSuggestions();
-
-        }
-
-        /*
-        if (currentSoftKeyboard.contains("wb")) {
-            if (ic != null && mPredictionOn)
-                ic.setComposingText("", 0);
-        }
-        */
-
+        mCandidateController.pickCandidateManually(index);
     }
 
     public void swipeRight() {
@@ -4681,7 +4486,7 @@ public class LIMEService extends InputMethodService implements
         return KEYBOARD_THEMES[mKeyboardThemeIndex].mStyleId;
     }
 
-    private static class CandidateViewHandler extends Handler {
+    static class CandidateViewHandler extends Handler {
 
         private final WeakReference<LIMEService> mLIMEService;
         private final int MSG_SHOW_CANDIDATE_VIEW = 1;
