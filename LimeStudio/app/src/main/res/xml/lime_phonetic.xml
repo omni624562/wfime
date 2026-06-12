@@ -173,14 +173,9 @@
 
     <Row limehd:rowEdgeFlags="bottom">
         <Key
-            limehd:codes="-1"
-            limehd:isModifier="true"
-            limehd:isSticky="true"
-            limehd:keyIcon="@drawable/sym_keyboard_shift_material3"
-            limehd:keyWidth="15%p" />
-        <Key
             limehd:codes="-2"
             limehd:isModifier="true"
+            limehd:keyEdgeFlags="left"
             limehd:keyLabel="@string/label_symbol_mode"
             limehd:keyWidth="15%p" />
         <Key
@@ -192,7 +187,7 @@
             limehd:codes="32"
             limehd:isRepeatable="true"
             limehd:keyIcon="@drawable/sym_flat_keyboard_space"
-            limehd:keyWidth="20%p" />
+            limehd:keyWidth="35%p" />
         <Key
             limehd:codes="45"
             limehd:keyLabel="-\nㄦ"
