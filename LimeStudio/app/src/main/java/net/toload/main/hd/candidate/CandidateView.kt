@@ -481,28 +481,31 @@ open class CandidateView @JvmOverloads constructor(
                             // 碼上限為 4 碼,固定寬度讓候選起點不隨碼長左右跳動。
                             // 只顯示轉換後字根(如 木牛舟);點擊仍可送出原始英文碼。
                             if (isPhysicalKeyboard && _composingText.isNotEmpty()) {
+                                // 字根是組字狀態提示,字級用候選的 75% 就好,
+                                // 太大會跟候選搶視覺重量(平板上尤其明顯)
+                                val slotFontSize = (candidateFontSize.value * 0.75f).sp
                                 val slotWidth = with(LocalDensity.current) {
-                                    (candidateFontSize.toPx() * 4f).toDp()
-                                } + 28.dp
+                                    (slotFontSize.toPx() * 4f).toDp()
+                                } + 22.dp
                                 Box(
                                     modifier = Modifier
-                                        .padding(start = 8.dp, top = 5.dp, bottom = 5.dp)
+                                        .padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                                         .width(slotWidth)
                                         .fillMaxHeight()
                                         .background(Color(0xFF1E272C), RoundedCornerShape(6.dp))
-                                        .border(1.dp, Color(0xFF00796B), RoundedCornerShape(6.dp))
+                                        .border(1.dp, Color(0xFF00796B).copy(alpha = 0.7f), RoundedCornerShape(6.dp))
                                         .clickable {
                                             if (_rawKeycode.isNotEmpty()) {
                                                 mService?.commitTyped(_rawKeycode)
                                             }
                                         }
-                                        .padding(horizontal = 10.dp),
+                                        .padding(horizontal = 8.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
                                     Text(
                                         text = _composingText,
                                         color = Color(0xFF4FC3F7),
-                                        fontSize = candidateFontSize,
+                                        fontSize = slotFontSize,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
                                     )
