@@ -502,9 +502,19 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
+                                    // 超過 4 碼(大易/注音碼長上限)代表正在直打英文
+                                    // 單字,改顯示原始碼尾端,讓使用者看得到剛打的字母
+                                    // (修飾鍵+Space/Enter 可整串送出,長度不限)
+                                    val overMaxCode = _rawKeycode.length > 4
+                                    val slotText = if (overMaxCode) {
+                                        if (_rawKeycode.length > 8) "…" + _rawKeycode.takeLast(7)
+                                        else _rawKeycode
+                                    } else {
+                                        _composingText
+                                    }
                                     Text(
-                                        text = _composingText,
-                                        color = Color(0xFF4FC3F7),
+                                        text = slotText,
+                                        color = if (overMaxCode) Color(0xFF80DEEA) else Color(0xFF4FC3F7),
                                         fontSize = slotFontSize,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
