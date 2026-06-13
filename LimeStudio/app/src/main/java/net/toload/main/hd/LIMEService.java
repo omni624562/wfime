@@ -2406,9 +2406,12 @@ public class LIMEService extends InputMethodService implements
 
     boolean isValidSymbol(int code) {
         // code has to < 256, a ascii character
-        // Fixed: Simplified logic - exclude letters, digits, and space
-        return code < 256 && !Character.isLetter(code)
-                && !Character.isDigit(code) && code != 32;
+        if (code >= 256 || Character.isLetter(code) || Character.isDigit(code) || code == 32)
+            return false;
+        // Exclude Shift-row symbols that can never be IM composing codes.
+        // These would otherwise be appended to the composing buffer (e.g. @ sent from
+        // the Dayi shift keyboard) because hasSymbolMapping=true for Dayi.
+        return "!@#$%^&*()".indexOf((char) code) < 0;
     }
 
     /**
