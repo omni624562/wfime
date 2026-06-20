@@ -526,6 +526,20 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    if (!isPhysicalKeyboard && _rawKeycode.isNotEmpty()) {
+                                        item {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                RawKeycodeItem(
+                                                    keycode = _rawKeycode,
+                                                    fontSize = candidateFontSize,
+                                                    onClick = {
+                                                        mService?.commitTyped(_rawKeycode)
+                                                    }
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                            }
+                                        }
+                                    }
                                     itemsIndexed(visibleSuggestions) { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
@@ -755,6 +769,33 @@ open class CandidateView @JvmOverloads constructor(
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    fun RawKeycodeItem(
+        keycode: String,
+        fontSize: androidx.compose.ui.unit.TextUnit,
+        onClick: () -> Unit
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .clickable(onClick = onClick)
+                .background(
+                    color = Color(0xFF3A3A3A),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = keycode,
+                color = Color(0xFF80DEEA),
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
         }
     }
 
