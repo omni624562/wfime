@@ -3185,6 +3185,17 @@ public class LIMEService extends InputMethodService implements
                         }
                     }
 
+                    // Dayi mode: inject raw composing code as a selectable English output option.
+                    // Placed after the alphanumeric filter above so there is no duplicate.
+                    // When >4 keys are typed (no Chinese candidates), this becomes the only option.
+                    if (activeIM != null && activeIM.startsWith("dayi") && !finalKeyString.isEmpty()) {
+                        Mapping rawEnglish = new Mapping();
+                        rawEnglish.setWord(finalKeyString);
+                        rawEnglish.setCode(finalKeyString);
+                        rawEnglish.setComposingCodeRecord();
+                        list.addLast(rawEnglish);
+                    }
+
                     if (list.size() > 0) {
                         setSuggestions(list, finalHasPhysicalKeyPressed, selkey);
                         if (DEBUG)

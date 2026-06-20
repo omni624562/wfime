@@ -237,18 +237,14 @@ open class CandidateView @JvmOverloads constructor(
     fun setService(service: LIMEService) {
         mService = service
     }
+
     open fun setSuggestions(
         suggestions: List<Mapping>?,
         completions: Boolean,
         typedWordValid: Boolean,
         haveMinimalSuggestion: Boolean
     ) {
-        val filtered = if (!net.toload.main.hd.BuildConfig.IS_TABLET) {
-            suggestions?.filter { !it.isComposingCodeRecord() }
-        } else {
-            suggestions
-        }
-        this.suggestions = filtered?.toList() ?: emptyList()
+        this.suggestions = suggestions ?: emptyList()
         this.selectedIndex = -1
         this.currentPage = 0
     }
@@ -262,12 +258,7 @@ open class CandidateView @JvmOverloads constructor(
      }
 
     open fun setSuggestions(suggestions: List<Mapping>?, selectedIndex: Int) {
-        val filtered = if (!net.toload.main.hd.BuildConfig.IS_TABLET) {
-            suggestions?.filter { !it.isComposingCodeRecord() }
-        } else {
-            suggestions
-        }
-        this.suggestions = filtered?.toList() ?: emptyList()
+        this.suggestions = suggestions ?: emptyList()
         this.selectedIndex = selectedIndex
         this.currentPage = 0
     }
@@ -535,8 +526,6 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // 不顯示英文原始碼項目(如 i2.)——大易使用者看英文字根
-                                    // 只會混淆;字根轉換顯示(木牛舟)已在組字浮窗呈現。
                                     itemsIndexed(visibleSuggestions) { i, mapping ->
                                         val actualIndex = startIndex + i
                                         CandidateItem(
@@ -692,7 +681,12 @@ open class CandidateView @JvmOverloads constructor(
         onLongClick: () -> Unit
     ) {
         // Gboard-style: light text on dark background
-        val textColor = if (isSelected) Color(0xFF4FC3F7) else Color.White  // Light blue when selected
+        // Composing code records (raw English output for Dayi) shown in cyan to distinguish from Chinese candidates
+        val textColor = when {
+            isSelected -> Color(0xFF4FC3F7)
+            mapping.isComposingCodeRecord() -> Color(0xFF80DEEA)
+            else -> Color.White
+        }
         val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
 
         val isPhysicalKeyboard = mService?.hasPhysicalKeyPressed == true
