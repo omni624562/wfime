@@ -688,6 +688,11 @@ public class LIMEService extends InputMethodService implements
             }
             return; // Skip floating popup on tablet, since it is rendered inline inside the candidate bar
         }
+        android.content.res.Configuration config = getResources().getConfiguration();
+        boolean isPhysicalKeyboardConnected = config.hardKeyboardHidden == android.content.res.Configuration.HARDKEYBOARDHIDDEN_NO;
+        if (!isPhysicalKeyboardConnected) {
+            return; // Skip floating popup on phone when virtual keyboard is used
+        }
         // Ensure popup operations run on main thread (may be called from background
         // thread)
         mMainHandler.post(() -> {
@@ -1269,9 +1274,13 @@ public class LIMEService extends InputMethodService implements
                         Log.i(TAG, "Fixed candidateView in off, return mInputView ");
                 }
             } else {
-                Log.d("KBD_DEBUG", "No config change, ensuring input view is set to container");
-                updateInputViewContainer();
-                setInputView(mInputViewContainer);
+                if (mInputViewContainer.getChildCount() == 0) {
+                    Log.d("KBD_DEBUG", "No config change, but container is empty, rebuilding");
+                    updateInputViewContainer();
+                    setInputView(mInputViewContainer);
+                } else {
+                    Log.d("KBD_DEBUG", "No config change, container already populated");
+                }
             }
         }
 
@@ -3188,7 +3197,7 @@ public class LIMEService extends InputMethodService implements
                     // Dayi mode: inject raw composing code as a selectable English output option.
                     // Placed after the alphanumeric filter above so there is no duplicate.
                     // When >4 keys are typed (no Chinese candidates), this becomes the only option.
-                    if (activeIM != null && activeIM.startsWith("dayi") && !finalKeyString.isEmpty()) {
+                    if (activeIM != null && activeIM.startsWith("dayi") && !finalKeyString.isEmpty() && finalHasPhysicalKeyPressed) {
                         Mapping rawEnglish = new Mapping();
                         rawEnglish.setWord(finalKeyString);
                         rawEnglish.setCode(finalKeyString);
@@ -3393,6 +3402,10 @@ public class LIMEService extends InputMethodService implements
         if (DEBUG)
             Log.i(TAG, "updateRelatedPhrase()");
         hasChineseSymbolCandidatesShown = false;
+        if (!mLIMEPref.getLearnRelatedWord()) {
+            clearSuggestions();
+            return;
+        }
         // Also use this to control whether need to display the english
         // suggestions words.
 
