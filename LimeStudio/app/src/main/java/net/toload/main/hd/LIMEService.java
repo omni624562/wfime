@@ -3198,11 +3198,13 @@ public class LIMEService extends InputMethodService implements
                     // Placed after the alphanumeric filter above so there is no duplicate.
                     // When >4 keys are typed (no Chinese candidates), this becomes the only option.
                     if (activeIM != null && activeIM.startsWith("dayi") && !finalKeyString.isEmpty() && finalHasPhysicalKeyPressed) {
-                        Mapping rawEnglish = new Mapping();
-                        rawEnglish.setWord(finalKeyString);
-                        rawEnglish.setCode(finalKeyString);
-                        rawEnglish.setComposingCodeRecord();
-                        list.addLast(rawEnglish);
+                        if (list.isEmpty()) {
+                            Mapping rawEnglish = new Mapping();
+                            rawEnglish.setWord(finalKeyString);
+                            rawEnglish.setCode(finalKeyString);
+                            rawEnglish.setComposingCodeRecord();
+                            list.addLast(rawEnglish);
+                        }
                     }
 
                     if (list.size() > 0) {
