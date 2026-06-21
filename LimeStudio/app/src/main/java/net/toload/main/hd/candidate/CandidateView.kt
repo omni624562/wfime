@@ -470,9 +470,7 @@ open class CandidateView @JvmOverloads constructor(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // 實體鍵盤模式:固定 4 字寬字根插槽(左置)。大易/注音
-                            // 碼上限為 4 碼,固定寬度讓候選起點不隨碼長左右跳動。
-                            // 只顯示轉換後字根(如 木牛舟);點擊仍可送出原始英文碼。
-                             if (isPhysicalKeyboard && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
+                            if (isPhysicalKeyboard && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty()) && _rawKeycode.length <= 4) {
                                 // 字根是組字狀態提示,字級用候選的 75% 就好,
                                 // 太大會跟候選搶視覺重量(平板上尤其明顯)
                                 val slotFontSize = (candidateFontSize.value * 0.75f).sp
@@ -494,9 +492,6 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
-                                    // 超過 4 碼(大易/注音碼長上限)代表正在直打英文
-                                    // 單字,改顯示原始碼尾端,讓使用者看得到剛打的字母
-                                    // (修飾鍵+Space/Enter 可整串送出,長度不限)
                                     val overMaxCode = _rawKeycode.length > 4
                                     val useRaw = overMaxCode || isDayi
                                     val slotText = if (useRaw) {
@@ -528,7 +523,7 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (!isPhysicalKeyboard && _rawKeycode.isNotEmpty()) {
+                                    if (!isPhysicalKeyboard && _rawKeycode.isNotEmpty() && _rawKeycode.length <= 4) {
                                         item {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 RawKeycodeItem(
@@ -542,8 +537,14 @@ open class CandidateView @JvmOverloads constructor(
                                             }
                                         }
                                     }
-                                    itemsIndexed(visibleSuggestions) { i, mapping ->
-                                        val actualIndex = startIndex + i
+                                    val indexedSuggestions = visibleSuggestions.mapIndexed { i, mapping ->
+                                        Pair(startIndex + i, mapping)
+                                    }.filter {
+                                        isPhysicalKeyboard || _rawKeycode.length > 4 || it.second.word != _rawKeycode
+                                    }
+
+                                    itemsIndexed(indexedSuggestions) { _, pair ->
+                                        val (actualIndex, mapping) = pair
                                         CandidateItem(
                                             mapping = mapping,
                                             index = actualIndex,
@@ -665,7 +666,7 @@ open class CandidateView @JvmOverloads constructor(
 
                             // Right side: Composing Text in candidate window — soft-keyboard
                             // tablet mode only; physical-keyboard mode uses the fixed left slot
-                            if (!isPhysicalKeyboard && isTablet && !isDayi && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
+                            if (!isPhysicalKeyboard && isTablet && !isDayi && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty()) && _rawKeycode.length <= 4) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
