@@ -725,7 +725,8 @@ public class SearchServer {
             // For Dayi 3-code, we only collect matches for the full code to enable auto-commit
             String currentLoopCode = code;
             java.util.HashSet<String> seenWords = new java.util.HashSet<>();
-            while (currentLoopCode != null && currentLoopCode.length() > 0) {
+            boolean isDayiOverLimit = tablename.startsWith("dayi") && code.length() > 4;
+            while (!isDayiOverLimit && currentLoopCode != null && currentLoopCode.length() > 0) {
                 String loopCacheKey = cacheKey(currentLoopCode);
                 List<Mapping> loopCacheTemp = cache.get(loopCacheKey);
 
