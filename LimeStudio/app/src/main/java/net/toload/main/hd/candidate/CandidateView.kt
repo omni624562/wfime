@@ -498,7 +498,8 @@ open class CandidateView @JvmOverloads constructor(
                                     // 單字,改顯示原始碼尾端,讓使用者看得到剛打的字母
                                     // (修飾鍵+Space/Enter 可整串送出,長度不限)
                                     val overMaxCode = _rawKeycode.length > 4
-                                    val slotText = if (overMaxCode) {
+                                    val useRaw = overMaxCode || isDayi
+                                    val slotText = if (useRaw) {
                                         if (_rawKeycode.length > 8) "…" + _rawKeycode.takeLast(7)
                                         else _rawKeycode
                                     } else {
@@ -506,7 +507,7 @@ open class CandidateView @JvmOverloads constructor(
                                     }
                                     Text(
                                         text = slotText,
-                                        color = if (overMaxCode) Color(0xFF80DEEA) else Color(0xFF4FC3F7),
+                                        color = if (useRaw) Color(0xFF80DEEA) else Color(0xFF4FC3F7),
                                         fontSize = slotFontSize,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
@@ -580,8 +581,8 @@ open class CandidateView @JvmOverloads constructor(
                                 }
                             }
 
-                            // Close/Clear Button for virtual keyboard
-                            if (!isPhysicalKeyboard && suggestions.isNotEmpty()) {
+                            // Close/Clear Button
+                            if (suggestions.isNotEmpty()) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
