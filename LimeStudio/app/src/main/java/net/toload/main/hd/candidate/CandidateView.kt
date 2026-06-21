@@ -593,7 +593,7 @@ open class CandidateView @JvmOverloads constructor(
                                         .fillMaxHeight()
                                         .padding(horizontal = 8.dp)
                                         .clickable {
-                                            mService?.clearSuggestions()
+                                            mService?.clearComposing(true)
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {

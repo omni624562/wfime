@@ -1148,7 +1148,7 @@ public class LIMEService extends InputMethodService implements
      * add forceClearComposing parameter to control forced clear the system
      * composing buffer
      */
-    void clearComposing(boolean forceClearComposing) {
+    public void clearComposing(boolean forceClearComposing) {
         if (DEBUG)
             Log.i(TAG, "clearComposing()");
 
