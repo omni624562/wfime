@@ -38,7 +38,7 @@
             android:id="@+id/candidatesView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/candidate_view_right_margin"
+            android:layout_marginStart="@dimen/candidate_view_right_margin"
             android:gravity="center_vertical" />
 
         <!-- The TextView for the IME abbreviation on tablets -->
@@ -46,7 +46,7 @@
             android:id="@+id/candidate_ime_name"
             android:layout_width="@dimen/candidate_view_right_margin"
             android:layout_height="match_parent"
-            android:layout_gravity="end"
+            android:layout_gravity="start"
             android:gravity="center"
             android:includeFontPadding="false"
             android:paddingLeft="0dp"

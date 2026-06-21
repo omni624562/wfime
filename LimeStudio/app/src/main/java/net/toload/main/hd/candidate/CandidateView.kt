@@ -664,7 +664,7 @@ open class CandidateView @JvmOverloads constructor(
 
                             // Right side: Composing Text in candidate window — soft-keyboard
                             // tablet mode only; physical-keyboard mode uses the fixed left slot
-                            if (!isPhysicalKeyboard && isTablet && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
+                            if (!isPhysicalKeyboard && isTablet && !isDayi && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
