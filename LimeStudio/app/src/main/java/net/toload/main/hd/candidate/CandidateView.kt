@@ -472,7 +472,7 @@ open class CandidateView @JvmOverloads constructor(
                             // 實體鍵盤模式:固定 4 字寬字根插槽(左置)。大易/注音
                             // 碼上限為 4 碼,固定寬度讓候選起點不隨碼長左右跳動。
                             // 只顯示轉換後字根(如 木牛舟);點擊仍可送出原始英文碼。
-                            if (isPhysicalKeyboard && _composingText.isNotEmpty()) {
+                             if (isPhysicalKeyboard && (_composingText.isNotEmpty() || _rawKeycode.isNotEmpty())) {
                                 // 字根是組字狀態提示,字級用候選的 75% 就好,
                                 // 太大會跟候選搶視覺重量(平板上尤其明顯)
                                 val slotFontSize = (candidateFontSize.value * 0.75f).sp
