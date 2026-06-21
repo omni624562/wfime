@@ -4112,6 +4112,9 @@ public class LIMEService extends InputMethodService implements
                 compose = isValidSymbol(primaryCode) || phoneticSpace
                         || isValidLetter(primaryCode) || isValidDigit(primaryCode);
             }
+            if (!compose && mComposing != null && mComposing.length() >= 4 && primaryCode >= 33 && primaryCode <= 126) {
+                compose = true;
+            }
 
             if (compose) {
                 mComposing.append((char) primaryCode);
