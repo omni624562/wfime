@@ -4124,14 +4124,13 @@ public class LIMEService extends InputMethodService implements
                 if (DEBUG)
                     Log.i(TAG, "handleCharacter() fallback case: primaryCode=" + primaryCode + " char="
                             + (char) primaryCode);
-                if (hasCandidatesShown) {
+                if (mComposing.length() > 0) {
                     if (!pickHighlightedCandidate()) {
-                        if (ic != null)
-                            ic.commitText(String.valueOf((char) primaryCode), 1);
+                        commitTyped(mComposing.toString());
                     }
-                } else {
-                    if (ic != null)
-                        ic.commitText(String.valueOf((char) primaryCode), 1);
+                }
+                if (ic != null) {
+                    ic.commitText(String.valueOf((char) primaryCode), 1);
                 }
                 // Jeremy '12,4,21
                 finishComposing();
