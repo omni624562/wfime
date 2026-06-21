@@ -1185,7 +1185,7 @@ public class LIMEService extends InputMethodService implements
      * Clear suggestions or candidates in candidate view.
      */
     // Delegates to CandidateController
-    void clearSuggestions() {
+    public void clearSuggestions() {
         mCandidateController.clearSuggestions();
     }
 

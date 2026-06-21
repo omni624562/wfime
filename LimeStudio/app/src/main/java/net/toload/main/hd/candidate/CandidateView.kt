@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
@@ -575,6 +576,32 @@ open class CandidateView @JvmOverloads constructor(
                                                     )
                                                 )
                                             )
+                                    )
+                                }
+                            }
+
+                            // Close/Clear Button for virtual keyboard
+                            if (!isPhysicalKeyboard && suggestions.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(1.dp)
+                                        .background(Color.White.copy(alpha = 0.12f))
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 8.dp)
+                                        .clickable {
+                                            mService?.clearSuggestions()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Clear",
+                                        tint = Color(0xFF80DEEA),
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
