@@ -27,6 +27,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -415,7 +417,122 @@ class SettingsViewModel(
     fun clearDayiSmartSelectionData() {
         SmartSelectionManager.getInstance(context).clearData()
     }
+
+    // ------------------------------------------------------------------
+    // 自建關聯字管理
+    // ------------------------------------------------------------------
+
+    private val _relatedManagerState = MutableStateFlow(RelatedManagerUiState())
+    val relatedManagerState: StateFlow<RelatedManagerUiState> = _relatedManagerState.asStateFlow()
+
+    private var relatedSearchJob: Job? = null
+    private var lastDeletedRelated: net.toload.main.hd.data.Related? = null
+
+    /** 開啟管理頁或資料變更後重新載入清單 */
+    fun loadUserRelated() {
+        val query = _relatedManagerState.value.query
+        viewModelScope.launch {
+            _relatedManagerState.update { it.copy(loading = true) }
+            val (items, total) = withContext(Dispatchers.IO) {
+                val list = limeDb.getUserLearnedRelated(query, RELATED_QUERY_LIMIT)
+                    .map { r ->
+                        RelatedWordItem(
+                            id = r.id.toLong(),
+                            pword = r.pword.orEmpty(),
+                            cword = r.cword.orEmpty(),
+                            count = r.userscore,
+                            isBuiltIn = r.basescore > 0
+                        )
+                    }
+                list to limeDb.countUserLearnedRelated()
+            }
+            _relatedManagerState.update {
+                it.copy(
+                    loading = false,
+                    items = items,
+                    totalCount = total,
+                    truncated = items.size >= RELATED_QUERY_LIMIT
+                )
+            }
+        }
+    }
+
+    /** 搜尋字串變更(250ms debounce) */
+    fun setRelatedSearchQuery(query: String) {
+        _relatedManagerState.update { it.copy(query = query) }
+        relatedSearchJob?.cancel()
+        relatedSearchJob = viewModelScope.launch {
+            delay(250)
+            loadUserRelated()
+        }
+    }
+
+    /** 刪除單筆:純自建刪列、內建歸零使用次數;記住被刪項供復原 */
+    fun deleteUserRelated(item: RelatedWordItem) {
+        val snapshot = net.toload.main.hd.data.Related().apply {
+            id = item.id.toInt()
+            pword = item.pword
+            cword = item.cword
+            userscore = item.count
+            basescore = if (item.isBuiltIn) 1 else 0
+        }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                limeDb.removeOrResetUserRelated(item.id, item.isBuiltIn)
+            }
+            lastDeletedRelated = snapshot
+            net.toload.main.hd.SearchServer.clearRelatedCaches()
+            loadUserRelated()
+        }
+    }
+
+    /** Snackbar 復原剛刪除的單筆 */
+    fun undoDeleteUserRelated() {
+        val item = lastDeletedRelated ?: return
+        lastDeletedRelated = null
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                limeDb.restoreUserRelated(item)
+            }
+            net.toload.main.hd.SearchServer.clearRelatedCaches()
+            loadUserRelated()
+        }
+    }
+
+    /** 全部清除(呼叫端須先經確認對話框) */
+    fun clearAllUserRelated() {
+        lastDeletedRelated = null
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                limeDb.clearUserLearnedRelated()
+            }
+            net.toload.main.hd.SearchServer.clearRelatedCaches()
+            loadUserRelated()
+        }
+    }
+
+    companion object {
+        private const val RELATED_QUERY_LIMIT = 500
+    }
 }
+
+/** 自建關聯字管理頁的 UI 狀態(dialog 生命週期,獨立於 SettingsUiState) */
+data class RelatedManagerUiState(
+    val loading: Boolean = false,
+    val query: String = "",
+    val items: List<RelatedWordItem> = emptyList(),
+    val totalCount: Int = 0,
+    val truncated: Boolean = false
+)
+
+/** 單筆自建關聯字:isBuiltIn 表示內建字典列(刪除時只歸零使用次數) */
+data class RelatedWordItem(
+    val id: Long,
+    val pword: String,
+    val cword: String,
+    val count: Int,
+    val isBuiltIn: Boolean
+)
 
 /**
  * Factory for creating SettingsViewModel instances.

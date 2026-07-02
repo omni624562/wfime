@@ -28,9 +28,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Paint;
+
+import androidx.core.graphics.PaintCompat;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.toload.main.hd.Lime;
 import net.toload.main.hd.data.Mapping;
@@ -49,8 +54,46 @@ public class EmojiConverter extends SQLiteOpenHelper {
     private static final String FIELD_TAG = "tag";
     private static final String FIELD_VALUE = "value";
 
+    // 裝置字型是否能顯示該 emoji 的快取;顯示不了的(豆腐格)不進候選列
+    private final static Map<String, Boolean> glyphCache = new ConcurrentHashMap<>();
+    private final static Paint glyphPaint = new Paint();
+
     public EmojiConverter(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    static boolean canRender(String emoji) {
+        Boolean cached = glyphCache.get(emoji);
+        if (cached != null)
+            return cached;
+        boolean sysGlyph;
+        try {
+            sysGlyph = PaintCompat.hasGlyph(glyphPaint, emoji);
+        } catch (Exception e) {
+            sysGlyph = true; // 檢查失敗時寧可顯示
+        }
+        if (sysGlyph) {
+            glyphCache.put(emoji, true);
+            return true;
+        }
+        // 系統字型沒有:問 EmojiCompat(Gboard 式 GMS 可下載字型 fallback)
+        try {
+            androidx.emoji2.text.EmojiCompat ec = androidx.emoji2.text.EmojiCompat.get();
+            int state = ec.getLoadState();
+            if (state == androidx.emoji2.text.EmojiCompat.LOAD_STATE_SUCCEEDED) {
+                boolean supported = ec.getEmojiMatch(emoji, Integer.MAX_VALUE)
+                        == androidx.emoji2.text.EmojiCompat.EMOJI_SUPPORTED;
+                glyphCache.put(emoji, supported);
+                return supported;
+            }
+            if (state == androidx.emoji2.text.EmojiCompat.LOAD_STATE_LOADING
+                    || state == androidx.emoji2.text.EmojiCompat.LOAD_STATE_DEFAULT)
+                return false; // 字型下載中:先隱藏且不快取,載入完成後自然恢復
+        } catch (IllegalStateException ignored) {
+            // EmojiCompat 未初始化(無 GMS 等):維持系統字型的判斷
+        }
+        glyphCache.put(emoji, false);
+        return false;
     }
 
     /**
@@ -92,7 +135,7 @@ public class EmojiConverter extends SQLiteOpenHelper {
                     int wordColumn = cursor.getColumnIndex(Lime.EMOJI_FIELD_VALUE);
                     while (!cursor.isAfterLast()) {
                         String word = cursor.getString(wordColumn);
-                        if (word != null && !word.isEmpty() && !word.equals(" ")) {
+                        if (word != null && !word.isEmpty() && !word.equals(" ") && canRender(word)) {
                             Mapping mapping = new Mapping();
                             mapping.setCode("");
                             mapping.setWord(word);

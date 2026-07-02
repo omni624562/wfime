@@ -795,16 +795,140 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     /**
-     * Empty Related table records
+     * 清除所有自建關聯字:純自建列(basescore 空)刪除、內建列(basescore>0)使用次數歸零。
+     * 不動 cword IS NULL 的頻率計數列(見 addOrUpdateRelatedPhraseRecord)與內建字典本體。
      */
-    public synchronized void deleteUserDictAll() {
+    public synchronized void clearUserLearnedRelated() {
         if (!checkDBConnection())
             return;
         mLIMEPref.setTotalUserdictRecords("0");
-        // -------------------------------------------------------------------------
-        // SQLiteDatabase db = this.getSqliteDb(false);
-        db.delete(Lime.DB_RELATED, FIELD_DIC_score + " > 0", null);
+        try {
+            db.beginTransaction();
+            ContentValues cv = new ContentValues();
+            cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, 0);
+            db.update(Lime.DB_RELATED, cv,
+                    FIELD_DIC_score + " > 0 AND " + Lime.DB_RELATED_COLUMN_BASESCORE + " > 0 AND "
+                            + FIELD_DIC_cword + " IS NOT NULL",
+                    null);
+            db.delete(Lime.DB_RELATED,
+                    FIELD_DIC_score + " > 0 AND (" + Lime.DB_RELATED_COLUMN_BASESCORE + " IS NULL OR "
+                            + Lime.DB_RELATED_COLUMN_BASESCORE + " <= 0) AND "
+                            + FIELD_DIC_cword + " IS NOT NULL",
+                    null);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+        relatedscore.clear();
+    }
 
+    /**
+     * 供 SearchServer 於自建關聯字變更後清除 score 快取
+     */
+    public void clearRelatedScoreCache() {
+        relatedscore.clear();
+    }
+
+    /**
+     * 自建關聯字管理:列出使用者學習過的關聯字(score>0),依使用次數排序。
+     * filter 為空時列出全部;否則以 pword/cword LIKE 過濾(% _ \ 跳脫為字面值)。
+     */
+    public List<Related> getUserLearnedRelated(String filter, int limit) {
+        List<Related> result = new ArrayList<>();
+        if (!checkDBConnection())
+            return result;
+        String selection = FIELD_DIC_score + " > 0 AND " + FIELD_DIC_cword + " IS NOT NULL";
+        String[] selectionArgs = null;
+        if (filter != null && !filter.trim().isEmpty()) {
+            String pattern = "%" + filter.trim()
+                    .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+            selection += " AND (" + FIELD_DIC_pword + " LIKE ? ESCAPE '\\' OR "
+                    + FIELD_DIC_cword + " LIKE ? ESCAPE '\\')";
+            selectionArgs = new String[] { pattern, pattern };
+        }
+        try {
+            Cursor cursor = db.query(Lime.DB_RELATED, null, selection, selectionArgs, null, null,
+                    FIELD_DIC_score + " DESC, " + FIELD_DIC_pword + " ASC", String.valueOf(limit));
+            if (cursor != null)
+                result = Related.getList(cursor); // getList() 會關閉 cursor
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 自建關聯字管理:自建關聯字總數(score>0,排除頻率計數列)
+     */
+    public int countUserLearnedRelated() {
+        if (!checkDBConnection())
+            return 0;
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery("SELECT COUNT(*) FROM " + Lime.DB_RELATED + " WHERE "
+                    + FIELD_DIC_score + " > 0 AND " + FIELD_DIC_cword + " IS NOT NULL", null);
+            if (cursor.moveToFirst())
+                return cursor.getInt(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return 0;
+    }
+
+    /**
+     * 自建關聯字管理:刪除單筆。內建列(builtIn)只把使用次數歸零保留字典資料;
+     * 純自建列直接刪除並遞減自建字數統計。
+     */
+    public synchronized void removeOrResetUserRelated(long id, boolean builtIn) {
+        if (!checkDBConnection())
+            return;
+        try {
+            if (builtIn) {
+                ContentValues cv = new ContentValues();
+                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, 0);
+                db.update(Lime.DB_RELATED, cv, FIELD_ID + " = ?", new String[] { String.valueOf(id) });
+            } else {
+                db.delete(Lime.DB_RELATED, FIELD_ID + " = ?", new String[] { String.valueOf(id) });
+                int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
+                if (dictotal > 0)
+                    mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal - 1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        relatedscore.remove(String.valueOf(id));
+    }
+
+    /**
+     * 自建關聯字管理:復原剛刪除的單筆(Snackbar 復原用)。
+     * 內建列還原使用次數;純自建列重新插入(basescore 留空以維持自建判別)。
+     */
+    public synchronized void restoreUserRelated(Related item) {
+        if (item == null || !checkDBConnection())
+            return;
+        try {
+            ContentValues cv = new ContentValues();
+            if (item.getBasescore() > 0) {
+                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, item.getUserscore());
+                db.update(Lime.DB_RELATED, cv, FIELD_ID + " = ?",
+                        new String[] { String.valueOf(item.getId()) });
+            } else {
+                cv.put(Lime.DB_RELATED_COLUMN_PWORD, item.getPword());
+                cv.put(Lime.DB_RELATED_COLUMN_CWORD, item.getCword());
+                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, item.getUserscore());
+                db.insert(Lime.DB_RELATED, null, cv);
+                int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
+                mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal + 1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        relatedscore.remove(String.valueOf(item.getId()));
     }
 
     /**
@@ -1399,7 +1523,18 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         List<Mapping> result = new LinkedList<>();
 
-        if (mLIMEPref.getSimiliarEnable()) {
+        // 兩開關獨立運作:「啟用關聯字典」顯示內建字典列(basescore>0),
+        // 「啟動自建關聯字」顯示使用者學習過的列(score>0),各自可單獨開啟
+        final boolean dictionaryEnabled = mLIMEPref.getSimiliarEnable();
+        final boolean userLearnedEnabled = mLIMEPref.getLearnRelatedWord();
+
+        if (dictionaryEnabled || userLearnedEnabled) {
+
+            String originFilter = "";
+            if (!dictionaryEnabled)
+                originFilter = " and " + Lime.DB_RELATED_COLUMN_USERSCORE + " > 0";
+            else if (!userLearnedEnabled)
+                originFilter = " and " + Lime.DB_RELATED_COLUMN_BASESCORE + " > 0";
 
             if (pword != null && !pword.trim().equals("")) {
 
@@ -1423,10 +1558,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
                     String selectString = "SELECT " + FIELD_ID + ", " + FIELD_DIC_pword + ", " + FIELD_DIC_cword + ", "
                             + Lime.DB_RELATED_COLUMN_BASESCORE + ", " + Lime.DB_RELATED_COLUMN_USERSCORE
-                            + ", length(" + FIELD_DIC_pword + ") as len FROM " + Lime.DB_RELATED + " where "
+                            + ", length(" + FIELD_DIC_pword + ") as len FROM " + Lime.DB_RELATED + " where ("
                             + FIELD_DIC_pword + " = '" + pword
                             + "' or " + FIELD_DIC_pword + " = '" + last
                             + "' and " + FIELD_DIC_cword + " is not null"
+                            + ")" + originFilter
                             + " order by len desc, " + Lime.DB_RELATED_COLUMN_USERSCORE + " desc, "
                             + Lime.DB_RELATED_COLUMN_BASESCORE + " desc ";
 
@@ -1446,7 +1582,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
                 } else {
                     cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = '" + pword
-                            + "' and " + FIELD_DIC_cword + " is not null ", null, null, null,
+                            + "' and " + FIELD_DIC_cword + " is not null " + originFilter, null, null, null,
                             Lime.DB_RELATED_COLUMN_USERSCORE + " DESC, "
                                     + Lime.DB_RELATED_COLUMN_BASESCORE + " DESC",
                             limitClause);
@@ -3040,6 +3176,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
+    // APK 內 res/raw/emoji.db 的資料版本;更新資料時遞增,裝置端會重新複製
+    // v2: 2026-07 以 Unicode 17.0 + CLDR 48 重建 en/tw 表
+    private final static int EMOJI_DB_VERSION = 2;
+
     private void checkEmojiDB() {
         if (emojiConverter == null) {
 
@@ -3048,8 +3188,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 emojiDBFile.getParentFile().mkdirs();
             }
 
-            if (!emojiDBFile.exists())
+            if (!emojiDBFile.exists()
+                    || mLIMEPref.getParameterInt("emojiDBVersion", 1) != EMOJI_DB_VERSION) {
+                if (emojiDBFile.exists())
+                    emojiDBFile.delete();
                 LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.emoji), emojiDBFile);
+                mLIMEPref.setParameter("emojiDBVersion", EMOJI_DB_VERSION);
+            }
 
             emojiConverter = new EmojiConverter(mContext);
         }

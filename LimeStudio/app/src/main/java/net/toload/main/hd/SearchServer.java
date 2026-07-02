@@ -126,6 +126,19 @@ public class SearchServer {
         mResetCache = resetCache;
     }
 
+    /**
+     * 自建關聯字管理變更資料後呼叫:清除聯想詞相關快取,
+     * 讓同 process 的輸入法服務立即反映刪除/清空結果
+     */
+    public static void clearRelatedCaches() {
+        if (relatedcache != null)
+            relatedcache.clear();
+        if (relatedPhraseCache != null)
+            relatedPhraseCache.clear();
+        if (dbadapter != null)
+            dbadapter.clearRelatedScoreCache();
+    }
+
     public String hanConvert(String input) {
         return dbadapter.hanConvert(input, mLIMEPref.getHanCovertOption());
     }
@@ -216,7 +229,9 @@ public class SearchServer {
         if (localCache == null)
             return dbadapter.getRelatedPhrase(word, getAllRecords);
 
-        String key = word + "\0" + getAllRecords;
+        // 開關狀態影響查詢結果,須納入快取 key 避免切換設定後吃到舊結果
+        String key = word + "\0" + getAllRecords
+                + "\0" + mLIMEPref.getSimiliarEnable() + mLIMEPref.getLearnRelatedWord();
         List<Mapping> cached = localCache.get(key);
         if (cached != null)
             return cached;

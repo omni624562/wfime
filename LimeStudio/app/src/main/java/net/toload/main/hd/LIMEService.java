@@ -293,6 +293,14 @@ public class LIMEService extends InputMethodService implements
         // IME
         startForegroundService();
 
+        // Gboard 式 emoji 字型 fallback:emoji2 的自動初始化把載入延到 Activity resume,
+        // IME process 沒有 Activity,須手動觸發下載字型載入;無 GMS 的裝置會拋例外,略過即可
+        try {
+            androidx.emoji2.text.EmojiCompat.get().load();
+        } catch (Exception e) {
+            Log.w(TAG, "EmojiCompat not available: " + e.getMessage());
+        }
+
         // Initialize Global Package Name for paths
         net.toload.main.hd.global.LIME.PACKAGE_NAME = getPackageName();
 
@@ -3409,7 +3417,9 @@ public class LIMEService extends InputMethodService implements
         if (DEBUG)
             Log.i(TAG, "updateRelatedPhrase()");
         hasChineseSymbolCandidatesShown = false;
-        if (!mLIMEPref.getLearnRelatedWord()) {
+        // 自建關聯字與關聯字典獨立運作:任一開啟就進入查詢,
+        // 來源過濾在 LimeDB.getRelatedPhrase() 內處理
+        if (!mLIMEPref.getLearnRelatedWord() && !mLIMEPref.getSimiliarEnable()) {
             clearSuggestions();
             return;
         }

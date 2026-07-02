@@ -1014,6 +1014,21 @@ fun MappingSettingsSection(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
+            var showRelatedManager by remember { mutableStateOf(false) }
+            ClickablePreference(
+                title = stringResource(R.string.related_manager_entry),
+                summary = stringResource(R.string.related_manager_entry_summary),
+                onClick = { showRelatedManager = true }
+            )
+            if (showRelatedManager) {
+                RelatedWordManagerDialog(
+                    viewModel = viewModel,
+                    onDismiss = { showRelatedManager = false }
+                )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
             SwitchPreference(
                 title = stringResource(R.string.learn_phrase),
                 summary = stringResource(R.string.learn_phrase_summary),

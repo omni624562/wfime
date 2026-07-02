@@ -8,6 +8,7 @@ import java.io.InputStreamReader
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 
 data class Emoji(
     val char: String,
@@ -50,23 +51,55 @@ object EmojiData {
 
                 val tempCategories = mutableMapOf<String, List<Emoji>>()
 
+                // 過濾顯示不了的新版 emoji,避免豆腐格。
+                // 判斷順序:系統字型 → EmojiCompat(Gboard 式 GMS 可下載字型 fallback)
+                val glyphPaint = android.graphics.Paint()
+                val emojiCompat = try {
+                    androidx.emoji2.text.EmojiCompat.get()
+                } catch (_: IllegalStateException) {
+                    null // 未初始化(無 GMS 等)
+                }
+                val emojiCompatReady =
+                    emojiCompat?.loadState == androidx.emoji2.text.EmojiCompat.LOAD_STATE_SUCCEEDED
+
+                fun canRender(char: String): Boolean {
+                    if (androidx.core.graphics.PaintCompat.hasGlyph(glyphPaint, char)) return true
+                    return emojiCompatReady && emojiCompat!!.getEmojiMatch(char, Int.MAX_VALUE) ==
+                            androidx.emoji2.text.EmojiCompat.EMOJI_SUPPORTED
+                }
+
+                // EmojiCompat 字型還在下載:載入完成後重新過濾一次,把新 emoji 補進清單
+                if (emojiCompat != null && !emojiCompatReady) {
+                    val appContext = context.applicationContext
+                    emojiCompat.registerInitCallback(object :
+                        androidx.emoji2.text.EmojiCompat.InitCallback() {
+                        override fun onInitialized() {
+                            isInitialized = false
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+                                .launch { initialize(appContext) }
+                        }
+                    })
+                }
+
                 for (i in 0 until categoriesArray.length()) {
                     val categoryObj = categoriesArray.getJSONObject(i)
                     val categoryName = categoryObj.getString("name")
                     val emojisArray = categoryObj.getJSONArray("emojis")
-                    
+
                     val emojiList = ArrayList<Emoji>(emojisArray.length())
                     for (j in 0 until emojisArray.length()) {
                         val emojiObj = emojisArray.getJSONObject(j)
                         val char = emojiObj.getString("char")
                         val hasSkinTone = emojiObj.optBoolean("hasSkinTone", false)
-                        
+
+                        if (!canRender(char)) continue
+
                         val keywordsArray = emojiObj.getJSONArray("keywords")
                         val keywords = ArrayList<String>(keywordsArray.length())
                         for (k in 0 until keywordsArray.length()) {
                             keywords.add(keywordsArray.getString(k))
                         }
-                        
+
                         emojiList.add(Emoji(char, keywords, hasSkinTone))
                     }
                     tempCategories[categoryName] = emojiList
