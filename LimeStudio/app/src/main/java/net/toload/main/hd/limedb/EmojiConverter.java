@@ -128,8 +128,19 @@ public class EmojiConverter extends SQLiteOpenHelper {
             try {
                 SQLiteDatabase db = this.getReadableDatabase();
 
-                cursor = db.query(tablename, null, Lime.EMOJI_FIELD_TAG + " = ?",
-                        new String[] { tag }, null, null, null, null);
+                // 英文 tag(≥2 碼)用前綴比對:打 "ca" 就能出 cat 的 emoji;
+                // 依 tag 長度排序讓最接近的先出。中文 tag 維持完全比對。
+                if (emoji == Lime.EMOJI_EN && tag.length() >= 2) {
+                    String prefix = tag.toLowerCase()
+                            .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+                    cursor = db.query(tablename, null,
+                            Lime.EMOJI_FIELD_TAG + " LIKE ? ESCAPE '\\'",
+                            new String[] { prefix }, null, null,
+                            "length(" + Lime.EMOJI_FIELD_TAG + ")", "8");
+                } else {
+                    cursor = db.query(tablename, null, Lime.EMOJI_FIELD_TAG + " = ?",
+                            new String[] { tag }, null, null, null, null);
+                }
 
                 if (cursor.moveToFirst()) {
                     int wordColumn = cursor.getColumnIndex(Lime.EMOJI_FIELD_VALUE);

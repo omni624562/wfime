@@ -3177,8 +3177,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     // APK 內 res/raw/emoji.db 的資料版本;更新資料時遞增,裝置端會重新複製
+    // (產生器見 tools/emoji/gen_emoji.py)
     // v2: 2026-07 以 Unicode 17.0 + CLDR 48 重建 en/tw 表
-    private final static int EMOJI_DB_VERSION = 2;
+    // v3: 2026-07 cn 表改以 CLDR zh 重生(原為 LimeIME 舊資料)
+    private final static int EMOJI_DB_VERSION = 3;
 
     private void checkEmojiDB() {
         if (emojiConverter == null) {

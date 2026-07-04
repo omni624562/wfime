@@ -768,7 +768,8 @@ open class CandidateView @JvmOverloads constructor(
                 Text(
                     text = mapping.word ?: "",
                     color = textColor,
-                    fontSize = fontSize,
+                    // emoji 候選放大顯示(jumbomoji 風格),文字候選維持原字級
+                    fontSize = if (mapping.isEmojiRecord()) fontSize * 1.5f else fontSize,
                     fontWeight = fontWeight,
                     maxLines = 1
                 )

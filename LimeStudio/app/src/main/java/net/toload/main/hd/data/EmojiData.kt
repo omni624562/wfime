@@ -35,6 +35,20 @@ object EmojiData {
 
     private var isInitialized = false
 
+    // base emoji -> 完整資訊(keywords/hasSkinTone),供最近使用等以字元回查
+    @Volatile
+    private var index: Map<String, Emoji> = emptyMap()
+
+    /** 去除膚色修飾字元,取得基底 emoji */
+    fun baseOf(char: String): String {
+        var s = char
+        SKIN_TONES.forEach { tone -> s = s.replace(tone, "") }
+        return s
+    }
+
+    /** 以基底字元回查完整 Emoji 資訊(未載入或查無時回 null) */
+    fun lookup(baseChar: String): Emoji? = index[baseChar]
+
     suspend fun initialize(context: Context) {
         if (isInitialized) return
 
@@ -104,6 +118,8 @@ object EmojiData {
                     }
                     tempCategories[categoryName] = emojiList
                 }
+
+                index = tempCategories.values.flatten().associateBy { it.char }
 
                 // Batch update state on Main thread
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {

@@ -1519,6 +1519,29 @@ public class LIMEService extends InputMethodService implements
 
         mKeydownEvent = new KeyEvent(event);
 
+        // emoji 選擇器搜尋模式作用中:實體鍵盤 a-z/空白/倒退/Esc 直接餵給
+        // 搜尋框(EmojiSearchBridge),不進 IME 組字管線
+        if (net.toload.main.hd.ui.EmojiSearchBridge.INSTANCE.isActive()
+                && !event.isCtrlPressed() && !event.isAltPressed() && !event.isMetaPressed()) {
+            if (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) {
+                net.toload.main.hd.ui.EmojiSearchBridge.sendChar(
+                        (char) ('a' + keyCode - KeyEvent.KEYCODE_A));
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_SPACE) {
+                net.toload.main.hd.ui.EmojiSearchBridge.sendChar(' ');
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_DEL) {
+                net.toload.main.hd.ui.EmojiSearchBridge.sendBackspace();
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_BACK) {
+                net.toload.main.hd.ui.EmojiSearchBridge.sendClose();
+                return true;
+            }
+        }
+
         // Cmd / Ctrl / Alt / Shift + (Space or Enter) directly commit Dayi composing text (Physical Keyboard Shortcut)
         if (activeIM != null && activeIM.startsWith("dayi") && mComposing != null && mComposing.length() > 0) {
             boolean isSpaceCombo = keyCode == KeyEvent.KEYCODE_SPACE && 
@@ -2024,6 +2047,16 @@ public class LIMEService extends InputMethodService implements
 
             );
 
+        // emoji 搜尋模式:onKeyDown 已消化的按鍵,放開事件也一併消化避免副作用
+        if (net.toload.main.hd.ui.EmojiSearchBridge.INSTANCE.isActive()
+                && ((keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z)
+                        || keyCode == KeyEvent.KEYCODE_SPACE
+                        || keyCode == KeyEvent.KEYCODE_DEL
+                        || keyCode == KeyEvent.KEYCODE_ESCAPE
+                        || keyCode == KeyEvent.KEYCODE_BACK)) {
+            return true;
+        }
+
         switch (keyCode) {
             // Jeremy '11,5,29 Bypass search and menu keys.
             // case KeyEvent.KEYCODE_SEARCH:
@@ -2271,6 +2304,9 @@ public class LIMEService extends InputMethodService implements
                         // Art '30,Sep,2011 when show related then clear composing
                         if (selectedCandidate.isEmojiRecord()
                                 || selectedCandidate.isChinesePunctuationSymbolRecord()) {
+                            // 記錄 emoji 使用頻率,讓聯想候選依常用程度排序
+                            if (selectedCandidate.isEmojiRecord())
+                                net.toload.main.hd.data.EmojiUsageTracker.record(this, selectedCandidate.getWord());
                             clearComposing(true);
                         }
 
@@ -3199,6 +3235,10 @@ public class LIMEService extends InputMethodService implements
                         }
 
                         if (emojiList.size() > 0) {
+                            // 依使用頻率排序(常用在前);次數相同維持原順序(穩定排序)
+                            emojiList.sort((a, b) -> Integer.compare(
+                                    net.toload.main.hd.data.EmojiUsageTracker.countOf(this, b.getWord()),
+                                    net.toload.main.hd.data.EmojiUsageTracker.countOf(this, a.getWord())));
                             int insertPosition = mLIMEPref.getEmojiDisplayPosition();
                             if (list.size() <= insertPosition) {
                                 insertPosition = list.size();
@@ -3209,14 +3249,22 @@ public class LIMEService extends InputMethodService implements
 
                     // Dayi mode: inject raw composing code as a selectable English output option.
                     // Placed after the alphanumeric filter above so there is no duplicate.
-                    // When >4 keys are typed (no Chinese candidates), this becomes the only option.
+                    // Checks for non-emoji candidates (not isEmpty) so prefix-matched emojis
+                    // don't suppress the English word; English stays first, emojis follow.
                     if (activeIM != null && activeIM.startsWith("dayi") && !finalKeyString.isEmpty()) {
-                        if (list.isEmpty()) {
+                        boolean hasNonEmoji = false;
+                        for (Mapping m : list) {
+                            if (!m.isEmojiRecord()) {
+                                hasNonEmoji = true;
+                                break;
+                            }
+                        }
+                        if (!hasNonEmoji) {
                             Mapping rawEnglish = new Mapping();
                             rawEnglish.setWord(finalKeyString);
                             rawEnglish.setCode(finalKeyString);
                             rawEnglish.setComposingCodeRecord();
-                            list.addLast(rawEnglish);
+                            list.addFirst(rawEnglish);
                         }
                     }
 
