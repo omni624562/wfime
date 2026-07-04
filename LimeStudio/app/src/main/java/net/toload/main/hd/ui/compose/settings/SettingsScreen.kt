@@ -809,6 +809,16 @@ fun ImSettingsSection(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
+                    SwitchPreference(
+                        title = "連打模式（自動上字）",
+                        summary = "打到無法接續的字根時自動送出首選字。注意：開啟後無法直接輸入英文單字",
+                        checked = uiState.dayiAutoCompose,
+                        onCheckedChange = { viewModel.setDayiAutoCompose(it) },
+                        color = Color.Transparent
+                    )
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
                     Spacer(modifier = Modifier.height(4.dp))
                     var showClearDialog by remember { mutableStateOf(false) }
 

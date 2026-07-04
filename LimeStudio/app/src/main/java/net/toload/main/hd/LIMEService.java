@@ -130,6 +130,8 @@ public class LIMEService extends InputMethodService implements
             java.util.concurrent.Executors.newSingleThreadExecutor();
     private volatile java.util.concurrent.Future<?> queryFuture;
     final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    // 連打模式:目前候選列(mCandidateList)對應的組字碼;與 setSuggestions 同步於主執行緒更新
+    private volatile String mLastSuggestionsCode = null;
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     final CandidateController mCandidateController = new CandidateController(this);
     public boolean hasMappingList = false;
@@ -1144,6 +1146,7 @@ public class LIMEService extends InputMethodService implements
 
         if (mCandidateList != null)
             mCandidateList.clear();
+        mLastSuggestionsCode = null;
         if (mCandidateView != null)
             mCandidateView.clear();
 
@@ -1168,6 +1171,7 @@ public class LIMEService extends InputMethodService implements
                 mComposing.setLength(0);
             if (mCandidateList != null)
                 mCandidateList.clear();
+            mLastSuggestionsCode = null;
 
             if (forceClearComposing) {
                 InputConnection ic = getCurrentInputConnection();
@@ -2387,7 +2391,9 @@ public class LIMEService extends InputMethodService implements
                             clearComposing(false);
                             updateRelatedPhrase(false);
 
-                            if (committedCandidate != null && committedCandidate.getWord() != null) {
+                            // 連打切分候選 (code=全碼串, word=多字) 不學習,避免污染詞庫
+                            if (committedCandidate != null && committedCandidate.getWord() != null
+                                    && !committedCandidate.isSegmentedPhraseRecord()) {
                                 SearchSrv.learnRelatedPhraseAndUpdateScore(committedCandidate);
 
                                 // do reverse lookup and display notification if required.
@@ -3265,16 +3271,33 @@ public class LIMEService extends InputMethodService implements
                             rawEnglish.setCode(finalKeyString);
                             rawEnglish.setComposingCodeRecord();
                             list.addFirst(rawEnglish);
+                            // 連打切分:長碼串能切成合法碼序列時,注入還原的中文詞。
+                            // 碼串含數字/符號(不可能是英文單字)→ 中文放第一,空白鍵直接上字;
+                            // 純字母(可能是英文,如 sorry)→ 英文維持第一,中文放第二
+                            Mapping segmented = SearchSrv.getSegmentedPhraseMapping(finalKeyString);
+                            if (segmented != null && !segmented.getWord().equals(finalKeyString)) {
+                                if (finalKeyString.matches(".*[^A-Za-z].*"))
+                                    list.addFirst(segmented);
+                                else
+                                    list.add(1, segmented);
+                            }
                         }
                     }
 
                     if (list.size() > 0) {
-                        setSuggestions(list, finalHasPhysicalKeyPressed, selkey);
+                        // 與 setSuggestions 同在主執行緒原子更新:記錄這批候選對應的
+                        // 組字碼,供連打模式判斷 mCandidateList 是否仍是當前碼的結果
+                        final String finalSelkey = selkey;
+                        mMainHandler.post(() -> {
+                            mLastSuggestionsCode = finalKeyString;
+                            setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
+                        });
                         if (DEBUG)
                             Log.i(TAG, "updateCandidates(): display selkey:" + selkey
                                     + ", list.size:" + list.size()
                                     + ", mComposing = " + mComposing);
                     } else {
+                        mLastSuggestionsCode = null;
                         clearSuggestions();
                     }
 
@@ -4180,6 +4203,23 @@ public class LIMEService extends InputMethodService implements
             }
 
             if (compose) {
+                // 大易連打模式:新鍵接不上目前組字碼時,先自動送出目前碼的首選字,
+                // 再以新鍵開始新組字(即打即上,不累積長碼串)
+                if (mLIMEPref.getDayiAutoComposeEnabled()
+                        && activeIM != null && activeIM.startsWith("dayi")
+                        && mComposing != null && mComposing.length() > 0) {
+                    String probe = mComposing.toString() + (char) primaryCode;
+                    if (!SearchSrv.canExtendCode(probe)) {
+                        autoCommitComposing();
+                        if (!SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {
+                            // 新鍵本身不是任何碼的起點:直接上屏該字元,不開新組字
+                            if (ic != null)
+                                ic.commitText(String.valueOf((char) primaryCode), 1);
+                            finishComposing();
+                            return;
+                        }
+                    }
+                }
                 mComposing.append((char) primaryCode);
                 // Just update CandidateView composing text
                 getComposingDisplayString(mComposing.toString());
@@ -4294,6 +4334,27 @@ public class LIMEService extends InputMethodService implements
     // Delegates to CandidateController
     public boolean pickHighlightedCandidate() {
         return mCandidateController.pickHighlightedCandidate();
+    }
+
+    /**
+     * 大易連打模式:自動送出目前組字碼的首選字。
+     * 候選列與當前組字碼一致時走 pickCandidateManually(0)(保留智慧選字排序);
+     * 快速連打下候選列可能還是舊碼的結果,改用同步 exact 查詢,避免上錯字。
+     */
+    private void autoCommitComposing() {
+        String composing = mComposing.toString();
+        if (hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()
+                && composing.equals(mLastSuggestionsCode)) {
+            pickCandidateManually(0);
+        } else {
+            Mapping top = SearchSrv.getTopExactMapping(composing);
+            if (top != null) {
+                selectedCandidate = top;
+                commitTyped(getCurrentInputConnection());
+            } else {
+                commitTyped(composing); // 連 exact 字都沒有:上屏原始碼
+            }
+        }
     }
 
     public void requestFullRecords(boolean isRelatedPhrase) {

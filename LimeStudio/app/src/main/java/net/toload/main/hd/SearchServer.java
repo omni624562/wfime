@@ -95,6 +95,10 @@ public class SearchServer {
     // Jeremy '15,6,8 TODO resolved: related phrases are now cached across keystrokes
     private static Map<String, List<Mapping>> relatedcache = null; // word -> related phrase list
     private static Map<String, Mapping> relatedPhraseCache = null; // pword\0cword -> Mapping (null = no record)
+    // 大易連打:exact code 首選字快取(NO_MAPPING = 查過但無此碼)與前綴存在性快取
+    private static Map<String, Mapping> topExactCache = null;      // tablename_code -> top Mapping
+    private static Map<String, Boolean> prefixCache = null;        // tablename_code -> hasCodeOrPrefix
+    private static final Mapping NO_MAPPING = new Mapping();
     private static final java.util.concurrent.atomic.AtomicBoolean prefetchRunning =
             new java.util.concurrent.atomic.AtomicBoolean(false);
     private static boolean abandonPhraseSuggestion = false;
@@ -901,6 +905,52 @@ public class SearchServer {
     }
 
     /**
+     * 大易連打切分:把長碼串切成合法碼序列還原中文詞;切不出回 null。
+     * 跑在候選查詢執行緒,exact 查詢經 topExactCache。
+     */
+    public Mapping getSegmentedPhraseMapping(String rawCode) {
+        if (rawCode == null || !tablename.startsWith("dayi")) return null;
+        String code = rawCode.toLowerCase(java.util.Locale.US);
+        Mapping m = net.toload.main.hd.data.DayiCodeSegmenter.segment(code, this::cachedTopByExactCode);
+        if (m != null) m.setCode(rawCode); // 保留原碼串供 commitTyped 判斷已消化長度
+        return m;
+    }
+
+    /**
+     * 大易連打模式:code 是否可接續(為某字 exact code 或任何碼的前綴)。
+     * 主執行緒同步呼叫;單筆索引查詢＋快取。DB 未就緒時回 true(退回一般行為)。
+     */
+    public boolean canExtendCode(String rawCode) {
+        if (rawCode == null || rawCode.isEmpty() || !tablename.startsWith("dayi")) return true;
+        String code = rawCode.toLowerCase(java.util.Locale.US);
+        if (prefixCache == null) prefixCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code;
+        Boolean cached = prefixCache.get(key);
+        if (cached != null) return cached;
+        boolean result = dbadapter.hasCodeOrPrefix(tablename, code);
+        prefixCache.put(key, result);
+        return result;
+    }
+
+    /**
+     * 大易連打模式:取 exact code 首選字(主執行緒同步 fallback);無則 null。
+     */
+    public Mapping getTopExactMapping(String rawCode) {
+        if (rawCode == null || rawCode.isEmpty() || !tablename.startsWith("dayi")) return null;
+        return cachedTopByExactCode(rawCode.toLowerCase(java.util.Locale.US));
+    }
+
+    private Mapping cachedTopByExactCode(String code) {
+        if (topExactCache == null) topExactCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code;
+        Mapping cached = topExactCache.get(key);
+        if (cached != null) return (cached == NO_MAPPING) ? null : cached;
+        Mapping result = dbadapter.getTopWordByExactCode(tablename, code);
+        topExactCache.put(key, (result == null) ? NO_MAPPING : result);
+        return result;
+    }
+
+    /**
      * get real code length
      */
     int getRealCodeLength(final Mapping selectedMapping, String currentCode) {
@@ -1026,6 +1076,8 @@ public class SearchServer {
         coderemapcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedPhraseCache = newLruMap(MAX_CACHE_ENTRIES);
+        topExactCache = newLruMap(MAX_CACHE_ENTRIES);
+        prefixCache = newLruMap(MAX_CACHE_ENTRIES);
 
         // initial exact match stack here
         suggestionLoL = new LinkedList<>();

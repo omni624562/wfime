@@ -2641,6 +2641,65 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     /**
+     * 取 exact code 分數最高的字(供大易連打切分/自動上字);無此碼回 null。
+     * 參數化查詢,走 idx_&lt;table&gt;_code 索引,可於主執行緒單筆呼叫。
+     */
+    public Mapping getTopWordByExactCode(String table, String code) {
+        if (!checkDBConnection()) return null;
+        if (table == null || !table.matches("[a-z0-9_]+")) return null;
+        if (code == null || code.isEmpty()) return null;
+
+        Mapping result = null;
+        try {
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + FIELD_WORD + ", " + FIELD_SCORE + " FROM " + table
+                            + " WHERE " + FIELD_CODE + " = ? AND " + FIELD_WORD + " IS NOT NULL"
+                            + " ORDER BY " + FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC, "
+                            + FIELD_ID + " ASC LIMIT 1",
+                    new String[]{code});
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    result = new Mapping();
+                    result.setCode(code);
+                    result.setWord(cursor.getString(0));
+                    result.setScore(cursor.getInt(1));
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * code 是否為某字的 exact code 或任何碼的前綴(供大易連打模式判斷可否接續)。
+     * 以字典序範圍查詢(末字元 +1 為上界)走索引,SELECT 1 ... LIMIT 1。
+     */
+    public boolean hasCodeOrPrefix(String table, String codePrefix) {
+        if (!checkDBConnection()) return false;
+        if (table == null || !table.matches("[a-z0-9_]+")) return false;
+        if (codePrefix == null || codePrefix.isEmpty()) return false;
+
+        String upperBound = codePrefix.substring(0, codePrefix.length() - 1)
+                + (char) (codePrefix.charAt(codePrefix.length() - 1) + 1);
+        try {
+            Cursor cursor = db.rawQuery(
+                    "SELECT 1 FROM " + table
+                            + " WHERE " + FIELD_CODE + " >= ? AND " + FIELD_CODE + " < ? LIMIT 1",
+                    new String[]{codePrefix, upperBound});
+            if (cursor != null) {
+                boolean exists = cursor.moveToFirst();
+                cursor.close();
+                return exists;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
      * Jeremy '11,9,8 get Highest socre for 'code'. relatedList will be stored on
      * highest score record after 3.6.
      */

@@ -488,6 +488,15 @@ public class LIMEPreferenceManager {
         setParameter("dayi_smart_selection", value);
     }
 
+    // 大易連打模式(自動上字):打到無法接續的字根時自動送出首選字。預設關。
+    public boolean getDayiAutoComposeEnabled() {
+        return getParameterBoolean("dayi_auto_compose", false);
+    }
+
+    public void setDayiAutoComposeEnabled(boolean value) {
+        setParameter("dayi_auto_compose", value);
+    }
+
     // Recent/context sub-toggles removed per spec change: smart selection is
     // now pure context prediction (no recency weighting, no global re-sort).
 

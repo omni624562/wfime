@@ -541,6 +541,10 @@ open class CandidateView @JvmOverloads constructor(
                                         Pair(startIndex + i, mapping)
                                     }.filter {
                                         isPhysicalKeyboard || _rawKeycode.length > 4 || it.second.word != _rawKeycode
+                                    }.sortedByDescending {
+                                        // 原始碼(字根)固定顯示在候選字前面;actualIndex 不變,
+                                        // 選字鍵與點選仍對應原本的候選位置
+                                        it.second.isComposingCodeRecord()
                                     }
 
                                     itemsIndexed(indexedSuggestions) { _, pair ->

@@ -41,6 +41,7 @@ public class Mapping {
     public static final int RECORD_PARTIAL_MATCH_TO_WORD = 10;
     public static final int RECORD_COMPLETION_SUGGESTION_WORD = 11;
     public static final int RECORD_EMOJI_WORD = 12;
+    public static final int RECORD_SEGMENTED_PHRASE = 13;
     private String id;
     private String code;
     private String codeorig;
@@ -147,6 +148,11 @@ public class Mapping {
         return recordType == RECORD_EMOJI_WORD;
     }
 
+    // Identify the phrase reconstructed by segmenting a long dayi code string (連打切分)
+    public boolean isSegmentedPhraseRecord() {
+        return recordType == RECORD_SEGMENTED_PHRASE;
+    }
+
     // Identify exactly or partially match to the word queried ( reverse query codes by word)
     public boolean isExactMatchToWordRecord() {
         return recordType == RECORD_EXACT_MATCH_TO_WORD;
@@ -208,6 +214,10 @@ public class Mapping {
 
     public void setEmojiRecord() {
         this.recordType = RECORD_EMOJI_WORD;
+    }
+
+    public void setSegmentedPhraseRecord() {
+        this.recordType = RECORD_SEGMENTED_PHRASE;
     }
 
 

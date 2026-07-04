@@ -91,7 +91,10 @@ data class SettingsUiState(
     val enablePhonetic: Boolean = true,
 
     // Dayi smart selection
-    val dayiSmartSelection: Boolean = true
+    val dayiSmartSelection: Boolean = true,
+
+    // Dayi 連打模式(自動上字)
+    val dayiAutoCompose: Boolean = false
 )
 
 /**
@@ -191,7 +194,8 @@ class SettingsViewModel(
                     isDayiImported = isDayi,
                     enableDayi = preferenceManager.getIMActivatedState().contains("0"),
                     enablePhonetic = preferenceManager.getIMActivatedState().contains("1"),
-                    dayiSmartSelection = preferenceManager.getDayiSmartSelectionEnabled()
+                    dayiSmartSelection = preferenceManager.getDayiSmartSelectionEnabled(),
+                    dayiAutoCompose = preferenceManager.getDayiAutoComposeEnabled()
                 )
             }
         }
@@ -412,6 +416,11 @@ class SettingsViewModel(
     fun setDayiSmartSelection(value: Boolean) {
         preferenceManager.setDayiSmartSelectionEnabled(value)
         _uiState.update { it.copy(dayiSmartSelection = value) }
+    }
+
+    fun setDayiAutoCompose(value: Boolean) {
+        preferenceManager.setDayiAutoComposeEnabled(value)
+        _uiState.update { it.copy(dayiAutoCompose = value) }
     }
 
     fun clearDayiSmartSelectionData() {
