@@ -2645,31 +2645,95 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * 參數化查詢,走 idx_&lt;table&gt;_code 索引,可於主執行緒單筆呼叫。
      */
     public Mapping getTopWordByExactCode(String table, String code) {
-        if (!checkDBConnection()) return null;
-        if (table == null || !table.matches("[a-z0-9_]+")) return null;
-        if (code == null || code.isEmpty()) return null;
+        List<Mapping> list = getTopWordsByExactCode(table, code, 1);
+        return list.isEmpty() ? null : list.get(0);
+    }
 
-        Mapping result = null;
+    /**
+     * 取 exact code 分數最高的前 limit 個字(供切分的智慧選字挑字);無此碼回空清單。
+     */
+    public List<Mapping> getTopWordsByExactCode(String table, String code, int limit) {
+        List<Mapping> results = new LinkedList<>();
+        if (!checkDBConnection()) return results;
+        if (table == null || !table.matches("[a-z0-9_]+")) return results;
+        if (code == null || code.isEmpty() || limit <= 0) return results;
+
         try {
             Cursor cursor = db.rawQuery(
                     "SELECT " + FIELD_WORD + ", " + FIELD_SCORE + " FROM " + table
                             + " WHERE " + FIELD_CODE + " = ? AND " + FIELD_WORD + " IS NOT NULL"
                             + " ORDER BY " + FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC, "
-                            + FIELD_ID + " ASC LIMIT 1",
+                            + FIELD_ID + " ASC LIMIT " + limit,
                     new String[]{code});
             if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    result = new Mapping();
-                    result.setCode(code);
-                    result.setWord(cursor.getString(0));
-                    result.setScore(cursor.getInt(1));
+                while (cursor.moveToNext()) {
+                    Mapping m = new Mapping();
+                    m.setCode(code);
+                    m.setWord(cursor.getString(0));
+                    m.setScore(cursor.getInt(1));
+                    results.add(m);
                 }
                 cursor.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return results;
+    }
+
+    /**
+     * 依碼與詞長取詞(供切分的詞庫優先比對;大易內建詞碼為每字「首碼+末碼」的縮碼)。
+     */
+    public List<String> getWordsByCodeAndLength(String table, String code, int wordLength, int limit) {
+        List<String> results = new LinkedList<>();
+        if (!checkDBConnection()) return results;
+        if (table == null || !table.matches("[a-z0-9_]+")) return results;
+        if (code == null || code.isEmpty() || wordLength <= 0 || limit <= 0) return results;
+
+        try {
+            // wordLength 為 int 直接內插:rawQuery 參數以 TEXT 綁定,
+            // length(word)=? 會變成整數比文字而永遠不成立
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + FIELD_WORD + " FROM " + table
+                            + " WHERE " + FIELD_CODE + " = ? AND length(" + FIELD_WORD + ") = " + wordLength
+                            + " ORDER BY " + FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC, "
+                            + FIELD_ID + " ASC LIMIT " + limit,
+                    new String[]{code});
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    String w = cursor.getString(0);
+                    if (w != null) results.add(w);
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    /**
+     * 此碼是否對映到此字(供切分的詞庫比對逐字驗證)。
+     */
+    public boolean codeMapsToWord(String table, String code, String word) {
+        if (!checkDBConnection()) return false;
+        if (table == null || !table.matches("[a-z0-9_]+")) return false;
+        if (code == null || code.isEmpty() || word == null || word.isEmpty()) return false;
+
+        try {
+            Cursor cursor = db.rawQuery(
+                    "SELECT 1 FROM " + table
+                            + " WHERE " + FIELD_CODE + " = ? AND " + FIELD_WORD + " = ? LIMIT 1",
+                    new String[]{code, word});
+            if (cursor != null) {
+                boolean exists = cursor.moveToFirst();
+                cursor.close();
+                return exists;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

@@ -777,7 +777,11 @@ open class CandidateView @JvmOverloads constructor(
                     fontWeight = fontWeight,
                     maxLines = 1
                 )
-                if (isPhysicalKeyboard && !mapping.isEmojiRecord() && !mapping.isComposingCodeRecord()) {
+                // 原始碼候選(英文)排第一時不畫選字鍵(空白即是);退到後面時照畫,
+                // 讓實體鍵盤使用者知道還是能用選字鍵選英文
+                if (isPhysicalKeyboard && !mapping.isEmojiRecord()
+                    && (!mapping.isComposingCodeRecord() || index > 0)
+                ) {
                     val selectionKey = if (activeIM?.startsWith("dayi") == true) {
                         when (index % 6) {
                             0 -> "\u2423"

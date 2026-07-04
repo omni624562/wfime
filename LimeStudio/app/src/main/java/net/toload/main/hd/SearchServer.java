@@ -95,10 +95,12 @@ public class SearchServer {
     // Jeremy '15,6,8 TODO resolved: related phrases are now cached across keystrokes
     private static Map<String, List<Mapping>> relatedcache = null; // word -> related phrase list
     private static Map<String, Mapping> relatedPhraseCache = null; // pword\0cword -> Mapping (null = no record)
-    // 大易連打:exact code 首選字快取(NO_MAPPING = 查過但無此碼)與前綴存在性快取
-    private static Map<String, Mapping> topExactCache = null;      // tablename_code -> top Mapping
-    private static Map<String, Boolean> prefixCache = null;        // tablename_code -> hasCodeOrPrefix
-    private static final Mapping NO_MAPPING = new Mapping();
+    // 大易連打的查詢/結果快取(key 皆含 tablename)
+    private static Map<String, List<Mapping>> topWordsCache = null;   // code -> exact 前幾名字(空清單=查過無此碼)
+    private static Map<String, Boolean> prefixCache = null;           // code -> hasCodeOrPrefix
+    private static Map<String, List<String>> phraseWordsCache = null; // 縮碼_詞長 -> 詞
+    private static Map<String, Boolean> pairCache = null;             // code\0word -> 是否對映
+    private static Map<String, List<Mapping>> segmentCache = null;    // 碼串 -> 切分候選結果
     private static final java.util.concurrent.atomic.AtomicBoolean prefetchRunning =
             new java.util.concurrent.atomic.AtomicBoolean(false);
     private static boolean abandonPhraseSuggestion = false;
@@ -905,15 +907,60 @@ public class SearchServer {
     }
 
     /**
-     * 大易連打切分:把長碼串切成合法碼序列還原中文詞;切不出回 null。
-     * 跑在候選查詢執行緒,exact 查詢經 topExactCache。
+     * 大易連打切分:把長碼串切成合法碼序列還原中文詞候選(最多 3 個,最佳在前)。
+     * 優先序:記住的切分(整串碼學過) → 詞庫優先＋智慧選字挑字 → 其他切法逐段取高分。
+     * 切不出回空清單。跑在候選查詢執行緒;整體結果進 segmentCache。
      */
-    public Mapping getSegmentedPhraseMapping(String rawCode) {
-        if (rawCode == null || !tablename.startsWith("dayi")) return null;
-        String code = rawCode.toLowerCase(java.util.Locale.US);
-        Mapping m = net.toload.main.hd.data.DayiCodeSegmenter.segment(code, this::cachedTopByExactCode);
-        if (m != null) m.setCode(rawCode); // 保留原碼串供 commitTyped 判斷已消化長度
-        return m;
+    public List<Mapping> getSegmentedPhraseMappings(String rawCode) {
+        List<Mapping> results = new LinkedList<>();
+        if (rawCode == null || !tablename.startsWith("dayi")) return results;
+        String code = rawCode.toLowerCase(Locale.US);
+
+        if (segmentCache == null) segmentCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code;
+        List<Mapping> cached = segmentCache.get(key);
+        if (cached != null) return cached;
+
+        java.util.LinkedHashSet<String> seen = new java.util.LinkedHashSet<>();
+
+        // 1. 記住的切分:整串碼曾被學過(選過切分候選會寫回 code=全碼串)
+        List<Mapping> learned = cachedTopWords(code);
+        if (!learned.isEmpty() && learned.get(0).getWord() != null
+                && learned.get(0).getWord().length() > 1) {
+            addSegmentedResult(results, seen, code, learned.get(0).getWord());
+        }
+
+        List<List<String>> segLists = net.toload.main.hd.data.DayiCodeSegmenter
+                .segmentCodes(code, this::cachedTopByExactCode, 3);
+        if (!segLists.isEmpty()) {
+            // 2. 最佳切法:詞庫優先＋智慧選字上下文挑字
+            addSegmentedResult(results, seen, code, refineSegmentWords(segLists.get(0)));
+            // 3. 多解:各切法逐段取最高分字(與上面不同者才收),最多 3 個候選
+            for (List<String> segs : segLists) {
+                if (results.size() >= 3) break;
+                addSegmentedResult(results, seen, code, plainSegmentWords(segs));
+            }
+        }
+
+        segmentCache.put(key, results);
+        return results;
+    }
+
+    /** 使用者選了切分候選:學成 code=全碼串 的對映(再選會加分),並失效相關快取 */
+    public void learnSegmentedPhrase(String rawCode, String word) {
+        if (rawCode == null || rawCode.isEmpty() || word == null || word.isEmpty()
+                || !tablename.startsWith("dayi")) return;
+        final String code = rawCode.toLowerCase(Locale.US);
+        final String key = tablename + "_" + code;
+        backgroundExecutor.execute(() -> {
+            try {
+                dbadapter.addOrUpdateMappingRecord(code, word);
+                if (topWordsCache != null) topWordsCache.remove(key);
+                if (segmentCache != null) segmentCache.remove(key);
+            } catch (Exception e) {
+                Log.e(TAG, "learnSegmentedPhrase failed: " + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -922,7 +969,7 @@ public class SearchServer {
      */
     public boolean canExtendCode(String rawCode) {
         if (rawCode == null || rawCode.isEmpty() || !tablename.startsWith("dayi")) return true;
-        String code = rawCode.toLowerCase(java.util.Locale.US);
+        String code = rawCode.toLowerCase(Locale.US);
         if (prefixCache == null) prefixCache = newLruMap(MAX_CACHE_ENTRIES);
         String key = tablename + "_" + code;
         Boolean cached = prefixCache.get(key);
@@ -937,17 +984,121 @@ public class SearchServer {
      */
     public Mapping getTopExactMapping(String rawCode) {
         if (rawCode == null || rawCode.isEmpty() || !tablename.startsWith("dayi")) return null;
-        return cachedTopByExactCode(rawCode.toLowerCase(java.util.Locale.US));
+        return cachedTopByExactCode(rawCode.toLowerCase(Locale.US));
     }
 
+    // ---- 切分內部工具(皆經 LRU 快取) ----
+
     private Mapping cachedTopByExactCode(String code) {
-        if (topExactCache == null) topExactCache = newLruMap(MAX_CACHE_ENTRIES);
+        List<Mapping> list = cachedTopWords(code);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private List<Mapping> cachedTopWords(String code) {
+        if (topWordsCache == null) topWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         String key = tablename + "_" + code;
-        Mapping cached = topExactCache.get(key);
-        if (cached != null) return (cached == NO_MAPPING) ? null : cached;
-        Mapping result = dbadapter.getTopWordByExactCode(tablename, code);
-        topExactCache.put(key, (result == null) ? NO_MAPPING : result);
+        List<Mapping> cached = topWordsCache.get(key);
+        if (cached != null) return cached;
+        List<Mapping> result = dbadapter.getTopWordsByExactCode(tablename, code, 5);
+        topWordsCache.put(key, result);
         return result;
+    }
+
+    private List<String> cachedWordsByCodeAndLength(String code, int wordLength) {
+        if (phraseWordsCache == null) phraseWordsCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code + "_" + wordLength;
+        List<String> cached = phraseWordsCache.get(key);
+        if (cached != null) return cached;
+        List<String> result = dbadapter.getWordsByCodeAndLength(tablename, code, wordLength, 3);
+        phraseWordsCache.put(key, result);
+        return result;
+    }
+
+    private boolean cachedCodeMapsToWord(String code, String word) {
+        if (pairCache == null) pairCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code + "\0" + word;
+        Boolean cached = pairCache.get(key);
+        if (cached != null) return cached;
+        boolean result = dbadapter.codeMapsToWord(tablename, code, word);
+        pairCache.put(key, result);
+        return result;
+    }
+
+    private void addSegmentedResult(List<Mapping> results, java.util.Set<String> seen,
+            String code, String words) {
+        if (words == null || words.isEmpty() || words.equals(code) || !seen.add(words)) return;
+        Mapping m = new Mapping();
+        m.setWord(words);
+        m.setCode(code);
+        m.setSegmentedPhraseRecord();
+        results.add(m);
+    }
+
+    /** 逐段取最高分字 */
+    private String plainSegmentWords(List<String> segs) {
+        StringBuilder sb = new StringBuilder();
+        for (String segCode : segs) {
+            Mapping top = cachedTopByExactCode(segCode);
+            if (top == null || top.getWord() == null) return null;
+            sb.append(top.getWord());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 詞庫優先＋智慧選字挑字:
+     * - 相鄰段落先組縮碼(每字首碼+末碼)查詞庫,詞命中且逐字驗證通過就整段採用
+     * - 其餘單字段落用智慧選字上下文(前一字)挑字,無記錄時取最高分
+     */
+    private String refineSegmentWords(List<String> segs) {
+        StringBuilder sb = new StringBuilder();
+        boolean smart = mLIMEPref.getDayiSmartSelectionEnabled();
+        SmartSelectionManager smartMgr = smart ? SmartSelectionManager.getInstance(mContext) : null;
+        String prevChar = lastCommittedChar;
+        int n = segs.size();
+        int i = 0;
+        while (i < n) {
+            boolean matched = false;
+            for (int len = Math.min(4, n - i); len >= 2 && !matched; len--) {
+                StringBuilder abbr = new StringBuilder();
+                for (int j = 0; j < len; j++)
+                    abbr.append(net.toload.main.hd.data.DayiCodeSegmenter.abbreviate(segs.get(i + j)));
+                for (String phrase : cachedWordsByCodeAndLength(abbr.toString(), len)) {
+                    if (phrase.length() != len) continue;
+                    boolean ok = true;
+                    for (int j = 0; j < len && ok; j++)
+                        ok = cachedCodeMapsToWord(segs.get(i + j), String.valueOf(phrase.charAt(j)));
+                    if (ok) {
+                        sb.append(phrase);
+                        prevChar = String.valueOf(phrase.charAt(len - 1));
+                        i += len;
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+            if (!matched) {
+                List<Mapping> tops = cachedTopWords(segs.get(i));
+                if (tops.isEmpty() || tops.get(0).getWord() == null) return null;
+                String chosen = tops.get(0).getWord();
+                if (smartMgr != null && prevChar != null && !prevChar.isEmpty()) {
+                    int bestCount = 0;
+                    for (Mapping m : tops) {
+                        if (m.getWord() == null) continue;
+                        int c = smartMgr.getContextCount(segs.get(i), m.getWord(), prevChar);
+                        if (c > bestCount) {
+                            bestCount = c;
+                            chosen = m.getWord();
+                        }
+                    }
+                }
+                sb.append(chosen);
+                if (!chosen.isEmpty())
+                    prevChar = String.valueOf(chosen.charAt(chosen.length() - 1));
+                i++;
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -1076,8 +1227,11 @@ public class SearchServer {
         coderemapcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedPhraseCache = newLruMap(MAX_CACHE_ENTRIES);
-        topExactCache = newLruMap(MAX_CACHE_ENTRIES);
+        topWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         prefixCache = newLruMap(MAX_CACHE_ENTRIES);
+        phraseWordsCache = newLruMap(MAX_CACHE_ENTRIES);
+        pairCache = newLruMap(MAX_CACHE_ENTRIES);
+        segmentCache = newLruMap(MAX_CACHE_ENTRIES);
 
         // initial exact match stack here
         suggestionLoL = new LinkedList<>();

@@ -93,6 +93,40 @@ public class LimeDBDayiLookupTest {
         assertNull(limeDb.getTopWordByExactCode("dayi; DROP TABLE dayi", "nh1"));
     }
 
+    // ===================== getTopWordsByExactCode =====================
+
+    @Test
+    public void testTopWords_OrderedAndLimited() {
+        java.util.List<Mapping> list = limeDb.getTopWordsByExactCode("dayi", "nh1", 5);
+        assertEquals(2, list.size());
+        assertEquals("盟", list.get(0).getWord());
+        assertEquals("明", list.get(1).getWord());
+        assertEquals(1, limeDb.getTopWordsByExactCode("dayi", "nh1", 1).size());
+        assertTrue(limeDb.getTopWordsByExactCode("dayi", "zzz", 5).isEmpty());
+    }
+
+    // ===================== getWordsByCodeAndLength =====================
+
+    @Test
+    public void testWordsByCodeAndLength_FiltersByLength() {
+        insertRow("n12d", "詹智", 3, 0);   // 2 字詞(縮碼)
+        insertRow("n12d", "獨", 9, 9);     // 同碼 1 字(不應回傳)
+        java.util.List<String> words = limeDb.getWordsByCodeAndLength("dayi", "n12d", 2, 3);
+        assertEquals(1, words.size());
+        assertEquals("詹智", words.get(0));
+        assertTrue(limeDb.getWordsByCodeAndLength("dayi", "n12d", 3, 3).isEmpty());
+    }
+
+    // ===================== codeMapsToWord =====================
+
+    @Test
+    public void testCodeMapsToWord() {
+        assertTrue(limeDb.codeMapsToWord("dayi", "nh1", "明"));
+        assertTrue(limeDb.codeMapsToWord("dayi", "nh1", "盟"));
+        assertFalse(limeDb.codeMapsToWord("dayi", "nh1", "天"));
+        assertFalse(limeDb.codeMapsToWord("dayi", "zzz", "明"));
+    }
+
     // ===================== hasCodeOrPrefix =====================
 
     @Test

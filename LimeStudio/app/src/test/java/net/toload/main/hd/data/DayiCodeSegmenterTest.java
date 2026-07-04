@@ -107,6 +107,32 @@ public class DayiCodeSegmenterTest {
     }
 
     @Test
+    public void testSegmentCodes_KBest_DistinctAndOrdered() {
+        StubLookup lookup = new StubLookup()
+                .put("ab", "戊", 9).put("cd", "己", 9)   // 2 段,總分 18(最佳)
+                .put("abc", "庚", 5).put("d", "丁", 5)   // 2 段,總分 10
+                .put("a", "甲", 9).put("bcd", "辛", 9);  // 2 段,總分 18(與最佳同分)
+        java.util.List<java.util.List<String>> segs =
+                DayiCodeSegmenter.segmentCodes("abcd", lookup, 3);
+        assertEquals(3, segs.size());
+        // 全部都是 2 段解
+        for (java.util.List<String> s : segs) assertEquals(2, s.size());
+        // 前兩名總分 18,第三名總分 10
+        java.util.List<String> third = segs.get(2);
+        assertEquals("abc", third.get(0));
+        assertEquals("d", third.get(1));
+    }
+
+    @Test
+    public void testAbbreviate() {
+        assertEquals("", DayiCodeSegmenter.abbreviate(""));
+        assertEquals("a", DayiCodeSegmenter.abbreviate("a"));
+        assertEquals("dj", DayiCodeSegmenter.abbreviate("dj"));
+        assertEquals(",5", DayiCodeSegmenter.abbreviate(",l5"));
+        assertEquals(",;", DayiCodeSegmenter.abbreviate(",4b;"));
+    }
+
+    @Test
     public void testSegmentMaxFourCodes() {
         // 5 碼單字不存在:必須至少切 2 段
         StubLookup lookup = new StubLookup()

@@ -2391,13 +2391,18 @@ public class LIMEService extends InputMethodService implements
                             clearComposing(false);
                             updateRelatedPhrase(false);
 
-                            // 連打切分候選 (code=全碼串, word=多字) 不學習,避免污染詞庫
-                            if (committedCandidate != null && committedCandidate.getWord() != null
-                                    && !committedCandidate.isSegmentedPhraseRecord()) {
-                                SearchSrv.learnRelatedPhraseAndUpdateScore(committedCandidate);
+                            if (committedCandidate != null && committedCandidate.getWord() != null) {
+                                if (committedCandidate.isSegmentedPhraseRecord()) {
+                                    // 記住這次的切分(code=全碼串→詞),下次同碼串直接優先;
+                                    // 不走一般學習,避免污染關聯詞與分數快取
+                                    SearchSrv.learnSegmentedPhrase(
+                                            committedCandidate.getCode(), committedCandidate.getWord());
+                                } else {
+                                    SearchSrv.learnRelatedPhraseAndUpdateScore(committedCandidate);
 
-                                // do reverse lookup and display notification if required.
-                                SearchSrv.getCodeListStringFromWord(committedCandidate.getWord());
+                                    // do reverse lookup and display notification if required.
+                                    SearchSrv.getCodeListStringFromWord(committedCandidate.getWord());
+                                }
                             }
                         }
 
@@ -3271,15 +3276,15 @@ public class LIMEService extends InputMethodService implements
                             rawEnglish.setCode(finalKeyString);
                             rawEnglish.setComposingCodeRecord();
                             list.addFirst(rawEnglish);
-                            // 連打切分:長碼串能切成合法碼序列時,注入還原的中文詞。
-                            // 碼串含數字/符號(不可能是英文單字)→ 中文放第一,空白鍵直接上字;
-                            // 純字母(可能是英文,如 sorry)→ 英文維持第一,中文放第二
-                            Mapping segmented = SearchSrv.getSegmentedPhraseMapping(finalKeyString);
-                            if (segmented != null && !segmented.getWord().equals(finalKeyString)) {
-                                if (finalKeyString.matches(".*[^A-Za-z].*"))
-                                    list.addFirst(segmented);
-                                else
-                                    list.add(1, segmented);
+                            // 連打切分:長碼串能切成合法碼序列時,注入還原的中文詞候選
+                            // (最多 3 個:記住的切分/詞庫+智慧選字/其他切法)。
+                            // 碼串含數字/符號(不可能是英文單字)→ 中文放最前,空白鍵直接上字;
+                            // 純字母(可能是英文,如 sorry)→ 英文維持第一,中文接在後面
+                            List<Mapping> segmentedList = SearchSrv.getSegmentedPhraseMappings(finalKeyString);
+                            if (segmentedList != null && !segmentedList.isEmpty()) {
+                                int pos = finalKeyString.matches(".*[^A-Za-z].*") ? 0 : 1;
+                                for (Mapping segmented : segmentedList)
+                                    list.add(pos++, segmented);
                             }
                         }
                     }
