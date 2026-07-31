@@ -220,6 +220,10 @@ open class CandidateView @JvmOverloads constructor(
     }
     
     override fun onAttachedToWindow() {
+        // DisposeOnDetachedFromWindowOrReleasedFromPool clears parentContext on detach.
+        // Re-set it here before super() dispatches onAttachedToWindow to child views,
+        // so ComposeView.onAttachedToWindow() finds it and skips the windowRecomposer path.
+        composeView?.setParentCompositionContext(recomposer)
         super.onAttachedToWindow()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }

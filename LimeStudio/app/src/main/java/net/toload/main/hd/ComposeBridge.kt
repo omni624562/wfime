@@ -158,6 +158,7 @@ object ComposeBridge {
                 }
 
                 override fun onAttachedToWindow() {
+                    composeView.setParentCompositionContext(recomposer)
                     super.onAttachedToWindow()
                     composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                     if (BuildConfig.DEBUG) android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper attached — lifecycle RESUMED")
@@ -284,6 +285,7 @@ object ComposeBridge {
                 }
 
                 override fun onAttachedToWindow() {
+                    composeView.setParentCompositionContext(recomposer)
                     super.onAttachedToWindow()
                     composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                     if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo wrapper attached — lifecycle RESUMED")
