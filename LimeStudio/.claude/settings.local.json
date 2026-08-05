@@ -131,7 +131,9 @@
       "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; $t=\"$env:TEMP\\\\claude\"; & $adb -s R5GL23KXA9B exec-out run-as net.toload.main.hd.tablet cat databases/lime.db > \"$t\\\\lime_check.db\"; & $adb -s R5GL23KXA9B exec-out run-as net.toload.main.hd.tablet cat databases/lime.db-wal > \"$t\\\\lime_check.db-wal\"; $env:PYTHONIOENCODING='utf-8'; python -c \"import sqlite3; con=sqlite3.connect\\(r'$t\\\\lime_check.db'\\); print\\(con.execute\\(\\\\\"SELECT code, word, score FROM dayi WHERE code='nh12vdbxe'\\\\\"\\).fetchall\\(\\)\\)\")",
       "PowerShell($env:PYTHONIOENCODING='utf-8'; python \"C:\\\\Users\\\\nan\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Storage-workspace-nanime-main-LimeStudio\\\\f4a28cc9-7517-4a2d-8e59-fb00edc3557d\\\\scratchpad\\\\check_learn.py\")",
       "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb -s R5GL23KXA9B shell input tap 2483 124; Start-Sleep -Milliseconds 800; foreach \\($k in 'KEYCODE_S','KEYCODE_O','KEYCODE_R','KEYCODE_R','KEYCODE_Y'\\) { & $adb -s R5GL23KXA9B shell input keyevent $k }; Start-Sleep -Seconds 1; & $adb -s R5GL23KXA9B exec-out screencap -p > \"$env:TEMP\\\\claude\\\\tab_opt3.png\")",
-      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb -s R5GL23KXA9B shell input keyevent KEYCODE_SPACE; Start-Sleep -Seconds 1; & $adb -s R5GL23KXA9B exec-out screencap -p > \"$env:TEMP\\\\claude\\\\tab_opt4.png\")"
+      "PowerShell($adb = \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\"; & $adb -s R5GL23KXA9B shell input keyevent KEYCODE_SPACE; Start-Sleep -Seconds 1; & $adb -s R5GL23KXA9B exec-out screencap -p > \"$env:TEMP\\\\claude\\\\tab_opt4.png\")",
+      "PowerShell(Remove-Item \"app\\\\src\\\\main\\\\java\\\\net\\\\toload\\\\main\\\\hd\\\\TextCompositionManager.java\" -Confirm:$false)",
+      "PowerShell(\"deleted\")"
     ],
     "deny": []
   }

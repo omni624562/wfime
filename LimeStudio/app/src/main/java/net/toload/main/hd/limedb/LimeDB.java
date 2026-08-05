@@ -3254,11 +3254,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
              * }
              * stemmer.stem();
              */
-            String selectString = "SELECT word FROM dictionary WHERE word MATCH '" + word + "*' AND word <> '" + word
-                    + "'ORDER BY word ASC LIMIT " + ssize + ";";
-            // SQLiteDatabase db = this.getSqliteDb(true);
-
-            Cursor cursor = db.rawQuery(selectString, null);
+            // 參數化:word 為使用者輸入,不可串接進 SQL(FTS MATCH 的前綴查詢以 ? 綁定)
+            String selectString = "SELECT word FROM dictionary WHERE word MATCH ? AND word <> ?"
+                    + " ORDER BY word ASC LIMIT " + ssize + ";";
+            Cursor cursor = db.rawQuery(selectString, new String[]{word + "*", word});
             if (cursor != null) {
                 if (cursor.getCount() > 0) {
                     cursor.moveToFirst();
@@ -3360,8 +3359,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             return false;
 
         try {
-            // ALTER TABLE foo RENAME TO bar
-            db.execSQL("ALTER TABLE " + source + " RENAME TO " + target);
+            // ALTER TABLE foo RENAME TO bar (表名經白名單/格式驗證,防注入)
+            db.execSQL("ALTER TABLE " + validateTableName(source)
+                    + " RENAME TO " + validateTableName(target));
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -3511,17 +3511,22 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return result;
 
+        // 參數化:query 為使用者輸入的搜尋字,以 ? 綁定;表名經白名單驗證
         Cursor cursor;
+        String selection;
+        String[] selectionArgs = null;
         if (query != null && query.length() >= 1) {
             if (searchroot) {
-                query = Lime.DB_COLUMN_CODE + " LIKE '" + query + "%' AND ifnull(" + Lime.DB_COLUMN_WORD
+                selection = Lime.DB_COLUMN_CODE + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
                         + ", '') <> ''";
+                selectionArgs = new String[]{query + "%"};
             } else {
-                query = Lime.DB_COLUMN_WORD + " LIKE '%" + query + "%' AND ifnull(" + Lime.DB_COLUMN_WORD
+                selection = Lime.DB_COLUMN_WORD + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
                         + ", '') <> ''";
+                selectionArgs = new String[]{"%" + query + "%"};
             }
         } else {
-            query = "ifnull(" + Lime.DB_COLUMN_WORD + ", '') <> ''";
+            selection = "ifnull(" + Lime.DB_COLUMN_WORD + ", '') <> ''";
         }
 
         String order;
@@ -3536,9 +3541,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             order += " LIMIT " + maximum + " OFFSET " + offset;
         }
 
-        cursor = db.query(code,
-                null, query,
-                null, null, null, order);
+        cursor = db.query(validateTableName(code),
+                null, selection,
+                selectionArgs, null, null, order);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -3573,9 +3578,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
 
-        String removesql = "DELETE FROM " + Lime.DB_IM + " WHERE " + Lime.DB_IM_COLUMN_CODE + " = '" + code + "'";
-        removesql += " AND " + Lime.DB_IM_COLUMN_TITLE + " = '" + Lime.IM_TYPE_KEYBOARD + "'";
-        db.execSQL(removesql);
+        // 參數化,避免 code 串接注入
+        db.delete(Lime.DB_IM,
+                Lime.DB_IM_COLUMN_CODE + " = ? AND " + Lime.DB_IM_COLUMN_TITLE + " = ?",
+                new String[]{code, Lime.IM_TYPE_KEYBOARD});
 
         Im im = new Im();
         im.setCode(code);
@@ -3592,9 +3598,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return null;
 
-        String query = Lime.DB_IM_COLUMN_CODE + " = '" + code + "' AND " +
-                Lime.DB_IM_COLUMN_TITLE + " = '" + Lime.IM_TYPE_KEYBOARD + "'";
-        Cursor cursor = db.query(Lime.DB_IM, null, query, null, null, null, null);
+        Cursor cursor = db.query(Lime.DB_IM, null,
+                Lime.DB_IM_COLUMN_CODE + " = ? AND " + Lime.DB_IM_COLUMN_TITLE + " = ?",
+                new String[]{code, Lime.IM_TYPE_KEYBOARD}, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
             String keyboardCode = cursor.getString(cursor.getColumnIndex(Lime.DB_IM_COLUMN_KEYBOARD));
@@ -3737,21 +3743,25 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         Cursor cursor;
 
-        String query = "SELECT COUNT(*) as count FROM " + table + " WHERE ";
+        // 參數化:curquery 為使用者輸入,以 ? 綁定;表名經白名單驗證
+        String query = "SELECT COUNT(*) as count FROM " + validateTableName(table) + " WHERE ";
+        String[] args = null;
 
         if (curquery != null && curquery.length() >= 1) {
             if (searchroot) {
-                query += Lime.DB_COLUMN_CODE + " LIKE '" + curquery + "%' AND ifnull(" + Lime.DB_COLUMN_WORD
+                query += Lime.DB_COLUMN_CODE + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
                         + ", '') <> ''";
+                args = new String[]{curquery + "%"};
             } else {
-                query += Lime.DB_COLUMN_WORD + " LIKE '%" + curquery + "%' AND ifnull(" + Lime.DB_COLUMN_WORD
+                query += Lime.DB_COLUMN_WORD + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
                         + ", '') <> ''";
+                args = new String[]{"%" + curquery + "%"};
             }
         } else {
             query += " ifnull(" + Lime.DB_COLUMN_WORD + ", '') <> ''";
         }
 
-        cursor = db.rawQuery(query, null);
+        cursor = db.rawQuery(query, args);
 
         cursor.moveToFirst();
         total = cursor.getInt(cursor.getColumnIndex(Lime.DB_TOTAL_COUNT));
@@ -3776,17 +3786,20 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             pword = pword.substring(0, 1);
         }
 
+        // 參數化:pword/cword 為使用者輸入,以 ? 綁定
+        java.util.List<String> args = new ArrayList<>();
         if (pword != null && !pword.isEmpty()) {
-            query += Lime.DB_RELATED_COLUMN_PWORD + " = '" + pword +
-                    "' AND ";
+            query += Lime.DB_RELATED_COLUMN_PWORD + " = ? AND ";
+            args.add(pword);
         }
         if (cword != null && !cword.isEmpty()) {
-            query += Lime.DB_RELATED_COLUMN_CWORD + " LIKE '" + cword + "%' AND ";
+            query += Lime.DB_RELATED_COLUMN_CWORD + " LIKE ? AND ";
+            args.add(cword + "%");
         }
 
         query += "ifnull(" + Lime.DB_RELATED_COLUMN_CWORD + ", '') <> ''";
 
-        cursor = db.rawQuery(query, null);
+        cursor = db.rawQuery(query, args.isEmpty() ? null : args.toArray(new String[0]));
 
         cursor.moveToFirst();
         total = cursor.getInt(cursor.getColumnIndex(Lime.DB_TOTAL_COUNT));
@@ -3839,6 +3852,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
+    /**
+     * @deprecated 任意 SQL 直通閘門,有注入風險。新程式碼請改用參數化方法
+     *             (db.query/rawQuery(sql, args)/delete/update 等);
+     *             既有呼叫端(IM 載入流程)只能傳入內部組出的 SQL,不可接觸使用者輸入。
+     */
+    @Deprecated
     public Cursor rawQuery(String query) {
         if (!checkDBConnection())
             return null;
@@ -3850,6 +3869,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * @deprecated 任意 SQL 直通閘門,有注入風險。同 {@link #rawQuery(String)} 說明。
+     */
+    @Deprecated
     public void execSQL(String insertsql) {
         if (!checkDBConnection())
             return;

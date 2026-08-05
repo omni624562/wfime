@@ -262,6 +262,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      */
     private final Rect mDirtyRect = new Rect();
     /**
+     * invalidateKey 標記的單一鍵:onBufferDraw 只重畫此鍵區域(髒矩形)
+     */
+    private Key mInvalidatedKey;
+    /**
+     * 鍵面 label 拆解快取(主字/子標籤/第二子標籤),避免每次重繪 split 配置
+     */
+    private final java.util.HashMap<String, String[]> mLabelSplitCache = new java.util.HashMap<>();
+    /**
      * The dirty region in the keyboard bitmap
      */
     private final Rect mTextBounds = new Rect();
@@ -696,6 +704,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         invalidateAllKeys();
         computeProximityThreshold(keyboard);
         mMiniKeyboardCache.clear();
+        mLabelSplitCache.clear();
     }
 
     /**
@@ -867,6 +876,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     }
 
     private void onBufferDraw() {
+        boolean bufferRebuilt = false;
         if (mBuffer == null || mKeyboardChanged) {
             if (mBuffer == null || (mBuffer.getWidth() != getWidth() || mBuffer.getHeight() != getHeight())) {
                 // Make sure our bitmap is at least 1x1
@@ -877,6 +887,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             }
             invalidateAllKeys();
             mKeyboardChanged = false;
+            bufferRebuilt = true;
         }
         final Canvas canvas = mCanvas;
         // Daniel: this is old usage. will cause crash
@@ -892,9 +903,25 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         final int kbdPaddingTop = getPaddingTop();
         final Key[] keys = mKeys;
 
+        // 單鍵髒矩形重繪:invalidateKey 觸發、buffer 有效且沒有整鍵盤重繪
+        // 待處理時,只 clip 到該鍵區域重畫一鍵,取代原本每次按鍵 O(全部鍵) 的重繪。
+        // mini keyboard 開著時有全鍵盤壓暗層,維持整張重畫。
+        final Key invalidatedKey = mInvalidatedKey;
+        mInvalidatedKey = null;
+        final boolean drawSingleKey = invalidatedKey != null
+                && !bufferRebuilt && !mDrawPending && mMiniKeyboard == null;
+        if (drawSingleKey) {
+            canvas.save();
+            canvas.clipRect(invalidatedKey.x + kbdPaddingLeft,
+                    invalidatedKey.y + kbdPaddingTop,
+                    invalidatedKey.x + invalidatedKey.width + kbdPaddingLeft,
+                    invalidatedKey.y + invalidatedKey.height + kbdPaddingTop);
+        }
+        final Key[] keysToDraw = drawSingleKey ? new Key[]{invalidatedKey} : keys;
+
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
         // final int keyCount = keys.length;
-        for (final Key key : keys) {
+        for (final Key key : keysToDraw) {
             int[] drawableState = key.getCurrentDrawableState();
 
             // Use action key background for Enter key, More Symbols (hamburger) key, and [?123] mode change key
@@ -959,18 +986,27 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 boolean hasSecondSubLabel = false;
                 String subLabel = "", secondSubLabel = "";
                 if (hasSubLabel) {
-                    String labelA[] = label.split("\n");
-                    if (labelA.length > 0)
-                        label = labelA[1];
-                    subLabel = labelA[0];
-
-                    hasSecondSubLabel = subLabel.contains("\t");
-                    if (hasSecondSubLabel) {
-                        String subLabelA[] = subLabel.split("\t");
-                        if (subLabelA.length > 0)
-                            subLabel = subLabelA[0];
-                        secondSubLabel = subLabelA[1];
+                    // 拆解結果快取:同一 label 不在每次重繪重複 split 配置
+                    String[] parts = mLabelSplitCache.get(label);
+                    if (parts == null) {
+                        String mainPart = label, subPart, secondPart = "";
+                        String labelA[] = label.split("\n");
+                        if (labelA.length > 0)
+                            mainPart = labelA[1];
+                        subPart = labelA[0];
+                        if (subPart.contains("\t")) {
+                            String subLabelA[] = subPart.split("\t");
+                            if (subLabelA.length > 0)
+                                subPart = subLabelA[0];
+                            secondPart = subLabelA[1];
+                        }
+                        parts = new String[]{mainPart, subPart, secondPart};
+                        mLabelSplitCache.put(label, parts);
                     }
+                    label = parts[0];
+                    subLabel = parts[1];
+                    secondSubLabel = parts[2];
+                    hasSecondSubLabel = !secondSubLabel.isEmpty();
                 }
                 if (hasSubLabel) {
                     if (label.length() > 1) { // Jeremy '12,6,6 shrink the font size for more characters on label
@@ -1160,6 +1196,9 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             }
             canvas.translate(-key.x - kbdPaddingLeft, -key.y - kbdPaddingTop);
         }
+        if (drawSingleKey) {
+            canvas.restore();
+        }
         // Overlay a dark rectangle to dim the keyboard
         if (mMiniKeyboard != null) {
             paint.setColor((int) (mBackgroundDimAmount * 0xFF) << 24);
@@ -1217,7 +1256,8 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     public void invalidateKey(Key key) {
         if (key == null)
             return;
-        // TODO we should clean up this and record key's region to use in onBufferDraw.
+        // 記下要重繪的鍵,onBufferDraw 只重畫這一鍵的區域,不再全鍵盤重繪
+        mInvalidatedKey = key;
         mDirtyRect.union(key.x + getPaddingLeft(), key.y + getPaddingTop(),
                 key.x + key.width + getPaddingLeft(), key.y + key.height + getPaddingTop());
         onBufferDraw();

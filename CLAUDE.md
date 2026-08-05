@@ -57,7 +57,7 @@ Signing config is loaded from `keystore.properties` (excluded from git). If miss
 
 ### Database Layer
 
-`LimeDB.java` (~210 KB) extends `LimeSQLiteOpenHelper` and contains all raw SQL. It is the **only** class that touches SQLite directly. Known SQL injection risks from legacy code — see `docs/SECURITY_ANALYSIS.md`. Do not add new raw string concatenation queries; use parameterized statements.
+`LimeDB.java` (~4000 lines) extends `LimeSQLiteOpenHelper` and contains all raw SQL. It is the **only** class that touches SQLite directly. Legacy SQL injection risks are mostly remediated (parameterized queries + `validateTableName` whitelist); the remaining raw gateways `rawQuery(String)`/`execSQL(String)` are `@Deprecated` — do not add new callers. Do not add new raw string concatenation queries; use parameterized statements.
 
 `EmojiConverter.java` and `LimeHanConverter.java` are smaller DB helpers for emoji lookup and Han character conversion respectively.
 
@@ -111,7 +111,7 @@ Commit messages may be in English or Chinese.
 
 ## Key Technical Notes | 技術要點
 
-- **LimeDB raw SQL** — known injection risks; parameterize new queries; see `docs/SECURITY_ANALYSIS.md`
+- **LimeDB raw SQL** — parameterize new queries; table names must go through `validateTableName`; avoid the deprecated `rawQuery(String)`/`execSQL(String)` gateways
 - **Compose in IME** — no `ComponentActivity`; use the `ComposeBridge` / manual `Recomposer` pattern
 - **Material 3 color migration** — in progress; see `docs/Phase3-Color-Audit-Material3-Mapping.md`
 - **Version bump** — edit `VERSION_MAJOR`/`VERSION_MINOR`/`VERSION_PATCH` in `LimeStudio/version.properties`
