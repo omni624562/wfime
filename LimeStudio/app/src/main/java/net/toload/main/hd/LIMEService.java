@@ -2324,7 +2324,7 @@ public class LIMEService extends InputMethodService implements
                         if (DEBUG)
                             Log.i(TAG, "commitTyped(): committedCodeLength = " + committedCodeLength);
 
-                        if (mComposing.length() > selectedCandidate.getCode().length()) {
+                        if (selectedCandidate.getCode() != null && mComposing.length() > selectedCandidate.getCode().length()) {
                             composingNotFinish = true;
                         }
 

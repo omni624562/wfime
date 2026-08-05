@@ -723,7 +723,9 @@ public class SearchServer {
         if (DEBUG)
             Log.i(TAG, "getRealCodeLength()");
 
+        if (selectedMapping == null) return 0;
         String code = selectedMapping.getCode();
+        if (code == null) return 0;
         int realCodeLen = code.length();
         if (LimeDB.isCodeDualMapped()) { // abandon LD support for dual mapped codes. Jeremy '15,6,5
             realCodeLen = currentCode.length();
