@@ -856,8 +856,9 @@ public class SearchServer {
     }
 
     private void updateScoreCache(Mapping cachedMapping) {
+        if (cachedMapping == null) return;
         if (DEBUG)
-            Log.i(TAG, "updateScoreCache(): code=" + cachedMapping.getCode());
+            Log.i(TAG, "updateScoreCache(): code=" + (cachedMapping.getCode() != null ? cachedMapping.getCode() : "null"));
 
         dbadapter.addScore(cachedMapping);
         // Selection may change related-table scores; drop cached related phrases
@@ -868,8 +869,10 @@ public class SearchServer {
             relatedPhraseCache.clear();
         // Jeremy '11,7,29 update cached here
         if (!cachedMapping.isRelatedPhraseRecord()) {
-            String code = cachedMapping.getCode().toLowerCase(Locale.US);
-            String cachekey = cacheKey(code);
+            String code = cachedMapping.getCode();
+            if (code == null) return;
+            String codeLower = code.toLowerCase(Locale.US);
+            String cachekey = cacheKey(codeLower);
             List<Mapping> cachedList = cache.get(cachekey);
             // null id denotes target is selected from the related list (not exact match)
             if ((cachedMapping.getId() == null || cachedMapping.isPartialMatchToCodeRecord()) // Jeremy '15,6,3 new
@@ -879,7 +882,7 @@ public class SearchServer {
                 if (DEBUG)
                     Log.i(TAG, "updateScoreCache(): updating related list");
                 if (cache.remove(cachekey) == null) {
-                    removeRemappedCodeCachedMappings(code);
+                    removeRemappedCodeCachedMappings(codeLower);
                 }
                 // non null id denotes target is in exact match result list.
             } else if ((cachedMapping.getId() != null || cachedMapping.isExactMatchToCodeRecord()) // Jeremy '15,6,3 new
