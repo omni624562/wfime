@@ -234,7 +234,7 @@ class CandidateController {
 
         } else if ((service.mComposing.length() > 0
                 || (service.selectedCandidate != null && !service.selectedCandidate.isComposingCodeRecord()))
-                && !service.mEnglishOnly) { // user picked candidates from composing candidate or related phrase candidates
+                && (!service.mEnglishOnly || service.tempEnglishList == null || service.tempEnglishList.isEmpty())) { // user picked candidates from composing candidate, related phrase candidates, or raw English candidates
             // Jeremy '12,4,29 use mEnglishOnly instead of onIM
             service.commitTyped(ic);
         } else if (service.mLIMEPref.getEnglishPrediction() && service.tempEnglishList != null
