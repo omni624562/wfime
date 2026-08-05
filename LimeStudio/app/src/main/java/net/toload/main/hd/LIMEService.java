@@ -3067,7 +3067,7 @@ public class LIMEService extends InputMethodService implements
         if (mPredicting) {
             commitTyped(ic);
             // mJustRevertedSeparator = null;
-        } else if (!mEnglishOnly && mComposing.length() > 0) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
+        } else if (mComposing.length() > 0) { // Commit active composition first in all modes to prevent input field desync
             if (!pickHighlightedCandidate()) {
                 // If no candidate is highlighted, pick the first one by default
                 // to commit the Chinese characters before the emoji
