@@ -57,6 +57,7 @@
                 android:id="@+id/listview_loading_target"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </TableRow>
 
