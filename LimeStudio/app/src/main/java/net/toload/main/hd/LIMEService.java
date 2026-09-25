@@ -381,7 +381,7 @@ public class LIMEService extends InputMethodService implements
 
             Notification notification = builder
                     .setContentTitle(getString(R.string.app_name))
-                    .setContentText("輸入法服務執行中")
+                    .setContentText(getString(R.string.foreground_service_notification_text))
                     .setSmallIcon(R.drawable.logo)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)

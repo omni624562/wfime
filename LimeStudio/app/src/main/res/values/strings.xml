@@ -26,6 +26,7 @@
 <resources>
     <string name="app_name">麥田輸入法</string>
     <string name="app_setting">設定麥田輸入法</string>
+    <string name="foreground_service_notification_text">輸入法服務執行中</string>
 
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
