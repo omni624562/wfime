@@ -506,6 +506,13 @@ public class LIMEService extends InputMethodService implements
                     android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
         }
 
+        // The framework adds the returned view to a freshly created input frame. The
+        // cached container may still be attached to the previous frame (e.g. after a
+        // uiMode change), which makes setInputView() throw IllegalStateException.
+        // Same guard as the one already applied to mInputView in updateInputViewContainer().
+        if (mInputViewContainer.getParent() != null)
+            ((android.view.ViewGroup) mInputViewContainer.getParent()).removeView(mInputViewContainer);
+
         updateInputViewContainer();
         
         Log.d("KBD_DEBUG", "Input container setup complete. Children count: " + mInputViewContainer.getChildCount());
