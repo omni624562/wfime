@@ -1019,13 +1019,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             return -1;
 
         // Remove all the chinese symbols from the related words
-        if (mLIMEPref.getLearnRelatedWord()) {
+        if (mLIMEPref.getLearnRelatedWord() && cword != null) {
             try {
                 // Remove Punctutation
-                String[] chinesesymbols = ChineseSymbol.chineseSymbols.split("|");
+                String[] chinesesymbols = ChineseSymbol.chineseSymbols.split("\\|");
                 for (String s : chinesesymbols) {
-                    cword = cword.replaceAll(s, "");
-                    if (cword == null || cword.isEmpty()) {
+                    cword = cword.replace(s, "");
+                    if (cword.isEmpty()) {
                         return -1;
                     }
                 }

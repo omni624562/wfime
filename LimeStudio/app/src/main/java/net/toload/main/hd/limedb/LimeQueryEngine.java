@@ -1200,10 +1200,10 @@ class LimeQueryEngine {
     /**
      * Process search results
      */
-    // 原為 LimeDB 的 synchronized 方法;搬移後以 synchronized (db) 保留原本的鎖物件(LimeDB 實例)
+    // 原為 LimeDB 的 synchronized 方法;本方法不做 DB I/O(僅讀取已開啟的 Cursor),
+    // 且外層 getMappingByCode 的 rawQuery 原本就在鎖外執行,故不再以 synchronized (db) 包覆
     private List<Mapping> buildQueryResult(String query_code, String codeorig, Cursor cursor,
             Boolean getAllRecords) {
-        synchronized (db) {
 
         long startTime = 0;
         if (LimeDB.DEBUG || LimeDB.probePerformance) {
@@ -1400,7 +1400,6 @@ class LimeQueryEngine {
                     + (System.currentTimeMillis() - startTime));
         return result;
 
-        }
     }
 
 }
