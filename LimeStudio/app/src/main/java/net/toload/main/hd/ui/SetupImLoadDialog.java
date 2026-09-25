@@ -479,7 +479,7 @@ public class SetupImLoadDialog extends DialogFragment {
             } else {
                 File fileToImport = new File(unzipPaths.get(0));
                 DBSrv.importBackupRelatedDb(fileToImport);
-                fileToImport.deleteOnExit();
+                fileToImport.delete();
                 showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
                         Toast.LENGTH_LONG);
             }
@@ -500,7 +500,7 @@ public class SetupImLoadDialog extends DialogFragment {
             } else {
                 File fileToImport = new File(unzipPaths.get(0));
                 DBSrv.importBackupDb(fileToImport.getAbsoluteFile(), imtype);
-                fileToImport.deleteOnExit();
+                fileToImport.delete();
                 showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
                         Toast.LENGTH_LONG);
             }
