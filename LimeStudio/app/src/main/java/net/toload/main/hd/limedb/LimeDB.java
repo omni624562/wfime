@@ -1790,7 +1790,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (cursor != null && cursor.getCount() > 0) {
             cursor.close();
             try {
-                db.execSQL("drop table " + backupTableName);
+                // 不用 DROP TABLE IF EXISTS:表不存在時該語句被判為唯讀並進入 statement cache,
+                // 同程序內表存在後再執行會沿用唯讀旗標而被派到 WAL 唯讀連線,導致 drop 失敗
+                if (hasTable(backupTableName))
+                    db.execSQL("drop table " + backupTableName);
             } catch (Exception e) {
                 Log.i(TAG, "Remove the table " + backupTableName);
             }
