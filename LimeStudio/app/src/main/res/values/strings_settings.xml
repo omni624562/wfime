@@ -50,9 +50,6 @@
     <!-- LIME Loading -->
     <string name="lime_setting_btn_load_local_notice">請選擇 .LIME 或 .CIN 檔案</string>
     <string name="lime_setting_loading">資料載入期間請勿關閉本視窗或跳出程式，以免匯入失敗</string>
-    <string name="lime_setting_select_root"> - back to /</string>
-    <string name="lime_setting_select_parent"> - back to ..</string>
-    <string name="lime_loading_cancel">取消</string>
 
     <string name="lime_setting_notification_loading">準備資料匯入</string>
     <string name="lime_setting_notification_failed">記錄匯入失敗</string>
