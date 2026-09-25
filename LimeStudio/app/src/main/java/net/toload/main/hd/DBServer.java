@@ -399,6 +399,9 @@ public class DBServer {
             return -1;
         } else {
             int count = datasource.importDb(targetDbPath, imtype);
+            // 解壓出的檔案匯入後即不再需要
+            for (String path : unzipFilePaths)
+                new File(path).delete();
             // mLIMEPref.setResetCacheFlag(true);
             resetCache();
             return count;

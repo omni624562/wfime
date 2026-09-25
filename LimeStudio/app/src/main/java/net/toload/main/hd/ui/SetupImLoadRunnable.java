@@ -99,6 +99,8 @@ public class SetupImLoadRunnable implements Runnable {
         if (tempfile == null || tempfile.length() < 100000) {
             // Primary download failed - log error and notify user
             Log.e(TAG, "Failed to download database from primary URL: " + url);
+            if (tempfile != null)
+                tempfile.delete();
             handler.cancelProgress();
             return;
         }
@@ -106,6 +108,7 @@ public class SetupImLoadRunnable implements Runnable {
         // Load DB
         handler.updateProgress(activity.getResources().getString(R.string.setup_load_migrate_load));
         int count = dbsrv.importMapping(tempfile, imtype);
+        tempfile.delete(); // 下載的 zip 匯入後即不再需要
 
         if (count < 0) {
             handler.cancelProgress();
@@ -292,6 +295,7 @@ public class SetupImLoadRunnable implements Runnable {
      */
     public File downloadRemoteFile(Context ctx, String url) {
 
+        File downloadedFile = null;
         try {
             URL downloadUrl = new URL(url);
             URLConnection conn = downloadUrl.openConnection();
@@ -301,8 +305,7 @@ public class SetupImLoadRunnable implements Runnable {
             int downloadSize = 0;
 
             File downloadFolder = ctx.getCacheDir();
-            File downloadedFile = File.createTempFile(Lime.DATABASE_IM_TEMP, Lime.DATABASE_IM_TEMP_EXT, downloadFolder);
-            downloadedFile.deleteOnExit();
+            downloadedFile = File.createTempFile(Lime.DATABASE_IM_TEMP, Lime.DATABASE_IM_TEMP_EXT, downloadFolder);
 
             try (InputStream is = conn.getInputStream();
                  FileOutputStream fos = new FileOutputStream(downloadedFile)) {
@@ -326,6 +329,8 @@ public class SetupImLoadRunnable implements Runnable {
 
         } catch (Exception e) {
             e.printStackTrace();
+            if (downloadedFile != null)
+                downloadedFile.delete(); // 下載中斷的殘檔
         }
         return null;
     }
