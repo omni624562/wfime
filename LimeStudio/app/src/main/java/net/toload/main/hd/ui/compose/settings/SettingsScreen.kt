@@ -1039,6 +1039,15 @@ fun MappingSettingsSection(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
+            val mainActivity = findMainActivity()
+            ClickablePreference(
+                title = stringResource(R.string.related_import_entry),
+                summary = stringResource(R.string.related_import_entry_summary),
+                onClick = { mainActivity?.importRelated() }
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
             SwitchPreference(
                 title = stringResource(R.string.learn_phrase),
                 summary = stringResource(R.string.learn_phrase_summary),

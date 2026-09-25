@@ -43,6 +43,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -251,5 +252,60 @@ public class LimeDBRelatedManagementTest {
         List<Related> list = limeDb.getUserLearnedRelated(null, 500);
         for (Related r : list)
             assertFalse("cword NULL 計數列不可出現在清單", r.getCword() == null);
+    }
+
+    // =========================================================================
+    // importBackupRelatedDb(匯入關聯字庫):整張取代,但保留 score>0 的學習資料
+    // =========================================================================
+
+    private int scoreOf(String pword, String cword) {
+        Cursor cursor = (cword == null)
+                ? db.rawQuery("SELECT score FROM related WHERE pword = ? AND cword IS NULL", new String[] { pword })
+                : db.rawQuery("SELECT score FROM related WHERE pword = ? AND cword = ?", new String[] { pword, cword });
+        assertTrue("找不到 " + pword + "→" + cword, cursor.moveToFirst());
+        int score = cursor.getInt(0);
+        cursor.close();
+        return score;
+    }
+
+    private Integer basescoreOf(String pword, String cword) {
+        Cursor cursor = db.rawQuery("SELECT basescore FROM related WHERE pword = ? AND cword = ?",
+                new String[] { pword, cword });
+        assertTrue("找不到 " + pword + "→" + cword, cursor.moveToFirst());
+        Integer basescore = cursor.isNull(0) ? null : cursor.getInt(0);
+        cursor.close();
+        return basescore;
+    }
+
+    @Test
+    public void testImportRelated_ReplacesTable_KeepsLearnedScores() {
+        // 來源字庫:含內建被用過/未用過兩列(score 0)、一列新字與計數列,不含純自建列
+        File source = new File(ApplicationProvider.<Context>getApplicationContext().getCacheDir(), "related_import_test.db");
+        source.delete();
+        SQLiteDatabase src = SQLiteDatabase.openOrCreateDatabase(source, null);
+        src.execSQL("CREATE TABLE related (" +
+                "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "pword text, cword text, " +
+                "score INTEGER NOT NULL DEFAULT 0, " +
+                "basescore INTEGER DEFAULT 0)");
+        src.execSQL("INSERT INTO related (pword, cword, score, basescore) VALUES ('詹', '事府', 0, 15)");
+        src.execSQL("INSERT INTO related (pword, cword, score, basescore) VALUES ('詹', '森', 0, 5)");
+        src.execSQL("INSERT INTO related (pword, cword, score, basescore) VALUES ('詹', '姆斯', 0, 9)");
+        src.execSQL("INSERT INTO related (pword, score) VALUES ('詹', 0)");
+        src.close();
+        Integer pureUserBasescore = basescoreOf("詹", "詠");
+
+        assertTrue(limeDb.importBackupRelatedDb(source));
+
+        // 來源 4 列 + 補回來源沒有的純自建列
+        assertEquals(5, rowCount(null));
+        assertEquals(5, scoreOf("詹", "事府"));   // 內建被用過:沿用新列,套回 score
+        assertEquals(0, scoreOf("詹", "森"));     // 內建未用過:維持新字庫
+        assertEquals(0, scoreOf("詹", "姆斯"));   // 新字庫才有的字
+        assertEquals(3, scoreOf("詹", "詠"));     // 純自建:整列補回
+        assertEquals(7, scoreOf("詹", null));     // 計數列:套回 score
+        assertEquals(pureUserBasescore, basescoreOf("詹", "詠"));   // 補回的列保留原 basescore
+        assertEquals(Integer.valueOf(15), basescoreOf("詹", "事府"));  // 沿用新字庫的 basescore
+        source.delete();
     }
 }

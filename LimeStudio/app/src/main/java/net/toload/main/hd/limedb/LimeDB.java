@@ -1663,6 +1663,22 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return false;
 
+        // 匯入會整張取代 related:先保存學習過(score>0)的關聯字,匯入後套回
+        List<ContentValues> learned = new ArrayList<>();
+        try (Cursor cursor = db.query(Lime.DB_RELATED,
+                new String[] { FIELD_DIC_pword, FIELD_DIC_cword, FIELD_DIC_score, Lime.DB_RELATED_COLUMN_BASESCORE },
+                FIELD_DIC_score + " > 0", null, null, null, null)) {
+            while (cursor.moveToNext()) {
+                ContentValues cv = new ContentValues();
+                cv.put(FIELD_DIC_pword, cursor.getString(0));
+                cv.put(FIELD_DIC_cword, cursor.getString(1));
+                cv.put(FIELD_DIC_score, cursor.getInt(2));
+                if (!cursor.isNull(3))
+                    cv.put(Lime.DB_RELATED_COLUMN_BASESCORE, cursor.getInt(3));
+                learned.add(cv);
+            }
+        }
+
         // Reset IM Info
         deleteAll(Lime.DB_RELATED);
 
@@ -1672,8 +1688,32 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile.getAbsolutePath() });
         db.execSQL("insert into " + Lime.DB_RELATED + " select * from sourceDB." + Lime.DB_RELATED);
         db.execSQL("detach database sourceDB");
+        restoreLearnedRelated(learned);
         unHoldDBConnection();
         return true;
+    }
+
+    // 新字庫已有同一組 pword/cword 者只套回 score,沒有者整列補回
+    private void restoreLearnedRelated(List<ContentValues> learned) {
+        db.beginTransaction();
+        try {
+            for (ContentValues cv : learned) {
+                String pword = cv.getAsString(FIELD_DIC_pword);
+                String cword = cv.getAsString(FIELD_DIC_cword);
+                ContentValues score = new ContentValues();
+                score.put(FIELD_DIC_score, cv.getAsInteger(FIELD_DIC_score));
+                int updated = (cword == null)
+                        ? db.update(Lime.DB_RELATED, score, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " IS NULL",
+                                new String[] { pword })
+                        : db.update(Lime.DB_RELATED, score, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?",
+                                new String[] { pword, cword });
+                if (updated == 0)
+                    db.insert(Lime.DB_RELATED, null, cv);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     public boolean importBackupDb(File sourcedbfile, String imtype) {

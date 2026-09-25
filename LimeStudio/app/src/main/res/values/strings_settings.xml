@@ -134,6 +134,8 @@
     <string name="candidate_suggestion_summary">依輸入文字自動建立關聯字,並在選字後顯示</string>
     <string name="related_manager_entry">管理自建關聯字</string>
     <string name="related_manager_entry_summary">檢視、刪除或清空已學習的關聯字</string>
+    <string name="related_import_entry">匯入關聯字庫</string>
+    <string name="related_import_entry_summary">導入預設字庫或 .limedb 關聯字檔,已學習的關聯字會保留</string>
     <string name="related_manager_title">自建關聯字管理</string>
     <string name="related_manager_count">共 %1$d 筆</string>
     <string name="related_manager_search_hint">搜尋前字或後字</string>

@@ -335,6 +335,10 @@ public class MainActivity extends AppCompatActivity {
         showSetupImLoadDialog(Lime.DB_TABLE_DAYI);
     }
 
+    public void importRelated() {
+        showSetupImLoadDialog(Lime.DB_RELATED);
+    }
+
     private void showSetupImLoadDialog(String imtype) {
         androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         SetupImHandler setupImHandler = new SetupImHandler(this);
