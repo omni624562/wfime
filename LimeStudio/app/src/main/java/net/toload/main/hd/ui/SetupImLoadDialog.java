@@ -32,28 +32,26 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import net.toload.main.hd.DBServer;
@@ -64,7 +62,6 @@ import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEProgressListener;
 import net.toload.main.hd.global.LIMEUtilities;
 import net.toload.main.hd.limedb.LimeDB;
-import net.toload.main.hd.limesettings.LIMESelectFileRecyclerAdapter;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -77,11 +74,6 @@ import net.toload.main.hd.limesettings.LIMESelectFileRecyclerAdapter;
  */
 public class SetupImLoadDialog extends DialogFragment {
 
-    static final Comparator<File> SORT_FILENAME = new Comparator<File>() {
-        public int compare(File e1, File e2) {
-            return e2.getName().compareTo(e1.getName());
-        }
-    };
     private static final String IM_TYPE = "IM_TYPE";
     // IM Log Tag
     private final String TAG = "SetupImLoadDialog";
@@ -96,7 +88,6 @@ public class SetupImLoadDialog extends DialogFragment {
     Button btnSetupImDialogCancel;
     CheckBox chkSetupImBackupLearning;
     CheckBox chkSetupImRestoreLearning;
-    List<File> flist;
     // Basic
     private SetupImHandler handler;
     private ConnectivityManager connManager;
@@ -107,10 +98,9 @@ public class SetupImLoadDialog extends DialogFragment {
     private DBServer DBSrv = null;
     private Activity activity;
     private LIMEPreferenceManager mLIMEPref;
-    // Select File
-    private LIMESelectFileRecyclerAdapter adapter;
-    private RecyclerView listview;
-    private LinearLayout toplayout;
+    // Select File: 系統檔案選擇器(SAF),選到的檔案複製到 cache 後沿用既有載入流程
+    private final ActivityResultLauncher<String[]> openDocumentLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::onMappingFilePicked);
     private Thread loadthread;
 
     public SetupImLoadDialog() {
@@ -213,11 +203,7 @@ public class SetupImLoadDialog extends DialogFragment {
             });
 
             btnSetupImDialogLoad1.setText(getResources().getString(R.string.setup_im_import_related));
-            btnSetupImDialogLoad1.setOnClickListener(v -> {
-                selectMappingFile();
-                handler.initialImButtons();
-                dismiss();
-            });
+            btnSetupImDialogLoad1.setOnClickListener(v -> selectMappingFile());
 
             // btnSetupImDialogLoad1.setVisibility(View.GONE);
             btnSetupImDialogLoad2.setVisibility(View.GONE);
@@ -277,11 +263,7 @@ public class SetupImLoadDialog extends DialogFragment {
 
                 getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_dialog_title));
 
-                btnSetupImDialogCustom.setOnClickListener(v -> {
-                    selectMappingFile();
-                    handler.initialImButtons();
-                    dismiss();
-                });
+                btnSetupImDialogCustom.setOnClickListener(v -> selectMappingFile());
 
                 if (imtype.equals(Lime.DB_TABLE_PHONETIC)) {
 
@@ -342,88 +324,59 @@ public class SetupImLoadDialog extends DialogFragment {
     }
 
     public void selectMappingFile() {
-
-        final Dialog dialog = new Dialog(activity);
-
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.target);
-        dialog.setCancelable(false);
-        Button button = dialog.findViewById(R.id.btn_loading_sync_cancel);
-        button.setOnClickListener(v -> dialog.dismiss());
-
-        listview = dialog.findViewById(R.id.listview_loading_target);
-        listview.setHasFixedSize(true);
-        listview.setLayoutManager(new LinearLayoutManager(activity));
-        toplayout = dialog.findViewById(R.id.linearlayout_loading_confirm_top);
-
-        // Use app-specific directory instead of deprecated external storage
-        File startDir = activity.getExternalFilesDir(null);
-        if (startDir == null)
-            startDir = activity.getFilesDir();
-
-        flist = getAvailableFiles(startDir.getAbsolutePath());
-        adapter = new LIMESelectFileRecyclerAdapter(activity, flist, position -> {
-            File f = flist.get(position);
-            if (f.isDirectory()) {
-                flist = getAvailableFiles(f.getAbsolutePath());
-                adapter.updateItems(flist);
-                createNavigationButtons(f);
-            } else {
-                getAvailableFiles(f.getAbsolutePath());
-                dialog.dismiss();
-            }
-        });
-        listview.setAdapter(adapter);
-
-        createNavigationButtons(startDir);
-        dialog.show();
+        // .cin/.lime/.limedb 沒有標準 MIME type,只能開放全部再依檔名過濾
+        openDocumentLauncher.launch(new String[] { "*/*" });
     }
 
-    private void createNavigationButtons(final File dir) {
+    private void onMappingFilePicked(Uri uri) {
+        // uri == null:使用者取消,保留對話框;handler == null:程序被回收後重建,無法繼續
+        if (uri == null || handler == null)
+            return;
 
-        // Clean Top Area
-        toplayout.removeAllViews();
+        handler.initialImButtons();
+        dismiss();
 
-        // Create Navigation Buttons
-        String path = dir.getAbsolutePath();
-        String[] pathlist = path.split("\\/");
-
-        String pathconstruct = "/";
-        if (pathlist.length > 0) {
-            for (String p : pathlist) {
-                if (!p.equals("") && !p.equals("/")) {
-                    pathconstruct += p + "/";
-                } else {
-                    p = "/";
-                }
-                final String actpath = pathconstruct;
-                Button b = new Button(activity);
-                b.setText(p);
-                b.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                b.setOnClickListener(arg0 -> {
-                    createNavigationButtons(new File(actpath));
-                    flist = getAvailableFiles(actpath);
-                    adapter.updateItems(flist);
-                });
-
-                toplayout.addView(b);
-            }
-        } else {
-            // final String actpath = pathconstruct;
-            Button b = new Button(activity);
-            b.setText("/");
-            b.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            b.setOnClickListener(arg0 -> {
-                createNavigationButtons(new File("/"));
-                flist = getAvailableFiles("/");
-                adapter.updateItems(flist);
-            });
-            toplayout.addView(b);
-            flist = getAvailableFiles("/");
-            adapter.updateItems(flist);
+        String name = getDisplayName(uri);
+        File file = (name != null && isSupportedMappingFile(name)) ? copyToCache(uri, name) : null;
+        if (file == null) {
+            showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+            return;
         }
+        loadMappingFile(file);
+    }
+
+    private String getDisplayName(Uri uri) {
+        try (Cursor cursor = activity.getContentResolver().query(uri,
+                new String[] { OpenableColumns.DISPLAY_NAME }, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst())
+                return cursor.getString(0);
+        } catch (Exception e) {
+            Log.w(TAG, "getDisplayName() failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private File copyToCache(Uri uri, String name) {
+        File file = new File(activity.getCacheDir(), new File(name).getName());
+        try {
+            LIMEUtilities.copyRAWFile(activity.getContentResolver().openInputStream(uri), file);
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, "copyToCache() failed: " + e.getMessage());
+            return null;
+        }
+        return file;
+    }
+
+    // 與舊版自製選擇器列出檔案的過濾條件相同
+    private boolean isSupportedMappingFile(String name) {
+        String lower = name.toLowerCase();
+        if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
+            return lower.startsWith(Lime.DB_RELATED) && lower.endsWith(Lime.SUPPORT_FILE_EXT_LIMEDB);
+        }
+        return lower.endsWith(Lime.SUPPORT_FILE_EXT_TXT)
+                || (lower.endsWith(Lime.SUPPORT_FILE_EXT_LIMEDB) && lower.startsWith(imtype))
+                || lower.endsWith(Lime.SUPPORT_FILE_EXT_LIME)
+                || lower.endsWith(Lime.SUPPORT_FILE_EXT_CIN);
     }
 
     public void downloadAndLoadIm(String code, String type) {
@@ -477,74 +430,18 @@ public class SetupImLoadDialog extends DialogFragment {
         toast.show();
     }
 
-    private List<File> getAvailableFiles(String path) {
-
-        List<File> templist = new ArrayList<File>();
-        List<File> list = new ArrayList<File>();
-        File check = new File(path);
-
-        if (check.exists() && check.isDirectory()) {
-
-            for (File f : check.listFiles()) {
-                if (f.canRead()) {
-                    if (!f.isDirectory()) {
-                        if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
-                            if ((f.getName().toLowerCase().startsWith(Lime.DB_RELATED) &&
-                                    f.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIMEDB))) {
-                                list.add(f);
-                            }
-                        } else {
-                            if (f.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
-                                    (f.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIMEDB) &&
-                                            f.getName().toLowerCase().startsWith(imtype))
-                                    ||
-                                    f.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
-                                    f.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
-                                list.add(f);
-                            }
-                        }
-                    } else {
-                        list.add(f);
-                    }
-                }
-            }
-
-            List<File> folders = new ArrayList<File>();
-            List<File> files = new ArrayList<File>();
-            for (File f : list) {
-                if (f.isDirectory()) {
-                    folders.add(f);
-                } else {
-                    files.add(f);
-                }
-            }
-
-            List<File> result = new ArrayList<File>();
-            Collections.sort(folders, SORT_FILENAME);
-            Collections.reverse(folders);
-            result.addAll(folders);
-            Collections.sort(files, SORT_FILENAME);
-            Collections.reverse(files);
-            result.addAll(files);
-
-            return result;
-
+    private void loadMappingFile(File check) {
+        if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
+            loadDbRelatedMapping(check);
         } else {
-
-            if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
-                loadDbRelatedMapping(check);
+            if (check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
+                    check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
+                    check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
+                loadMapping(check);
             } else {
-                if (check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
-                        check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
-                        check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
-                    loadMapping(check);
-                } else {
-                    loadDbMapping(check);
-                }
+                loadDbMapping(check);
             }
-
         }
-        return templist;
     }
 
     public void loadDefaultRelated() {
