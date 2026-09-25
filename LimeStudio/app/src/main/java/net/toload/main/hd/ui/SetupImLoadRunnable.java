@@ -146,7 +146,7 @@ public class SetupImLoadRunnable implements Runnable {
                      * }
                      * handler.updateProgress(20);
                      */
-                    Cursor cursorbackup = datasource.rawQuery("select * from " + backupTableName);
+                    Cursor cursorbackup = datasource.listBackupRecords(imtype);
                     List<Word> backuplist = Word.getList(cursorbackup);
                     cursorbackup.close();
 

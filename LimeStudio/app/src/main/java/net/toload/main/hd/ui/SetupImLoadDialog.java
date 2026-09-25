@@ -667,7 +667,7 @@ public class SetupImLoadDialog extends DialogFragment {
                                 return;
 
                             try {
-                                Cursor cursorbackup = datasource.rawQuery("select * from " + backupTableName);
+                                Cursor cursorbackup = datasource.listBackupRecords(imtype);
                                 List<Word> backuplist = Word.getList(cursorbackup);
                                 cursorbackup.close();
 

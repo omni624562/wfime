@@ -1975,6 +1975,15 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     /**
+     * 讀取學習資料備份表(table + "_user")的所有記錄;表名經 validateTableName 驗證。
+     */
+    public Cursor listBackupRecords(String table) {
+        if (!checkDBConnection())
+            return null;
+        return db.query(validateTableName(table + "_user"), null, null, null, null, null, null);
+    }
+
+    /**
      * Checks if a table exists in the database.
      *
      * @param tableName Name of the table to check
