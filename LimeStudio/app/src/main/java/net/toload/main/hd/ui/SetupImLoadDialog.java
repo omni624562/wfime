@@ -430,16 +430,19 @@ public class SetupImLoadDialog extends DialogFragment {
         toast.show();
     }
 
+    // check 為 SAF 複製到 cache 的暫存檔,載入完即刪除
     private void loadMappingFile(File check) {
         if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
             loadDbRelatedMapping(check);
+            check.delete();
         } else {
             if (check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
                     check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
                     check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
-                loadMapping(check);
+                loadMapping(check); // 背景載入,於 onPostExecute 刪除
             } else {
                 loadDbMapping(check);
+                check.delete();
             }
         }
     }
@@ -535,6 +538,8 @@ public class SetupImLoadDialog extends DialogFragment {
 
                 @Override
                 public void onPostExecute(boolean success, String status, int code) {
+
+                    unit.delete(); // 載入 thread 已結束,刪除 SAF 暫存檔
 
                     boolean restorelearning = chkSetupImRestoreLearning.isChecked();
 
