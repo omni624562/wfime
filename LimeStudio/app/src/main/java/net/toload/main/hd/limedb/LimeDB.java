@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -287,7 +286,16 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     final LIMEPreferenceManager mLIMEPref;
     private final Context mContext;
     // Cache for Related Score
-    private final HashMap<String, Integer> relatedscore = new HashMap<>();
+    // Bounded LRU — the IME process is long-lived (foreground service), so an
+    // unbounded map would grow monotonically. Evicted entries are recomputed from
+    // the USERSCORE column via isRelatedPhraseExistOnDB(), so eviction is lossless.
+    private final java.util.Map<String, Integer> relatedscore = java.util.Collections.synchronizedMap(
+            new java.util.LinkedHashMap<String, Integer>(LIME.LIMEDB_CACHE_SIZE, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(java.util.Map.Entry<String, Integer> eldest) {
+                    return size() > LIME.LIMEDB_CACHE_SIZE;
+                }
+            });
     private File filename = null;
     String tablename = "custom";
     private int count = 0;
