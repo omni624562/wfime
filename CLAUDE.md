@@ -95,6 +95,7 @@ Compose is used for:
 | Class | Role |
 |---|---|
 | `LIME.java` | Global string constants (DB names, preference keys, IM status keys) |
+| `Lime.java` | DB schema constants (table/column names, IM codes, cloud download URLs) |
 | `LIMEPreferenceManager.java` | Typed accessors for all `SharedPreferences` keys; cached `SharedPreferences` instance |
 | `LIMEUtilities.java` | Misc static helpers |
 | `RootMapper.java` | Maps root characters for phonetic input |
