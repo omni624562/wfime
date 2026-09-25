@@ -2045,7 +2045,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         if (DEBUG)
                             Log.i(TAG, "loadfile(), build code3r index.");
                         mLIMEPref.setParameter("checkLDPhonetic", "doneV2");
-                        db.execSQL("CREATE INDEX phonetic_idx_code3r ON phonetic(code3r)");
+                        db.execSQL("CREATE INDEX IF NOT EXISTS phonetic_idx_code3r ON phonetic(code3r)");
 
                     }
                 } catch (Exception e1) {
