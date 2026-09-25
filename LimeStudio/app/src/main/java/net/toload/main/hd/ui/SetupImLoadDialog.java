@@ -194,7 +194,6 @@ public class SetupImLoadDialog extends DialogFragment {
                         .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
                                 (dialog, which) -> {
                                     loadDefaultRelated();
-                                    handler.initialImButtons();
                                     dismiss();
                                 })
                         .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
@@ -449,24 +448,33 @@ public class SetupImLoadDialog extends DialogFragment {
 
     public void loadDefaultRelated() {
 
-        try {
-            File relatedDbPath = activity.getDatabasePath("related.db");
-            if (!relatedDbPath.getParentFile().exists()) {
-                relatedDbPath.getParentFile().mkdirs();
-            }
-            if (relatedDbPath.exists())
+        // 匯入 6 萬多筆在主執行緒會卡住畫面數秒:改在背景執行,期間顯示進度圈
+        handler.showProgress(true, activity.getResources().getString(R.string.setup_im_import_related_default));
+        new Thread(() -> {
+            try {
+                File relatedDbPath = activity.getDatabasePath("related.db");
+                if (!relatedDbPath.getParentFile().exists()) {
+                    relatedDbPath.getParentFile().mkdirs();
+                }
+                if (relatedDbPath.exists())
+                    relatedDbPath.delete();
+
+                LIMEUtilities.copyRAWFile(activity.getResources().openRawResource(R.raw.lime), relatedDbPath);
+
+                DBSrv.importBackupRelatedDb(relatedDbPath);
                 relatedDbPath.delete();
-
-            LIMEUtilities.copyRAWFile(activity.getResources().openRawResource(R.raw.lime), relatedDbPath);
-
-            DBSrv.importBackupRelatedDb(relatedDbPath);
-            relatedDbPath.deleteOnExit();
-            showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete), Toast.LENGTH_LONG);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
-        }
-
+                handler.showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
+                        Toast.LENGTH_LONG);
+            } catch (Exception e) {
+                e.printStackTrace();
+                handler.showToastMessage(activity.getResources().getString(R.string.error_import_db),
+                        Toast.LENGTH_LONG);
+            } finally {
+                handler.cancelProgress();
+                // 匯入期間 DB 處於 hold,刷新匯入狀態會查 DB,必須等匯入結束才刷新
+                handler.initialImButtons();
+            }
+        }).start();
     }
 
     public void loadDbRelatedMapping(File unit) {
