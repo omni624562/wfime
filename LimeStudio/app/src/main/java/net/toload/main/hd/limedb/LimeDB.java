@@ -3869,37 +3869,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
-    /**
-     * @deprecated 任意 SQL 直通閘門,有注入風險。新程式碼請改用參數化方法
-     *             (db.query/rawQuery(sql, args)/delete/update 等);
-     *             既有呼叫端(IM 載入流程)只能傳入內部組出的 SQL,不可接觸使用者輸入。
-     */
-    @Deprecated
-    public Cursor rawQuery(String query) {
-        if (!checkDBConnection())
-            return null;
-        try {
-            return db.rawQuery(query, null);
-        } catch (Exception e) {
-            Log.w(TAG, "Ignore all possible exceptions~");
-        }
-        return null;
-    }
-
-    /**
-     * @deprecated 任意 SQL 直通閘門,有注入風險。同 {@link #rawQuery(String)} 說明。
-     */
-    @Deprecated
-    public void execSQL(String insertsql) {
-        if (!checkDBConnection())
-            return;
-        try {
-            db.execSQL(insertsql);
-        } catch (Exception e) {
-            Log.w(TAG, "Ignore all possible exceptions~");
-        }
-    }
-
     public void resetLimeSetting() {
 
         if (db != null)
