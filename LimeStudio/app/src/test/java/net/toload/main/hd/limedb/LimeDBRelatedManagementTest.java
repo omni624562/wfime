@@ -45,6 +45,8 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 自建關聯字管理的資料層測試。
@@ -252,6 +254,35 @@ public class LimeDBRelatedManagementTest {
         List<Related> list = limeDb.getUserLearnedRelated(null, 500);
         for (Related r : list)
             assertFalse("cword NULL 計數列不可出現在清單", r.getCword() == null);
+    }
+
+    // =========================================================================
+    // holdDBConnection 期間的查詢:須立即回傳失敗值,不可卡住呼叫的 thread
+    // =========================================================================
+
+    @Test
+    public void testHold_QueriesReturnImmediatelyInsteadOfBlocking() throws Exception {
+        limeDb.holdDBConnection();
+        try {
+            // 在沒有 Looper 的背景 thread 查詢(同 IME 的查詢 thread):舊版會在該 thread
+            // Looper.prepare() 後進入 Looper.loop(),永不返回
+            AtomicReference<Boolean> connected = new AtomicReference<>();
+            AtomicInteger count = new AtomicInteger(-1);
+            Thread query = new Thread(() -> {
+                connected.set(limeDb.checkDBConnection());
+                count.set(limeDb.countUserLearnedRelated());
+            });
+            query.setDaemon(true);
+            query.start();
+            query.join(3000);
+            assertFalse("鎖定期間的查詢 thread 不可卡住", query.isAlive());
+            assertEquals(Boolean.FALSE, connected.get());
+            assertEquals(0, count.get());
+        } finally {
+            limeDb.unHoldDBConnection();
+        }
+        assertTrue(limeDb.checkDBConnection());
+        assertEquals(2, limeDb.countUserLearnedRelated());
     }
 
     // =========================================================================

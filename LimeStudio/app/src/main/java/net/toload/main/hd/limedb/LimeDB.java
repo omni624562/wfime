@@ -29,6 +29,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.Handler;
 import android.os.Looper;
 
 import android.os.SystemClock;
@@ -278,6 +279,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // private final static Boolean fuzzySearch = false;
     // hold database connection when database is in maintainable. Jeremy '15,5,23
     private static boolean databaseOnHold = false;
+    // 本次鎖定期間是否已提示過「資料庫載入中」,避免每次查詢都跳 Toast
+    private static volatile boolean holdNoticeShown = false;
     static boolean codeDualMapped = false;
     /**
      * Black list cache stored code without valid return. Jeremy '12,6,3
@@ -765,10 +768,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (databaseOnHold) { // mapping loading in progress, database is not available for query
             if (DEBUG)
                 Log.i(TAG, "checkDBConnection() : mapping loading ");
-            if (Looper.myLooper() == null)
-                Looper.prepare();
-            Toast.makeText(mContext, mContext.getText(R.string.l3_database_loading), Toast.LENGTH_SHORT).show();
-            Looper.loop();
+            // 原本以 Looper.prepare()+Looper.loop() 在任意 thread 顯示 Toast,但 loop 永不返回,
+            // 呼叫的 thread 會永遠卡住;改為丟到主執行緒顯示(每次鎖定只提示一次)並直接回傳 false
+            if (!holdNoticeShown) {
+                holdNoticeShown = true;
+                new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(mContext,
+                        mContext.getText(R.string.l3_database_loading), Toast.LENGTH_SHORT).show());
+            }
             return false;
         } else
             return openDBConnection(false);
@@ -3885,6 +3891,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // Hold database connection to prevent further transactions when database is in
     // maintenance. Jeremy '15,5,23
     public void holdDBConnection() {
+        holdNoticeShown = false;
         databaseOnHold = true;
     }
 

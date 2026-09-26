@@ -1093,7 +1093,7 @@ public class SearchServer {
                                 || unit1.getCode().length() == 0
                                 || unit1.isRelatedPhraseRecord()) {
                             List<Mapping> rMappingList = dbadapter.getMappingByWord(baseWord, tablename);
-                            if (rMappingList.size() > 0)
+                            if (rMappingList != null && rMappingList.size() > 0)
                                 baseCode = rMappingList.get(0).getCode();
                             else
                                 break; // look-up failed, abandon.
@@ -1109,7 +1109,7 @@ public class SearchServer {
                         for (int i = 0; i < baseWord.length(); i++) {
                             String c = baseWord.substring(i, i + 1);
                             List<Mapping> rMappingList = dbadapter.getMappingByWord(c, tablename);
-                            if (rMappingList.size() > 0) {
+                            if (rMappingList != null && rMappingList.size() > 0) {
                                 baseCode += rMappingList.get(0).getCode();
                                 QPCode += rMappingList.get(0).getCode().substring(0, 1);
                             } else {
@@ -1145,7 +1145,7 @@ public class SearchServer {
                                         || code2.length() == 0
                                         || unit2.isRelatedPhraseRecord()) {
                                     List<Mapping> rMappingList = dbadapter.getMappingByWord(word2, tablename);
-                                    if (rMappingList.size() > 0)
+                                    if (rMappingList != null && rMappingList.size() > 0)
                                         code2 = rMappingList.get(0).getCode();
                                     else
                                         break;
@@ -1161,7 +1161,7 @@ public class SearchServer {
                                 for (int j = 0; j < word2.length(); j++) {
                                     String c = word2.substring(j, j + 1);
                                     List<Mapping> rMappingList = dbadapter.getMappingByWord(c, tablename);
-                                    if (rMappingList.size() > 0) {
+                                    if (rMappingList != null && rMappingList.size() > 0) {
                                         baseCode += rMappingList.get(0).getCode();
                                         QPCode += rMappingList.get(0).getCode().substring(0, 1);
                                     } else // r-lookup failed. abandon the phrase learning
