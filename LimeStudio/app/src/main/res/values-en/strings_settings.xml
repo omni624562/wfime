@@ -78,9 +78,15 @@
     <string name="related_import_entry">Import related phrases</string>
     <string name="related_import_entry_summary">Import the default dictionary or a .limedb related phrase file. Learned related phrases are kept</string>
     <string name="related_manager_title">User related phrases</string>
-    <string name="related_manager_count">%1$d entries</string>
+    <plurals name="related_manager_count">
+        <item quantity="one">%1$d entry</item>
+        <item quantity="other">%1$d entries</item>
+    </plurals>
     <string name="related_manager_search_hint">Search the first or next word</string>
-    <string name="related_manager_usage_count">Used %1$d times</string>
+    <plurals name="related_manager_usage_count">
+        <item quantity="one">Used %1$d time</item>
+        <item quantity="other">Used %1$d times</item>
+    </plurals>
     <string name="related_manager_builtin_badge">Built-in</string>
     <string name="related_manager_deleted">Deleted \"%1$s → %2$s\"</string>
     <string name="related_manager_undo">Undo</string>

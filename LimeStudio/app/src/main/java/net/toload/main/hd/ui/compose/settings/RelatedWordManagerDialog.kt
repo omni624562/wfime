@@ -71,6 +71,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -131,7 +132,7 @@ fun RelatedWordManagerDialog(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = stringResource(R.string.related_manager_count, state.totalCount),
+                                text = pluralStringResource(R.plurals.related_manager_count, state.totalCount, state.totalCount),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -240,7 +241,7 @@ fun RelatedWordManagerDialog(
                                         },
                                         supportingContent = {
                                             Text(
-                                                text = stringResource(R.string.related_manager_usage_count, item.count),
+                                                text = pluralStringResource(R.plurals.related_manager_usage_count, item.count, item.count),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )

@@ -137,9 +137,13 @@
     <string name="related_import_entry">匯入關聯字庫</string>
     <string name="related_import_entry_summary">導入預設字庫或 .limedb 關聯字檔,已學習的關聯字會保留</string>
     <string name="related_manager_title">自建關聯字管理</string>
-    <string name="related_manager_count">共 %1$d 筆</string>
+    <plurals name="related_manager_count">
+        <item quantity="other">共 %1$d 筆</item>
+    </plurals>
     <string name="related_manager_search_hint">搜尋前字或後字</string>
-    <string name="related_manager_usage_count">使用 %1$d 次</string>
+    <plurals name="related_manager_usage_count">
+        <item quantity="other">使用 %1$d 次</item>
+    </plurals>
     <string name="related_manager_builtin_badge">內建</string>
     <string name="related_manager_deleted">已刪除「%1$s → %2$s」</string>
     <string name="related_manager_undo">復原</string>
