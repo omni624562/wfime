@@ -24,7 +24,7 @@
   -->
 
 <resources>
-    <string name="app_name">麥田輸入法</string>
+    <string name="app_name" translatable="false">麥田輸入法</string>
     <string name="app_setting">設定麥田輸入法</string>
     <string name="foreground_service_notification_text">輸入法服務執行中</string>
 
@@ -56,7 +56,7 @@
     <string name="action_reset">恢復原廠設定</string>
     <string name="action_news">最新消息</string>
     <string name="action_help">使用說明</string>
-    <string name="action_preference">麥田輸入法</string>
+    <string name="action_preference" translatable="false">麥田輸入法</string>
 
     <string name="global_exit_title">結束程式</string>
 

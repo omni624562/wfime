@@ -178,7 +178,7 @@
     <string name="typing_mode_mixed">切換輸入模式 / 混合</string>
 
     <!-- Popup keyboard char sequences-->
-    <string name="chinese_punctuation">「」！？、。，</string>
+    <string name="chinese_punctuation" translatable="false">「」！？、。，</string>
 
 
     <!-- Other Messages -->
