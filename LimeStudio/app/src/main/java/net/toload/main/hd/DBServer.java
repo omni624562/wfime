@@ -381,7 +381,7 @@ public class DBServer {
         List<String> unzipFilePaths = new ArrayList<>();
         try {
             unzipFilePaths = LIMEUtilities.unzip(compressedSourceDB.getAbsolutePath(),
-                    appContext.getCacheDir().getAbsolutePath() + "limehd", true);
+                    new File(appContext.getCacheDir(), "limehd").getAbsolutePath(), true);
         } catch (Exception e) {
             e.printStackTrace();
         }
