@@ -332,16 +332,27 @@ public class SetupImLoadDialog extends DialogFragment {
         if (uri == null || handler == null)
             return;
 
-        handler.initialImButtons();
         dismiss();
 
         String name = getDisplayName(uri);
-        File file = (name != null && isSupportedMappingFile(name)) ? copyToCache(uri, name) : null;
-        if (file == null) {
+        if (name == null || !isSupportedMappingFile(name)) {
             showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
             return;
         }
-        loadMappingFile(file);
+
+        // 複製與 .limedb 匯入都可能耗時:移到背景執行,匯入狀態等載入結束才刷新
+        // (匯入期間 DB 處於 hold,提前刷新會讓查詢 thread 卡在 checkDBConnection)
+        handler.showProgress(true, activity.getResources().getString(
+                imtype.equalsIgnoreCase(Lime.DB_RELATED) ? R.string.setup_im_import_related : R.string.setup_im_dialog_custom));
+        new Thread(() -> {
+            File file = copyToCache(uri, name);
+            if (file == null) {
+                handler.cancelProgress();
+                handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+                return;
+            }
+            loadMappingFile(file);
+        }).start();
     }
 
     private String getDisplayName(Uri uri) {
@@ -429,7 +440,7 @@ public class SetupImLoadDialog extends DialogFragment {
         toast.show();
     }
 
-    // check 為 SAF 複製到 cache 的暫存檔,載入完即刪除
+    // 於背景 thread 呼叫;check 為 SAF 複製到 cache 的暫存檔,載入完即刪除
     private void loadMappingFile(File check) {
         if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
             loadDbRelatedMapping(check);
@@ -438,12 +449,15 @@ public class SetupImLoadDialog extends DialogFragment {
             if (check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
                     check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
                     check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
-                loadMapping(check); // 背景載入,於 onPostExecute 刪除
+                loadMapping(check); // 另起載入 thread,於 onPostExecute 刪除並刷新
+                return;
             } else {
                 loadDbMapping(check);
                 check.delete();
             }
         }
+        handler.cancelProgress();
+        handler.initialImButtons();
     }
 
     public void loadDefaultRelated() {
@@ -483,17 +497,17 @@ public class SetupImLoadDialog extends DialogFragment {
             List<String> unzipPaths = LIMEUtilities.unzip(unit.getAbsolutePath(),
                     activity.getCacheDir().getAbsolutePath(), true);
             if (unzipPaths.size() != 1) {
-                showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+                handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
             } else {
                 File fileToImport = new File(unzipPaths.get(0));
                 DBSrv.importBackupRelatedDb(fileToImport);
                 fileToImport.delete();
-                showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
+                handler.showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
                         Toast.LENGTH_LONG);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+            handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
         }
     }
 
@@ -504,17 +518,17 @@ public class SetupImLoadDialog extends DialogFragment {
             List<String> unzipPaths = LIMEUtilities.unzip(unit.getAbsolutePath(),
                     activity.getCacheDir().getAbsolutePath(), true);
             if (unzipPaths.size() != 1) {
-                showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+                handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
             } else {
                 File fileToImport = new File(unzipPaths.get(0));
                 DBSrv.importBackupDb(fileToImport.getAbsoluteFile(), imtype);
                 fileToImport.delete();
-                showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
+                handler.showToastMessage(activity.getResources().getString(R.string.setup_im_import_complete),
                         Toast.LENGTH_LONG);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
+            handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
         }
     }
 
@@ -602,6 +616,7 @@ public class SetupImLoadDialog extends DialogFragment {
                     }
 
                     handler.cancelProgress();
+                    handler.initialImButtons();
                 }
             });
         } catch (Exception e) {
