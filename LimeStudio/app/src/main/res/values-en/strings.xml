@@ -19,8 +19,6 @@
     <string name="action_news">What\'s new</string>
     <string name="action_help">Help</string>
     <string name="global_exit_title">Exit</string>
-    <string name="setup_im_backup_message">Backing up database, please wait…</string>
-    <string name="setup_im_restore_message">Restoring database, please wait…</string>
     <string name="setup_im_import_complete">Database import completed</string>
     <string name="setup_im_backup_local">Local backup</string>
     <string name="setup_im_database">Back up / restore database</string>
@@ -92,7 +90,6 @@
     <string name="manage_im_search">Search</string>
     <string name="manage_im_previous">Previous</string>
     <string name="manage_im_next">Next</string>
-    <string name="manage_im_loading">Loading …</string>
     <string name="manage_im_word">Word</string>
     <string name="manage_im_root">Key code</string>
     <string name="manage_related_management">Manage related phrases</string>
@@ -107,7 +104,6 @@
     <string name="manage_related_update">Update</string>
     <string name="manage_related_remove">Remove</string>
     <string name="manage_related_save">Save</string>
-    <string name="manage_related_loading">Loading …</string>
     <string name="manage_related_reset">Reset</string>
     <string name="manage_related_duplicated">Related phrase will be overwritten</string>
     <string name="manage_related_format_error">Failed to create related phrase. Unsupported code format.</string>
@@ -132,8 +128,6 @@
     <string name="share_dialog_related_title_message">Export the related phrase dictionary and send it to you. Currently supports limedb (database).</string>
     <string name="share_dialog_title">Share input method</string>
     <string name="share_dialog_title_message">Export the input method and send it to you. Currently supports .lime (plain text) or limedb (database).</string>
-    <string name="share_step_initial">Preparing database…</string>
-    <string name="share_step_write">Writing file…</string>
     <string name="share_lime_cin">Plain text</string>
     <string name="share_lime_db">Database</string>
     <string name="import_dialog_related_title">Import related phrase database</string>

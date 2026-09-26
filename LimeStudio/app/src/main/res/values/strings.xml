@@ -60,8 +60,6 @@
 
     <string name="global_exit_title">結束程式</string>
 
-    <string name="setup_im_backup_message">資料庫備份中，請稍後等待…</string>
-    <string name="setup_im_restore_message">資料庫還原中，請稍後等待…</string>
     <string name="setup_im_import_complete">資料庫匯入完成</string>
 
 
@@ -151,7 +149,6 @@
     <string name="manage_im_search">檢索</string>
     <string name="manage_im_previous">上一頁</string>
     <string name="manage_im_next">下一頁</string>
-    <string name="manage_im_loading">讀取中 …</string>
     <string name="manage_im_word">字詞</string>
     <string name="manage_im_root">字根</string>
 
@@ -167,7 +164,6 @@
     <string name="manage_related_update">更新</string>
     <string name="manage_related_remove">移除</string>
     <string name="manage_related_save">存檔</string>
-    <string name="manage_related_loading">讀取中 …</string>
     <string name="manage_related_reset">重置</string>
     <string name="manage_related_duplicated">關聯字詞覆蓋提醒</string>
     <string name="manage_related_format_error">關聯字建立錯誤。字碼格式不支援。</string>
@@ -203,8 +199,6 @@
     <string name="share_dialog_title">分享輸入法</string>
     <string name="share_dialog_title_message">啟動分享，可以將輸入法匯出並傳送給你，目前支援 .lime (純文字) 或 limedb (資料庫)。</string>
 
-    <string name="share_step_initial">準備資料庫…</string>
-    <string name="share_step_write">寫入檔案中…</string>
 
     <string name="share_lime_cin">純文字格式</string>
     <string name="share_lime_db">資料庫格式</string>
