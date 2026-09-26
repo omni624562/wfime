@@ -358,7 +358,7 @@ public class SetupImLoadDialog extends DialogFragment {
 
     // 與舊版自製選擇器列出檔案的過濾條件相同
     private boolean isSupportedMappingFile(String name) {
-        String lower = name.toLowerCase();
+        String lower = name.toLowerCase(java.util.Locale.ROOT);
         if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
             return lower.startsWith(Lime.DB_RELATED) && lower.endsWith(Lime.SUPPORT_FILE_EXT_LIMEDB);
         }
@@ -425,9 +425,9 @@ public class SetupImLoadDialog extends DialogFragment {
             loadDbRelatedMapping(check);
             check.delete();
         } else {
-            if (check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
-                    check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
-                    check.getName().toLowerCase().endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
+            if (check.getName().toLowerCase(java.util.Locale.ROOT).endsWith(Lime.SUPPORT_FILE_EXT_TXT) ||
+                    check.getName().toLowerCase(java.util.Locale.ROOT).endsWith(Lime.SUPPORT_FILE_EXT_LIME) ||
+                    check.getName().toLowerCase(java.util.Locale.ROOT).endsWith(Lime.SUPPORT_FILE_EXT_CIN)) {
                 loadMapping(check); // 另起載入 thread,於 onPostExecute 刪除並刷新
                 return;
             } else {

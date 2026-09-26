@@ -814,7 +814,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     protected CharSequence adjustCase(CharSequence label) {
         if (mKeyboard.isShifted() && label != null && label.length() <= 3
                 && Character.isLowerCase(label.charAt(0))) {
-            label = label.toString().toUpperCase();
+            label = label.toString().toUpperCase(java.util.Locale.ROOT);
         }
         return label;
     }

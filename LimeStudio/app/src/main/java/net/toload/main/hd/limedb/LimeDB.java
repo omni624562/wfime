@@ -3465,14 +3465,14 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
     public void insert(String insertsql) {
         if (db != null && db.isOpen() &&
-                insertsql != null && insertsql.toLowerCase().trim().startsWith("insert")) {
+                insertsql != null && insertsql.toLowerCase(Locale.ROOT).trim().startsWith("insert")) {
             db.execSQL(insertsql);
         }
     }
 
     public void add(String addsql) {
         if (db != null && db.isOpen()) {
-            if (addsql.toLowerCase().startsWith("insert")) {
+            if (addsql.toLowerCase(Locale.ROOT).startsWith("insert")) {
                 db.execSQL(addsql);
             }
         }
@@ -3485,7 +3485,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
 
-        if (removesql.toLowerCase().startsWith("delete")) {
+        if (removesql.toLowerCase(Locale.ROOT).startsWith("delete")) {
             db.execSQL(removesql);
         }
 
@@ -3509,7 +3509,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
 
-        if (updatesql.toLowerCase().startsWith("update")) {
+        if (updatesql.toLowerCase(Locale.ROOT).startsWith("update")) {
             db.execSQL(updatesql);
         }
 

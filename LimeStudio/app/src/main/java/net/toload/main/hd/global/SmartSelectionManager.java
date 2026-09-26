@@ -71,7 +71,7 @@ public class SmartSelectionManager {
 
     public synchronized void recordSelection(String code, String word, String prevChar) {
         if (code == null || word == null) return;
-        code = code.trim().toLowerCase();
+        code = code.trim().toLowerCase(java.util.Locale.ROOT);
         if (code.isEmpty() || word.isEmpty()) return;
 
         Map<String, CandidateStats> wordStats = statsMap.get(code);
@@ -168,7 +168,7 @@ public class SmartSelectionManager {
 
     public synchronized CandidateStats getStats(String code, String word) {
         if (code == null || word == null) return null;
-        code = code.trim().toLowerCase();
+        code = code.trim().toLowerCase(java.util.Locale.ROOT);
         Map<String, CandidateStats> wordStats = statsMap.get(code);
         if (wordStats == null) return null;
         return wordStats.get(word);
@@ -184,7 +184,7 @@ public class SmartSelectionManager {
     public synchronized int getContextCount(String code, String word, String prevChar) {
         if (code == null || word == null || prevChar == null || prevChar.isEmpty())
             return 0;
-        Map<String, CandidateStats> wordStats = statsMap.get(code.trim().toLowerCase());
+        Map<String, CandidateStats> wordStats = statsMap.get(code.trim().toLowerCase(java.util.Locale.ROOT));
         if (wordStats == null)
             return 0;
         CandidateStats stats = wordStats.get(word);

@@ -240,7 +240,7 @@ public class Mapping {
      */
     public String getCode() {
         if (code != null) {
-            return code.toLowerCase();
+            return code.toLowerCase(java.util.Locale.ROOT);
         }
         return null;
     }

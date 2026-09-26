@@ -388,7 +388,7 @@ public class DBServer {
         // decompressFile(compressedSourceDB, LIME.LIME_SDCARD_FOLDER, imtype, true);
         String targetDbPath = null;
         for (String path : unzipFilePaths) {
-            if (path.toLowerCase().endsWith(".db")) {
+            if (path.toLowerCase(java.util.Locale.ROOT).endsWith(".db")) {
                 targetDbPath = path;
                 break;
             }

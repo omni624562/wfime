@@ -131,7 +131,7 @@ public class EmojiConverter extends SQLiteOpenHelper {
                 // 英文 tag(≥2 碼)用前綴比對:打 "ca" 就能出 cat 的 emoji;
                 // 依 tag 長度排序讓最接近的先出。中文 tag 維持完全比對。
                 if (emoji == Lime.EMOJI_EN && tag.length() >= 2) {
-                    String prefix = tag.toLowerCase()
+                    String prefix = tag.toLowerCase(java.util.Locale.ROOT)
                             .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
                     cursor = db.query(tablename, null,
                             Lime.EMOJI_FIELD_TAG + " LIKE ? ESCAPE '\\'",
