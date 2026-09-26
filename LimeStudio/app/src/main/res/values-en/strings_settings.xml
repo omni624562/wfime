@@ -36,7 +36,7 @@
     <string name="three_rows_remapping">3-row keyboard remapping</string>
     <string name="three_rows_remapping_summary">Map 1234567890-; to qwertyuiopv.</string>
     <string name="physical_keyboard">Physical keyboard options</string>
-    <string name="phonetic_keyboard">Zhuyin keyboard options</string>
+    <string name="phonetic_keyboard">Chuyin keyboard options</string>
     <string name="prediction_category">English suggestions</string>
     <string name="auto_cap">Auto-capitalize</string>
     <string name="auto_cap_summary">Capitalize the first letter of English sentences</string>
@@ -52,7 +52,7 @@
     <string name="im_reverse_lookup_list">Key code reverse lookup</string>
     <string name="default_reverse_lookup_list">User key code reverse lookup</string>
     <string name="dayi_reverse_lookup_list">Dayi key code reverse lookup</string>
-    <string name="bpmf_reverse_lookup_list">Zhuyin key code reverse lookup</string>
+    <string name="bpmf_reverse_lookup_list">Chuyin key code reverse lookup</string>
     <string name="reverse_lookup_notify">Show reverse lookup notifications</string>
     <string name="han_convert_ts">Traditional to Simplified</string>
     <string name="han_convert_st">Simplified to Traditional</string>
@@ -120,15 +120,15 @@
     <string name="l3_tab_initial_error">Download failed. Please make sure the device is connected to the internet.</string>
     <string name="l3_tab_initial_message">Tap [Preloaded database] OR [Empty database] to download the LIME database, or tap [Restore database] to restore it from a backup</string>
     <string name="l3_initial_btn_load_empty_db">Empty database</string>
-    <string name="l3_initial_btn_load_phonetic_only_db">Zhuyin-only database</string>
-    <string name="l3_initial_btn_load_preload_db">Preloaded database \nZhuyin, Dayi, </string>
+    <string name="l3_initial_btn_load_phonetic_only_db">Chuyin-only database</string>
+    <string name="l3_initial_btn_load_preload_db">Preloaded database \nChuyin, Dayi, </string>
     <string name="l3_initial_btn_reset_db">Reset database</string>
     <string name="l3_initial_btn_store_to_sdcard">Move the database storage to the SD card? This may cause poor performance on some devices.</string>
     <string name="l3_initial_btn_store_to_device">Move the database storage to the device? </string>
     <string name="l3_initial_btn_store_device">Device storage</string>
     <string name="l3_tab_manage">Input method management</string>
     <string name="l3_manage_default">User</string>
-    <string name="l3_manage_phonetic">Zhuyin</string>
+    <string name="l3_manage_phonetic">Chuyin</string>
     <string name="l3_manage_dayi">Dayi</string>
     <string name="l3_tab_preference">Preferences</string>
     <string name="l3_dbservice_download_start">Downloading the preloaded database. This may take one to several minutes, please wait.</string>
@@ -171,19 +171,19 @@
     <string name="l3_im_download_from_dayi">Install OpenVanilla Dayi key codes</string>
     <string name="l3_im_download_from_dayi_start">Downloading OpenVanilla Dayi key codes</string>
     <string name="l3_im_download_from_dayi_install">Installing OpenVanilla Dayi key codes</string>
-    <string name="l3_im_download_from_phonetic">Install OpenVanilla Zhuyin key codes</string>
-    <string name="l3_im_download_from_phonetic_start">Downloading OpenVanilla Zhuyin key codes</string>
-    <string name="l3_im_download_from_phonetic_install">Installing OpenVanilla Zhuyin key codes</string>
-    <string name="l3_im_download_from_phonetic_big5">Install OpenVanilla Zhuyin key codes (Big5)</string>
-    <string name="l3_im_download_from_phonetic_adv">Install OpenVanilla Zhuyin key codes (advanced)</string>
-    <string name="l3_im_download_from_phonetic_adv_big5">Install OpenVanilla Zhuyin key codes (advanced, Big5)</string>
-    <string name="l3_im_download_from_phonetic_cns">Traditional Zhuyin CNS11643 key codes. Some characters may not display correctly depending on the device and OS fonts</string>
-    <string name="l3_im_download_from_phonetic_cns_start">Downloading Zhuyin CNS11643 key codes</string>
-    <string name="l3_im_download_from_phonetic_cns_install">Installing Zhuyin CNS11643 key codes</string>
+    <string name="l3_im_download_from_phonetic">Install OpenVanilla Chuyin key codes</string>
+    <string name="l3_im_download_from_phonetic_start">Downloading OpenVanilla Chuyin key codes</string>
+    <string name="l3_im_download_from_phonetic_install">Installing OpenVanilla Chuyin key codes</string>
+    <string name="l3_im_download_from_phonetic_big5">Install OpenVanilla Chuyin key codes (Big5)</string>
+    <string name="l3_im_download_from_phonetic_adv">Install OpenVanilla Chuyin key codes (advanced)</string>
+    <string name="l3_im_download_from_phonetic_adv_big5">Install OpenVanilla Chuyin key codes (advanced, Big5)</string>
+    <string name="l3_im_download_from_phonetic_cns">Traditional Chuyin CNS11643 key codes. Some characters may not display correctly depending on the device and OS fonts</string>
+    <string name="l3_im_download_from_phonetic_cns_start">Downloading Chuyin CNS11643 key codes</string>
+    <string name="l3_im_download_from_phonetic_cns_install">Installing Chuyin CNS11643 key codes</string>
     <string name="l3_im_download_from_phonetic_cns_warning">The file is large, so importing will take longer</string>
-    <string name="l3_im_download_from_cjk_phonetic">Install Zhuyin key codes</string>
-    <string name="l3_im_download_from_cjk_phonetic_start">Downloading Zhuyin key codes</string>
-    <string name="l3_im_download_from_cjk_phonetic_install">Installing Zhuyin key codes</string>
+    <string name="l3_im_download_from_cjk_phonetic">Install Chuyin key codes</string>
+    <string name="l3_im_download_from_cjk_phonetic_start">Downloading Chuyin key codes</string>
+    <string name="l3_im_download_from_cjk_phonetic_install">Installing Chuyin key codes</string>
     <string name="l3_im_database_error">Database error. Please wait a moment and try again.</string>
     <string name="l3_database_loading">Loading database, please wait…</string>
     <string name="l3_database_not_exist">Database not found. Please download the database first</string>
@@ -206,10 +206,10 @@
     <string name="enable_dayi_summary_on">The Dayi keyboard appears when switching input methods</string>
     <string name="enable_dayi_summary_off">The Dayi keyboard does not appear when switching input methods</string>
     <string name="enable_dayi_summary_disabled">Load the Dayi mapping table above first</string>
-    <string name="enable_phonetic">Enable Zhuyin</string>
-    <string name="enable_phonetic_summary_on">The Zhuyin keyboard appears when switching input methods</string>
-    <string name="enable_phonetic_summary_off">The Zhuyin keyboard does not appear when switching input methods</string>
-    <string name="enable_phonetic_summary_disabled">Load the Zhuyin mapping table above first</string>
+    <string name="enable_phonetic">Enable Chuyin</string>
+    <string name="enable_phonetic_summary_on">The Chuyin keyboard appears when switching input methods</string>
+    <string name="enable_phonetic_summary_off">The Chuyin keyboard does not appear when switching input methods</string>
+    <string name="enable_phonetic_summary_disabled">Load the Chuyin mapping table above first</string>
 
     <string-array name="han_convert_options">
         <item>None</item>
@@ -247,20 +247,20 @@
     <string-array name="im_reverse_lookup">
         <item>None</item>
         <item>Dayi</item>
-        <item>Zhuyin</item>
+        <item>Chuyin</item>
     </string-array>
     <string-array name="keyboard">
         <item>Dayi input method</item>
-        <item>Zhuyin input method</item>
+        <item>Chuyin input method</item>
     </string-array>
     <string-array name="keyboardShortname">
         <item>Dayi</item>
-        <item>Zhuyin</item>
+        <item>Chuyin</item>
     </string-array>
     <string-array name="table">
         <item>User / Phone</item>
         <item>Dayi</item>
-        <item>Zhuyin</item>
+        <item>Chuyin</item>
         <item>Preloaded related phrases</item>
         <item>English dictionary</item>
     </string-array>
@@ -307,8 +307,8 @@
     <string name="settings_nav_mapping">Key codes &amp; mapping tables</string>
     <string name="settings_reset">Reset settings</string>
     <string name="settings_category_load_mapping">Load mapping tables</string>
-    <string name="settings_phonetic_loaded">Zhuyin (loaded)</string>
-    <string name="settings_phonetic_load">Load Zhuyin table</string>
+    <string name="settings_phonetic_loaded">Chuyin (loaded)</string>
+    <string name="settings_phonetic_load">Load Chuyin table</string>
     <string name="settings_dayi_loaded">Dayi (loaded)</string>
     <string name="settings_dayi_load">Load Dayi table</string>
     <string name="settings_group_smart_emoji">Smart input &amp; emoji</string>
@@ -317,7 +317,7 @@
     <string name="settings_group_shortcut_behavior">Shortcuts &amp; alphanumeric input</string>
     <string name="settings_group_shortcuts">Shortcut reference</string>
     <string name="shortcut_globe_key">🌐 Globe key</string>
-    <string name="shortcut_globe_key_desc">Cycle English → Dayi → Zhuyin; long press to open the system input method picker</string>
+    <string name="shortcut_globe_key_desc">Cycle English → Dayi → Chuyin; long press to open the system input method picker</string>
     <string name="shortcut_double_shift">Double-tap Shift</string>
     <string name="shortcut_double_shift_desc">Caps lock (press again to release)</string>
     <string name="shortcut_dayi_quick_select">Dayi quick select (physical keyboard)</string>

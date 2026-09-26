@@ -73,8 +73,8 @@
     <string name="im_input_method">Input method</string>
     <string name="im_custom">User</string>
     <string name="im_dayi">Dayi</string>
-    <string name="im_phonetic">Zhuyin</string>
-    <string name="im_phonetic_advanced">Zhuyin (continuous)</string>
+    <string name="im_phonetic">Chuyin</string>
+    <string name="im_phonetic_advanced">Chuyin (continuous)</string>
     <string name="related">Related phrases</string>
     <string name="manage_im_add">Add</string>
     <string name="manage_im_edit">Edit</string>
@@ -179,7 +179,7 @@
     <string name="help_feature_ai_light_desc">The Dayi smart selection module is upgraded to an \"AI smart core\" with a new breathing status light. When enabled it glows green and softly lights the whole card to show the engine state.</string>
     <string name="help_troubleshoot_title">💡 Troubleshooting</string>
     <string name="help_troubleshoot_step1" formatted="false">If the input method misbehaves or mapping tables are missing, tap \"Reset settings\" at the bottom of the left navigation panel to restore the factory settings. This solves more than 95% of problems.</string>
-    <string name="help_troubleshoot_step2">After installing new mapping tables, make sure the \"Enable Dayi\" and \"Enable Zhuyin\" switches are on.</string>
+    <string name="help_troubleshoot_step2">After installing new mapping tables, make sure the \"Enable Dayi\" and \"Enable Chuyin\" switches are on.</string>
     <string name="help_physical_title">🎹 Physical keyboard (Bluetooth / magnetic) workflow</string>
     <string name="help_physical_step1">While typing, use your right hand on the physical keyboard to enter key codes and candidate number keys.</string>
     <string name="help_physical_step2">To page, tap \"▲ (previous page)\" and \"▼ (next page)\" at the far left edge of the tablet screen with your left hand.</string>
