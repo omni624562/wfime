@@ -1083,6 +1083,8 @@ public class LIMEService extends InputMethodService implements
 
     @Override
     public boolean onEvaluateInputViewShown() {
+        // @CallSuper：依規定呼叫 super（目前 super 只判斷不修改狀態）；結果不採用，下方永遠回傳 true
+        super.onEvaluateInputViewShown();
         Configuration config = getResources().getConfiguration();
         boolean isPhysicalKeyboardConnected = config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
         if (DEBUG) {
