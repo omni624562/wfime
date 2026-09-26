@@ -39,6 +39,10 @@ import net.toload.main.hd.keyboard.LIMEKeyboardBaseView;
 
 public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 	private int mBottomInset = 0;
+	// 系統手勢排除區：重複使用同一組物件，避免每次 onLayout 配置新物件（框架會深拷貝）
+	private final android.graphics.Rect mGestureExclusionRect = new android.graphics.Rect();
+	private final java.util.List<android.graphics.Rect> mGestureExclusionRects =
+			java.util.Collections.singletonList(mGestureExclusionRect);
 	static final boolean DEBUG = false;
 	static final String TAG = "LIMEKeyboardView";
 
@@ -155,9 +159,8 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 		super.onLayout(changed, left, top, right, bottom);
 		// Exclude bottom portion from system gestures for key responsiveness
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && mBottomInset > 0) {
-			java.util.List<android.graphics.Rect> exclusionRects = new java.util.ArrayList<>();
-			exclusionRects.add(new android.graphics.Rect(0, getHeight() - mBottomInset, getWidth(), getHeight()));
-			setSystemGestureExclusionRects(exclusionRects);
+			mGestureExclusionRect.set(0, getHeight() - mBottomInset, getWidth(), getHeight());
+			setSystemGestureExclusionRects(mGestureExclusionRects);
 		}
 	}
 }
