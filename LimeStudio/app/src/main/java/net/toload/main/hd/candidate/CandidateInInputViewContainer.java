@@ -41,7 +41,6 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
     private static final String TAG = "CandiInputViewContainer";
     Context ctx;
     private ImageButton mRightButton;
-    private View mButtonRightExpand;
     private CandidateView mCandidateView;
 
     public CandidateInInputViewContainer(Context context, AttributeSet attrs) {
@@ -59,7 +58,6 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
         if (DEBUG)
             Log.i(TAG, "initViews()");
         if (mCandidateView == null) {
-            mButtonRightExpand = findViewById(R.id.candidate_right);
             mRightButton = findViewById(R.id.candidate_right);
 
             if (mRightButton != null) {
@@ -117,9 +115,9 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
                 mRightButton.setImageDrawable(null); // Clear drawable
             }
 
-            if (mButtonRightExpand != null) {
+            if (mRightButton != null) {
                 // Should be GONE since both flags are false
-                mButtonRightExpand.setVisibility(GONE);
+                mRightButton.setVisibility(GONE);
             }
         }
         super.requestLayout();

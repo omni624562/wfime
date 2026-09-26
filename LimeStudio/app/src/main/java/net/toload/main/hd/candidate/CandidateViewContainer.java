@@ -39,7 +39,6 @@ import net.toload.main.hd.R;
 public class CandidateViewContainer extends LinearLayout implements OnTouchListener {
 
     private ImageButton mButtonExpand;
-    private View mButtonExpandLayout;
     private CandidateView mCandidateView;
 
     public CandidateViewContainer(Context context, AttributeSet attrs) {
@@ -51,7 +50,6 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
 
     public void initViews() {
         if (mCandidateView == null) {
-            mButtonExpandLayout = findViewById(R.id.candidate_right);
             mButtonExpand = findViewById(R.id.candidate_right);
             if (mButtonExpand != null) {
                 mButtonExpand.setOnTouchListener(this);
@@ -91,8 +89,8 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
             if (mCandidateView.isCandidateExpanded())
                 rightVisible = true;
 
-            if (mButtonExpandLayout != null) {
-                mButtonExpandLayout.setVisibility(rightVisible ? VISIBLE : GONE);
+            if (mButtonExpand != null) {
+                mButtonExpand.setVisibility(rightVisible ? VISIBLE : GONE);
             }
         }
         super.requestLayout();
