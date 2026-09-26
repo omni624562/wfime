@@ -620,7 +620,11 @@ public class SetupImLoadDialog extends DialogFragment {
                 }
             });
         } catch (Exception e) {
+            // 同步拋出(例如 DB 開不起來)時不會有 onPostExecute,在這裡收尾,否則進度條會一直留著
             e.printStackTrace();
+            unit.delete();
+            handler.cancelProgress();
+            handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
         }
     }
 }
