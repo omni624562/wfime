@@ -1018,7 +1018,7 @@ public class LIMEService extends InputMethodService implements
     }
 
     private void updateImeNameOnTablet() {
-        String shortName = mEnglishOnly ? "英" : (mIMSwitchHelper != null ? mIMSwitchHelper.getActiveIMShortName() : "");
+        String shortName = mEnglishOnly ? getString(R.string.ime_name_english) : (mIMSwitchHelper != null ? mIMSwitchHelper.getActiveIMShortName() : "");
         if (mCandidateViewContainer != null) {
             mCandidateViewContainer.setImeName(shortName);
         }

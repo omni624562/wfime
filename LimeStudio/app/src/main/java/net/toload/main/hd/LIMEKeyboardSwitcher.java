@@ -173,18 +173,18 @@ public class LIMEKeyboardSwitcher {
      * Returns a single-character abbreviation for the current active input method.
      * Used for the IM switch key label.
      * 
-     * @return Single character like "易" for dayi, "注" for phonetic
+     * @return Single character like "易" for dayi, "注" for phonetic (English UI: "Dayi", "Chuyin")
      */
     public String getActiveIMSingleChar() {
         if (imtype == null)
-            return "中";
+            return mThemedContext.getString(R.string.im_switch_label_default);
         switch (imtype) {
             case "dayi":
-                return "易";
+                return mThemedContext.getString(R.string.im_switch_label_dayi);
             case "phonetic":
-                return "注";
+                return mThemedContext.getString(R.string.im_switch_label_phonetic);
             default:
-                return "中";
+                return mThemedContext.getString(R.string.im_switch_label_default);
         }
     }
 

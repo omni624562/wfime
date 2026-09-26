@@ -222,4 +222,10 @@
     <string name="emoji_search_hint">Type English keywords…</string>
     <string name="emoji_search_close">Close search</string>
     <string name="emoji_no_results">No matching emoji</string>
+
+    <!-- 鍵盤模式標籤：空白鍵左邊的切換鍵（LIMEKeyboardSwitcher）、平板候選列的輸入法名稱（LIMEService） -->
+    <string name="im_switch_label_dayi">Dayi</string>
+    <string name="im_switch_label_phonetic">Chuyin</string>
+    <string name="im_switch_label_default">Chinese</string>
+    <string name="ime_name_english">English</string>
 </resources>

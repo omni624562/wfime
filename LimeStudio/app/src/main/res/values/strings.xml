@@ -308,4 +308,10 @@
     <string name="emoji_search_hint">輸入英文關鍵字…</string>
     <string name="emoji_search_close">關閉搜尋</string>
     <string name="emoji_no_results">沒有符合的表情符號</string>
+
+    <!-- 鍵盤模式標籤：空白鍵左邊的切換鍵（LIMEKeyboardSwitcher）、平板候選列的輸入法名稱（LIMEService） -->
+    <string name="im_switch_label_dayi">易</string>
+    <string name="im_switch_label_phonetic">注</string>
+    <string name="im_switch_label_default">中</string>
+    <string name="ime_name_english">英</string>
 </resources>
