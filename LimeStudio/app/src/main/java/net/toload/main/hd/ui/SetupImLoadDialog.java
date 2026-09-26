@@ -28,7 +28,6 @@ import android.util.Log;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -131,26 +130,6 @@ public class SetupImLoadDialog extends DialogFragment {
         if (dialog != null) {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(android.content.DialogInterface dialog,
-                    int keyCode, android.view.KeyEvent event) {
-                if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
-                    // To dismiss the fragment when the back-button is pressed.
-                    dismiss();
-                    return true;
-                }
-                // Otherwise, do nothing else
-                else
-                    return false;
-            }
-        });
     }
 
     @Override

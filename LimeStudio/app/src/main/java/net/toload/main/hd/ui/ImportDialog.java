@@ -101,23 +101,6 @@ public class ImportDialog extends DialogFragment {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        this.setCancelable(false);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        getDialog().setOnKeyListener((dialog, keyCode, event) -> {
-            if ((keyCode == android.view.KeyEvent.KEYCODE_BACK)) {
-                // To dismiss the fragment when the back-button is pressed.
-                dismiss();
-                return true;
-            }
-            // Otherwise, do nothing else
-            else
-                return false;
-        });
     }
 
     public void cancelDialog() {
@@ -127,6 +110,8 @@ public class ImportDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle icicle) {
 
         getDialog().getWindow().setTitle(getResources().getString(R.string.import_dialog_title));
+        // 返回鍵／返回手勢可關閉（預測返回不會送 KEYCODE_BACK 給 OnKeyListener），點對話框外面不關
+        getDialog().setCanceledOnTouchOutside(false);
         datasource = new LimeDB(getActivity());
         importdialog = this;
 
