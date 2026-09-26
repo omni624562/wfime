@@ -1608,13 +1608,13 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                             int rsize = 0;
                             do {
                                 Mapping munit = new Mapping();
-                                munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
-                                munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
+                                munit.setId(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_ID)));
+                                munit.setPword(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_PWORD)));
                                 munit.setCode("");
-                                munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
-                                munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
+                                munit.setWord(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_CWORD)));
+                                munit.setScore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_USERSCORE)));
                                 munit.setBasescore(
-                                        cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
+                                        cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_BASESCORE)));
                                 munit.setRelatedPhraseRecord();
                                 result.add(munit);
                                 rsize++;
@@ -2009,7 +2009,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
             cursor.moveToFirst();
 
-            int total = cursor.getInt(cursor.getColumnIndex("total"));
+            int total = cursor.getInt(cursor.getColumnIndexOrThrow("total"));
             cursor.close();
             
             if (total > 0) {
@@ -2959,11 +2959,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 try {
                     if (cursor.moveToFirst()) {
                         munit = new Mapping();
-                        munit.setId(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_ID)));
-                        munit.setPword(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_PWORD)));
-                        munit.setWord(cursor.getString(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_CWORD)));
-                        munit.setBasescore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_BASESCORE)));
-                        munit.setScore(cursor.getInt(cursor.getColumnIndex(Lime.DB_RELATED_COLUMN_USERSCORE)));
+                        munit.setId(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_ID)));
+                        munit.setPword(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_PWORD)));
+                        munit.setWord(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_CWORD)));
+                        munit.setBasescore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_BASESCORE)));
+                        munit.setScore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_USERSCORE)));
                         munit.setRelatedPhraseRecord();
 
                     }
@@ -3093,11 +3093,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
-                        String title = cursor.getString(cursor.getColumnIndex("title"));
+                        String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
                         if (title.equals("keyboard")) {
                             ImObj kobj = new ImObj();
-                            kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                            String kb = cursor.getString(cursor.getColumnIndex("keyboard"));
+                            kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
+                            String kb = cursor.getString(cursor.getColumnIndexOrThrow("keyboard"));
                             if (kb != null) {
                                 if (kb.contains("dayi")) {
                                     kb = "dayi";
@@ -3136,21 +3136,21 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     kobj = new KeyboardObj();
-                    kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                    kobj.setName(cursor.getString(cursor.getColumnIndex("name")));
-                    kobj.setDescription(cursor.getString(cursor.getColumnIndex("desc")));
-                    kobj.setType(cursor.getString(cursor.getColumnIndex("type")));
-                    kobj.setImage(cursor.getString(cursor.getColumnIndex("image")));
-                    kobj.setImkb(cursor.getString(cursor.getColumnIndex("imkb")));
-                    kobj.setImshiftkb(cursor.getString(cursor.getColumnIndex("imshiftkb")));
-                    kobj.setEngkb(cursor.getString(cursor.getColumnIndex("engkb")));
-                    kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndex("engshiftkb")));
-                    kobj.setSymbolkb(cursor.getString(cursor.getColumnIndex("symbolkb")));
-                    kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndex("symbolshiftkb")));
-                    kobj.setDefaultkb(cursor.getString(cursor.getColumnIndex("defaultkb")));
-                    kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndex("defaultshiftkb")));
-                    kobj.setExtendedkb(cursor.getString(cursor.getColumnIndex("extendedkb")));
-                    kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndex("extendedshiftkb")));
+                    kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
+                    kobj.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
+                    kobj.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("desc")));
+                    kobj.setType(cursor.getString(cursor.getColumnIndexOrThrow("type")));
+                    kobj.setImage(cursor.getString(cursor.getColumnIndexOrThrow("image")));
+                    kobj.setImkb(cursor.getString(cursor.getColumnIndexOrThrow("imkb")));
+                    kobj.setImshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("imshiftkb")));
+                    kobj.setEngkb(cursor.getString(cursor.getColumnIndexOrThrow("engkb")));
+                    kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("engshiftkb")));
+                    kobj.setSymbolkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolkb")));
+                    kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolshiftkb")));
+                    kobj.setDefaultkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultkb")));
+                    kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultshiftkb")));
+                    kobj.setExtendedkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedkb")));
+                    kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedshiftkb")));
                 }
 
                 cursor.close();
@@ -3191,7 +3191,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                info = cursor.getString(cursor.getColumnIndex(field));
+                info = cursor.getString(cursor.getColumnIndexOrThrow(field));
             }
             cursor.close();
         }
@@ -3215,21 +3215,21 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 if (cursor.moveToFirst()) {
                     do {
                         KeyboardObj kobj = new KeyboardObj();
-                        kobj.setCode(cursor.getString(cursor.getColumnIndex("code")));
-                        kobj.setName(cursor.getString(cursor.getColumnIndex("name")));
-                        kobj.setDescription(cursor.getString(cursor.getColumnIndex("desc")));
-                        kobj.setType(cursor.getString(cursor.getColumnIndex("type")));
-                        kobj.setImage(cursor.getString(cursor.getColumnIndex("image")));
-                        kobj.setImkb(cursor.getString(cursor.getColumnIndex("imkb")));
-                        kobj.setImshiftkb(cursor.getString(cursor.getColumnIndex("imshiftkb")));
-                        kobj.setEngkb(cursor.getString(cursor.getColumnIndex("engkb")));
-                        kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndex("engshiftkb")));
-                        kobj.setSymbolkb(cursor.getString(cursor.getColumnIndex("symbolkb")));
-                        kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndex("symbolshiftkb")));
-                        kobj.setDefaultkb(cursor.getString(cursor.getColumnIndex("defaultkb")));
-                        kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndex("defaultshiftkb")));
-                        kobj.setExtendedkb(cursor.getString(cursor.getColumnIndex("extendedkb")));
-                        kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndex("extendedshiftkb")));
+                        kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
+                        kobj.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
+                        kobj.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("desc")));
+                        kobj.setType(cursor.getString(cursor.getColumnIndexOrThrow("type")));
+                        kobj.setImage(cursor.getString(cursor.getColumnIndexOrThrow("image")));
+                        kobj.setImkb(cursor.getString(cursor.getColumnIndexOrThrow("imkb")));
+                        kobj.setImshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("imshiftkb")));
+                        kobj.setEngkb(cursor.getString(cursor.getColumnIndexOrThrow("engkb")));
+                        kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("engshiftkb")));
+                        kobj.setSymbolkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolkb")));
+                        kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolshiftkb")));
+                        kobj.setDefaultkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultkb")));
+                        kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultshiftkb")));
+                        kobj.setExtendedkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedkb")));
+                        kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedshiftkb")));
                         result.add(kobj);
                     } while (cursor.moveToNext());
                 }
@@ -3327,7 +3327,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 if (cursor.getCount() > 0) {
                     cursor.moveToFirst();
                     do {
-                        String w = cursor.getString(cursor.getColumnIndex("word"));
+                        String w = cursor.getString(cursor.getColumnIndexOrThrow("word"));
                         if (w != null && !w.equals("")) {
                             result.add(w);
                         }
@@ -3668,7 +3668,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 new String[]{code, Lime.IM_TYPE_KEYBOARD}, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
-            String keyboardCode = cursor.getString(cursor.getColumnIndex(Lime.DB_IM_COLUMN_KEYBOARD));
+            String keyboardCode = cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_IM_COLUMN_KEYBOARD));
             cursor.close();
 
             // Get the full keyboard object
@@ -3792,7 +3792,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         String query = "SELECT COUNT(*) as count FROM " + table;
         cursor = db.rawQuery(query, null);
         cursor.moveToFirst();
-        total = cursor.getInt(cursor.getColumnIndex(Lime.DB_TOTAL_COUNT));
+        total = cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_TOTAL_COUNT));
         cursor.close();
 
         return total;
@@ -3829,7 +3829,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         cursor = db.rawQuery(query, args);
 
         cursor.moveToFirst();
-        total = cursor.getInt(cursor.getColumnIndex(Lime.DB_TOTAL_COUNT));
+        total = cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_TOTAL_COUNT));
         cursor.close();
         return total;
 
@@ -3867,7 +3867,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         cursor = db.rawQuery(query, args.isEmpty() ? null : args.toArray(new String[0]));
 
         cursor.moveToFirst();
-        total = cursor.getInt(cursor.getColumnIndex(Lime.DB_TOTAL_COUNT));
+        total = cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_TOTAL_COUNT));
         cursor.close();
 
         return total;
