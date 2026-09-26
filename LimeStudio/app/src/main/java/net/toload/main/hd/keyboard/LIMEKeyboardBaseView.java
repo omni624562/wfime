@@ -875,6 +875,16 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         canvas.drawBitmap(mBuffer, 0, 0, null);
     }
 
+    /**
+     * 標籤在目前字級下的寬度超過可用寬度時，回傳等比例縮小後的字級；放得下就回傳原字級。
+     */
+    static int fitLabelTextSize(int labelSize, float textWidth, float availableWidth) {
+        if (availableWidth > 0 && textWidth > availableWidth) {
+            return (int) (labelSize * availableWidth / textWidth);
+        }
+        return labelSize;
+    }
+
     private void onBufferDraw() {
         boolean bufferRebuilt = false;
         if (mBuffer == null || mKeyboardChanged) {
@@ -970,7 +980,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             boolean shouldDrawIcon = true;
             if (label != null) {
                 // For characters, use large font. For labels like "Done", use small font.
-                final int labelSize;
+                int labelSize;
 
                 /*
                  * if (DEBUG)
@@ -1025,6 +1035,15 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                     paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
                 }
                 paint.setTextSize(labelSize);
+                // 沒有副標籤的標籤比按鍵寬時（如英文介面切換鍵的 "Chuyin"）等比例縮小字級，左右各留 5%
+                if (!hasSubLabel) {
+                    float availableWidth = (drawWidth - padding.left - padding.right) * 0.9f;
+                    int fittedSize = fitLabelTextSize(labelSize, paint.measureText(label), availableWidth);
+                    if (fittedSize != labelSize) {
+                        labelSize = fittedSize;
+                        paint.setTextSize(labelSize);
+                    }
+                }
 
                 final int labelHeight;
                 final int labelWidth;
