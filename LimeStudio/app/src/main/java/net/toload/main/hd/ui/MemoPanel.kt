@@ -20,12 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import net.toload.main.hd.DBServer
+import net.toload.main.hd.R
 import net.toload.main.hd.limedb.MemoObj
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,13 +81,13 @@ fun MemoPanel(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "返回",
+                    contentDescription = stringResource(R.string.memo_back),
                     tint = iconColor
                 )
             }
 
             Text(
-                text = "常用備忘錄",
+                text = stringResource(R.string.memo_title),
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -102,12 +104,12 @@ fun MemoPanel(
                         if (text.isNotBlank()) {
                             dbServer.insertMemo(text, 0)
                             reloadMemos()
-                            Toast.makeText(context, "已自剪貼簿新增備忘錄", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.memo_added_from_clipboard), Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(context, "剪貼簿中無文字內容", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.memo_clipboard_no_text), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(context, "剪貼簿為空", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.memo_clipboard_empty), Toast.LENGTH_SHORT).show()
                     }
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = accentColor),
@@ -124,7 +126,7 @@ fun MemoPanel(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "貼上新增",
+                    text = stringResource(R.string.memo_paste_add),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -139,7 +141,7 @@ fun MemoPanel(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "手動新增",
+                    contentDescription = stringResource(R.string.memo_add_manually),
                     tint = accentColor
                 )
             }
@@ -169,12 +171,12 @@ fun MemoPanel(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "尚無常用備忘錄",
+                        text = stringResource(R.string.memo_empty),
                         color = secondaryTextColor,
                         fontSize = 14.sp
                     )
                     Text(
-                        text = "點擊右上角按鈕貼上或新增",
+                        text = stringResource(R.string.memo_empty_hint),
                         color = secondaryTextColor.copy(alpha = 0.7f),
                         fontSize = 12.sp
                     )
@@ -231,7 +233,7 @@ fun MemoPanel(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.PushPin,
-                                        contentDescription = if (isPinned) "取消置頂" else "置頂",
+                                        contentDescription = if (isPinned) stringResource(R.string.memo_unpin) else stringResource(R.string.memo_pin),
                                         tint = if (isPinned) accentColor else secondaryTextColor,
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -242,13 +244,13 @@ fun MemoPanel(
                                     onClick = {
                                         dbServer.deleteMemo(memo.id)
                                         reloadMemos()
-                                        Toast.makeText(context, "備忘錄已刪除", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.memo_deleted), Toast.LENGTH_SHORT).show()
                                     },
                                     modifier = Modifier.size(36.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
-                                        contentDescription = "刪除",
+                                        contentDescription = stringResource(R.string.memo_delete),
                                         tint = Color(0xFFE57373),
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -308,7 +310,7 @@ fun MemoPanel(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "新增常用備忘錄",
+                        text = stringResource(R.string.memo_add_title),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -322,7 +324,7 @@ fun MemoPanel(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 100.dp),
-                        placeholder = { Text(text = "輸入欲儲存的文字內容...", color = secondaryTextColor) },
+                        placeholder = { Text(text = stringResource(R.string.memo_input_hint), color = secondaryTextColor) },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -342,7 +344,7 @@ fun MemoPanel(
                         TextButton(
                             onClick = { showAddDialog = false }
                         ) {
-                            Text(text = "取消", color = secondaryTextColor)
+                            Text(text = stringResource(R.string.dialog_cancel), color = secondaryTextColor)
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -353,14 +355,14 @@ fun MemoPanel(
                                     dbServer.insertMemo(memoInputText, 0)
                                     reloadMemos()
                                     showAddDialog = false
-                                    Toast.makeText(context, "備忘錄已儲存", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.memo_saved), Toast.LENGTH_SHORT).show()
                                 } else {
-                                    Toast.makeText(context, "請輸入內容", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.memo_input_required), Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = accentColor)
                         ) {
-                            Text(text = "儲存", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.memo_save), color = Color.Black, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

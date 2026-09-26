@@ -35,8 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.toload.main.hd.R
 
 /**
  * Premium Preference Group Container (Card-based glassmorphic container)
@@ -272,7 +274,7 @@ fun ListPreference(
             },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("取消", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dialog_cancel), fontWeight = FontWeight.Bold)
                 }
             }
         )

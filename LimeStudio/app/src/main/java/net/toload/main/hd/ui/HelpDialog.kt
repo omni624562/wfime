@@ -23,11 +23,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.DialogFragment
+import net.toload.main.hd.R
 import net.toload.main.hd.ui.compose.theme.LimeTheme
 
 class HelpDialog : DialogFragment() {
@@ -65,9 +67,9 @@ class HelpDialog : DialogFragment() {
 fun HelpDialogContent(onDismiss: () -> Unit) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf(
-        Triple(0, "✨ 旗艦功能", Icons.Default.AutoAwesome),
-        Triple(1, "⌨️ 鍵盤教學", Icons.Default.Keyboard),
-        Triple(2, "📋 更新日誌", Icons.Default.List)
+        Triple(0, stringResource(R.string.help_tab_features), Icons.Default.AutoAwesome),
+        Triple(1, stringResource(R.string.help_tab_keyboard), Icons.Default.Keyboard),
+        Triple(2, stringResource(R.string.help_tab_changelog), Icons.Default.List)
     )
 
     Surface(
@@ -116,7 +118,7 @@ fun HelpDialogContent(onDismiss: () -> Unit) {
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "使用說明與教學",
+                        text = stringResource(R.string.help_and_tutorial),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -216,7 +218,7 @@ fun HelpDialogContent(onDismiss: () -> Unit) {
                 )
             ) {
                 Text(
-                    text = "開始使用麥田輸入法",
+                    text = stringResource(R.string.help_get_started),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -233,24 +235,24 @@ fun TabFlagshipFeatures() {
     ) {
         item {
             FeatureItem(
-                title = "大易實體鍵盤左側翻頁面板",
-                description = "專為實體外接鍵盤設計，將「▲ (上頁) / ▼ (下頁)」翻頁控制列移至最左側。實現「右手打字、左手翻頁」的完美分工，按鈕隨頁數動態亮起，大幅降低手部移動疲勞與誤觸率。",
+                title = stringResource(R.string.help_feature_left_paging_title),
+                description = stringResource(R.string.help_feature_left_paging_desc),
                 icon = Icons.Default.Keyboard,
                 accentColor = Color(0xFF00E676)
             )
         }
         item {
             FeatureItem(
-                title = "全面屏沉浸式設定主控台",
-                description = "拋棄傳統 XML 頂部標題贅肉，讓設定畫面完美直通頂部邊緣，結合極簡左側導覽列與磨砂玻璃漸層背景，釋放超過 15% 以上的閱讀空間，展現極致高貴設計感。",
+                title = stringResource(R.string.help_feature_immersive_title),
+                description = stringResource(R.string.help_feature_immersive_desc),
                 icon = Icons.Default.Fullscreen,
                 accentColor = Color(0xFF3A86FF)
             )
         }
         item {
             FeatureItem(
-                title = "AI 智慧選字呼吸指示燈",
-                description = "大易智慧選字模組升級為「AI 智慧核心」，搭載全新狀態呼吸燈。啟用時會亮起科技綠色，並微亮渲染整張卡片，以動態科技美學呈現系統運算狀態。",
+                title = stringResource(R.string.help_feature_ai_light_title),
+                description = stringResource(R.string.help_feature_ai_light_desc),
                 icon = Icons.Default.AutoAwesome,
                 accentColor = Color(0xFF8338EC)
             )
@@ -323,20 +325,20 @@ fun TabKeyboardTutorial() {
     ) {
         item {
             TutorialCard(
-                title = "💡 遇到異常時如何排查？",
+                title = stringResource(R.string.help_troubleshoot_title),
                 steps = listOf(
-                    "若輸入法運作異常、字對照表遺失，請點擊左側導覽面板最底部的「重置設定值」按鍵，恢復原廠設定即可解決 95% 以上問題。",
-                    "安裝新版對照表後，請確保「啟用大易輸入法」與「啟用注音輸入法」開關處於啟動狀態。"
+                    stringResource(R.string.help_troubleshoot_step1),
+                    stringResource(R.string.help_troubleshoot_step2)
                 )
             )
         }
         item {
             TutorialCard(
-                title = "🎹 實體鍵盤（外接藍牙/磁吸）操作流",
+                title = stringResource(R.string.help_physical_title),
                 steps = listOf(
-                    "打字時，右手於實體鍵盤正常輸入字碼與選字數字鍵。",
-                    "需要翻頁時，左手直接點選平板最左側螢幕邊緣的「▲ (前一頁)」與「▼ (後一頁)」進行翻頁，極具效率。",
-                    "系統預設支援實體鍵盤直接送出字詞，亦可於設定內開啟「實體鍵盤優先排序」確保常用字前排顯示。"
+                    stringResource(R.string.help_physical_step1),
+                    stringResource(R.string.help_physical_step2),
+                    stringResource(R.string.help_physical_step3)
                 )
             )
         }
@@ -399,10 +401,10 @@ fun TabUpdateLog() {
             version = "v1.4.0-tablet",
             date = "2026.06.01",
             changes = listOf(
-                "大易實體外接鍵盤左側翻頁優化 (▲/▼)。",
-                "平板雙欄全面屏沉浸式設定主控台升級，隱藏 XML AppBarLayout。",
-                "大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。",
-                "整合使用說明與重置功能至導覽列底部。"
+                stringResource(R.string.help_log_20260601_1),
+                stringResource(R.string.help_log_20260601_2),
+                stringResource(R.string.help_log_20260601_3),
+                stringResource(R.string.help_log_20260601_4)
             ),
             isFlagship = true
         ),
@@ -410,25 +412,25 @@ fun TabUpdateLog() {
             version = "v1.3.1",
             date = "2026.02.28",
             changes = listOf(
-                "簡化架構，移除舊用語音輸入功能按鍵與 VoiceInputActivity。",
-                "為 LimeDB、IMSwitchHelper、OptionsDialogHelper 新增 66 項全數通過之單元測試案例。"
+                stringResource(R.string.help_log_20260228_1),
+                stringResource(R.string.help_log_20260228_2)
             )
         ),
         UpdateLogItem(
             version = "v1.3.0",
             date = "2026.02.05",
             changes = listOf(
-                "修復繪文字鍵盤 (Emoji Picker) 切換中斷與輸入法崩潰問題。",
-                "最佳化輸入法開啟穩定度與系統整合。"
+                stringResource(R.string.help_log_20260205_1),
+                stringResource(R.string.help_log_20260205_2)
             )
         ),
         UpdateLogItem(
             version = "v1.2.0",
             date = "2026.01.03",
             changes = listOf(
-                "全面導入 Material Design 3 設計語言，支援動態色彩與全屏顯示。",
-                "修復側邊選單導致的隨機程式崩潰 Bug。",
-                "版本格式更動為日期格式 (yyyy.MM.dd) 以利識別。"
+                stringResource(R.string.help_log_20260103_1),
+                stringResource(R.string.help_log_20260103_2),
+                stringResource(R.string.help_log_20260103_3)
             )
         )
     )

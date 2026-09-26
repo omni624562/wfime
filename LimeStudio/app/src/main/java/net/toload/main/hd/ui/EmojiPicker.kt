@@ -19,11 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import net.toload.main.hd.R
 import net.toload.main.hd.data.Emoji
 import net.toload.main.hd.data.EmojiData
 import androidx.compose.material.icons.Icons
@@ -127,7 +129,7 @@ fun EmojiPicker(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Search,
-                    contentDescription = "搜尋",
+                    contentDescription = stringResource(R.string.emoji_search),
                     tint = if (searchMode) iconColor else secondaryTextColor,
                     modifier = Modifier
                         .size(24.dp)
@@ -419,8 +421,8 @@ fun EmojiSearchPane(
             Text(
                 text = when {
                     query.isNotEmpty() -> query
-                    hasHardKeyboard -> "用實體鍵盤輸入英文關鍵字…"
-                    else -> "輸入英文關鍵字…"
+                    hasHardKeyboard -> stringResource(R.string.emoji_search_hint_physical)
+                    else -> stringResource(R.string.emoji_search_hint)
                 },
                 color = if (query.isEmpty()) Color(0xFF9E9E9E) else Color.White,
                 fontSize = 16.sp,
@@ -429,7 +431,7 @@ fun EmojiSearchPane(
             IconButton(onClick = onClose, modifier = Modifier.size(28.dp)) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "關閉搜尋",
+                    contentDescription = stringResource(R.string.emoji_search_close),
                     tint = Color(0xFF9E9E9E),
                     modifier = Modifier.size(18.dp)
                 )
@@ -440,7 +442,7 @@ fun EmojiSearchPane(
         Box(modifier = Modifier.weight(1f)) {
             if (query.isNotEmpty() && results.isEmpty()) {
                 Text(
-                    text = "沒有符合的表情符號",
+                    text = stringResource(R.string.emoji_no_results),
                     color = Color(0xFF9E9E9E),
                     fontSize = 14.sp,
                     modifier = Modifier.align(Alignment.Center)

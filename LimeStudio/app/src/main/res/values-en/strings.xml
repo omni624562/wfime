@@ -164,4 +164,62 @@
     <string name="preference_smart_chinese_input_message">Some input methods may affect mixed Chinese/English typing</string>
     <string name="clipboard_empty">Clipboard is empty</string>
     <string name="db_query_error">Dictionary query failed, please reload the IM tables in Settings</string>
+
+    <!-- 使用說明對話框 HelpDialog.kt（help_and_tutorial 與設定畫面共用） -->
+    <string name="help_and_tutorial">Help &amp; tutorial</string>
+    <string name="help_tab_features">✨ Highlights</string>
+    <string name="help_tab_keyboard">⌨️ Keyboard guide</string>
+    <string name="help_tab_changelog">📋 Changelog</string>
+    <string name="help_get_started">Start using 麥田輸入法</string>
+    <string name="help_feature_left_paging_title">Dayi left-side paging panel for physical keyboards</string>
+    <string name="help_feature_left_paging_desc">Designed for external physical keyboards: the \"▲ (page up) / ▼ (page down)\" paging controls are moved to the far left, so you can type with your right hand and page with your left. The buttons light up according to the available pages, greatly reducing hand movement fatigue and mistaps.</string>
+    <string name="help_feature_immersive_title">Full-screen immersive settings console</string>
+    <string name="help_feature_immersive_desc" formatted="false">Drops the traditional XML title bar so the settings screen extends to the top edge, combined with a minimal left navigation bar and a frosted-glass gradient background, freeing up more than 15% of reading space for a refined look.</string>
+    <string name="help_feature_ai_light_title">AI smart selection breathing indicator</string>
+    <string name="help_feature_ai_light_desc">The Dayi smart selection module is upgraded to an \"AI smart core\" with a new breathing status light. When enabled it glows green and softly lights the whole card to show the engine state.</string>
+    <string name="help_troubleshoot_title">💡 Troubleshooting</string>
+    <string name="help_troubleshoot_step1" formatted="false">If the input method misbehaves or mapping tables are missing, tap \"Reset settings\" at the bottom of the left navigation panel to restore the factory settings. This solves more than 95% of problems.</string>
+    <string name="help_troubleshoot_step2">After installing new mapping tables, make sure the \"Enable Dayi\" and \"Enable Zhuyin\" switches are on.</string>
+    <string name="help_physical_title">🎹 Physical keyboard (Bluetooth / magnetic) workflow</string>
+    <string name="help_physical_step1">While typing, use your right hand on the physical keyboard to enter key codes and candidate number keys.</string>
+    <string name="help_physical_step2">To page, tap \"▲ (previous page)\" and \"▼ (next page)\" at the far left edge of the tablet screen with your left hand.</string>
+    <string name="help_physical_step3">Physical keyboards can commit words directly by default. You can also turn on \"Sort by selection on physical keyboard\" in Settings to keep frequently used words at the front.</string>
+    <string name="help_log_20260601_1">Dayi left-side paging for external physical keyboards (▲/▼).</string>
+    <string name="help_log_20260601_2">Upgraded the two-pane full-screen immersive settings console on tablets and hid the XML AppBarLayout.</string>
+    <string name="help_log_20260601_3">Redesigned the Dayi smart selection AI card and added a green/grey breathing status light.</string>
+    <string name="help_log_20260601_4">Moved Help and Reset to the bottom of the navigation bar.</string>
+    <string name="help_log_20260228_1">Simplified the architecture by removing the old voice input key and VoiceInputActivity.</string>
+    <string name="help_log_20260228_2">Added 66 passing unit test cases for LimeDB, IMSwitchHelper and OptionsDialogHelper.</string>
+    <string name="help_log_20260205_1">Fixed the emoji keyboard (Emoji Picker) interrupting input and crashing the input method when switched to.</string>
+    <string name="help_log_20260205_2">Improved input method startup stability and system integration.</string>
+    <string name="help_log_20260103_1">Adopted Material Design 3 throughout, with dynamic color and edge-to-edge display.</string>
+    <string name="help_log_20260103_2">Fixed random crashes caused by the side menu.</string>
+    <string name="help_log_20260103_3">Changed the version format to a date (yyyy.MM.dd) for easier identification.</string>
+
+    <!-- 常用備忘錄 MemoPanel.kt -->
+    <string name="memo_back">Back</string>
+    <string name="memo_title">Saved memos</string>
+    <string name="memo_added_from_clipboard">Memo added from clipboard</string>
+    <string name="memo_clipboard_no_text">Clipboard has no text</string>
+    <string name="memo_clipboard_empty">Clipboard is empty</string>
+    <string name="memo_paste_add">Paste</string>
+    <string name="memo_add_manually">Add manually</string>
+    <string name="memo_empty">No saved memos yet</string>
+    <string name="memo_empty_hint">Tap the buttons at the top right to paste or add a memo</string>
+    <string name="memo_unpin">Unpin</string>
+    <string name="memo_pin">Pin</string>
+    <string name="memo_deleted">Memo deleted</string>
+    <string name="memo_delete">Delete</string>
+    <string name="memo_add_title">Add memo</string>
+    <string name="memo_input_hint">Enter the text to save…</string>
+    <string name="memo_saved">Memo saved</string>
+    <string name="memo_input_required">Please enter some text</string>
+    <string name="memo_save">Save</string>
+
+    <!-- 表情符號選擇器 EmojiPicker.kt -->
+    <string name="emoji_search">Search</string>
+    <string name="emoji_search_hint_physical">Type English keywords on the physical keyboard…</string>
+    <string name="emoji_search_hint">Type English keywords…</string>
+    <string name="emoji_search_close">Close search</string>
+    <string name="emoji_no_results">No matching emoji</string>
 </resources>

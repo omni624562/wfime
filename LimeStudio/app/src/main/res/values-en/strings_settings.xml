@@ -298,4 +298,49 @@
         <item>9</item>
         <item>10</item>
     </string-array>
+
+    <!-- 設定畫面 SettingsScreen.kt -->
+    <string name="settings_console_version">Settings console v%1$s</string>
+    <string name="settings_nav_load_im">Load input method tables</string>
+    <string name="settings_nav_keyboard">On-screen keyboard &amp; feedback</string>
+    <string name="settings_nav_im_engine">Input method engine</string>
+    <string name="settings_nav_mapping">Key codes &amp; mapping tables</string>
+    <string name="settings_reset">Reset settings</string>
+    <string name="settings_category_load_mapping">Load mapping tables</string>
+    <string name="settings_phonetic_loaded">Zhuyin (loaded)</string>
+    <string name="settings_phonetic_load">Load Zhuyin table</string>
+    <string name="settings_dayi_loaded">Dayi (loaded)</string>
+    <string name="settings_dayi_load">Load Dayi table</string>
+    <string name="settings_group_smart_emoji">Smart input &amp; emoji</string>
+    <string name="settings_group_keyboard_layout">Keyboard layout &amp; size</string>
+    <string name="settings_group_key_feedback">Key feedback &amp; physical keyboard</string>
+    <string name="settings_group_shortcut_behavior">Shortcuts &amp; alphanumeric input</string>
+    <string name="settings_group_shortcuts">Shortcut reference</string>
+    <string name="shortcut_globe_key">🌐 Globe key</string>
+    <string name="shortcut_globe_key_desc">Cycle English → Dayi → Zhuyin; long press to open the system input method picker</string>
+    <string name="shortcut_double_shift">Double-tap Shift</string>
+    <string name="shortcut_double_shift_desc">Caps lock (press again to release)</string>
+    <string name="shortcut_dayi_quick_select">Dayi quick select (physical keyboard)</string>
+    <string name="shortcut_dayi_quick_select_desc">Space selects candidate 1; \' [ ] - \\ select candidates 2~6; Ctrl+1~9 selects candidates 1~9</string>
+    <string name="shortcut_dayi_punctuation">Dayi full-width punctuation (physical keyboard)</string>
+    <string name="shortcut_dayi_punctuation_desc">Shift+, . / 1 ; outputs ，。?!:; — 「=」 prefix + punctuation outputs 、;:</string>
+    <string name="shortcut_switch_language">Chinese/English switch (physical keyboard)</string>
+    <string name="shortcut_switch_language_desc">Shift+Space or Ctrl+Space</string>
+    <string name="shortcut_candidate_bar">Candidate bar (physical keyboard)</string>
+    <string name="shortcut_candidate_bar_desc">Arrow keys to move; PgUp/PgDn or ↑↓ to page; Enter to select</string>
+    <string name="settings_group_im_enable">Input method activation</string>
+    <string name="settings_dayi_smart_core">Dayi smart selection core (AI learning model)</string>
+    <string name="settings_smart_selection">Enable smart selection</string>
+    <string name="settings_smart_selection_summary">Predicts from the previous character and moves at most one candidate to position 1; the other candidates keep their fixed order (safe for muscle memory)</string>
+    <string name="settings_auto_compose">Continuous typing (auto commit)</string>
+    <string name="settings_auto_compose_summary">Automatically commits the first candidate when the next key code cannot continue. Note: when on, you cannot type English words directly</string>
+    <string name="settings_clear_smart_data">Clear smart selection data</string>
+    <string name="settings_clear_smart_data_summary">Clear all your personal usage statistics for the Dayi input method</string>
+    <string name="settings_clear_smart_data_confirm_title">Clear smart learning data?</string>
+    <string name="settings_clear_smart_data_confirm_message">Are you sure you want to clear all smart selection learning data for the Dayi input method? This cannot be undone.</string>
+    <string name="settings_clear_smart_data_confirm">Clear</string>
+    <string name="settings_group_input_behavior">Input behavior &amp; assistance</string>
+    <string name="settings_group_related_homophone">Related phrases &amp; homophone lookup</string>
+    <string name="settings_group_english_suggestion">English word suggestions</string>
+    <string name="settings_group_candidate_learning">Candidates &amp; smart learning</string>
 </resources>

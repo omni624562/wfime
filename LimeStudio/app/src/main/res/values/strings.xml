@@ -251,4 +251,61 @@
     <!-- Database error notice (字庫查詢錯誤提示) -->
     <string name="db_query_error">字庫查詢失敗,請到設定重新載入輸入法字庫 | Dictionary query failed, please reload the IM tables in Settings</string>
 
+    <!-- 使用說明對話框 HelpDialog.kt（help_and_tutorial 與設定畫面共用） -->
+    <string name="help_and_tutorial">使用說明與教學</string>
+    <string name="help_tab_features">✨ 旗艦功能</string>
+    <string name="help_tab_keyboard">⌨️ 鍵盤教學</string>
+    <string name="help_tab_changelog">📋 更新日誌</string>
+    <string name="help_get_started">開始使用麥田輸入法</string>
+    <string name="help_feature_left_paging_title">大易實體鍵盤左側翻頁面板</string>
+    <string name="help_feature_left_paging_desc">專為實體外接鍵盤設計，將「▲ (上頁) / ▼ (下頁)」翻頁控制列移至最左側。實現「右手打字、左手翻頁」的完美分工，按鈕隨頁數動態亮起，大幅降低手部移動疲勞與誤觸率。</string>
+    <string name="help_feature_immersive_title">全面屏沉浸式設定主控台</string>
+    <string name="help_feature_immersive_desc" formatted="false">拋棄傳統 XML 頂部標題贅肉，讓設定畫面完美直通頂部邊緣，結合極簡左側導覽列與磨砂玻璃漸層背景，釋放超過 15% 以上的閱讀空間，展現極致高貴設計感。</string>
+    <string name="help_feature_ai_light_title">AI 智慧選字呼吸指示燈</string>
+    <string name="help_feature_ai_light_desc">大易智慧選字模組升級為「AI 智慧核心」，搭載全新狀態呼吸燈。啟用時會亮起科技綠色，並微亮渲染整張卡片，以動態科技美學呈現系統運算狀態。</string>
+    <string name="help_troubleshoot_title">💡 遇到異常時如何排查？</string>
+    <string name="help_troubleshoot_step1" formatted="false">若輸入法運作異常、字對照表遺失，請點擊左側導覽面板最底部的「重置設定值」按鍵，恢復原廠設定即可解決 95% 以上問題。</string>
+    <string name="help_troubleshoot_step2">安裝新版對照表後，請確保「啟用大易輸入法」與「啟用注音輸入法」開關處於啟動狀態。</string>
+    <string name="help_physical_title">🎹 實體鍵盤（外接藍牙/磁吸）操作流</string>
+    <string name="help_physical_step1">打字時，右手於實體鍵盤正常輸入字碼與選字數字鍵。</string>
+    <string name="help_physical_step2">需要翻頁時，左手直接點選平板最左側螢幕邊緣的「▲ (前一頁)」與「▼ (後一頁)」進行翻頁，極具效率。</string>
+    <string name="help_physical_step3">系統預設支援實體鍵盤直接送出字詞，亦可於設定內開啟「實體鍵盤優先排序」確保常用字前排顯示。</string>
+    <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁優化 (▲/▼)。</string>
+    <string name="help_log_20260601_2">平板雙欄全面屏沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
+    <string name="help_log_20260601_3">大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。</string>
+    <string name="help_log_20260601_4">整合使用說明與重置功能至導覽列底部。</string>
+    <string name="help_log_20260228_1">簡化架構，移除舊用語音輸入功能按鍵與 VoiceInputActivity。</string>
+    <string name="help_log_20260228_2">為 LimeDB、IMSwitchHelper、OptionsDialogHelper 新增 66 項全數通過之單元測試案例。</string>
+    <string name="help_log_20260205_1">修復繪文字鍵盤 (Emoji Picker) 切換中斷與輸入法崩潰問題。</string>
+    <string name="help_log_20260205_2">最佳化輸入法開啟穩定度與系統整合。</string>
+    <string name="help_log_20260103_1">全面導入 Material Design 3 設計語言，支援動態色彩與全屏顯示。</string>
+    <string name="help_log_20260103_2">修復側邊選單導致的隨機程式崩潰 Bug。</string>
+    <string name="help_log_20260103_3">版本格式更動為日期格式 (yyyy.MM.dd) 以利識別。</string>
+
+    <!-- 常用備忘錄 MemoPanel.kt -->
+    <string name="memo_back">返回</string>
+    <string name="memo_title">常用備忘錄</string>
+    <string name="memo_added_from_clipboard">已自剪貼簿新增備忘錄</string>
+    <string name="memo_clipboard_no_text">剪貼簿中無文字內容</string>
+    <string name="memo_clipboard_empty">剪貼簿為空</string>
+    <string name="memo_paste_add">貼上新增</string>
+    <string name="memo_add_manually">手動新增</string>
+    <string name="memo_empty">尚無常用備忘錄</string>
+    <string name="memo_empty_hint">點擊右上角按鈕貼上或新增</string>
+    <string name="memo_unpin">取消置頂</string>
+    <string name="memo_pin">置頂</string>
+    <string name="memo_deleted">備忘錄已刪除</string>
+    <string name="memo_delete">刪除</string>
+    <string name="memo_add_title">新增常用備忘錄</string>
+    <string name="memo_input_hint">輸入欲儲存的文字內容...</string>
+    <string name="memo_saved">備忘錄已儲存</string>
+    <string name="memo_input_required">請輸入內容</string>
+    <string name="memo_save">儲存</string>
+
+    <!-- 表情符號選擇器 EmojiPicker.kt -->
+    <string name="emoji_search">搜尋</string>
+    <string name="emoji_search_hint_physical">用實體鍵盤輸入英文關鍵字…</string>
+    <string name="emoji_search_hint">輸入英文關鍵字…</string>
+    <string name="emoji_search_close">關閉搜尋</string>
+    <string name="emoji_no_results">沒有符合的表情符號</string>
 </resources>

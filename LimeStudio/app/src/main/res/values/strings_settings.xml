@@ -579,4 +579,48 @@
     <string name="enable_phonetic_summary_off">切換輸入法時不出現注音鍵盤</string>
     <string name="enable_phonetic_summary_disabled">請先在上方載入注音對照表</string>
 
+    <!-- 設定畫面 SettingsScreen.kt -->
+    <string name="settings_console_version">設定主控台 v%1$s</string>
+    <string name="settings_nav_load_im">載入輸入法對照表</string>
+    <string name="settings_nav_keyboard">虛擬鍵盤與回饋</string>
+    <string name="settings_nav_im_engine">輸入法引擎設定</string>
+    <string name="settings_nav_mapping">字根與對照表管理</string>
+    <string name="settings_reset">重置設定值</string>
+    <string name="settings_category_load_mapping">載入對照表</string>
+    <string name="settings_phonetic_loaded">注音 (已載入)</string>
+    <string name="settings_phonetic_load">載入注音對照表</string>
+    <string name="settings_dayi_loaded">大易 (已載入)</string>
+    <string name="settings_dayi_load">載入大易對照表</string>
+    <string name="settings_group_smart_emoji">智慧輸入與表情符號</string>
+    <string name="settings_group_keyboard_layout">鍵盤配置與尺寸調整</string>
+    <string name="settings_group_key_feedback">按鍵回饋與實體鍵盤互動</string>
+    <string name="settings_group_shortcut_behavior">快捷鍵與英數輸入行為</string>
+    <string name="settings_group_shortcuts">快捷鍵速查 | Shortcuts</string>
+    <string name="shortcut_globe_key">🌐 地球鍵</string>
+    <string name="shortcut_globe_key_desc">循環切換 英文 → 大易 → 注音;長按開啟系統輸入法選單</string>
+    <string name="shortcut_double_shift">雙擊 Shift</string>
+    <string name="shortcut_double_shift_desc">鎖定大寫(再按一次解除)</string>
+    <string name="shortcut_dayi_quick_select">大易快速選字(實體鍵盤)</string>
+    <string name="shortcut_dayi_quick_select_desc">Space 選第 1 個候選;\' [ ] - \\ 選第 2~6 個;Ctrl+1~9 選第 1~9 個</string>
+    <string name="shortcut_dayi_punctuation">大易全形標點(實體鍵盤)</string>
+    <string name="shortcut_dayi_punctuation_desc">Shift+, . / 1 ; 輸出 ，。?!:;「=」前綴+標點輸出 、;:</string>
+    <string name="shortcut_switch_language">中英切換(實體鍵盤)</string>
+    <string name="shortcut_switch_language_desc">Shift+Space 或 Ctrl+Space</string>
+    <string name="shortcut_candidate_bar">候選列(實體鍵盤)</string>
+    <string name="shortcut_candidate_bar_desc">方向鍵移動;PgUp/PgDn 或 ↑↓ 翻頁;Enter 選取</string>
+    <string name="settings_group_im_enable">輸入法啟用管理</string>
+    <string name="settings_dayi_smart_core">大易智慧選字核心 (AI 學習模型)</string>
+    <string name="settings_smart_selection">啟用智慧選字</string>
+    <string name="settings_smart_selection_summary">依前一個字預測,最多把一個候選提到第 1 位;其餘候選維持固定順序(肌肉記憶安全)</string>
+    <string name="settings_auto_compose">連打模式（自動上字）</string>
+    <string name="settings_auto_compose_summary">打到無法接續的字根時自動送出首選字。注意：開啟後無法直接輸入英文單字</string>
+    <string name="settings_clear_smart_data">清除智慧選字資料</string>
+    <string name="settings_clear_smart_data_summary">清除您在大易輸入法下的所有個人習慣統計資料</string>
+    <string name="settings_clear_smart_data_confirm_title">確認清除智慧學習資料</string>
+    <string name="settings_clear_smart_data_confirm_message">您確定要清除大易輸入法的所有智慧選字學習習慣嗎？此動作無法復原。</string>
+    <string name="settings_clear_smart_data_confirm">確定清除</string>
+    <string name="settings_group_input_behavior">輸入行為與輔助設定</string>
+    <string name="settings_group_related_homophone">聯想與同音字輔助對照</string>
+    <string name="settings_group_english_suggestion">英文輸入聯想助手</string>
+    <string name="settings_group_candidate_learning">候選字行為與智慧學習</string>
 </resources>

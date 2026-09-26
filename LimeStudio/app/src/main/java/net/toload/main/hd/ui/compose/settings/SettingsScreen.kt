@@ -144,13 +144,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "麥田輸入法",
+                                text = stringResource(R.string.app_name),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "設定主控台 v${net.toload.main.hd.BuildConfig.VERSION_NAME}",
+                                text = stringResource(R.string.settings_console_version, net.toload.main.hd.BuildConfig.VERSION_NAME),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -161,10 +161,10 @@ fun SettingsScreen(
 
                     // 導覽選項 (Navigation Options)
                     val menuItems = listOf(
-                        Triple(0, "載入輸入法對照表", Icons.Default.CloudDownload),
-                        Triple(1, "虛擬鍵盤與回饋", Icons.Default.Keyboard),
-                        Triple(2, "輸入法引擎設定", Icons.Default.Tune),
-                        Triple(3, "字根與對照表管理", Icons.Default.Storage)
+                        Triple(0, stringResource(R.string.settings_nav_load_im), Icons.Default.CloudDownload),
+                        Triple(1, stringResource(R.string.settings_nav_keyboard), Icons.Default.Keyboard),
+                        Triple(2, stringResource(R.string.settings_nav_im_engine), Icons.Default.Tune),
+                        Triple(3, stringResource(R.string.settings_nav_mapping), Icons.Default.Storage)
                     )
 
                     menuItems.forEach { (index, title, icon) ->
@@ -240,7 +240,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "使用說明與教學",
+                            text = stringResource(R.string.help_and_tutorial),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -262,7 +262,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "重置設定值",
+                            text = stringResource(R.string.settings_reset),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -283,7 +283,7 @@ fun SettingsScreen(
                         ) {
                             when (page) {
                                 0 -> {
-                                    item { PreferenceCategory(title = "載入對照表") }
+                                    item { PreferenceCategory(title = stringResource(R.string.settings_category_load_mapping)) }
                                     item { ImLoadingCard(activity, uiState, modifier = Modifier.padding(horizontal = 0.dp)) }
                                 }
                                 1 -> {
@@ -441,7 +441,7 @@ fun ImLoadingCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.isPhoneticImported) "注音 (已載入)" else "載入注音對照表",
+                            text = if (uiState.isPhoneticImported) stringResource(R.string.settings_phonetic_loaded) else stringResource(R.string.settings_phonetic_load),
                             fontWeight = FontWeight.Bold,
                             color = if (uiState.isPhoneticImported)
                                 MaterialTheme.colorScheme.onSecondaryContainer
@@ -481,7 +481,7 @@ fun ImLoadingCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.isDayiImported) "大易 (已載入)" else "載入大易對照表",
+                            text = if (uiState.isDayiImported) stringResource(R.string.settings_dayi_loaded) else stringResource(R.string.settings_dayi_load),
                             fontWeight = FontWeight.Bold,
                             color = if (uiState.isDayiImported)
                                 MaterialTheme.colorScheme.onSecondaryContainer
@@ -506,7 +506,7 @@ fun KeyboardSettingsSection(
 ) {
     Column(modifier = modifier) {
         // Group 1: 智慧功能與表情
-        PreferenceCardGroup(title = "智慧輸入與表情符號", icon = Icons.Default.AutoAwesome) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_smart_emoji), icon = Icons.Default.AutoAwesome) {
             SwitchPreference(
                 title = stringResource(R.string.enable_emoji),
                 summary = stringResource(R.string.enable_emoji_summary),
@@ -542,7 +542,7 @@ fun KeyboardSettingsSection(
         }
 
         // Group 2: 鍵盤配置與尺寸
-        PreferenceCardGroup(title = "鍵盤配置與尺寸調整", icon = Icons.Default.Keyboard) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_keyboard_layout), icon = Icons.Default.Keyboard) {
             val splitKbEntries = stringArrayResource(R.array.split_keyboard_values)
             val splitKbLabels = stringArrayResource(R.array.split_keyboard_options)
             ListPreference(
@@ -597,7 +597,7 @@ fun KeyboardSettingsSection(
         }
 
         // Group 3: 鍵盤互動與回饋
-        PreferenceCardGroup(title = "按鍵回饋與實體鍵盤互動", icon = Icons.Default.VolumeUp) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_key_feedback), icon = Icons.Default.VolumeUp) {
             SwitchPreference(
                 title = stringResource(R.string.vibrate_on_keypress),
                 checked = uiState.vibrateOnKeypress,
@@ -640,7 +640,7 @@ fun KeyboardSettingsSection(
         }
 
         // Group 4: 英數快速切換與功能鍵
-        PreferenceCardGroup(title = "快捷鍵與英數輸入行為", icon = Icons.Default.Extension) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_shortcut_behavior), icon = Icons.Default.Extension) {
             SwitchPreference(
                 title = stringResource(R.string.switch_english_mode_1),
                 summary = stringResource(R.string.switch_english_mode_summary_1),
@@ -674,14 +674,14 @@ fun KeyboardSettingsSection(
         }
 
         // 快捷鍵速查:把散落在程式裡的隱藏快捷鍵公開給使用者
-        PreferenceCardGroup(title = "快捷鍵速查 | Shortcuts", icon = Icons.Default.Info) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_shortcuts), icon = Icons.Default.Info) {
             val shortcuts = listOf(
-                "🌐 地球鍵" to "循環切換 英文 → 大易 → 注音;長按開啟系統輸入法選單",
-                "雙擊 Shift" to "鎖定大寫(再按一次解除)",
-                "大易快速選字(實體鍵盤)" to "Space 選第 1 個候選;' [ ] - \\ 選第 2~6 個;Ctrl+1~9 選第 1~9 個",
-                "大易全形標點(實體鍵盤)" to "Shift+, . / 1 ; 輸出 ，。?!:;「=」前綴+標點輸出 、;:",
-                "中英切換(實體鍵盤)" to "Shift+Space 或 Ctrl+Space",
-                "候選列(實體鍵盤)" to "方向鍵移動;PgUp/PgDn 或 ↑↓ 翻頁;Enter 選取"
+                stringResource(R.string.shortcut_globe_key) to stringResource(R.string.shortcut_globe_key_desc),
+                stringResource(R.string.shortcut_double_shift) to stringResource(R.string.shortcut_double_shift_desc),
+                stringResource(R.string.shortcut_dayi_quick_select) to stringResource(R.string.shortcut_dayi_quick_select_desc),
+                stringResource(R.string.shortcut_dayi_punctuation) to stringResource(R.string.shortcut_dayi_punctuation_desc),
+                stringResource(R.string.shortcut_switch_language) to stringResource(R.string.shortcut_switch_language_desc),
+                stringResource(R.string.shortcut_candidate_bar) to stringResource(R.string.shortcut_candidate_bar_desc)
             )
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 shortcuts.forEachIndexed { i, (key, desc) ->
@@ -717,7 +717,7 @@ fun ImSettingsSection(
 ) {
     Column(modifier = modifier) {
         // Group 1: 輸入法引擎開關
-        PreferenceCardGroup(title = "輸入法啟用管理", icon = Icons.Default.Tune) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_im_enable), icon = Icons.Default.Tune) {
             SwitchPreference(
                 title = stringResource(R.string.enable_dayi),
                 summary = if (uiState.isDayiImported) {
@@ -784,7 +784,7 @@ fun ImSettingsSection(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "大易智慧選字核心 (AI 學習模型)",
+                            text = stringResource(R.string.settings_dayi_smart_core),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = if (uiState.dayiSmartSelection) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -800,8 +800,8 @@ fun ImSettingsSection(
                     )
 
                     SwitchPreference(
-                        title = "啟用智慧選字",
-                        summary = "依前一個字預測,最多把一個候選提到第 1 位;其餘候選維持固定順序(肌肉記憶安全)",
+                        title = stringResource(R.string.settings_smart_selection),
+                        summary = stringResource(R.string.settings_smart_selection_summary),
                         checked = uiState.dayiSmartSelection,
                         onCheckedChange = { viewModel.setDayiSmartSelection(it) },
                         color = Color.Transparent
@@ -810,8 +810,8 @@ fun ImSettingsSection(
                     HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
                     SwitchPreference(
-                        title = "連打模式（自動上字）",
-                        summary = "打到無法接續的字根時自動送出首選字。注意：開啟後無法直接輸入英文單字",
+                        title = stringResource(R.string.settings_auto_compose),
+                        summary = stringResource(R.string.settings_auto_compose_summary),
                         checked = uiState.dayiAutoCompose,
                         onCheckedChange = { viewModel.setDayiAutoCompose(it) },
                         color = Color.Transparent
@@ -826,21 +826,21 @@ fun ImSettingsSection(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         headlineContent = {
                             Text(
-                                text = "清除智慧選字資料",
+                                text = stringResource(R.string.settings_clear_smart_data),
                                 color = MaterialTheme.colorScheme.error,
                                 fontWeight = FontWeight.Bold
                             )
                         },
-                        supportingContent = { Text("清除您在大易輸入法下的所有個人習慣統計資料") },
+                        supportingContent = { Text(stringResource(R.string.settings_clear_smart_data_summary)) },
                         modifier = Modifier.clickable { showClearDialog = true }
                     )
 
                     if (showClearDialog) {
                         AlertDialog(
                             onDismissRequest = { showClearDialog = false },
-                            title = { Text("確認清除智慧學習資料", fontWeight = FontWeight.Bold) },
+                            title = { Text(stringResource(R.string.settings_clear_smart_data_confirm_title), fontWeight = FontWeight.Bold) },
                             shape = RoundedCornerShape(24.dp),
-                            text = { Text("您確定要清除大易輸入法的所有智慧選字學習習慣嗎？此動作無法復原。") },
+                            text = { Text(stringResource(R.string.settings_clear_smart_data_confirm_message)) },
                             confirmButton = {
                                 TextButton(
                                     onClick = {
@@ -848,12 +848,12 @@ fun ImSettingsSection(
                                         showClearDialog = false
                                     }
                                 ) {
-                                    Text("確定清除", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.settings_clear_smart_data_confirm), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showClearDialog = false }) {
-                                    Text("取消")
+                                    Text(stringResource(R.string.dialog_cancel))
                                 }
                             }
                         )
@@ -863,7 +863,7 @@ fun ImSettingsSection(
         }
 
         // Group 3: 輸入行為與輔助
-        PreferenceCardGroup(title = "輸入行為與輔助設定", icon = Icons.Default.Build) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_input_behavior), icon = Icons.Default.Build) {
             SwitchPreference(
                 title = stringResource(R.string.auto_chinese_symbol),
                 summary = stringResource(R.string.auto_chinese_symbol_summary),
@@ -961,7 +961,7 @@ fun MappingSettingsSection(
 ) {
     Column(modifier = modifier) {
         // Group 1: 聯想字與同音字輔助
-        PreferenceCardGroup(title = "聯想與同音字輔助對照", icon = Icons.Default.Translate) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_related_homophone), icon = Icons.Default.Translate) {
             val similiarEntries = stringArrayResource(R.array.similiar_codes)
             ListPreference(
                 title = stringResource(R.string.similiar_list),
@@ -984,7 +984,7 @@ fun MappingSettingsSection(
         }
 
         // Group 2: 英文關聯字典
-        PreferenceCardGroup(title = "英文輸入聯想助手", icon = Icons.Default.Info) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_english_suggestion), icon = Icons.Default.Info) {
             SwitchPreference(
                 title = stringResource(R.string.enable_english_dictionary),
                 summary = stringResource(R.string.enable_english_dictionary_summary),
@@ -1005,7 +1005,7 @@ fun MappingSettingsSection(
         }
 
         // Group 3: 智慧學習與候選字過濾
-        PreferenceCardGroup(title = "候選字行為與智慧學習", icon = Icons.Default.Storage) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_candidate_learning), icon = Icons.Default.Storage) {
             SwitchPreference(
                 title = stringResource(R.string.candidate_switch),
                 summary = stringResource(R.string.candidate_switch_summary),
