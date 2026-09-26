@@ -557,9 +557,11 @@ public class LIMEService extends InputMethodService implements
                     ((android.view.ViewGroup) mCandidateInInputView.getParent()).removeView(mCandidateInInputView);
 
                 // Hide the virtual keyboard if physical keyboard is connected
+                // （「自動隱藏軟鍵盤」關閉時，接實體鍵盤也保留螢幕鍵盤）
                 View keyboardView = mCandidateInInputView.findViewById(R.id.keyboard);
                 if (keyboardView != null) {
-                    keyboardView.setVisibility(isPhysicalKeyboardConnected ? View.GONE : View.VISIBLE);
+                    boolean hideSoftKeys = isPhysicalKeyboardConnected && mLIMEPref.getAutoHideSoftKeyboard();
+                    keyboardView.setVisibility(hideSoftKeys ? View.GONE : View.VISIBLE);
                 }
 
                 mCandidateInInputView.setVisibility(View.VISIBLE);
@@ -880,7 +882,7 @@ public class LIMEService extends InputMethodService implements
                     for (int i = 0; i < group.getChildCount(); i++) {
                         android.view.View child = group.getChildAt(i);
                         // Keep virtual keyboard hidden when physical keyboard is attached
-                        if (physKeyConnected && child.getId() == R.id.keyboard) {
+                        if (physKeyConnected && mLIMEPref.getAutoHideSoftKeyboard() && child.getId() == R.id.keyboard) {
                             child.setVisibility(View.GONE);
                             if (DEBUG) Log.d("EMOJI_DEBUG", "  Keeping keyboard child GONE (physical keyboard connected)");
                         } else {
@@ -999,7 +1001,7 @@ public class LIMEService extends InputMethodService implements
                     for (int i = 0; i < group.getChildCount(); i++) {
                         android.view.View child = group.getChildAt(i);
                         // Keep virtual keyboard hidden when physical keyboard is attached
-                        if (physKeyConnected && child.getId() == R.id.keyboard) {
+                        if (physKeyConnected && mLIMEPref.getAutoHideSoftKeyboard() && child.getId() == R.id.keyboard) {
                             child.setVisibility(View.GONE);
                         } else {
                             child.setVisibility(View.VISIBLE);
