@@ -106,10 +106,12 @@ data class SettingsUiState(
  * - Providing reactive state to UI
  */
 class SettingsViewModel(
-    private val context: Context
+    context: Context
 ) : ViewModel() {
-    private val preferenceManager = LIMEPreferenceManager(context)
-    private val limeDb = net.toload.main.hd.limedb.LimeDB(context)
+    // ViewModel 比 Activity 活得久，只保留 application context，避免持有已銷毀的 Activity
+    private val context: android.app.Application = context.applicationContext as android.app.Application
+    private val preferenceManager = LIMEPreferenceManager(this.context)
+    private val limeDb = net.toload.main.hd.limedb.LimeDB(this.context)
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
