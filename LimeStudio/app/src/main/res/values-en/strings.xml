@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name / action_preference 為品牌名稱「麥田輸入法」，刻意不翻譯（沿用預設值） -->
+    <string name="app_setting">麥田輸入法 Settings</string>
+    <string name="foreground_service_notification_text">Input method service is running</string>
+    <string name="no_search_result">No symbols found</string>
+    <string name="insert_error">Failed to insert record. Please check the parameters</string>
+    <string name="update_error">Failed to update record. Please check the parameters</string>
+    <string name="error_network_failed">A network connection is required. Please enable your network</string>
+    <string name="error_restore_not_found">Database or backup file not found</string>
+    <string name="global_remove">Remove</string>
+    <string name="global_update">Update</string>
+    <string name="global_add">Add</string>
+    <string name="dialog_confirm">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_close">Close</string>
+    <string name="sdcard_transfer_message">Back up the database and move it to free up space</string>
+    <string name="action_reset">Reset to defaults</string>
+    <string name="action_news">What\'s new</string>
+    <string name="action_help">Help</string>
+    <string name="global_exit_title">Exit</string>
+    <string name="setup_im_backup_message">Backing up database, please wait...</string>
+    <string name="setup_im_restore_message">Restoring database, please wait...</string>
+    <string name="setup_im_import_complete">Database import completed</string>
+    <string name="setup_im_backup_local">Local backup</string>
+    <string name="setup_im_database">Back up / restore database</string>
+    <string name="setup_im_database_description">Back up the entire database to local or cloud storage, or restore it from local or cloud storage.</string>
+    <string name="setup_im_grant_permission">Please grant storage access to enable importing database backups.</string>
+    <string name="setup_im_grant_permission_button">Allow storage access</string>
+    <string name="setup_im_download">Download input methods</string>
+    <string name="setup_im_download_description">Download and import the built-in input methods. A network connection is required. Please enable your network</string>
+    <string name="setup_im_import">Import input method</string>
+    <string name="setup_im_import_description">Select a file to import. Standard .CIN files and LIME simplified .LIME input method backups are supported.</string>
+    <string name="setup_im_system_settings">Enable 麥田輸入法</string>
+    <string name="setup_im_system_selectLIME">Select 麥田輸入法</string>
+    <string name="setup_im_wizard_nextstep">Next</string>
+    <string name="setup_im_system_settings_description">麥田輸入法 is installed. Tap Next to enable 麥田輸入法 in the system keyboard settings, then press Back to continue.</string>
+    <string name="setup_im_system_impicker_description">麥田輸入法 is enabled but not selected yet. Tap Next to choose 麥田輸入法 from the system keyboard picker.</string>
+    <string name="setup_im_import_standard">Import common mapping file</string>
+    <string name="setup_im_import_reset">Remove common mapping file</string>
+    <string name="setup_im_import_related">Import related phrases</string>
+    <string name="setup_im_import_related_default">Import default dictionary</string>
+    <string name="setup_im_import_related_default_confirm">Import the default related phrase dictionary?</string>
+    <string name="setup_im_download_old">Download old version</string>
+    <string name="setup_im_download_old_summary">To use the old version, uninstall the current version after downloading, then open the downloaded file from your Downloads folder to install it.</string>
+    <string name="setup_im_download_old_version">Download LIMEHD v3.9.1</string>
+    <string name="setup_im_download_old_version_confirm">Download LIMEHD 3.9.1?</string>
+    <string name="setup_im_download_old_version_hint">Download location:</string>
+    <string name="setup_im_restore_local">Local restore</string>
+    <string name="setup_im_load_custom">Load mapping file</string>
+    <string name="setup_im_load_standard">Import common mapping file</string>
+    <string name="setup_im_load_reset">Remove common mapping file</string>
+    <string name="setup_im_related_title">Install related phrases</string>
+    <string name="setup_im_related_custom">Import related phrases</string>
+    <string name="setup_im_dialog_title">Install input method</string>
+    <string name="setup_im_dialog_custom">Import mapping file</string>
+    <string name="setup_im_dialog_title_remove">Remove input method</string>
+    <string name="setup_im_dialog_remove">Remove mapping table</string>
+    <string name="setup_im_dialog_remove_confirm">Remove input method</string>
+    <string name="setup_im_dialog_remove_confirm_message">Remove this mapping table?</string>
+    <string name="setup_im_backup_learning_data">Back up learning data</string>
+    <string name="setup_im_restore_learning_data">Restore learning data</string>
+    <string name="setup_im_restore_learning_data_message">Restore the learning data for this input method?</string>
+    <string name="setup_load_download_dayiuni">Install Unicode 3+4 code character table</string>
+    <string name="setup_load_download_dayiunip">Install Unicode 3+4 code phrase table</string>
+    <string name="setup_load_download">Downloading input method table</string>
+    <string name="setup_load_migrate_load">Preparing input method data</string>
+    <string name="setup_load_migrate_import">Importing input method data</string>
+    <string name="setup_load_migrate_rebuild_related">Building related phrase index</string>
+    <string name="setup_load_import_finish">Input method data imported</string>
+    <string name="reset_dialog_title">Reset data and settings</string>
+    <string name="reset_dialog_confirm">Remove all imported input methods, related phrase dictionaries and learning records, and restore the default settings? After the reset, please enable [麥田輸入法] again</string>
+    <string name="default_menu_initial">Input method setup</string>
+    <string name="default_menu_related">Manage related phrases</string>
+    <string name="im_input_method">Input method</string>
+    <string name="im_custom">User</string>
+    <string name="im_dayi">Dayi</string>
+    <string name="im_phonetic">Zhuyin</string>
+    <string name="im_phonetic_advanced">Zhuyin (continuous)</string>
+    <string name="related">Related phrases</string>
+    <string name="manage_im_add">Add</string>
+    <string name="manage_im_edit">Edit</string>
+    <string name="manage_im_copy">Copy</string>
+    <string name="manage_im_update">Update</string>
+    <string name="manage_im_cancel">Cancel</string>
+    <string name="manage_im_save">Save</string>
+    <string name="manage_im_keyboard">Please set the input method keyboard</string>
+    <string name="manage_im_management">Manage input methods</string>
+    <string name="manage_im_move">Move</string>
+    <string name="manage_im_remove">Remove</string>
+    <string name="manage_im_reset">Reset</string>
+    <string name="manage_im_search">Search</string>
+    <string name="manage_im_previous">Previous</string>
+    <string name="manage_im_next">Next</string>
+    <string name="manage_im_loading">Loading ...</string>
+    <string name="manage_im_word">Word</string>
+    <string name="manage_im_root">Key code</string>
+    <string name="manage_related_management">Manage related phrases</string>
+    <string name="manage_related_add">Add</string>
+    <string name="manage_related_search">Search</string>
+    <string name="manage_related_previous">Previous</string>
+    <string name="manage_related_next">Next</string>
+    <string name="manage_related_pword">First character</string>
+    <string name="manage_related_cword">Related phrase</string>
+    <string name="manage_related_score">Display weight</string>
+    <string name="manage_related_cancel">Cancel</string>
+    <string name="manage_related_update">Update</string>
+    <string name="manage_related_remove">Remove</string>
+    <string name="manage_related_save">Save</string>
+    <string name="manage_related_loading">Loading ...</string>
+    <string name="manage_related_reset">Reset</string>
+    <string name="manage_related_duplicated">Related phrase will be overwritten</string>
+    <string name="manage_related_format_error">Failed to create related phrase. Unsupported code format.</string>
+    <string name="manage_related_dialog_edit">Edit</string>
+    <string name="manage_related_dialog_message">Save changes and go back?</string>
+    <string name="manage_related_dialog_delete">Delete</string>
+    <string name="manage_related_dialog_delete_message">Delete this entry and go back?</string>
+    <string name="manage_related_dialog_add">Add</string>
+    <string name="manage_related_dialog_add_message">Add this entry and go back?</string>
+    <string name="manage_word_code">Key code</string>
+    <string name="manage_word_code3r">3-key code</string>
+    <string name="manage_word_word">Word</string>
+    <string name="manage_word_score">Display weight</string>
+    <string name="manage_select_keyboard">Please select a keyboard</string>
+    <string name="manage_word_dialog_edit">Edit</string>
+    <string name="manage_word_dialog_message">Save changes and go back?</string>
+    <string name="manage_word_dialog_delete">Delete</string>
+    <string name="manage_word_dialog_delete_message">Delete this entry and go back?</string>
+    <string name="manage_word_dialog_add">Add</string>
+    <string name="manage_word_dialog_add_message">Add this entry and go back?</string>
+    <string name="share_dialog_related_title">Share related phrases</string>
+    <string name="share_dialog_related_title_message">Export the related phrase dictionary and send it to you. Currently supports limedb (database).</string>
+    <string name="share_dialog_title">Share input method</string>
+    <string name="share_dialog_title_message">Export the input method and send it to you. Currently supports .lime (plain text) or limedb (database).</string>
+    <string name="share_step_initial">Preparing database...</string>
+    <string name="share_step_write">Writing file...</string>
+    <string name="share_lime_cin">Plain text</string>
+    <string name="share_lime_db">Database</string>
+    <string name="import_dialog_related_title">Import related phrase database</string>
+    <string name="import_dialog_title">Import input method table</string>
+    <string name="import_code_hint">\n\nPlease enter the key code</string>
+    <string name="import_code_empty">No key code entered</string>
+    <string name="import_related_success">Related phrase database created</string>
+    <string name="import_word_success">Input method data created</string>
+    <string name="help_dialog_title">Help</string>
+    <string name="help_dialog_detail">
+        \n** If the input method misbehaves, try the [Reset settings] function at the bottom left to clear data and settings.\n
+        \nRelease notes (2026.06.01 - Tablet flagship upgrade)\n
+        1. [Physical keyboard] Dayi left-side paging: a fixed page up/down panel (▲/▼) on the far left for physical keyboard users, so you can page with the left hand and type with the right. The buttons use a high-contrast teal when available and are disabled when there are no more pages to prevent mistaps.\n
+        2. [UI] Full-screen immersive console: the traditional title bar is hidden so the console extends edge to edge for maximum visible area.\n
+        3. [Visual] Card-based settings and AI status light: all settings are grouped into rounded cards. Dayi smart selection shows a green/grey \"learning status\" breathing light to indicate its state.\n
+        4. [Layout] Integrated toolbar: [Help] and [Reset settings] are neatly placed at the bottom of the left sidebar.\n\n
+        \nRelease notes (2026.02.28)\n
+        1. [Removed] Voice input: removed the voice input key, VoiceInputActivity and related resources to simplify the input method framework.\n
+        2. [Tests] Unit tests: 30 cases for LimeDB table name validation, 17 cases for IMSwitchHelper switching logic and 19 cases for OptionsDialogHelper menus, 66 test cases in total, all passing.\n\n
+        \nRelease notes (2026.02.05)\n
+        1. Emoji keyboard fix (Emoji Picker): fixed the emoji keyboard failing to show or interrupting input when switched to while typing.\n
+        2. System optimization: improved input method startup stability and code integration.\n\n
+        \nRelease notes (2026.01.03)\n
+        1. UI modernization: adopted Material Design 3 throughout, with dynamic color and edge-to-edge display.\n
+        2. Tablet support: fixed locked screen orientation and added support for landscape split mode.\n
+        3. System optimization: removed ads, cloud backup and sharing to improve performance and security.\n
+        4. Crash fix: fixed a crash caused by the side menu (Navigation Drawer).\n
+        5. Version format change: versions now use the date format (yyyy.MM.dd) for easier identification.\n\n
+        Thanks to the inventor of the Dayi input method and its sponsors. LIME is officially licensed to use it.\n\n
+    </string>
+    <string name="error_import_db">Import failed. The file may be corrupted or in the wrong format. Please try again</string>
+    <string name="error_set_active_im">Please download an input method and import its mapping file first</string>
+    <string name="preference_smart_chinese_input">Enable smart Chinese input</string>
+    <string name="preference_smart_chinese_input_message">Some input methods may affect mixed Chinese/English typing</string>
+    <string name="clipboard_empty">Clipboard is empty</string>
+    <string name="db_query_error">Dictionary query failed, please reload the IM tables in Settings</string>
+</resources>
