@@ -96,11 +96,6 @@ public class LIMEKeyboardSwitcher {
         mKeySizeScale = mLIMEPref.getFontSize();
     }
 
-    public static LIMEKeyboardSwitcher getInstance() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public void setThemedContext(Context context) {
         mThemedContext = context;
     }
