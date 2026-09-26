@@ -29,11 +29,11 @@
     <string name="foreground_service_notification_text">輸入法服務執行中</string>
 
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
 
-    <string name="action_share">Share</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_share" translatable="false">Share</string>
+    <string name="action_settings" translatable="false">Settings</string>
 
     <string name="no_search_result">沒有任何符號</string>
     <string name="insert_error">插入記錄錯誤，請檢查參數</string>
@@ -244,12 +244,12 @@
     <string name="error_import_db">導入失敗，可能是檔案毀損或格式錯誤，請再試一次</string>
 
     <string name="error_set_active_im">請先下載輸入法並匯入字根檔</string>
-    <string name="title_activity_setup_im_google">SetupImGoogleActivity</string>
+    <string name="title_activity_setup_im_google" translatable="false">SetupImGoogleActivity</string>
 
-    <string name="smart_chinese_input">smart_chinese_input</string>
+    <string name="smart_chinese_input" translatable="false">smart_chinese_input</string>
     <string name="preference_smart_chinese_input">啟動中文智慧輸入</string>
     <string name="preference_smart_chinese_input_message">部份輸入法可能會影響中英混打功能</string>
-    <string name="label_symbol_mode">\?123</string>
+    <string name="label_symbol_mode" translatable="false">\?123</string>
 
     <!-- Clipboard paste (剪貼簿貼上) -->
     <string name="clipboard_empty">剪貼簿沒有內容 | Clipboard is empty</string>
