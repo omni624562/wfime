@@ -26,7 +26,6 @@ package net.toload.main.hd.global;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import androidx.preference.PreferenceManager;
 
 import net.toload.main.hd.R;
@@ -223,8 +222,7 @@ public class LIMEPreferenceManager {
     }
 
     public boolean getEmojiMode() {
-        // Jeremy '16,7,30 Emoji support is limited before API 16
-        return sp.getBoolean("enable_emoji", Build.VERSION.SDK_INT >= 27);
+        return sp.getBoolean("enable_emoji", true);
     }
 
     public Integer getEmojiDisplayPosition() {

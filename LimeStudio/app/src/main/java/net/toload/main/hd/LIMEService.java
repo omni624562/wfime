@@ -349,19 +349,17 @@ public class LIMEService extends InputMethodService implements
                     Context.NOTIFICATION_SERVICE);
 
             // Create notification channel for Android 8.0+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        getString(R.string.app_name),
-                        NotificationManager.IMPORTANCE_MIN // Minimal importance - no sound, no popup
-                );
-                channel.setDescription("Input Method Service");
-                channel.setShowBadge(false);
-                channel.enableLights(false);
-                channel.enableVibration(false);
-                if (notificationManager != null) {
-                    notificationManager.createNotificationChannel(channel);
-                }
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    getString(R.string.app_name),
+                    NotificationManager.IMPORTANCE_MIN // Minimal importance - no sound, no popup
+            );
+            channel.setDescription("Input Method Service");
+            channel.setShowBadge(false);
+            channel.enableLights(false);
+            channel.enableVibration(false);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
             }
 
             // Create intent to open main activity when notification is tapped
@@ -371,13 +369,7 @@ public class LIMEService extends InputMethodService implements
                     PendingIntent.FLAG_IMMUTABLE);
 
             // Build the notification (minimal/silent)
-            Notification.Builder builder;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                builder = new Notification.Builder(this, CHANNEL_ID);
-            } else {
-                builder = new Notification.Builder(this);
-                builder.setPriority(Notification.PRIORITY_MIN);
-            }
+            Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID);
 
             Notification notification = builder
                     .setContentTitle(getString(R.string.app_name))
@@ -468,30 +460,28 @@ public class LIMEService extends InputMethodService implements
         android.app.Dialog dialog = getWindow();
         if (dialog != null && dialog.getWindow() != null) {
             android.view.Window window = dialog.getWindow();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                android.view.View decorView = window.getDecorView();
-                int flags = decorView.getSystemUiVisibility();
-                
-                boolean isMaterial3 = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Material3;
-                boolean isLightTheme = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Light;
-                boolean isSystemDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-                boolean isLightMode = isLightTheme || (isMaterial3 && !isSystemDarkMode);
+            android.view.View decorView = window.getDecorView();
+            int flags = decorView.getSystemUiVisibility();
+            
+            boolean isMaterial3 = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Material3;
+            boolean isLightTheme = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Light;
+            boolean isSystemDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+            boolean isLightMode = isLightTheme || (isMaterial3 && !isSystemDarkMode);
 
-                if (isLightMode) {
-                    flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                    if (isMaterial3) {
-                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
-                    } else {
-                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.keyboard_background_light, mThemeContext.getTheme()));
-                    }
+            if (isLightMode) {
+                flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                if (isMaterial3) {
+                    window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
                 } else {
-                    flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                    if (isMaterial3) {
-                        window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
-                    }
+                    window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.keyboard_background_light, mThemeContext.getTheme()));
                 }
-                decorView.setSystemUiVisibility(flags);
+            } else {
+                flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                if (isMaterial3) {
+                    window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
+                }
             }
+            decorView.setSystemUiVisibility(flags);
         }
 
         if (DEBUG) Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");

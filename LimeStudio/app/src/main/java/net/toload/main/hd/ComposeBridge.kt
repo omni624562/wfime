@@ -125,14 +125,9 @@ object ComposeBridge {
                 }
 
                 override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
-                    val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                        val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
-                        val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
-                        java.lang.Math.max(navBarBottom, gestureBottom)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        insets.systemWindowInsetBottom
-                    }
+                    val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
+                    val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
+                    val bottom = java.lang.Math.max(navBarBottom, gestureBottom)
                     if (bottom != mBottomInset) {
                         mBottomInset = bottom
                         setPadding(0, 0, 0, mBottomInset)
@@ -251,14 +246,9 @@ object ComposeBridge {
                 }
 
                 override fun onApplyWindowInsets(insets: android.view.WindowInsets): android.view.WindowInsets {
-                    val bottom = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                        val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
-                        val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
-                        java.lang.Math.max(navBarBottom, gestureBottom)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        insets.systemWindowInsetBottom
-                    }
+                    val navBarBottom = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
+                    val gestureBottom = insets.getInsets(android.view.WindowInsets.Type.systemGestures()).bottom
+                    val bottom = java.lang.Math.max(navBarBottom, gestureBottom)
                     if (bottom != mBottomInset) {
                         mBottomInset = bottom
                         setPadding(0, 0, 0, mBottomInset)

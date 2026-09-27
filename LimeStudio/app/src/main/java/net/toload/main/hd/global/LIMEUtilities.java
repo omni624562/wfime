@@ -24,14 +24,12 @@
 
 package net.toload.main.hd.global;
 
-import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 
 import android.provider.Settings;
 import android.util.Log;
@@ -327,7 +325,6 @@ public class LIMEUtilities {
      * Add by Jeremy '12,4,23 Show notification with notification builder in
      * compatibility package replacing the deprecated alert dialog creation
      */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static void showNotification(Context context, Boolean autoCancel, CharSequence title, CharSequence message,
             Intent intent) {
 
@@ -341,12 +338,7 @@ public class LIMEUtilities {
                 .setTicker(message)
                 .setContentText(message);
 
-        boolean lollipop = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-        if (lollipop) {
-            mBuilder.setSmallIcon(R.drawable.logobw);
-        } else {
-            mBuilder.setSmallIcon(R.drawable.logo);
-        }
+        mBuilder.setSmallIcon(R.drawable.logobw);
 
         NotificationManager mNotificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
@@ -355,19 +347,11 @@ public class LIMEUtilities {
     }
 
     private static int getNotificationIcon() {
-        boolean whiteIcon = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-        return whiteIcon ? R.drawable.logobw : R.drawable.logo;
+        return R.drawable.logobw;
     }
 
     private static Bitmap getNotificationIconBitmap(Context context) {
-        boolean whiteIcon = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-        Bitmap bm = null;
-        if (whiteIcon) {
-            bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
-        } else {
-            bm = BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
-        }
-        return bm;
+        return BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
     }
 
     public static String isVoiceSearchServiceExist(Context context) {

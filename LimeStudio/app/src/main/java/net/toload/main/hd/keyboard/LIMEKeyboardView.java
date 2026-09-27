@@ -130,13 +130,9 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 
 	@Override
 	public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-			int navBarBottom = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
-			int gestureBottom = insets.getInsets(WindowInsets.Type.systemGestures()).bottom;
-			mBottomInset = Math.max(navBarBottom, gestureBottom);
-		} else {
-			mBottomInset = insets.getSystemWindowInsetBottom();
-		}
+		int navBarBottom = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+		int gestureBottom = insets.getInsets(WindowInsets.Type.systemGestures()).bottom;
+		mBottomInset = Math.max(navBarBottom, gestureBottom);
 		requestLayout();
 		return super.onApplyWindowInsets(insets);
 	}
@@ -158,7 +154,7 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 		// Exclude bottom portion from system gestures for key responsiveness
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && mBottomInset > 0) {
+		if (mBottomInset > 0) {
 			mGestureExclusionRect.set(0, getHeight() - mBottomInset, getWidth(), getHeight());
 			setSystemGestureExclusionRects(mGestureExclusionRects);
 		}
