@@ -327,6 +327,7 @@ public class LIMEBaseKeyboard {
                     R.styleable.LIMEBaseKeyboard_Row);
             rowEdgeFlags = a.getInt(R.styleable.LIMEBaseKeyboard_Row_rowEdgeFlags, 0);
             mode = a.getResourceId(R.styleable.LIMEBaseKeyboard_Row_keyboardMode, 0);
+            a.recycle();
 
         }
     }
