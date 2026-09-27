@@ -487,7 +487,7 @@ public class LIMEKeyboardSwitcher {
                         if (isIm) {
                             key.label = getActiveIMShortname();
                         } else {
-                            key.label = "English";
+                            key.label = mThemedContext.getString(R.string.space_label_english);
                         }
                     }
                 }

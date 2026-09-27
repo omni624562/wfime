@@ -102,4 +102,5 @@
     <string name="im_switch_label_phonetic">Chuyin</string>
     <string name="im_switch_label_default">Chinese</string>
     <string name="ime_name_english">English</string>
+    <string name="space_label_english">English</string>
 </resources>

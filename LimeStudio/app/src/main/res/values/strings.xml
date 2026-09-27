@@ -182,4 +182,5 @@
     <string name="im_switch_label_phonetic">注</string>
     <string name="im_switch_label_default">中</string>
     <string name="ime_name_english">英</string>
+    <string name="space_label_english">英文</string>
 </resources>
