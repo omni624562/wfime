@@ -121,9 +121,9 @@
 
     <!-- 使用說明對話框 HelpDialog.kt（help_and_tutorial 與設定畫面共用） -->
     <string name="help_and_tutorial">使用說明與教學</string>
-    <string name="help_tab_features">✨ 旗艦功能</string>
-    <string name="help_tab_keyboard">⌨️ 鍵盤教學</string>
-    <string name="help_tab_changelog">📋 更新日誌</string>
+    <string name="help_tab_features">旗艦功能</string>
+    <string name="help_tab_keyboard">鍵盤教學</string>
+    <string name="help_tab_changelog">更新日誌</string>
     <string name="help_get_started">開始使用麥田輸入法</string>
     <string name="help_feature_left_paging_title">大易實體鍵盤左側翻頁面板</string>
     <string name="help_feature_left_paging_desc">專為實體外接鍵盤設計，將「▲ (上頁) / ▼ (下頁)」翻頁控制列移至最左側。實現「右手打字、左手翻頁」的完美分工，按鈕隨頁數動態亮起，大幅降低手部移動疲勞與誤觸率。</string>
@@ -132,12 +132,19 @@
     <string name="help_feature_ai_light_title">AI 智慧選字呼吸指示燈</string>
     <string name="help_feature_ai_light_desc">大易智慧選字模組升級為「AI 智慧核心」，搭載全新狀態呼吸燈。啟用時會亮起科技綠色，並微亮渲染整張卡片，以動態科技美學呈現系統運算狀態。</string>
     <string name="help_troubleshoot_title">💡 遇到異常時如何排查？</string>
-    <string name="help_troubleshoot_step1" formatted="false">若輸入法運作異常、字對照表遺失，請點擊左側導覽面板最底部的「重置設定值」按鍵，恢復原廠設定即可解決 95% 以上問題。</string>
+    <string name="help_troubleshoot_step1" formatted="false">若輸入法運作異常、字對照表遺失，請重置設定值（平板：左側導覽面板最底部的「重置設定值」；手機：右上角選單的「恢復原廠設定」），恢復原廠設定即可解決 95% 以上問題。</string>
     <string name="help_troubleshoot_step2">安裝新版對照表後，請確保「啟用大易輸入法」與「啟用注音輸入法」開關處於啟動狀態。</string>
     <string name="help_physical_title">🎹 實體鍵盤（外接藍牙/磁吸）操作流</string>
     <string name="help_physical_step1">打字時，右手於實體鍵盤正常輸入字碼與選字數字鍵。</string>
     <string name="help_physical_step2">需要翻頁時，左手直接點選平板最左側螢幕邊緣的「▲ (前一頁)」與「▼ (後一頁)」進行翻頁，極具效率。</string>
     <string name="help_physical_step3">系統預設支援實體鍵盤直接送出字詞，亦可於設定內開啟「實體鍵盤優先排序」確保常用字前排顯示。</string>
+    <string name="help_physical_step4">接上實體鍵盤仍想使用螢幕鍵盤時，可到設定關閉「自動隱藏軟鍵盤」。</string>
+    <string name="help_log_20260927_1">新增英文介面，會依系統或 app 語言自動切換；注音的英文名稱為 Chuyin。</string>
+    <string name="help_log_20260927_2">導入字根檔改用系統檔案選擇器，可從任何位置選檔；匯入改在背景執行，不再卡住畫面。</string>
+    <string name="help_log_20260927_3">新增「導入關聯字庫」入口，匯入時保留已學習的關聯字。</string>
+    <string name="help_log_20260927_4">「自動隱藏軟鍵盤」設定生效：關閉後接實體鍵盤仍顯示螢幕鍵盤。</string>
+    <string name="help_log_20260927_5">分享文字的匯入對話框可用返回鍵關閉，旋轉畫面後也不再重複跳出。</string>
+    <string name="help_log_20260927_6">多項穩定性修正：資料庫鎖定時不再卡住、過長的按鍵標籤自動縮小。</string>
     <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁優化 (▲/▼)。</string>
     <string name="help_log_20260601_2">平板雙欄全面屏沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
     <string name="help_log_20260601_3">大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。</string>

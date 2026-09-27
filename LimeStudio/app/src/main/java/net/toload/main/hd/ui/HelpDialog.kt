@@ -338,7 +338,8 @@ fun TabKeyboardTutorial() {
                 steps = listOf(
                     stringResource(R.string.help_physical_step1),
                     stringResource(R.string.help_physical_step2),
-                    stringResource(R.string.help_physical_step3)
+                    stringResource(R.string.help_physical_step3),
+                    stringResource(R.string.help_physical_step4)
                 )
             )
         }
@@ -397,6 +398,18 @@ fun TutorialCard(title: String, steps: List<String>) {
 @Composable
 fun TabUpdateLog() {
     val logs = listOf(
+        UpdateLogItem(
+            version = "v1.5.0",
+            date = "2026.09.27",
+            changes = listOf(
+                stringResource(R.string.help_log_20260927_1),
+                stringResource(R.string.help_log_20260927_2),
+                stringResource(R.string.help_log_20260927_3),
+                stringResource(R.string.help_log_20260927_4),
+                stringResource(R.string.help_log_20260927_5),
+                stringResource(R.string.help_log_20260927_6)
+            )
+        ),
         UpdateLogItem(
             version = "v1.4.0-tablet",
             date = "2026.06.01",
