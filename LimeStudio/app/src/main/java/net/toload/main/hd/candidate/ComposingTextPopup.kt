@@ -10,6 +10,7 @@
 package net.toload.main.hd.candidate
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
@@ -48,11 +49,8 @@ class ComposingTextPopup(private val context: Context) {
     }
     
     private fun createPopupWindow() {
-        // Create styled TextView
+        // Create styled TextView（文字與背景顏色由 applyThemeColors() 設定）
         textView = TextView(context).apply {
-            // Set text color (light blue)
-            setTextColor(Color.parseColor("#4FC3F7"))
-            
             // Apply font size from preference
             val fontSizeScale = mLIMEPref.fontSize
             val scaledFontSizePx = baseFontSizePx * fontSizeScale
@@ -65,9 +63,7 @@ class ComposingTextPopup(private val context: Context) {
             
             // Set background with rounded corners (slightly darker gray, more translucent)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#CC2B2B2B")) // 80% opacity dark gray
                 cornerRadius = dpToPx(6).toFloat() // Slightly more rounded
-                setStroke(dpToPx(1), Color.parseColor("#664FC3F7")) // Subtle light blue border
             }
             
             // Single line
@@ -91,6 +87,20 @@ class ComposingTextPopup(private val context: Context) {
         }
     }
     
+    // 配色依系統深淺色切換：深色沿用原本的深灰浮窗，淺色用 Material3 淺色色票（與候選列一致）。
+    // 浮窗只建立一次，所以每次顯示前重新套用，輸入法執行中系統切換深淺色時才會跟著變
+    private fun applyThemeColors() {
+        val isNight = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+        textView?.apply {
+            setTextColor(Color.parseColor(if (isNight) "#4FC3F7" else "#006C4C")) // light blue / md_theme_primary
+            (background as? GradientDrawable)?.apply {
+                setColor(Color.parseColor(if (isNight) "#CC2B2B2B" else "#CCF0F1EC")) // 80% opacity dark gray / md_theme_inverseOnSurface
+                setStroke(dpToPx(1), Color.parseColor(if (isNight) "#664FC3F7" else "#66006C4C")) // Subtle light blue / primary border
+            }
+        }
+    }
+
     private fun dpToPx(dp: Int): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
@@ -121,6 +131,7 @@ class ComposingTextPopup(private val context: Context) {
         
         try {
             if (anchor.windowToken == null) return
+            applyThemeColors()
 
             // Get absolute screen location of the anchor
             val location = IntArray(2)

@@ -25,7 +25,7 @@
 <net.toload.main.hd.candidate.CandidateViewContainer xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#2B2B2B"
+    android:background="@color/keyboard_candidate_bar_background_material3"
     android:orientation="vertical">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"

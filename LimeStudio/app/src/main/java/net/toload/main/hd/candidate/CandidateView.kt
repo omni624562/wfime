@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,6 +94,50 @@ import net.toload.main.hd.LIMEService
 import net.toload.main.hd.R
 import net.toload.main.hd.data.Mapping
 import net.toload.main.hd.global.LIMEPreferenceManager
+
+// 候選列／工具列配色：深色沿用原本的 Gboard 風格深灰；淺色用 Material3 淺色色票（colors_material3.xml）
+private data class CandidateBarColors(
+    val background: Color,           // 候選列、工具列底色
+    val icon: Color,                 // 工具列圖示
+    val text: Color,                 // 一般候選字
+    val selectedText: Color,         // 選中的候選字、組字格裡的字根
+    val accent: Color,               // 英文組字記錄、選字鍵、清除鈕、翻頁鍵、頁碼
+    val chipBackground: Color,       // 選中底、組字格底、可翻頁時的按鈕底
+    val chipBorder: Color,           // 選中框、組字格框
+    val disabled: Color,             // 不能翻頁時的箭頭
+    val divider: Color,              // 清除鈕左側的分隔線
+    val rawKeycodeBackground: Color  // 螢幕鍵盤的英文原始碼候選底
+)
+
+private val DarkCandidateBarColors = CandidateBarColors(
+    background = Color(0xFF2B2B2B),
+    icon = Color.White,
+    text = Color.White,
+    selectedText = Color(0xFF4FC3F7),
+    accent = Color(0xFF80DEEA),
+    chipBackground = Color(0xFF1E272C),
+    chipBorder = Color(0xFF00796B),
+    disabled = Color(0xFF555555),
+    divider = Color.White.copy(alpha = 0.12f),
+    rawKeycodeBackground = Color(0xFF3A3A3A)
+)
+
+private val LightCandidateBarColors = CandidateBarColors(
+    background = Color(0xFFF0F1EC),              // md_theme_inverseOnSurface（比鍵盤底色 surface 暗一階）
+    icon = Color(0xFF404943),                    // md_theme_onSurfaceVariant
+    text = Color(0xFF191C1A),                    // md_theme_onSurface
+    selectedText = Color(0xFF006C4C),            // md_theme_primary
+    accent = Color(0xFF3E6374),                  // md_theme_tertiary
+    chipBackground = Color(0xFFCFE9D9),          // md_theme_secondaryContainer
+    chipBorder = Color(0xFF006C4C),              // md_theme_primary
+    disabled = Color(0xFF707972).copy(alpha = 0.5f), // md_theme_outline @ 50%
+    divider = Color.Black.copy(alpha = 0.12f),
+    rawKeycodeBackground = Color(0xFFDBE5DD)     // md_theme_surfaceVariant
+)
+
+@Composable
+private fun candidateBarColors(): CandidateBarColors =
+    if (isSystemInDarkTheme()) DarkCandidateBarColors else LightCandidateBarColors
 
 open class CandidateView @JvmOverloads constructor(
     context: Context,
@@ -313,6 +358,7 @@ open class CandidateView @JvmOverloads constructor(
     fun ToolbarRow(
         candidateFontSize: androidx.compose.ui.unit.TextUnit
     ) {
+        val c = candidateBarColors()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,7 +377,7 @@ open class CandidateView @JvmOverloads constructor(
                 Icon(
                     imageVector = Icons.Default.Assignment,
                     contentDescription = "Memo",
-                    tint = Color.White,
+                    tint = c.icon,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -346,7 +392,7 @@ open class CandidateView @JvmOverloads constructor(
                 Icon(
                     imageVector = Icons.Default.Mood,
                     contentDescription = "Emoji",
-                    tint = Color.White,
+                    tint = c.icon,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -371,7 +417,7 @@ open class CandidateView @JvmOverloads constructor(
                 Icon(
                     imageVector = Icons.Default.ContentPaste,
                     contentDescription = "Paste",
-                    tint = Color.White,
+                    tint = c.icon,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -393,7 +439,7 @@ open class CandidateView @JvmOverloads constructor(
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
-                    tint = Color.White,
+                    tint = c.icon,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -417,8 +463,8 @@ open class CandidateView @JvmOverloads constructor(
         val hasNextPage = endIndex < suggestions.size
         val hasPrevPage = startIndex > 0
         
-        // Stable Color — remembered so the object is not re-created on every recomposition
-        val gboardDark = remember { Color(0xFF2B2B2B) }
+        // 配色依系統深淺色切換（見 CandidateBarColors）
+        val c = candidateBarColors()
         // LazyRow only composes the visible candidates; the old Row + horizontalScroll
         // composed all (up to 210) items on every keystroke
         val candidateListState = rememberLazyListState()
@@ -453,7 +499,7 @@ open class CandidateView @JvmOverloads constructor(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(heightDp)
-                .background(gboardDark)
+                .background(c.background)
         ) {
             // Only render the scrollable content if we have a finite maximum width.
             // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
@@ -482,8 +528,8 @@ open class CandidateView @JvmOverloads constructor(
                                         .padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                                         .width(slotWidth)
                                         .fillMaxHeight()
-                                        .background(Color(0xFF1E272C), RoundedCornerShape(6.dp))
-                                        .border(1.dp, Color(0xFF00796B).copy(alpha = 0.7f), RoundedCornerShape(6.dp))
+                                        .background(c.chipBackground, RoundedCornerShape(6.dp))
+                                        .border(1.dp, c.chipBorder.copy(alpha = 0.7f), RoundedCornerShape(6.dp))
                                         .clickable {
                                             if (_rawKeycode.isNotEmpty()) {
                                                 mService?.commitTyped(_rawKeycode)
@@ -502,7 +548,7 @@ open class CandidateView @JvmOverloads constructor(
                                     }
                                     Text(
                                         text = slotText,
-                                        color = if (useRaw) Color(0xFF80DEEA) else Color(0xFF4FC3F7),
+                                        color = if (useRaw) c.accent else c.selectedText,
                                         fontSize = slotFontSize,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
@@ -578,7 +624,7 @@ open class CandidateView @JvmOverloads constructor(
                                                 brush = Brush.horizontalGradient(
                                                     colors = listOf(
                                                         Color.Transparent,
-                                                        gboardDark
+                                                        c.background
                                                     )
                                                 )
                                             )
@@ -592,7 +638,7 @@ open class CandidateView @JvmOverloads constructor(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .width(1.dp)
-                                        .background(Color.White.copy(alpha = 0.12f))
+                                        .background(c.divider)
                                 )
                                 Box(
                                     modifier = Modifier
@@ -606,7 +652,7 @@ open class CandidateView @JvmOverloads constructor(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Clear",
-                                        tint = Color(0xFF80DEEA),
+                                        tint = c.accent,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -626,13 +672,13 @@ open class CandidateView @JvmOverloads constructor(
                                         modifier = Modifier
                                             .size(22.dp)
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasPrevPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .background(if (hasPrevPage) c.chipBackground else Color.Transparent)
                                             .clickable(enabled = hasPrevPage) { pagePrev() },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "▲",
-                                            color = if (hasPrevPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            color = if (hasPrevPage) c.accent else c.disabled,
                                             fontSize = (candidateFontSize.value * 0.6f).sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -642,7 +688,7 @@ open class CandidateView @JvmOverloads constructor(
                                     if (totalPages > 1) {
                                         Text(
                                             text = "${currentPage + 1}/$totalPages",
-                                            color = Color(0xFF80DEEA),
+                                            color = c.accent,
                                             fontSize = (candidateFontSize.value * 0.45f).sp,
                                             modifier = Modifier.padding(vertical = 1.dp)
                                         )
@@ -654,13 +700,13 @@ open class CandidateView @JvmOverloads constructor(
                                         modifier = Modifier
                                             .size(22.dp)
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(if (hasNextPage) Color(0xFF1E272C) else Color.Transparent)
+                                            .background(if (hasNextPage) c.chipBackground else Color.Transparent)
                                             .clickable(enabled = hasNextPage) { pageNext() },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "▼",
-                                            color = if (hasNextPage) Color(0xFF80DEEA) else Color(0xFF555555),
+                                            color = if (hasNextPage) c.accent else c.disabled,
                                             fontSize = (candidateFontSize.value * 0.6f).sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -674,19 +720,19 @@ open class CandidateView @JvmOverloads constructor(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxHeight()
-                                        .background(gboardDark)
+                                        .background(c.background)
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
                                         modifier = Modifier
                                             .background(
-                                                color = Color(0xFF1E272C),
+                                                color = c.chipBackground,
                                                 shape = RoundedCornerShape(6.dp)
                                             )
                                             .border(
                                                 width = 1.dp,
-                                                color = Color(0xFF00796B),
+                                                color = c.chipBorder,
                                                 shape = RoundedCornerShape(6.dp)
                                             )
                                             .clickable {
@@ -703,7 +749,7 @@ open class CandidateView @JvmOverloads constructor(
                                         val displayText = if (_composingText.isNotEmpty()) _composingText else _rawKeycode
                                         Text(
                                             text = displayText,
-                                            color = Color(0xFF4FC3F7),
+                                            color = c.selectedText,
                                             fontSize = candidateFontSize,
                                             fontWeight = FontWeight.Bold,
                                             maxLines = 1
@@ -727,12 +773,13 @@ open class CandidateView @JvmOverloads constructor(
         onClick: () -> Unit,
         onLongClick: () -> Unit
     ) {
-        // Gboard-style: light text on dark background
-        // Composing code records (raw English output for Dayi) shown in cyan to distinguish from Chinese candidates
+        // 配色依系統深淺色切換（見 CandidateBarColors）
+        // Composing code records (raw English output for Dayi) use the accent color to distinguish from Chinese candidates
+        val c = candidateBarColors()
         val textColor = when {
-            isSelected -> Color(0xFF4FC3F7)
-            mapping.isComposingCodeRecord() -> Color(0xFF80DEEA)
-            else -> Color.White
+            isSelected -> c.selectedText
+            mapping.isComposingCodeRecord() -> c.accent
+            else -> c.text
         }
         val fontWeight = if (mapping.isHighLighted == true) FontWeight.Bold else FontWeight.Normal
 
@@ -742,12 +789,12 @@ open class CandidateView @JvmOverloads constructor(
         val backgroundModifier = if (isSelected) {
             Modifier
                 .background(
-                    color = Color(0xFF1E272C), // Premium dark slate background
+                    color = c.chipBackground, // 選中底色
                     shape = RoundedCornerShape(6.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF00796B), // Muted slate-teal border
+                    color = c.chipBorder, // 選中框
                     shape = RoundedCornerShape(6.dp)
                 )
         } else {
@@ -799,7 +846,7 @@ open class CandidateView @JvmOverloads constructor(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = selectionKey,
-                            color = Color(0xFF80DEEA), // Cyan keycode color
+                            color = c.accent, // 選字鍵
                             fontSize = fontSize * 0.7f,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.align(Alignment.Top) // raised slightly like superscript
@@ -816,12 +863,13 @@ open class CandidateView @JvmOverloads constructor(
         fontSize: androidx.compose.ui.unit.TextUnit,
         onClick: () -> Unit
     ) {
+        val c = candidateBarColors()
         Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .clickable(onClick = onClick)
                 .background(
-                    color = Color(0xFF3A3A3A),
+                    color = c.rawKeycodeBackground,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .padding(horizontal = 12.dp, vertical = 2.dp),
@@ -829,7 +877,7 @@ open class CandidateView @JvmOverloads constructor(
         ) {
             Text(
                 text = keycode,
-                color = Color(0xFF80DEEA),
+                color = c.accent,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1

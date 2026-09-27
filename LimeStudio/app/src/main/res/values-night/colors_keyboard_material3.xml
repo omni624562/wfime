@@ -34,6 +34,7 @@
         Uses Material3 primary (lighter in dark mode) and outline tokens
     -->
     <color name="keyboard_candidate_spacer_material3">@color/md_theme_outline</color>
+    <color name="keyboard_candidate_bar_background_material3">#2B2B2B</color> <!-- 候選列底色，沿用原本的 Gboard 風格深灰 -->
     <color name="keyboard_selection_keys_material3">#CC6CDBAC</color> <!-- md_theme_primary (dark) @ 80% -->
     <color name="keyboard_action_key_material3">@color/md_theme_primaryContainer</color>
     <color name="keyboard_action_key_icon_material3">@color/md_theme_onPrimaryContainer</color>
