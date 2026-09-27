@@ -131,8 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Handle Import Text from other application
+        // 只在第一次建立時處理；旋轉、切換語言等重建 Activity 時 intent 不變，不重複處理（已顯示的對話框由系統自動還原）
         Intent intent = getIntent();
-        String action = intent.getAction();
+        String action = savedInstanceState == null ? intent.getAction() : null;
         String type = getIntent().getType();
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
