@@ -172,7 +172,7 @@
     <string name="memo_deleted">備忘錄已刪除</string>
     <string name="memo_delete">刪除</string>
     <string name="memo_add_title">新增常用備忘錄</string>
-    <string name="memo_input_hint">輸入欲儲存的文字內容...</string>
+    <string name="memo_input_hint">輸入欲儲存的文字內容…</string>
     <string name="memo_saved">備忘錄已儲存</string>
     <string name="memo_input_required">請輸入內容</string>
     <string name="memo_save">儲存</string>
