@@ -182,8 +182,9 @@ public abstract class LimeSQLiteOpenHelper {
         // if (mDatabase != null) mDatabase. .lock();
         try {
 
+            // 開啟時就用 WAL：否則連線會先試著切成預設的 TRUNCATE，同程序已有其他連線時失敗並留下「database is locked」警告
             db = SQLiteDatabase.openDatabase(destpath.getAbsolutePath(), null, SQLiteDatabase.OPEN_READWRITE
-                    | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+                    | SQLiteDatabase.NO_LOCALIZED_COLLATORS | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING);
         } catch (Exception e) {
 
             File ch = new File(destpath.getAbsolutePath());
