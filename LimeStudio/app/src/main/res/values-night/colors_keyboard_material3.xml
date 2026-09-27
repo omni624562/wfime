@@ -13,7 +13,6 @@
     -->
     <color name="keyboard_background_material3">@color/md_theme_surface</color>
     <color name="keyboard_second_background_material3">@color/md_theme_surfaceVariant</color>
-    <color name="keyboard_third_background_material3">@color/md_theme_surface</color>
     <color name="keyboard_functional_background_material3">@color/md_theme_surfaceVariant</color>
 
     <!--

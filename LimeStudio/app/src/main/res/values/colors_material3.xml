@@ -38,7 +38,6 @@
     
     <!-- Outline -->
     <color name="md_theme_outline">#707972</color>
-    <color name="md_theme_outlineVariant">#BFC9C1</color>
     
     <!-- Inverse colors -->
     <color name="md_theme_inverseSurface">#2E312E</color>

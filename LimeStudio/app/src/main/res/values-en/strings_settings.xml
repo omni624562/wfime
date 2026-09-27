@@ -3,23 +3,8 @@
     <!-- chinese_punctuation 是中文標點符號資料，刻意不翻譯（沿用預設值）；*_values / *_codes 陣列為程式內部值，不可翻譯 -->
     <string name="ime_setting">LIME-HD Settings</string>
     <string name="input_method">Switch system input method</string>
-    <string name="experienced_device">Development test device</string>
-    <string name="license">License</string>
-    <string name="license_detail">LIME-HD is an input method framework that provides Chinese input methods for Android devices.\nIf there is any copyright dispute over input method tables or dictionary files downloaded from the internet by organizations or individuals, please obtain permission from the original authors. This program assumes no legal or copyright liability arising from them.\nFor full details, see the license on the LIME Project website  http://code.google.com/p/limeime/.</string>
-    <string name="label_close_key">Close</string>
-    <string name="lime_setting_btn_load_local_notice">Please select a .LIME or .CIN file</string>
-    <string name="lime_setting_loading">Do not close this window or leave the app while loading, or the import may fail</string>
-    <string name="lime_setting_notification_loading">Preparing to import data</string>
-    <string name="lime_setting_notification_failed">Failed to import records</string>
-    <string name="lime_setting_notification_finish">Records imported</string>
-    <string name="lime_setting_notification_related">Building related phrases</string>
-    <string name="lime_setting_notification_loading_end">loaded</string>
-    <string name="lime_setting_notification_loading_build">mapping table</string>
-    <string name="lime_setting_notification_loading_import">key codes</string>
-    <string name="lime_setting_db">Mapping tables</string>
     <string name="lime_setting_preference">Preferences</string>
     <string name="keyboard">Keyboard</string>
-    <string name="Similiar">Related phrases</string>
     <string name="mapping">Mapping table</string>
     <string name="keyboard_list">LIME input method switching</string>
     <string name="enable_emoji">Show emoji</string>
@@ -30,48 +15,26 @@
     <string name="persistent_language_mode_summary">Keep the Chinese/English mode until you switch it</string>
     <string name="number_row_in_english">Number row on English keyboard</string>
     <string name="number_row_in_english_summary">Show a number row on the English keyboard (5-row keyboard)</string>
-    <string name="disable_software_keyboard">Hide on-screen keyboard</string>
-    <string name="fixed_candidate_view_display">Always show candidate bar</string>
-    <string name="enable_transparent_candidate_view">Transparent candidate bar background</string>
-    <string name="three_rows_remapping">3-row keyboard remapping</string>
-    <string name="three_rows_remapping_summary">Map 1234567890-; to qwertyuiopv.</string>
     <string name="physical_keyboard">Physical keyboard options</string>
     <string name="phonetic_keyboard">Chuyin keyboard options</string>
-    <string name="prediction_category">English suggestions</string>
-    <string name="auto_cap">Auto-capitalize</string>
-    <string name="auto_cap_summary">Capitalize the first letter of English sentences</string>
-    <string name="quick_fixes">Quick fixes</string>
-    <string name="quick_fixes_summary">Correct common typing mistakes</string>
-    <string name="auto_complete">Auto-complete</string>
-    <string name="auto_complete_summary">Pressing space or punctuation inserts the highlighted word.</string>
     <string name="im">Input method</string>
     <string name="enable_english_dictionary">English dictionary</string>
     <string name="enable_english_dictionary_summary">Show English suggestions in English input mode</string>
     <string name="enable_english_dictionary_physical_keyboard">English dictionary for physical keyboard</string>
     <string name="enable_english_dictionary_physical_keyboard_summary">Show English suggestions when typing English on a physical keyboard</string>
-    <string name="im_reverse_lookup_list">Key code reverse lookup</string>
-    <string name="default_reverse_lookup_list">User key code reverse lookup</string>
-    <string name="dayi_reverse_lookup_list">Dayi key code reverse lookup</string>
-    <string name="bpmf_reverse_lookup_list">Chuyin key code reverse lookup</string>
     <string name="reverse_lookup_notify">Show reverse lookup notifications</string>
     <string name="han_convert_ts">Traditional to Simplified</string>
     <string name="han_convert_st">Simplified to Traditional</string>
-    <string name="han_convert_notify">Traditional/Simplified conversion reminder</string>
-    <string name="han_convert_notify_summary">Remind about the conversion setting when typing resumes after more than 60 seconds</string>
     <string name="han_convert_option_list">Traditional/Simplified Chinese conversion</string>
     <string name="selkey_option_list">Selection key preference</string>
-    <string name="table_list">Select mapping table</string>
     <string name="similiar_list">Number of suggestions</string>
     <string name="vibrate_on_keypress">Vibrate on keypress</string>
     <string name="sound_on_keypress">Sound on keypress</string>
-    <string name="display_number_keypads">Show number keys</string>
-    <string name="display_number_keypads_summary">Show number buttons on the keyboard</string>
     <string name="similiar_enable_switch">Built-in related phrase dictionary</string>
     <string name="similiar_enable_switch_summary">Show suggestions from the built-in related phrase dictionary after selecting a word</string>
     <string name="candidate_switch">Swipe to select</string>
     <string name="candidate_switch_summary">Swipe to select input method suggestions</string>
     <string name="candidate_suggestion">User related phrases</string>
-    <string name="candidate_suggestion_punctuation">Remember punctuation in user related phrases</string>
     <string name="candidate_suggestion_summary">Learn related phrases from what you type and show them after selecting a word</string>
     <string name="related_manager_entry">Manage user related phrases</string>
     <string name="related_manager_entry_summary">View, delete or clear learned related phrases</string>
@@ -115,79 +78,19 @@
     <string name="switch_english_mode_summary_2">Press [SHIFT] alone to switch input mode (physical keyboard)</string>
     <string name="typing_mode_english">Switch input mode / English</string>
     <string name="typing_mode_mixed">Switch input mode / Mixed</string>
-    <string name="l3_message_initial_required">Please initialize the LIME database_</string>
-    <string name="l3_tab_initial">Initialize database</string>
     <string name="l3_tab_initial_error">Download failed. Please make sure the device is connected to the internet.</string>
-    <string name="l3_tab_initial_message">Tap [Preloaded database] OR [Empty database] to download the LIME database, or tap [Restore database] to restore it from a backup</string>
-    <string name="l3_initial_btn_load_empty_db">Empty database</string>
-    <string name="l3_initial_btn_load_phonetic_only_db">Chuyin-only database</string>
-    <string name="l3_initial_btn_load_preload_db">Preloaded database \nChuyin, Dayi, </string>
-    <string name="l3_initial_btn_reset_db">Reset database</string>
-    <string name="l3_initial_btn_store_to_sdcard">Move the database storage to the SD card? This may cause poor performance on some devices.</string>
-    <string name="l3_initial_btn_store_to_device">Move the database storage to the device? </string>
-    <string name="l3_initial_btn_store_device">Device storage</string>
-    <string name="l3_tab_manage">Input method management</string>
-    <string name="l3_manage_default">User</string>
-    <string name="l3_manage_phonetic">Chuyin</string>
-    <string name="l3_manage_dayi">Dayi</string>
-    <string name="l3_tab_preference">Preferences</string>
-    <string name="l3_dbservice_download_start">Downloading the preloaded database. This may take one to several minutes, please wait.</string>
-    <string name="l3_dbservice_download_start_empty">Downloading the empty database. This may take one to several minutes, please wait.</string>
-    <string name="l3_dbservice_download_initial">Initializing database.</string>
-    <string name="l3_dbservice_download_loaded">Database loaded.</string>
-    <string name="l3_dbservice_download_convert">Converting input method…</string>
-    <string name="l3_message_table_downloading">Downloading mapping file…</string>
-    <string name="l3_message_database_reset_confirm">Remove the database?</string>
-    <string name="l3_message_table_reset_confirm">Clear all records?</string>
-    <string name="l3_message_table_download_confirm">Do not close this window or leave the app while loading, or the import may fail. Download the mapping file?</string>
-    <string name="l3_message_table_abort_confirm">Stop loading the mapping file?</string>
-    <string name="l3_initial_download_database">Download database</string>
-    <string name="l3_initial_database_failed">Operation failed! Please try again later and check that the database is fully loaded!</string>
     <string name="l3_initial_download_failed">Data conversion error. Please reset the database and download again!</string>
     <string name="l3_initial_download_write_sdcard_failed">Please make sure the SD card is mounted, then reset the database and download again!</string>
-    <string name="l3_initial_backup_database">Back up database</string>
-    <string name="l3_initial_backup_start">Database backup started</string>
     <string name="l3_initial_backup_end">Database backup completed</string>
-    <string name="l3_initial_backup_confirm">Back up the database?</string>
     <string name="l3_initial_backup_error">Database backup failed</string>
-    <string name="l3_initial_cloud_backup_database">Cloud backup</string>
-    <string name="l3_initial_cloud_restore_database">Cloud restore</string>
-    <string name="l3_initial_restore_database">Restore database</string>
     <string name="l3_initial_restore_error">Restore failed. Please make sure the backup file exists.</string>
-    <string name="l3_initial_restore_confirm">Restore the database?</string>
-    <string name="l3_initial_restore_start">Database restore started</string>
     <string name="l3_initial_restore_end">Database restore completed</string>
-    <string name="l3_im_setting_select_keyboard">Select the input method keyboard</string>
-    <string name="l3_im_setting_back">Back</string>
-    <string name="l3_im_setting_title">Mapping table settings</string>
-    <string name="l3_im_setting_source">Source: </string>
-    <string name="l3_im_setting_keyboard">Keyboard: </string>
-    <string name="l3_im_setting_version">Version: </string>
-    <string name="l3_im_setting_total_amount">Entries: </string>
-    <string name="l3_im_setting_import_date">Status: </string>
-    <string name="l3_im_setting_button_load">Import mapping file</string>
-    <string name="l3_im_setting_button_reset">Remove mapping file</string>
-    <string name="l3_im_setting_button_select">Select keyboard</string>
     <string name="l3_im_download_from_dayi">Install OpenVanilla Dayi key codes</string>
-    <string name="l3_im_download_from_dayi_start">Downloading OpenVanilla Dayi key codes</string>
-    <string name="l3_im_download_from_dayi_install">Installing OpenVanilla Dayi key codes</string>
     <string name="l3_im_download_from_phonetic">Install OpenVanilla Chuyin key codes</string>
-    <string name="l3_im_download_from_phonetic_start">Downloading OpenVanilla Chuyin key codes</string>
-    <string name="l3_im_download_from_phonetic_install">Installing OpenVanilla Chuyin key codes</string>
     <string name="l3_im_download_from_phonetic_big5">Install OpenVanilla Chuyin key codes (Big5)</string>
     <string name="l3_im_download_from_phonetic_adv">Install OpenVanilla Chuyin key codes (advanced)</string>
     <string name="l3_im_download_from_phonetic_adv_big5">Install OpenVanilla Chuyin key codes (advanced, Big5)</string>
-    <string name="l3_im_download_from_phonetic_cns">Traditional Chuyin CNS11643 key codes. Some characters may not display correctly depending on the device and OS fonts</string>
-    <string name="l3_im_download_from_phonetic_cns_start">Downloading Chuyin CNS11643 key codes</string>
-    <string name="l3_im_download_from_phonetic_cns_install">Installing Chuyin CNS11643 key codes</string>
-    <string name="l3_im_download_from_phonetic_cns_warning">The file is large, so importing will take longer</string>
-    <string name="l3_im_download_from_cjk_phonetic">Install Chuyin key codes</string>
-    <string name="l3_im_download_from_cjk_phonetic_start">Downloading Chuyin key codes</string>
-    <string name="l3_im_download_from_cjk_phonetic_install">Installing Chuyin key codes</string>
-    <string name="l3_im_database_error">Database error. Please wait a moment and try again.</string>
     <string name="l3_database_loading">Loading database, please wait…</string>
-    <string name="l3_database_not_exist">Database not found. Please download the database first</string>
-    <string name="l3_im_notice">To save memory, we strongly recommend clearing input method tables you rarely use, or using the empty database and loading individual mapping files.</string>
     <string name="hide_software_keyboard_typing_with_physical">Auto-hide on-screen keyboard</string>
     <string name="hide_software_keyboard_typing_with_physical_summary">Hide the on-screen keyboard when typing on a physical keyboard. S-PEN users should leave this off</string>
     <string name="split_keyboard">Split keyboard</string>
@@ -201,7 +104,6 @@
     <string name="auto_commit">Auto-commit on phone keypad</string>
     <string name="auto_commit_summary">Automatically commit when the number of key codes reaches the set value</string>
     <string name="disable_physical_selkey_option">Disable physical keyboard selection keys</string>
-    <string name="reset_db_note">If text cannot be entered correctly, we recommend resetting the database and downloading or importing the mapping files again.</string>
     <string name="enable_dayi">Enable Dayi</string>
     <string name="enable_dayi_summary_on">The Dayi keyboard appears when switching input methods</string>
     <string name="enable_dayi_summary_off">The Dayi keyboard does not appear when switching input methods</string>
@@ -244,11 +146,6 @@
     <string-array name="phonetic_keyboard_type">
         <item>Standard</item>
     </string-array>
-    <string-array name="im_reverse_lookup">
-        <item>None</item>
-        <item>Dayi</item>
-        <item>Chuyin</item>
-    </string-array>
     <string-array name="keyboard">
         <item>Dayi input method</item>
         <item>Chuyin input method</item>
@@ -256,13 +153,6 @@
     <string-array name="keyboardShortname">
         <item>Dayi</item>
         <item>Chuyin</item>
-    </string-array>
-    <string-array name="table">
-        <item>User / Phone</item>
-        <item>Dayi</item>
-        <item>Chuyin</item>
-        <item>Preloaded related phrases</item>
-        <item>English dictionary</item>
     </string-array>
     <string-array name="show_arrow_keys_options">
         <item>None</item>
