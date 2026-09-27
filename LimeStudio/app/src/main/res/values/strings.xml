@@ -127,7 +127,7 @@
     <string name="help_get_started">開始使用麥田輸入法</string>
     <string name="help_feature_left_paging_title">大易實體鍵盤左側翻頁面板</string>
     <string name="help_feature_left_paging_desc">專為實體外接鍵盤設計，將「▲ (上頁) / ▼ (下頁)」翻頁控制列移至最左側。實現「右手打字、左手翻頁」的完美分工，按鈕隨頁數動態亮起，大幅降低手部移動疲勞與誤觸率。</string>
-    <string name="help_feature_immersive_title">全面屏沉浸式設定主控台</string>
+    <string name="help_feature_immersive_title">全螢幕沉浸式設定主控台</string>
     <string name="help_feature_immersive_desc" formatted="false">拋棄傳統 XML 頂部標題贅肉，讓設定畫面完美直通頂部邊緣，結合極簡左側導覽列與磨砂玻璃漸層背景，釋放超過 15% 以上的閱讀空間，展現極致高貴設計感。</string>
     <string name="help_feature_ai_light_title">AI 智慧選字呼吸指示燈</string>
     <string name="help_feature_ai_light_desc">大易智慧選字模組升級為「AI 智慧核心」，搭載全新狀態呼吸燈。啟用時會亮起科技綠色，並微亮渲染整張卡片，以動態科技美學呈現系統運算狀態。</string>
@@ -145,15 +145,15 @@
     <string name="help_log_20260927_4">「自動隱藏軟鍵盤」設定生效：關閉後接實體鍵盤仍顯示螢幕鍵盤。</string>
     <string name="help_log_20260927_5">分享文字的匯入對話框可用返回鍵關閉，旋轉畫面後也不再重複跳出。</string>
     <string name="help_log_20260927_6">多項穩定性修正：資料庫鎖定時不再卡住、過長的按鍵標籤自動縮小。</string>
-    <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁優化 (▲/▼)。</string>
-    <string name="help_log_20260601_2">平板雙欄全面屏沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
+    <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁改善 (▲/▼)。</string>
+    <string name="help_log_20260601_2">平板雙欄全螢幕沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
     <string name="help_log_20260601_3">大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。</string>
     <string name="help_log_20260601_4">整合使用說明與重置功能至導覽列底部。</string>
     <string name="help_log_20260228_1">簡化架構，移除舊用語音輸入功能按鍵與 VoiceInputActivity。</string>
     <string name="help_log_20260228_2">為 LimeDB、IMSwitchHelper、OptionsDialogHelper 新增 66 項全數通過之單元測試案例。</string>
     <string name="help_log_20260205_1">修復繪文字鍵盤 (Emoji Picker) 切換中斷與輸入法崩潰問題。</string>
     <string name="help_log_20260205_2">最佳化輸入法開啟穩定度與系統整合。</string>
-    <string name="help_log_20260103_1">全面導入 Material Design 3 設計語言，支援動態色彩與全屏顯示。</string>
+    <string name="help_log_20260103_1">全面導入 Material Design 3 設計語言，支援動態色彩與全螢幕顯示。</string>
     <string name="help_log_20260103_2">修復側邊選單導致的隨機程式崩潰 Bug。</string>
     <string name="help_log_20260103_3">版本格式更動為日期格式 (yyyy.MM.dd) 以利識別。</string>
 
