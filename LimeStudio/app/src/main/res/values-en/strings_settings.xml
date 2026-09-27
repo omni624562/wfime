@@ -198,9 +198,9 @@
     <string name="settings_reset">Reset settings</string>
     <string name="settings_category_load_mapping">Load mapping tables</string>
     <string name="settings_phonetic_loaded">Chuyin (loaded)</string>
-    <string name="settings_phonetic_load">Load Chuyin table</string>
+    <string name="settings_phonetic_load">Load Chuyin</string>
     <string name="settings_dayi_loaded">Dayi (loaded)</string>
-    <string name="settings_dayi_load">Load Dayi table</string>
+    <string name="settings_dayi_load">Load Dayi</string>
     <string name="settings_group_smart_emoji">Smart input &amp; emoji</string>
     <string name="settings_group_keyboard_layout">Keyboard layout &amp; size</string>
     <string name="settings_group_key_feedback">Key feedback &amp; physical keyboard</string>
