@@ -126,6 +126,30 @@ public class LIMEService extends InputMethodService implements
     final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     // 連打模式:目前候選列(mCandidateList)對應的組字碼;與 setSuggestions 同步於主執行緒更新
     private volatile String mLastSuggestionsCode = null;
+
+    // 查詢執行緒算好、還在主執行緒排隊等著套用的最新候選結果;
+    // 選字鍵搶在結果套用之前按下時,由 ensureCandidatesCurrent() 直接套用
+    private static final class PendingSuggestions {
+        final int seq;
+        final String code;
+        final LinkedList<Mapping> list;
+        final boolean physical;
+        final String selkey;
+
+        PendingSuggestions(int seq, String code, LinkedList<Mapping> list, boolean physical, String selkey) {
+            this.seq = seq;
+            this.code = code;
+            this.list = list;
+            this.physical = physical;
+            this.selkey = selkey;
+        }
+    }
+
+    private volatile PendingSuggestions mPendingSuggestions = null;
+    // 候選查詢的序號(只在主執行緒讀寫):mQuerySeq 是最新送出的查詢,
+    // mAppliedQuerySeq 是結果已套用到候選列的查詢;兩者相同表示候選清單就是目前組字的結果
+    private int mQuerySeq = 0;
+    private int mAppliedQuerySeq = 0;
     final CandidateViewHandler mCandidateViewHandler = new CandidateViewHandler(this);
     final CandidateController mCandidateController = new CandidateController(this);
     public boolean hasMappingList = false;
@@ -1606,8 +1630,9 @@ public class LIMEService extends InputMethodService implements
                 
                 if (symbol != null) {
                     // 組字中自動送出已選或首選字：先送出當前組字字元，再送出標點
+                    // （候選清單等不到目前組字的結果時，送出原始組字，不用舊清單選字）
                     if (mComposing != null && mComposing.length() > 0) {
-                        if (hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
+                        if (ensureCandidatesCurrent() && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
                             pickCandidateManually(0);
                         } else {
                             commitTyped(mComposing.toString());
@@ -1644,7 +1669,7 @@ public class LIMEService extends InputMethodService implements
                     if (symbol != null) {
                         // 同 Method 1：先送出組字字元，再送出標點
                         if (mComposing != null && mComposing.length() > 0) {
-                            if (hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
+                            if (ensureCandidatesCurrent() && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
                                 pickCandidateManually(0);
                             } else {
                                 commitTyped(mComposing.toString());
@@ -1843,6 +1868,9 @@ public class LIMEService extends InputMethodService implements
                     hasSpaceProcessed = true;
                     return true;
                 } else {
+                    // 候選清單可能還是上一碼的結果:先套用目前組字的查詢結果,等不到就吃掉這個鍵
+                    if (activeIM != null && activeIM.startsWith("dayi") && !ensureCandidatesCurrent())
+                        return true;
                     if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty() && hasPhysicalKeyPressed) {
                         int candidateIndex = -1;
                         if (mCandidateView != null && mCandidateView.retrieveSelectedIndex() != -1) {
@@ -1909,6 +1937,13 @@ public class LIMEService extends InputMethodService implements
             default:
                 if (!(hasCtrlPress || event.isCtrlPressed() || hasMenuPress)) {
                     // Dayi Fast Candidate Selection: ', [, ], -, \ select candidates 1 through 5
+                    // 候選清單可能還是上一碼的結果(或第一碼的結果還沒顯示):先套用目前組字的查詢結果,等不到就吃掉這個鍵
+                    if (activeIM != null && activeIM.startsWith("dayi")
+                            && (keyCode == KeyEvent.KEYCODE_APOSTROPHE || keyCode == KeyEvent.KEYCODE_LEFT_BRACKET
+                                    || keyCode == KeyEvent.KEYCODE_RIGHT_BRACKET || keyCode == KeyEvent.KEYCODE_MINUS
+                                    || keyCode == KeyEvent.KEYCODE_BACKSLASH)
+                            && !ensureCandidatesCurrent())
+                        return true;
                     if (activeIM != null && activeIM.startsWith("dayi") && hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty()) {
                         int candidateIndex = -1;
                         if (keyCode == KeyEvent.KEYCODE_APOSTROPHE) {
@@ -1945,6 +1980,12 @@ public class LIMEService extends InputMethodService implements
         if ((hasCtrlPress || event.isCtrlPressed() || hasMenuPress) && !mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
             int primaryKey = (hasCtrlPress || event.isCtrlPressed()) ? event.getUnicodeChar(0) : event.getUnicodeChar(LIMEMetaKeyKeyListener.getMetaState(mMetaState));
             char t = (char) primaryKey;
+
+            // Ctrl+數字選字前,候選清單可能還是上一碼的結果:先套用目前組字的查詢結果,等不到就吃掉這個鍵
+            if ((hasCtrlPress || event.isCtrlPressed())
+                    && keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9
+                    && !ensureCandidatesCurrent())
+                return true;
 
             if ((hasCtrlPress || event.isCtrlPressed()) && // Only working with ctrl Jeremy '11,8,22
                     mCandidateList != null && mCandidateList.size() > 0
@@ -2623,6 +2664,9 @@ public class LIMEService extends InputMethodService implements
         } else if (primaryCode == KEYCODE_SWITCH_TO_IM_MODE && mInputView != null) { // eng -> chi
             switchKeyboard(primaryCode);
         } else if (primaryCode == MY_KEYCODE_SPACE && activeIM != null && activeIM.startsWith("dayi") && mComposing.length() > 0) {
+            // 候選清單可能還是上一碼的結果:先套用目前組字的查詢結果,等不到就吃掉這個鍵
+            if (!ensureCandidatesCurrent())
+                return;
             if (hasCandidatesShown) {
                 // If there is an exact match for the current composing length, pick it
                 boolean hasExactMatch = false;
@@ -2691,7 +2735,9 @@ public class LIMEService extends InputMethodService implements
                 if (mComposing != null && mComposing.length() == auto_commit &&
                         currentSoftKeyboard != null && currentSoftKeyboard.contains("phone")) {
                     InputConnection ic = getCurrentInputConnection();
-                    commitTyped(ic);
+                    // 這一碼的查詢才剛送出:先套用它的結果再上字,不要上到前一碼的首選
+                    if (ensureCandidatesCurrent())
+                        commitTyped(ic);
 
                 }
             }
@@ -3149,6 +3195,7 @@ public class LIMEService extends InputMethodService implements
 
             final String finalKeyString = keyString;
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
+            final int querySeq = ++mQuerySeq;
             if (queryFuture != null) queryFuture.cancel(true);
             queryFuture = queryExecutor.submit(() -> {
 
@@ -3287,14 +3334,18 @@ public class LIMEService extends InputMethodService implements
                         }
                     }
 
+                    mPendingSuggestions = new PendingSuggestions(querySeq, finalKeyString, list,
+                            finalHasPhysicalKeyPressed, selkey);
                     if (list.size() > 0) {
                         // 與 setSuggestions 同在主執行緒原子更新:記錄這批候選對應的
                         // 組字碼,供連打模式判斷 mCandidateList 是否仍是當前碼的結果
                         final String finalSelkey = selkey;
                         mMainHandler.post(() -> {
-                            // 結果排到主執行緒時組字可能已經變了(例如快速按刪除清空組字),
-                            // 過期的結果不要蓋掉目前的候選列
-                            if (!finalKeyString.contentEquals(mComposing)) return;
+                            // 結果排到主執行緒時組字可能已經變了(例如快速按刪除清空組字、又重打同一個碼),
+                            // 只套用最新一次查詢的結果(已被 ensureCandidatesCurrent() 套用過也再套一次,
+                            // 蓋掉之後才到的關聯字清單,順序跟原本一樣)
+                            if (querySeq != mQuerySeq || !finalKeyString.contentEquals(mComposing)) return;
+                            mAppliedQuerySeq = querySeq;
                             mLastSuggestionsCode = finalKeyString;
                             setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
                         });
@@ -3304,7 +3355,8 @@ public class LIMEService extends InputMethodService implements
                                     + ", mComposing = " + mComposing);
                     } else {
                         mMainHandler.post(() -> {
-                            if (!finalKeyString.contentEquals(mComposing)) return;
+                            if (querySeq != mQuerySeq || !finalKeyString.contentEquals(mComposing)) return;
+                            mAppliedQuerySeq = querySeq;
                             mLastSuggestionsCode = null;
                             clearSuggestions();
                         });
@@ -3701,6 +3753,7 @@ public class LIMEService extends InputMethodService implements
                 }
                 clearSuggestions(); // Clears internal lists
                 hasCandidatesShown = false; // Reset flag
+                mLastSuggestionsCode = null; // 候選清單已不是任何組字碼的結果
             } else {
                 // Composing still has text
                 // Just update CandidateView composing text
@@ -4082,6 +4135,9 @@ public class LIMEService extends InputMethodService implements
                 case ' ': i = 0; break;
             }
             if (i != -1) {
+                // 候選清單可能還是上一碼的結果:先套用目前組字的查詢結果,等不到就吃掉這個鍵
+                if (!ensureCandidatesCurrent())
+                    return true;
                 pickCandidateManually(i);
                 return true;
             }
@@ -4130,6 +4186,12 @@ public class LIMEService extends InputMethodService implements
             i = relatedSelkey.indexOf(primaryCode);
         }
 
+        // 候選清單可能還是上一碼的結果:先套用目前組字的查詢結果,等不到就吃掉這個鍵
+        if (i >= 0 && !ensureCandidatesCurrent())
+            return true;
+        // 目前組字查無候選(候選列已隱藏):跟結果早就套用時一樣,這個鍵當成一般輸入
+        if (i >= 0 && mComposing.length() > 0 && !hasCandidatesShown)
+            return false;
         if (i < 0 || i >= mCandidateList.size()) {
             return false;
         } else {
@@ -4153,7 +4215,9 @@ public class LIMEService extends InputMethodService implements
 
         // Jeremy '11,6,6 processing physical keyboard selkeys.
         // Move here '11,6,9 to have lower priority than hasnumbermapping
-        if (hasPhysicalKeyPressed && (mCandidateView != null && hasCandidatesShown)) { // Replace isCandidateShown()
+        // 候選列還沒顯示、但目前組字的查詢結果還在排隊時也要判斷選字鍵(handleSelkey 會先套用結果)
+        if (hasPhysicalKeyPressed && (mCandidateView != null
+                && (hasCandidatesShown || (mComposing.length() > 0 && mAppliedQuerySeq != mQuerySeq)))) { // Replace isCandidateShown()
                                                                                        // with hasCandidatesShown by
                                                                                        // Jeremy '12,5,6
             if (handleSelkey(primaryCode)) {
@@ -4340,6 +4404,44 @@ public class LIMEService extends InputMethodService implements
     // Delegates to CandidateController
     public boolean pickHighlightedCandidate() {
         return mCandidateController.pickHighlightedCandidate();
+    }
+
+    /**
+     * 組字中要用候選清單選字(空白、快選鍵、選字鍵)之前呼叫。
+     * 查詢結果要排隊才會套用,按鍵可能先到,這時清單還是上一碼(或關聯字)的結果:
+     * 先把查詢執行緒已算好的目前組字結果直接套用;還沒算好就最多等 80 ms。
+     * 回傳 false 表示等不到,呼叫端應吃掉這個鍵,不要用舊清單選字。組字為空時一律回傳 true。
+     */
+    private boolean ensureCandidatesCurrent() {
+        if (mComposing.length() == 0 || mAppliedQuerySeq == mQuerySeq)
+            return true;
+        PendingSuggestions pending = mPendingSuggestions;
+        if (pending == null || pending.seq != mQuerySeq) {
+            java.util.concurrent.Future<?> future = queryFuture;
+            if (future != null) {
+                try {
+                    future.get(80, java.util.concurrent.TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception ignored) {
+                    // 逾時、已取消或查詢失敗:下面判斷結果還沒到
+                }
+            }
+            pending = mPendingSuggestions;
+        }
+        if (pending == null || pending.seq != mQuerySeq) {
+            return false;
+        }
+        mAppliedQuerySeq = pending.seq;
+        if (pending.list.isEmpty()) {
+            // 目前組字查無候選:跟查詢結果的清空分支做一樣的事
+            mLastSuggestionsCode = null;
+            clearSuggestions();
+        } else {
+            mLastSuggestionsCode = pending.code;
+            setSuggestions(pending.list, pending.physical, pending.selkey);
+        }
+        return true;
     }
 
     /**
