@@ -340,20 +340,6 @@ open class CandidateView @JvmOverloads constructor(
         return if (suggestions.isNotEmpty()) 10000 else 0
     }
     
-    fun isCandidateExpanded(): Boolean {
-        return false // Prototype does not support expanded view yet
-    }
-    
-    fun isEmpty(): Boolean {
-        return suggestions.isEmpty()
-    }
-    
-    fun showCandidatePopup() {
-        // Prototype: just log or do nothing. Original showed a popup window.
-        // Should we implement the popup? 
-        // mService?.doVibrateSound(0)
-    }
-
     @Composable
     fun ToolbarRow(
         candidateFontSize: androidx.compose.ui.unit.TextUnit
@@ -890,15 +876,10 @@ open class CandidateView @JvmOverloads constructor(
     fun updateFontSize() {
         _fontSizeScale = mLIMEPref.fontSize
     }
-    fun setTouchX(x: Int) {}
-    fun takeSuggestionAt(x: Int) {}
-    fun onTouchReal(event: android.view.MotionEvent): Boolean = false
     
     fun setComposingText(text: String) {
         _composingText = text
     }
-    fun setTransparentCandidateView(transparent: Boolean) {}
-    fun startSymbolInput() {}
     fun forceHide() {
         clear()
     }

@@ -25,12 +25,8 @@ public class HardKeyHelper {
 
         service.hasPhysicalKeyPressed = true;
 
-        // If user use the physical keyboard then not fixed the candidate view also use
-        // the tranparent background
+        // If user use the physical keyboard then not fixed the candidate view
         service.mFixedCandidateViewOn = false;
-        if (service.mCandidateView != null) {
-            service.mCandidateView.setTransparentCandidateView(false);
-        }
 
         // hide softkeyboard. Jeremy '12,5,8
         // Should not hide inputView or the candidateView cannot be shown in first

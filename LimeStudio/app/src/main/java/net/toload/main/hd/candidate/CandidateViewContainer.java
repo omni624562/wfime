@@ -27,16 +27,13 @@ package net.toload.main.hd.candidate;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import net.toload.main.hd.R;
 
-public class CandidateViewContainer extends LinearLayout implements OnTouchListener {
+public class CandidateViewContainer extends LinearLayout {
 
     private ImageButton mButtonExpand;
     private CandidateView mCandidateView;
@@ -51,9 +48,6 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
     public void initViews() {
         if (mCandidateView == null) {
             mButtonExpand = findViewById(R.id.candidate_right);
-            if (mButtonExpand != null) {
-                mButtonExpand.setOnTouchListener(this);
-            }
             mCandidateView = findViewById(R.id.candidates);
             TextView mEmbeddedTextView = findViewById(R.id.embeddedComposing);
 
@@ -86,25 +80,12 @@ public class CandidateViewContainer extends LinearLayout implements OnTouchListe
             int neededWidth = mCandidateView.computeHorizontalScrollRange();
 
             boolean rightVisible = availableWidth < neededWidth;
-            if (mCandidateView.isCandidateExpanded())
-                rightVisible = true;
 
             if (mButtonExpand != null) {
                 mButtonExpand.setVisibility(rightVisible ? VISIBLE : GONE);
             }
         }
         super.requestLayout();
-    }
-
-    public boolean onTouch(View v, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (v == mButtonExpand) {
-
-                mCandidateView.showCandidatePopup();
-
-            }
-        }
-        return false;
     }
 
 }

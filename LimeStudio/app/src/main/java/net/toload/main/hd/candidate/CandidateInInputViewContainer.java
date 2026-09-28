@@ -28,14 +28,13 @@ package net.toload.main.hd.candidate;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import net.toload.main.hd.R;
 
-public class CandidateInInputViewContainer extends LinearLayout implements View.OnClickListener {
+public class CandidateInInputViewContainer extends LinearLayout {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "CandiInputViewContainer";
@@ -59,10 +58,6 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
             Log.i(TAG, "initViews()");
         if (mCandidateView == null) {
             mRightButton = findViewById(R.id.candidate_right);
-
-            if (mRightButton != null) {
-                mRightButton.setOnClickListener(this);
-            }
             mCandidateView = findViewById(R.id.candidatesView);
 
             mCandidateView.setBackgroundColor(mCandidateView.mColorBackground);
@@ -99,37 +94,16 @@ public class CandidateInInputViewContainer extends LinearLayout implements View.
                 if (DEBUG)
                     Log.i(TAG, "requestLayout() availableWidth:" + availableWidth + " neededWidth:" + neededWidth);
 
-            // Jeremy '24,1,6: Remove expand button entirely as requested by user ("looks
-            // bad")
-            boolean showExpandButton = false;
-
-            // Jeremy '24,1,6 Remove top-right emoji button as requested (redundant with
-            // bottom row)
-            boolean showSymbolInputButton = false;
-
-            // Logic below naturally hides it if both are false
-            if (mCandidateView.isCandidateExpanded())
-                showExpandButton = false; // Ensure it stays hidden even if expanded
-
+            // Jeremy '24,1,6: Remove expand button and top-right emoji button entirely as requested by user
+            // (右側鈕一律隱藏)
             if (mRightButton != null) {
                 mRightButton.setImageDrawable(null); // Clear drawable
             }
 
             if (mRightButton != null) {
-                // Should be GONE since both flags are false
                 mRightButton.setVisibility(GONE);
             }
         }
         super.requestLayout();
-    }
-
-    @Override
-    public void onClick(View v) {
-
-        if (mCandidateView.isEmpty())
-            mCandidateView.startSymbolInput();
-        else
-            mCandidateView.showCandidatePopup();
-
     }
 }
