@@ -681,11 +681,16 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    private void showComposingPopup(String text) {
+    // forCode:這段字根對應的組字碼(查詢結果用);顯示時組字已經變了就不顯示。null 表示不檢查
+    private void showComposingPopup(String text, String forCode) {
         if (net.toload.main.hd.BuildConfig.IS_TABLET) {
-            if (mCandidateView != null) {
-                mCandidateView.setComposingText(text);
-            }
+            // 查詢執行緒呼叫時也要回到主執行緒並確認組字沒變,和手機的浮窗一樣
+            mMainHandler.post(() -> {
+                if (forCode != null && !forCode.contentEquals(mComposing)) return;
+                if (mCandidateView != null) {
+                    mCandidateView.setComposingText(text);
+                }
+            });
             return; // Skip floating popup on tablet, since it is rendered inline inside the candidate bar
         }
         android.content.res.Configuration config = getResources().getConfiguration();
@@ -696,6 +701,7 @@ public class LIMEService extends InputMethodService implements
         // Ensure popup operations run on main thread (may be called from background
         // thread)
         mMainHandler.post(() -> {
+            if (forCode != null && !forCode.contentEquals(mComposing)) return;
             if (mComposingPopup != null) {
                 mComposingPopup.updateComposingText(text);
                 View anchor = mInputViewContainer != null ? mInputViewContainer
@@ -708,8 +714,8 @@ public class LIMEService extends InputMethodService implements
     }
 
     // Delegates to CandidateController
-    private void updateComposingRootsDisplay(String roots) {
-        mCandidateController.updateComposingRootsDisplay(roots);
+    private void updateComposingRootsDisplay(String roots, String forCode) {
+        mCandidateController.updateComposingRootsDisplay(roots, forCode);
     }
 
     void hideComposingPopup() {
@@ -2838,7 +2844,7 @@ public class LIMEService extends InputMethodService implements
         }
 
         initComposingPopup();
-        showComposingPopup(imName);
+        showComposingPopup(imName, null);
 
         // Auto-hide after 1.5 s, but only if user has not started composing
         mMainHandler.postDelayed(() -> {
@@ -3286,6 +3292,9 @@ public class LIMEService extends InputMethodService implements
                         // 組字碼,供連打模式判斷 mCandidateList 是否仍是當前碼的結果
                         final String finalSelkey = selkey;
                         mMainHandler.post(() -> {
+                            // 結果排到主執行緒時組字可能已經變了(例如快速按刪除清空組字),
+                            // 過期的結果不要蓋掉目前的候選列
+                            if (!finalKeyString.contentEquals(mComposing)) return;
                             mLastSuggestionsCode = finalKeyString;
                             setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
                         });
@@ -3294,8 +3303,11 @@ public class LIMEService extends InputMethodService implements
                                     + ", list.size:" + list.size()
                                     + ", mComposing = " + mComposing);
                     } else {
-                        mLastSuggestionsCode = null;
-                        clearSuggestions();
+                        mMainHandler.post(() -> {
+                            if (!finalKeyString.contentEquals(mComposing)) return;
+                            mLastSuggestionsCode = null;
+                            clearSuggestions();
+                        });
                     }
 
                     // Show composing window if keyToKeyname got different string. Revised by Jeremy
@@ -3314,13 +3326,13 @@ public class LIMEService extends InputMethodService implements
                             }
                             // DB keynames are the authoritative root display;
                             // feed the candidate-bar slot on both views.
-                            updateComposingRootsDisplay(keynameString);
+                            updateComposingRootsDisplay(keynameString, finalKeyString);
                             // Floating popup only for soft-keyboard input — in
                             // physical-keyboard mode the fixed slot shows roots.
                             if (!finalHasPhysicalKeyPressed)
-                                showComposingPopup(keynameString);
+                                showComposingPopup(keynameString, finalKeyString);
                         } else {
-                            updateComposingRootsDisplay("");
+                            updateComposingRootsDisplay("", finalKeyString);
                         }
                     }
             });
