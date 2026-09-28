@@ -415,6 +415,9 @@ public class SearchServer {
                     int bestCount = 0;
                     for (int i = 0; i < result.size(); i++) {
                         Mapping m = result.get(i);
+                        // 只提升碼完全相符的候選:前綴碼的字(例如打 d 時清單裡的 dfmu 曀)
+                        // 即使在前一字之後選過,也不能排到這個碼本身的字前面
+                        if (!m.isExactMatchToCodeRecord()) continue;
                         int c = manager.getContextCount(m.getCode(), m.getWord(), prevChar);
                         if (c > bestCount) { // strictly greater: ties keep the earlier (DB-order) candidate
                             bestCount = c;
