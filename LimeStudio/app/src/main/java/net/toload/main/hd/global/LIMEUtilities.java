@@ -346,10 +346,6 @@ public class LIMEUtilities {
         mNotificationManager.notify(501, mBuilder.build());
     }
 
-    private static int getNotificationIcon() {
-        return R.drawable.logobw;
-    }
-
     private static Bitmap getNotificationIconBitmap(Context context) {
         return BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
     }
