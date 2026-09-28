@@ -41,10 +41,6 @@ public abstract class LIMEProgressListener {
         return;
     }
 
-    public void onPreExecute() {
-        return;
-    }
-
     public void onPostExecute(boolean success, String status, int code) {
         return;
     }

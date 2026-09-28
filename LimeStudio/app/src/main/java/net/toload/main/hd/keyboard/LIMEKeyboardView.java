@@ -54,11 +54,6 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 
 	private int mKeyHeight;
 
-	/** Get the bottom inset value used to extend keyboard height */
-	public int getBottomInset() {
-		return mBottomInset;
-	}
-
 	public LIMEKeyboardView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mKeyHeight = context.getResources().getDimensionPixelSize(R.dimen.key_height);

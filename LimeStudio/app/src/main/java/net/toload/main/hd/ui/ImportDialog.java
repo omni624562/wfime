@@ -103,10 +103,6 @@ public class ImportDialog extends DialogFragment {
         super.onCreate(icicle);
     }
 
-    public void cancelDialog() {
-        this.dismiss();
-    }
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle icicle) {
 
         getDialog().getWindow().setTitle(getResources().getString(R.string.import_dialog_title));

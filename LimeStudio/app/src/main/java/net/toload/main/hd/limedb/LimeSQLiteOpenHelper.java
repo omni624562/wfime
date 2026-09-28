@@ -109,14 +109,6 @@ public abstract class LimeSQLiteOpenHelper {
 
     }
 
-    /**
-     * Return the name of the SQLite database being opened, as given tp
-     * the constructor.
-     */
-    public String getDatabaseName() {
-        return mName;
-    }
-
     public synchronized SQLiteDatabase getWritableDatabase() {
 
         if (DEBUG)

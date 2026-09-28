@@ -51,7 +51,6 @@ public class PointerTracker {
     // private final LIMEKeyboardSwitcher mKeyboardSwitcher;
     private final boolean mHasDistinctMultitouch;
     private final KeyState mKeyState;
-    private final StringBuilder mPreviewLabel = new StringBuilder(1);
     private OnKeyboardActionListener mListener;
     private Key[] mKeys;
     private int mKeyHysteresisDistanceSquared = -1;
@@ -461,21 +460,6 @@ public class PointerTracker {
             }
             mLastSentIndex = index;
             mLastTapTime = eventTime;
-        }
-    }
-
-    /**
-     * Handle multi-tap keys by producing the key label for the current multi-tap
-     * state.
-     */
-    public CharSequence getPreviewText(Key key) {
-        if (mInMultiTap) {
-            // Multi-tap
-            mPreviewLabel.setLength(0);
-            mPreviewLabel.append((char) key.codes[mTapCount < 0 ? 0 : mTapCount]);
-            return mPreviewLabel;
-        } else {
-            return key.label;
         }
     }
 

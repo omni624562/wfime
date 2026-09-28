@@ -104,10 +104,6 @@ public class Mapping {
         this.pword = pword;
     }
 
-    public int getRecordType() {
-        return recordType;
-    }
-
     private void setRecordType(int recordType) {
         this.recordType = recordType;
     }
@@ -136,10 +132,6 @@ public class Mapping {
         return recordType == RECORD_CHINESE_PUNCTUATION_SYMBOL;
     }
 
-    public boolean isHasMoreRecordsMarkRecord() {
-        return recordType == RECORD_HAS_MORE_RECORDS_MARK;
-    }
-
     public boolean isRuntimeBuiltPhraseRecord() {
         return recordType == RECORD_RUNTIME_BUILT_PHRASE;
     }
@@ -151,19 +143,6 @@ public class Mapping {
     // Identify the phrase reconstructed by segmenting a long dayi code string (連打切分)
     public boolean isSegmentedPhraseRecord() {
         return recordType == RECORD_SEGMENTED_PHRASE;
-    }
-
-    // Identify exactly or partially match to the word queried ( reverse query codes by word)
-    public boolean isExactMatchToWordRecord() {
-        return recordType == RECORD_EXACT_MATCH_TO_WORD;
-    }
-
-    public boolean isPartialMatchToWordRecord() {
-        return recordType == RECORD_PARTIAL_MATCH_TO_WORD;
-    }
-
-    public boolean isCompletionSuggestionRecord() {
-        return recordType == RECORD_COMPLETION_SUGGESTION_WORD;
     }
 
     //Identify the record to be the current code typed by user and can be used to type English in mixed mode..
@@ -195,17 +174,9 @@ public class Mapping {
         this.recordType = RECORD_HAS_MORE_RECORDS_MARK;
     }
 
-    public void setRuntimeBuiltPhraseRecord() {
-        this.recordType = RECORD_RUNTIME_BUILT_PHRASE;
-    }
-
     // Identify exactly or partially match to the word queried ( reverse query codes by word)
     public void setExactMatchToWordRecord() {
         this.recordType = RECORD_EXACT_MATCH_TO_WORD;
-    }
-
-    public void setPartialMatchToWordRecord() {
-        this.recordType = RECORD_PARTIAL_MATCH_TO_WORD;
     }
 
     public void setCompletionSuggestionRecord() {
@@ -251,10 +222,6 @@ public class Mapping {
      */
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getCodeorig() {
-        return codeorig;
     }
 
     public void setCodeorig(String codeorig) {

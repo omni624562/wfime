@@ -30,12 +30,6 @@ import androidx.preference.PreferenceManager;
 
 import net.toload.main.hd.R;
 
-import java.util.HashMap;
-import java.util.List;
-
-import net.toload.main.hd.Lime;
-import net.toload.main.hd.data.Im;
-
 public class LIMEPreferenceManager {
 
     private final Context ctx;
@@ -47,62 +41,6 @@ public class LIMEPreferenceManager {
     public LIMEPreferenceManager(Context context) {
         this.ctx = context;
         this.sp = PreferenceManager.getDefaultSharedPreferences(context);
-    }
-
-    public String getTableTotalRecords(String table) {
-        table = preProcessTableName(table);
-
-        String records = sp.getString(table + "total_record", "");
-        if (records.equals("")) {
-            SharedPreferences ssp = ctx.getSharedPreferences(table + "total_record", 0);
-            records = ssp.getString(table + "total_record", "");
-            if (!records.equals(""))
-                setTableTotalRecords(table, records);
-        }
-        return records;
-    }
-
-    public void setTableTotalRecords(String table, String records) {
-        table = preProcessTableName(table);
-        sp.edit().putString(table + "total_record", records).apply();
-    }
-
-    public String getTableVersion(String table) {
-        table = preProcessTableName(table);
-
-        String version = sp.getString(table + "mapping_version", "");
-        if (version.equals("")) {
-            SharedPreferences ssp = ctx.getSharedPreferences(table + "mapping_version", 0);
-            version = ssp.getString(table + "mapping_version", "");
-            if (!version.equals(""))
-                setTableVersion(table, version);
-        }
-        return version;
-    }
-
-    public void setTableVersion(String table, String version) {
-        table = preProcessTableName(table);
-        sp.edit().putString(table + "mapping_version", version).apply();
-    }
-
-    public String getTableMappingFilename(String table) {
-        table = preProcessTableName(table);
-        return sp.getString(table + "mapping_file", "");
-    }
-
-    public void setTableMappingFilename(String table, String filename) {
-        table = preProcessTableName(table);
-        sp.edit().putString(table + "mapping_file", filename).apply();
-    }
-
-    public String getTableMappingTempFilename(String table) {
-        table = preProcessTableName(table);
-        return sp.getString(table + "mapping_file_temp", "");
-    }
-
-    public void setTableTempMappingFilename(String table, String filename) {
-        table = preProcessTableName(table);
-        sp.edit().putString(table + "mapping_file_temp", filename).apply();
     }
 
     public String getTotalUserdictRecords() {
@@ -140,14 +78,6 @@ public class LIMEPreferenceManager {
 
     }
 
-    public int getMappingFileImportLines() {
-        return Integer.parseInt(sp.getString("mapping_import_line", "0"));
-    }
-
-    public void setMappingFileImportLines(int lines) {
-        sp.edit().putString("mapping_import_line", String.valueOf(lines)).apply();
-    }
-
     public String getRerverseLookupTable(String table) {
         if (table.equals("phonetic")) {
             return sp.getString("bpmf_im_reverselookup", "none");
@@ -160,10 +90,6 @@ public class LIMEPreferenceManager {
         return true;
     }
 
-    public boolean getDisableSoftwareKeyboard() {
-        return sp.getBoolean("disable_software_keyboard", false);
-    }
-
     public boolean getLearnRelatedWord() {
         return sp.getBoolean("candidate_suggestion", true);
     }
@@ -172,16 +98,8 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("learn_phrase", true);
     }
 
-    public boolean getDisablePhysicalSelKeyOption() {
-        return sp.getBoolean("disable_physical_selkey_option", false);
-    }
-
     public boolean getEnglishPrediction() {
         return sp.getBoolean("english_dictionary_enable", true);
-    }
-
-    public boolean getPhysicalKeyboardEnable() {
-        return sp.getBoolean("physical_keyboard_enable", true);
     }
 
     public boolean getEnglishPredictionOnPhysicalKeyboard() {
@@ -243,21 +161,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("number_row_in_english", true);
     }
 
-    public void syncIMActivatedState(List<Im> imlist) {
-        HashMap<String, String> imhm = new HashMap<String, String>();
-        for (Im i : imlist) {
-            imhm.put(i.getCode(), i.getCode());
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (imhm.get(Lime.IM_CUSTOM) != null)   { sb.append("0"); }
-        if (imhm.get(Lime.IM_DAYI) != null)      { if (sb.length() > 0) sb.append(";"); sb.append("5"); }
-        if (imhm.get(Lime.IM_PHONETIC) != null)  { if (sb.length() > 0) sb.append(";"); sb.append("6"); }
-
-
-        setIMActivatedState(sb.toString());
-    }
-
     public String getIMActivatedState() {
         return sp.getString("keyboard_state", "0;1;2;3;4;5;6;7;8;9;10;11;12");
     }
@@ -274,11 +177,6 @@ public class LIMEPreferenceManager {
         sp.edit().putString("keyboard_list", String.valueOf(activeIM)).apply();
     }
 
-    public boolean getThreerowRemapping() {
-
-        return sp.getBoolean("three_rows_remapping", false);
-    }
-
     public String getPhysicalKeyboardType() {
 
         return sp.getString("physical_keyboard_type", "normal_keyboard");
@@ -291,21 +189,6 @@ public class LIMEPreferenceManager {
     public String getPhoneticKeyboardType() {
 
         return sp.getString("phonetic_keyboard_type", "standard");
-    }
-
-    public boolean getAutoCaptalization() {
-
-        return sp.getBoolean("auto_cap", true);
-    }
-
-    public boolean getQuickFixes() {
-
-        return sp.getBoolean("quick_fixes", true);
-    }
-
-    public boolean getAutoComplete() {
-
-        return sp.getBoolean("auto_complete", true);
     }
 
     public boolean getDisablePhysicalSelkey() {
@@ -352,11 +235,6 @@ public class LIMEPreferenceManager {
         return Integer.parseInt(sp.getString("vibrate_level", "40"));
     }
 
-    public boolean getShowNumberKeypard() {
-
-        return sp.getBoolean("display_number_keypads", false);
-    }
-
     public boolean getAllowNumberMapping() {
         return sp.getBoolean("accept_number_index", false);
     }
@@ -383,11 +261,6 @@ public class LIMEPreferenceManager {
 
     }
 
-    public void setShowArrowKeys(int mode) {
-        sp.edit().putString("show_arrow_key", Integer.toString(mode)).apply();
-
-    }
-
     public int getSplitKeyboard() {
         return Integer.parseInt(sp.getString("split_keyboard_mode", "0"));
     }
@@ -399,10 +272,6 @@ public class LIMEPreferenceManager {
 
     public int getKeyboardTheme() {
         return 0;
-    }
-
-    public boolean getResetCacheFlag(boolean defaultvalue) {
-        return sp.getBoolean("searchsrv_reset_cache", defaultvalue);
     }
 
     public void setResetCacheFlag(boolean value) {
@@ -492,17 +361,5 @@ public class LIMEPreferenceManager {
 
     // Recent/context sub-toggles removed per spec change: smart selection is
     // now pure context prediction (no recency weighting, no global re-sort).
-
-    private String preProcessTableName(String table) {
-        if (table.endsWith("_") || table.equals("")) {
-            return table; // processed already.
-        } else if (table.equals("phonetic")) {
-            return "bpmf_";
-        } else if (table.equals("mapping") || table.equals("lime") || table.equals("phone")) {
-            return "";
-        } else {
-            return table + "_";
-        }
-    }
 
 }

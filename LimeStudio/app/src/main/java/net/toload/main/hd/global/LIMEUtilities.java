@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import android.provider.Settings;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -51,7 +50,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import net.toload.main.hd.LIMEService;
 import net.toload.main.hd.R;
 
 //
@@ -70,21 +68,6 @@ public class LIMEUtilities {
         }
         return false;
 
-    }
-
-    /**
-     * Return the filepath if the file not exist in the target path
-     *
-     * @param filepath
-     * @return
-     */
-    public static File isFileNotExist(String filepath) {
-
-        File mfile = new File(filepath);
-        if (mfile.exists())
-            return null;
-        else
-            return mfile;
     }
 
     public static File isFileExist(String filepath) {
@@ -279,25 +262,6 @@ public class LIMEUtilities {
         return returnFilePaths;
     }
 
-    public static boolean copyFile(String sourceFilePath, String targetFilePath, Boolean overWrite) {
-        File sourceFile = isFileExist(sourceFilePath);
-        if (sourceFilePath == null || sourceFile == null || targetFilePath == null)
-            return false;
-        File targetFile = isFileExist(targetFilePath);
-        if (targetFile != null && !overWrite)
-            return false;
-        if (targetFile == null)
-            targetFile = new File(targetFilePath);
-        try (FileInputStream inStream = new FileInputStream(sourceFile);
-             FileOutputStream outSteram = new FileOutputStream(targetFile)) {
-            copyRAWFile(inStream, outSteram);
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
-
-    }
-
     public static void copyRAWFile(InputStream inStream, File newfile) {
         try (FileOutputStream fs = new FileOutputStream(newfile)) {
             copyRAWFile(inStream, fs);
@@ -374,39 +338,6 @@ public class LIMEUtilities {
 
     }
 
-    public static boolean isLIMEEnabled(Context context) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        List<InputMethodInfo> mInputMethodProperties = imm.getEnabledInputMethodList();
-        String limeID = getLIMEID(context);
-
-        boolean isLIMEActive = false;
-
-        for (int i = 0; i < mInputMethodProperties.size(); i++) {
-            InputMethodInfo imi = mInputMethodProperties.get(i);
-            if (DEBUG)
-                Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
-            if (imi.getId().equals(limeID)) {
-                isLIMEActive = true;
-                break;
-            }
-        }
-        return isLIMEActive;
-    }
-
-    public static boolean isLIMEActive(Context context) {
-        String activeIM = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        String limeID = getLIMEID(context);
-
-        if (DEBUG)
-            Log.i(TAG, "active IM:" + activeIM + " LIME IM:" + limeID);
-        return activeIM.equals(limeID);
-    }
-
-    public static String getLIMEID(Context context) {
-        ComponentName LIMEComponentName = new ComponentName(context, LIMEService.class);
-        return LIMEComponentName.flattenToShortString();
-    }
-
     public static String getVoiceSearchIMId(Context context) {
         ComponentName voiceInputComponent = new ComponentName("com.google.android.voice-search",
                 "com.google.android.voice-search.ime.VoceInputMethodService");
@@ -415,12 +346,6 @@ public class LIMEUtilities {
                     + voiceInputComponent.flattenToString() + ", id = "
                     + voiceInputComponent.flattenToShortString());
         return voiceInputComponent.flattenToShortString();
-    }
-
-    public static void showInputMethodSettingsPage(Context context) {
-        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
     }
 
     public static void showInputMethodPicker(Context context) {

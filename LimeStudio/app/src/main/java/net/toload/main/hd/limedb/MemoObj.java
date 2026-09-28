@@ -40,10 +40,6 @@ public class MemoObj {
         this.pinned = pinned;
     }
 
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
     }

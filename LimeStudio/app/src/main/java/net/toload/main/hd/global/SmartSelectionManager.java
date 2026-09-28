@@ -166,14 +166,6 @@ public class SmartSelectionManager {
         }
     }
 
-    public synchronized CandidateStats getStats(String code, String word) {
-        if (code == null || word == null) return null;
-        code = code.trim().toLowerCase(java.util.Locale.ROOT);
-        Map<String, CandidateStats> wordStats = statsMap.get(code);
-        if (wordStats == null) return null;
-        return wordStats.get(word);
-    }
-
     /**
      * Pure context signal per spec: how many times this word was chosen for
      * this code right after prevChar. No global counts, no recency — the

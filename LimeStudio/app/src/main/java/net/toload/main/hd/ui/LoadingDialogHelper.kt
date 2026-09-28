@@ -127,23 +127,6 @@ class LoadingDialogHelper(private val context: Context) {
     }
 
     /**
-     * Set ViewTree owners explicitly. Useful for Service contexts (like LIMEService)
-     * where the context itself doesn't implement these interfaces.
-     */
-    fun setOwners(
-        lifecycleOwner: LifecycleOwner?,
-        savedStateRegistryOwner: SavedStateRegistryOwner?,
-        viewModelStoreOwner: ViewModelStoreOwner?
-    ) {
-        this.lifecycleOwner = lifecycleOwner
-        this.savedStateRegistryOwner = savedStateRegistryOwner
-        this.viewModelStoreOwner = viewModelStoreOwner
-        
-        // Re-create dialog if it was already initialized to apply new owners to its ComposeView
-        createDialog()
-    }
-
-    /**
      * Set the message to display in the dialog.
      * 設定要在對話框中顯示的訊息。
      */

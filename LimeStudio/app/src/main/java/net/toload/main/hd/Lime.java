@@ -205,20 +205,6 @@ public class Lime {
     // ==================== Utility Methods ====================
 
     /**
-     * Get the database folder path using app-specific storage.
-     *
-     * @param context Application context
-     * @return Path to database folder
-     */
-    public static String getDatabaseFolder(Context context) {
-        File dbDir = new File(context.getFilesDir(), "databases");
-        if (!dbDir.exists()) {
-            dbDir.mkdirs();
-        }
-        return dbDir.getAbsolutePath();
-    }
-
-    /**
      * Format a number with thousands separators.
      *
      * @param number The number to format

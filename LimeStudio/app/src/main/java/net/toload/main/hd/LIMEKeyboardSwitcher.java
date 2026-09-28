@@ -65,7 +65,6 @@ public class LIMEKeyboardSwitcher {
 
     private static Map<String, Integer> imMap = new HashMap<>();
     private final Map<KeyboardId, LIMEKeyboard> mKeyboards;
-    private final int mTextMode = MODE_TEXT_QWERTY;
     private final LIMEPreferenceManager mLIMEPref;
     private final boolean mIsAlphabet = false;
     LIMEKeyboardView mInputView;
@@ -143,10 +142,6 @@ public class LIMEKeyboardSwitcher {
         // Defensive copies: don't alias caller-owned lists from static fields
         mActivatedIMList = new java.util.ArrayList<>(codes);
         mActivatedIMShortnameList = new java.util.ArrayList<>(shortnames);
-    }
-
-    public List<String> getActivatedIMShortnameList() {
-        return mActivatedIMShortnameList;
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -521,18 +516,6 @@ public class LIMEKeyboardSwitcher {
         return mMode;
     }
 
-    public boolean isTextMode() {
-        return mMode == MODE_TEXT;
-    }
-
-    public int getTextMode() {
-        return mTextMode;
-    }
-
-    public int getTextModeCount() {
-        return MODE_TEXT_COUNT;
-    }
-
     public boolean isAlphabetMode() {
         return mIsAlphabet;
     }
@@ -547,14 +530,6 @@ public class LIMEKeyboardSwitcher {
             this.setKeyboardMode(imtype, mMode, mImeOptions, false, mIsSymbols, mIsShifted);
         }
 
-    }
-
-    public void setIsChinese(boolean value) {
-        mIsChinese = value;
-    }
-
-    public void setIsSymbols(boolean value) {
-        mIsSymbols = value;
     }
 
     public void toggleChinese() {

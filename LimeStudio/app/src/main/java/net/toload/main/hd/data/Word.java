@@ -86,18 +86,6 @@ public class Word {
         return sb.toString();
     }
 
-    public static String getUpdateScoreQuery(String table, Word w) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("UPDATE " + table + " SET ");
-        sb.append(Lime.DB_COLUMN_SCORE + "='");
-        sb.append(w.getScore() + "', ");
-        sb.append(Lime.DB_COLUMN_BASESCORE + "='");
-        sb.append(w.getBasescore() + "' ");
-        sb.append(" WHERE " + Lime.DB_COLUMN_ID + " ='");
-        sb.append(w.getId() + "'");
-        return sb.toString();
-    }
-
     public int getId() {
         return id;
     }
@@ -112,10 +100,6 @@ public class Word {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getCode3r() {
-        return code3r;
     }
 
     public void setCode3r(String code3r) {

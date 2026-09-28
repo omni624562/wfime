@@ -135,13 +135,6 @@ public class OptionsDialogHelper {
     }
 
     /**
-     * Get Han convert option items from resources.
-     */
-    public CharSequence[] getHanConvertOptions() {
-        return mResources.getStringArray(R.array.han_convert_options);
-    }
-
-    /**
      * Configuration class for building the main options menu.
      */
     public static class OptionsMenuConfig {

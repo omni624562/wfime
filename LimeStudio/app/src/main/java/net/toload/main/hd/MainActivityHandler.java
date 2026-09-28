@@ -118,29 +118,9 @@ public class MainActivityHandler extends Handler {
         this.sendMessageDelayed(m, 1);
     }
 
-    public void shareTxtTo(String filepath) {
-        Message m = new Message();
-        m.getData().putString("action", "sharetxt");
-        m.getData().putString("filepath", filepath);
-        this.sendMessageDelayed(m, 1);
-    }
-
-    public void shareZipTo(String filepath) {
-        Message m = new Message();
-        m.getData().putString("action", "sharezip");
-        m.getData().putString("filepath", filepath);
-        this.sendMessageDelayed(m, 1);
-    }
-
     public void initialDefaultPreference() {
         Message m = new Message();
         m.getData().putString("action", "initialpreference");
         this.sendMessageDelayed(m, 1000);
-    }
-
-    public void showMessageBoard() {
-        Message m = new Message();
-        m.getData().putString("action", "showmessageboard");
-        this.sendMessageDelayed(m, 1);
     }
 }

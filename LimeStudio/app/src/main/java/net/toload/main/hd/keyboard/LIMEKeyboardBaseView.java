@@ -441,24 +441,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         }
     }
 
-    private void startKeyPreviewFadeInAnimation() {
-        /*
-         * Daniel
-         * mKeyPreviewFadeInAnimator.reset();
-         * mPreviewText.clearAnimation();
-         * mPreviewText.startAnimation(mKeyPreviewFadeInAnimator);
-         */
-    }
-
-    private void startKeyPreviewFadeOutAnimation() {
-        /*
-         * Daniel
-         * mKeyPreviewFadeOutAnimator.reset();
-         * mPreviewText.clearAnimation();
-         * mPreviewText.startAnimation(mKeyPreviewFadeOutAnimator);
-         */
-    }
-
     public LIMEKeyboardBaseView(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.LIMEKeyboardBaseView);
         mContext = context;
@@ -774,10 +756,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
      */
     public boolean isPreviewEnabled() {
         return mShowPreview;
-    }
-
-    public int getSymbolColorScheme() {
-        return mSymbolColorScheme;
     }
 
     public void setPopupParent(View v) {

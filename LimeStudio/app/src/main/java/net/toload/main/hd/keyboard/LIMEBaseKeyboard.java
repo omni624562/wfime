@@ -961,48 +961,16 @@ public class LIMEBaseKeyboard {
         return mKeys;
     }
 
-    public List<Key> getModifierKeys() {
-        return mModifierKeys;
-    }
-
-    protected int getHorizontalGap() {
-        return mDefaultHorizontalGap;
-    }
-
-    protected void setHorizontalGap(int gap) {
-        mDefaultHorizontalGap = gap;
-    }
-
-    protected int getVerticalGap() {
-        return mDefaultVerticalGap;
-    }
-
     public float getKeySizeScale() {
         return mKeySizeScale;
-    }
-
-    public void setKeySizeScale(float mKeySizeScale) {
-        LIMEBaseKeyboard.mKeySizeScale = mKeySizeScale;
-    }
-
-    protected void setVerticalGap(int gap) {
-        mDefaultVerticalGap = gap;
     }
 
     protected int getKeyHeight() {
         return mDefaultHeight;
     }
 
-    protected void setKeyHeight(int height) {
-        mDefaultHeight = height;
-    }
-
     protected int getKeyWidth() {
         return mDefaultWidth;
-    }
-
-    protected void setKeyWidth(int width) {
-        mDefaultWidth = width;
     }
 
     /**

@@ -29,7 +29,6 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -39,7 +38,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.toload.main.hd.DBServer;
@@ -210,79 +208,6 @@ public class SetupImLoadRunnable implements Runnable {
         handler.finishLoading(imtype);
         handler.initialImButtons();
 
-    }
-
-    public int migrateDb(File tempfile, String imtype) {
-
-        List<Word> results = null;
-
-        // Use app cache directory instead of deprecated external storage
-        String cacheFolder = mContext.getCacheDir().getAbsolutePath() + File.separator;
-        String sourcedbfile = cacheFolder + imtype;
-
-        handler.updateProgress(activity.getResources().getString(R.string.setup_load_migrate_load));
-        DBServer.decompressFile(tempfile, cacheFolder, imtype, true);
-        SQLiteDatabase sourcedb = SQLiteDatabase.openDatabase(sourcedbfile, null, // SQLiteDatabase.OPEN_READWRITE |
-                                                                                  // //redundant
-                SQLiteDatabase.NO_LOCALIZED_COLLATORS);
-        results = loadWord(sourcedb, imtype);
-        sourcedb.close();
-
-        // Remove Imtype and related info
-        try {
-            dbsrv.resetMapping(imtype);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        int total = results.size();
-        int c = 0;
-
-        // datasource.open();
-        datasource.beginTransaction();
-
-        for (Word w : results) {
-            c++;
-            String insert = Word.getInsertQuery(imtype, w);
-            datasource.add(insert);
-            if (c % 100 == 0) {
-                int p = (c * 100 / total);
-                handler.updateProgress(
-                        activity.getResources().getString(R.string.setup_load_migrate_import) + " " + p + "%");
-            }
-        }
-        datasource.endTransaction();
-        return results.size();
-
-        // datasource.close();
-        /*
-         * try {
-         * 
-         * } catch (SQLException e) {
-         * e.printStackTrace();
-         * }
-         */
-
-        // return 0;
-    }
-
-    public List<Word> loadWord(SQLiteDatabase sourcedb, String code) {
-        List<Word> result = new ArrayList<Word>();
-        if (sourcedb != null && sourcedb.isOpen()) {
-            Cursor cursor;
-            String order = Lime.DB_COLUMN_CODE + " ASC";
-
-            cursor = sourcedb.query(code, null, null, null, null, null, order);
-
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                Word r = Word.get(cursor);
-                result.add(r);
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-        return result;
     }
 
     // Removed @Deprecated methods:

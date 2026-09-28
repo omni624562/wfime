@@ -408,10 +408,6 @@ public class DBServer {
         }
     }
 
-    public int getLoadingMappingCount() {
-        return datasource.getCount();
-    }
-
     public String getImInfo(String im, String field) {
         // if (datasource == null) {loadLimeDB();}
         return datasource.getImInfo(im, field);
@@ -594,13 +590,6 @@ public class DBServer {
      */
     public void checkPhoneticKeyboardSetting() {
         datasource.checkPhoneticKeyboardSetting();
-    }
-
-    public int getLoadingMappingPercentageDone() {
-        if (remoteFileDownloading)
-            return 0;
-        else
-            return datasource.getProgressPercentageDone();
     }
 
     public void renameTableName(String source, String target) {

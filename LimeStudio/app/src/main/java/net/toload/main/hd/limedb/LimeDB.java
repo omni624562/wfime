@@ -623,49 +623,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
-    @Deprecated
-    public void upgradeRelatedTable(SQLiteDatabase dbin) {
-        try {
-
-            String BACKUP_OLD_RELATED = "ALTER " + Lime.DB_RELATED + " RENAME TO " + Lime.DB_RELATED + "_old";
-            execSQL(dbin, BACKUP_OLD_RELATED);
-
-            String CREATE_NEW_TABLE = "";
-
-            CREATE_NEW_TABLE += "CREATE TABLE \"" + Lime.DB_RELATED + "\" ( ";
-            CREATE_NEW_TABLE += "        \"" + Lime.DB_COLUMN_ID + "\"  INTEGER PRIMARY KEY AUTOINCREMENT,";
-            CREATE_NEW_TABLE += "       \"" + Lime.DB_RELATED_COLUMN_PWORD + "\"  text,";
-            CREATE_NEW_TABLE += "        \"" + Lime.DB_RELATED_COLUMN_CWORD + "\"  text,";
-            CREATE_NEW_TABLE += "        \"" + Lime.DB_RELATED_COLUMN_BASESCORE + "\"  integer,";
-            CREATE_NEW_TABLE += "        \"" + Lime.DB_RELATED_COLUMN_USERSCORE + "\"  INTEGER DEFAULT 0";
-            CREATE_NEW_TABLE += ");";
-
-            execSQL(dbin, CREATE_NEW_TABLE);
-
-            String CREATE_INDEX = "";
-            CREATE_INDEX += "CREATE INDEX \"" + Lime.DB_RELATED + "\".\"related_idx_pword\" ";
-            CREATE_INDEX += "ON \"" + Lime.DB_RELATED + "\" (\"" + Lime.DB_RELATED_COLUMN_PWORD + "\" ASC); ";
-
-            execSQL(dbin, CREATE_INDEX);
-
-            String MIGRATE_DATA = "";
-            MIGRATE_DATA += "INSERT INTO " + Lime.DB_RELATED + "(" + Lime.DB_RELATED_COLUMN_PWORD + ", "
-                    + Lime.DB_RELATED_COLUMN_CWORD + ", " + Lime.DB_RELATED_COLUMN_BASESCORE + ")";
-            MIGRATE_DATA += "SELECT " + Lime.DB_RELATED_COLUMN_PWORD + ", " + Lime.DB_RELATED_COLUMN_CWORD
-                    + ", score FROM " + Lime.DB_RELATED + "_old";
-
-            execSQL(dbin, MIGRATE_DATA);
-
-            String DROP_OLD_TABLE = "DROP TABLE " + Lime.DB_RELATED + "_old";
-            execSQL(dbin, DROP_OLD_TABLE);
-
-            // Download and restore related DB
-
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Check the consistency of phonetic keyboard setting in preference and db.
      * Jeremy '12,6,8
@@ -983,37 +940,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     public int getCount() {
         return count;
-    }
-
-    public int getProgressPercentageDone() {
-        return progressPercentageDone;
-    }
-
-    /**
-     * Count total amount loaded records amount
-     *
-     * @return 0 if db is not ready, table is not available or 0 userdic records
-     */
-    public int countUserdic() {
-
-        if (!checkDBConnection())
-            return 0;
-        int total = 0;
-        Cursor cursor = null;
-        try {
-
-            cursor = db.rawQuery(
-                    "SELECT * FROM related where " + FIELD_DIC_score + " > 0",
-                    null);
-            total += cursor.getCount();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return total;
     }
 
     /**
@@ -1634,35 +1560,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             }
         }
         return result;
-    }
-
-    public boolean prepareBackupRelatedDb(String sourcedbfile) {
-        if (!checkDBConnection())
-            return false;
-
-        holdDBConnection();
-        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
-        db.execSQL("insert into sourceDB." + Lime.DB_RELATED + " select * from " + Lime.DB_RELATED);
-        db.execSQL("detach database sourceDB");
-        unHoldDBConnection();
-        return true;
-    }
-
-    public boolean prepareBackupDb(String sourcedbfile, String sourcetable) {
-        if (!checkDBConnection())
-            return false;
-
-        String validatedTable = validateTableName(sourcetable);
-        holdDBConnection();
-        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
-        db.execSQL("insert into sourceDB." + Lime.DB_TABLE_CUSTOM + " select * from " + validatedTable);
-        db.execSQL("insert into sourceDB." + Lime.DB_IM + " select * from " + Lime.DB_IM + " WHERE code=?",
-                new Object[] { validatedTable });
-        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "=?",
-                new Object[] { validatedTable });
-        db.execSQL("detach database sourceDB");
-        unHoldDBConnection();
-        return true;
     }
 
     public boolean importBackupRelatedDb(File sourcedbfile) {
@@ -2832,56 +2729,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * Jeremy '11,9,8 get Highest socre for 'code'. relatedList will be stored on
      * highest score record after 3.6.
      */
-    public int getHighestScore(String word) {
-
-        if (!checkDBConnection())
-            return 0;
-
-        int highestScore = 0;
-        if (word != null && word.trim().length() > 0) {
-
-            try {
-                highestScore = getHighestScoreOnDB(db, word);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return highestScore;
-
-    }
-
-    /**
-     * f
-     * Jeremy '12,4,6 core of getHightestScore()
-     */
-    private int getHighestScoreOnDB(SQLiteDatabase db, String word) {
-        // '14,12,28 use word instead of code when evaluating scores
-
-        int highestScore = 0;
-        if (word != null && word.trim().length() > 0) {
-
-            // Process the escape characters of query
-            word = word.replace("'", "''");
-            Cursor cursor = db.query(tablename, null, FIELD_WORD + " = '"
-                    + word + "'", null, null, null, FIELD_SCORE + " DESC", null);
-
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    int scoreColumn = cursor.getColumnIndex(FIELD_SCORE);
-                    highestScore = cursor.getInt(scoreColumn);
-                }
-                cursor.close();
-            }
-
-        }
-        return highestScore;
-    }
-
-    /**
-     * Jeremy '11,9,8 get Highest socre for 'code'. relatedList will be stored on
-     * highest score record after 3.6.
-     */
     public int getHighestScoreIDOnDB(SQLiteDatabase db, String table, String code) {
         int ID = -1;
         if (code != null && code.trim().length() > 0) {
@@ -3491,20 +3338,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
-    /**
-     * Safe removal by ID using parameterized query to prevent SQL injection
-     * 
-     * @param table Table name to delete from
-     * @param id    The ID of the record to delete
-     * @return Number of rows affected
-     */
-    public int removeById(String table, String id) {
-        if (!checkDBConnection())
-            return 0;
-
-        return db.delete(table, Lime.DB_COLUMN_ID + " = ?", new String[] { id });
-    }
-
     public void update(String updatesql) {
         if (!checkDBConnection())
             return;
@@ -3571,56 +3404,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return result;
     }
 
-    public List<Word> loadWord(String code, String query, boolean searchroot, int maximum, int offset) {
-        List<Word> result = new ArrayList<>();
-        if (!checkDBConnection())
-            return result;
-
-        // 參數化:query 為使用者輸入的搜尋字,以 ? 綁定;表名經白名單驗證
-        Cursor cursor;
-        String selection;
-        String[] selectionArgs = null;
-        if (query != null && query.length() >= 1) {
-            if (searchroot) {
-                selection = Lime.DB_COLUMN_CODE + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
-                        + ", '') <> ''";
-                selectionArgs = new String[]{query + "%"};
-            } else {
-                selection = Lime.DB_COLUMN_WORD + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
-                        + ", '') <> ''";
-                selectionArgs = new String[]{"%" + query + "%"};
-            }
-        } else {
-            selection = "ifnull(" + Lime.DB_COLUMN_WORD + ", '') <> ''";
-        }
-
-        String order;
-
-        if (searchroot) {
-            order = Lime.DB_COLUMN_CODE + " ASC";
-        } else {
-            order = Lime.DB_COLUMN_WORD + " ASC";
-        }
-
-        if (maximum > 0) {
-            order += " LIMIT " + maximum + " OFFSET " + offset;
-        }
-
-        cursor = db.query(validateTableName(code),
-                null, selection,
-                selectionArgs, null, null, order);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Word r = Word.get(cursor);
-            result.add(r);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return result;
-    }
-
     public Word getWord(String code, long id) {
         if (!checkDBConnection())
             return null;
@@ -3637,26 +3420,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         w = Word.get(cursor);
         cursor.close();
         return w;
-    }
-
-    public void setImKeyboard(String code, Keyboard keyboard) {
-        if (!checkDBConnection())
-            return;
-
-        // 參數化,避免 code 串接注入
-        db.delete(Lime.DB_IM,
-                Lime.DB_IM_COLUMN_CODE + " = ? AND " + Lime.DB_IM_COLUMN_TITLE + " = ?",
-                new String[]{code, Lime.IM_TYPE_KEYBOARD});
-
-        Im im = new Im();
-        im.setCode(code);
-        im.setKeyboard(keyboard.getCode());
-        im.setTitle(Lime.IM_TYPE_KEYBOARD);
-        im.setDesc(keyboard.getDesc());
-
-        String addsql = Im.getInsertQuery(im);
-        db.execSQL(addsql);
-
     }
 
     public Keyboard getImKeyboard(String code) {
@@ -3684,83 +3447,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             cursor.close();
         }
         return null;
-    }
-
-    public int hasRelated(String pword, String cword) {
-
-        try {
-            Cursor cursor;
-
-            String query = "";
-            if (pword != null && !pword.isEmpty() && cword != null && !cword.isEmpty()) {
-                query = Lime.DB_RELATED_COLUMN_PWORD + " = '" + pword + "' AND ";
-                query += Lime.DB_RELATED_COLUMN_CWORD + " = '" + cword + "'";
-            }
-
-            cursor = db.query(Lime.DB_RELATED,
-                    null, query,
-                    null, null, null, null);
-
-            int id = 0;
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                Related r = Related.get(cursor);
-                id = r.getId();
-                cursor.moveToNext();
-            }
-            cursor.close();
-
-            return id;
-        } catch (SQLiteException sqe) {
-            return 9999999;
-        }
-    }
-
-    public List<Related> loadRelated(String pword, int maximum, int offset) {
-
-        List<Related> result = new ArrayList<>();
-        if (!checkDBConnection())
-            return result;
-
-        Cursor cursor;
-
-        String query = "";
-        String cword = "";
-
-        if (pword != null && pword.length() > 1) {
-            cword = pword.substring(1);
-            pword = pword.substring(0, 1);
-        }
-        if (pword != null && !pword.isEmpty()) {
-            query = Lime.DB_RELATED_COLUMN_PWORD + " = '" + pword +
-                    "' AND ";
-        }
-        if (cword != null && !cword.isEmpty()) {
-            query += Lime.DB_RELATED_COLUMN_CWORD + " LIKE '" + cword +
-                    "%' AND ";
-        }
-
-        query += "ifnull(" + Lime.DB_RELATED_COLUMN_CWORD + ", '') <> ''";
-
-        String order = Lime.DB_RELATED_COLUMN_USERSCORE + " desc," + Lime.DB_RELATED_COLUMN_BASESCORE + " desc";
-
-        if (maximum > 0) {
-            order += " LIMIT " + maximum + " OFFSET " + offset;
-        }
-
-        cursor = db.query(Lime.DB_RELATED,
-                null, query,
-                null, null, null, order);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Related r = Related.get(cursor);
-            result.add(r);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return result;
     }
 
     public Related getRelated(long id) {
@@ -3799,80 +3485,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
-    public int getWordSize(String table, String curquery, boolean searchroot) {
-
-        if (!checkDBConnection())
-            return 0;
-
-        int total;
-
-        Cursor cursor;
-
-        // 參數化:curquery 為使用者輸入,以 ? 綁定;表名經白名單驗證
-        String query = "SELECT COUNT(*) as count FROM " + validateTableName(table) + " WHERE ";
-        String[] args = null;
-
-        if (curquery != null && curquery.length() >= 1) {
-            if (searchroot) {
-                query += Lime.DB_COLUMN_CODE + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
-                        + ", '') <> ''";
-                args = new String[]{curquery + "%"};
-            } else {
-                query += Lime.DB_COLUMN_WORD + " LIKE ? AND ifnull(" + Lime.DB_COLUMN_WORD
-                        + ", '') <> ''";
-                args = new String[]{"%" + curquery + "%"};
-            }
-        } else {
-            query += " ifnull(" + Lime.DB_COLUMN_WORD + ", '') <> ''";
-        }
-
-        cursor = db.rawQuery(query, args);
-
-        cursor.moveToFirst();
-        total = cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_TOTAL_COUNT));
-        cursor.close();
-        return total;
-
-    }
-
-    public int getRelatedSize(String pword) {
-
-        if (!checkDBConnection())
-            return -1;
-        int total;
-
-        Cursor cursor;
-
-        String query = "SELECT COUNT(*) as count FROM " + Lime.DB_RELATED + " WHERE ";
-
-        String cword = "";
-        if (pword != null && !pword.isEmpty()) {
-            cword = pword.substring(1);
-            pword = pword.substring(0, 1);
-        }
-
-        // 參數化:pword/cword 為使用者輸入,以 ? 綁定
-        java.util.List<String> args = new ArrayList<>();
-        if (pword != null && !pword.isEmpty()) {
-            query += Lime.DB_RELATED_COLUMN_PWORD + " = ? AND ";
-            args.add(pword);
-        }
-        if (cword != null && !cword.isEmpty()) {
-            query += Lime.DB_RELATED_COLUMN_CWORD + " LIKE ? AND ";
-            args.add(cword + "%");
-        }
-
-        query += "ifnull(" + Lime.DB_RELATED_COLUMN_CWORD + ", '') <> ''";
-
-        cursor = db.rawQuery(query, args.isEmpty() ? null : args.toArray(new String[0]));
-
-        cursor.moveToFirst();
-        total = cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_TOTAL_COUNT));
-        cursor.close();
-
-        return total;
-    }
-
     public void insert(String table, ContentValues cv) {
         if (!checkDBConnection())
             return;
@@ -3901,54 +3513,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     public boolean isDatabseOnHold() {
         return databaseOnHold;
-    }
-
-    public void updateBackupScore(String imtype, List<Word> scorelist) {
-        if (!checkDBConnection())
-            return;
-        db.beginTransaction();
-        try {
-            for (Word w : scorelist) {
-                String updatesql = Word.getUpdateScoreQuery(imtype, w);
-                db.execSQL(updatesql);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-    }
-
-    public void resetLimeSetting() {
-
-        if (db != null)
-            db.close();
-
-        File dbFile = new File(Lime.getDatabaseDeviceFolder(mContext) + File.separator + Lime.DATABASE_NAME);
-        dbFile.deleteOnExit();
-        LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.lime), dbFile);
-        openDBConnection(true);
-
-        if (emojiConverter != null)
-            emojiConverter.close();
-
-        emojiConverter = null;
-        File emojiDbFile = new File(mContext.getFilesDir().getParentFile().getPath() + "/databases/emoji.db");
-        emojiDbFile.deleteOnExit();
-        LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.emoji), emojiDbFile);
-        emojiConverter = new EmojiConverter(mContext);
-
-        if (hanConverter != null)
-            hanConverter.close();
-
-        hanConverter = null;
-        File hanDBFile = new File(mContext.getFilesDir().getParentFile().getPath() + "/databases/hanconvert.db");
-        hanDBFile.deleteOnExit();
-        File hanDB2File = new File(mContext.getFilesDir().getParentFile().getPath() + "/databases/hanconvertv2.db");
-        hanDB2File.deleteOnExit();
-
-        LIMEUtilities.copyRAWFile(mContext.getResources().openRawResource(R.raw.hanconvertv2), hanDB2File);
-        hanConverter = new LimeHanConverter(mContext);
-
     }
 
     @Override

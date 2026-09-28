@@ -161,10 +161,6 @@ public class SearchServer {
         lastCommittedChar = c;
     }
 
-    public static String getLastCommittedChar() {
-        return lastCommittedChar;
-    }
-
     public void setTablename(String table, boolean numberMapping, boolean symbolMapping) {
         if (DEBUG)
             Log.i(TAG, "SearchService.setTablename()");
@@ -465,60 +461,6 @@ public class SearchServer {
         }
 
         return result;
-    }
-
-    private List<Mapping> getMappingByCodeFromCacheOrDB(String queryCode, Boolean getAllRecords) {
-        String cacheKey = cacheKey(queryCode);
-        List<Mapping> cacheTemp = cache.get(cacheKey);
-
-        if (DEBUG)
-            Log.i(TAG, " getMappingByCode() check if cached exist on code = '" + queryCode + "'");
-
-        if (cacheTemp == null) {
-            // 25/Jul/2011 by Art
-            // Just ignore error when something wrong with the result set
-            try {
-                if (Thread.currentThread().isInterrupted()) return null;
-                cacheTemp = dbadapter.getMappingByCode(queryCode, !isPhysicalKeyboardPressed, getAllRecords);
-                if (cacheTemp != null) {
-                    cache.put(cacheKey, cacheTemp);
-                }
-                // Jeremy '12,6,5 check if need to update code remap cache
-                if (cacheTemp != null && cacheTemp != null
-                        && cacheTemp.size() > 0 && cacheTemp.get(0) != null
-                        && cacheTemp.get(0).isExactMatchToCodeRecord()) {
-                    String remappedCode = cacheTemp.get(0).getCode();
-                    if (!queryCode.equals(remappedCode)) {
-                        List<String> codeList = coderemapcache.get(remappedCode);
-                        String key = cacheKey(remappedCode);
-                        if (codeList == null) {
-                            List<String> newlist = new LinkedList<>();
-                            newlist.add(remappedCode); // put self in the list
-                            newlist.add(queryCode);
-                            coderemapcache.put(key, newlist);
-                            if (DEBUG)
-                                Log.i(TAG, "getMappingByCode() build new remap code = '"
-                                        + remappedCode + "' to code = '" + queryCode + "'"
-                                        + " coderemapcache.size()=" + coderemapcache.size());
-                        } else {
-                            codeList.add(queryCode);
-                            coderemapcache.remove(key);
-                            coderemapcache.put(key, codeList);
-                            if (DEBUG)
-                                Log.i(TAG, "getMappingByCode() remappedCode: add new remap code = '" + remappedCode
-                                        + "' to code = '" + queryCode + "'");
-                        }
-
-                    }
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return cacheTemp;
-
     }
 
     /**
