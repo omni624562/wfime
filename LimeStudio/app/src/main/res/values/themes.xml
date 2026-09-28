@@ -53,6 +53,13 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
+    <!-- 新增備忘錄小視窗（MemoEditActivity）：透明全螢幕，遮罩與卡片由 Compose 畫 -->
+    <style name="MemoEditTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
     <style name="LIMETheme" parent="Theme.Material3.Light"></style>
 
 

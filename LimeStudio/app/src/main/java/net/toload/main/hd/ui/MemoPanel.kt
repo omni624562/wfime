@@ -2,6 +2,7 @@ package net.toload.main.hd.ui
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import net.toload.main.hd.DBServer
 import net.toload.main.hd.R
 import net.toload.main.hd.limedb.MemoObj
@@ -46,13 +46,10 @@ fun MemoPanel(
         memos.addAll(dbServer.getMemos())
     }
 
-    // Load initial list
-    LaunchedEffect(Unit) {
+    // Load initial list; reload after MemoEditActivity adds a memo (this panel is created only once)
+    LaunchedEffect(MemoChangeSignal.version) {
         reloadMemos()
     }
-
-    var showAddDialog by remember { mutableStateOf(false) }
-    var memoInputText by remember { mutableStateOf("") }
 
     // Styles & Theme（配色依系統深淺色切換，見 KeyboardPanelColors）
     val panelColors = keyboardPanelColors()
@@ -132,11 +129,14 @@ fun MemoPanel(
                 )
             }
 
-            // Manual Add Icon Button
+            // Manual Add Icon Button：開 MemoEditActivity 輸入（輸入法視窗裡無法開 Dialog，也收不到鍵盤輸入）。
+            // 先關掉備忘錄面板（onBackClick），小視窗的輸入框才會叫出一般鍵盤
             IconButton(
                 onClick = {
-                    memoInputText = ""
-                    showAddDialog = true
+                    onBackClick()
+                    context.startActivity(
+                        Intent(context, MemoEditActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
                 }
             ) {
                 Icon(
@@ -289,81 +289,6 @@ fun MemoPanel(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )
-                    }
-                }
-            }
-        }
-    }
-
-    // 4. Custom Manual Add Dialog
-    if (showAddDialog) {
-        Dialog(onDismissRequest = { showAddDialog = false }) {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = panelColors.dialogCard),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = stringResource(R.string.memo_add_title),
-                        color = panelColors.text,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = memoInputText,
-                        onValueChange = { memoInputText = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 100.dp),
-                        placeholder = { Text(text = stringResource(R.string.memo_input_hint), color = secondaryTextColor) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = panelColors.text,
-                            unfocusedTextColor = panelColors.text,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = secondaryTextColor.copy(alpha = 0.5f),
-                            cursorColor = accentColor
-                        ),
-                        maxLines = 10
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            onClick = { showAddDialog = false }
-                        ) {
-                            Text(text = stringResource(R.string.dialog_cancel), color = secondaryTextColor)
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Button(
-                            onClick = {
-                                if (memoInputText.isNotBlank()) {
-                                    dbServer.insertMemo(memoInputText, 0)
-                                    reloadMemos()
-                                    showAddDialog = false
-                                    Toast.makeText(context, context.getString(R.string.memo_saved), Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, context.getString(R.string.memo_input_required), Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = accentColor)
-                        ) {
-                            Text(text = stringResource(R.string.memo_save), color = panelColors.onAccent, fontWeight = FontWeight.Bold)
-                        }
                     }
                 }
             }

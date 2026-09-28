@@ -69,6 +69,15 @@
             </intent-filter>
         </activity>
 
+        <!-- 新增備忘錄的小視窗：輸入法視窗裡無法開 Dialog、也收不到鍵盤輸入，改開獨立 task 的 Activity -->
+        <activity
+            android:name="net.toload.main.hd.ui.MemoEditActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@style/MemoEditTheme"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+
         <!-- LIME Services -->
         <service
             android:name=".LIMEService"
