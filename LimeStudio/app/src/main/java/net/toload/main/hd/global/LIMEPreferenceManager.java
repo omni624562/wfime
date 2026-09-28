@@ -398,7 +398,7 @@ public class LIMEPreferenceManager {
     }
 
     public int getKeyboardTheme() {
-        return 6;
+        return 0;
     }
 
     public boolean getResetCacheFlag(boolean defaultvalue) {

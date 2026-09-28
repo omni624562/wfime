@@ -118,13 +118,7 @@ public class LIMEService extends InputMethodService implements
     private static final int POS_METHOD = 3;
     private static final int POS_SPLIT_KEYBOARD = 4;
     private static final KeyboardTheme[] KEYBOARD_THEMES = {
-            new KeyboardTheme("Light", 0, R.style.LIMETheme_Light),
-            new KeyboardTheme("Dark", 1, R.style.LIMETheme_Dark),
-            new KeyboardTheme("Pink", 2, R.style.LIMETheme_Pink),
-            new KeyboardTheme("TechBlue", 3, R.style.LIMETheme_TechBlue),
-            new KeyboardTheme("FashionPurple", 4, R.style.LIMETheme_FashionPurple),
-            new KeyboardTheme("RelaxGreen", 5, R.style.LIMETheme_RelaxGreen),
-            new KeyboardTheme("Material3", 6, R.style.LIMETheme_Material3),
+            new KeyboardTheme("Material3", 0, R.style.LIMETheme_Material3),
     };
     private java.util.concurrent.ExecutorService queryExecutor =
             java.util.concurrent.Executors.newSingleThreadExecutor();
@@ -464,16 +458,13 @@ public class LIMEService extends InputMethodService implements
             int flags = decorView.getSystemUiVisibility();
             
             boolean isMaterial3 = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Material3;
-            boolean isLightTheme = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Light;
             boolean isSystemDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            boolean isLightMode = isLightTheme || (isMaterial3 && !isSystemDarkMode);
+            boolean isLightMode = isMaterial3 && !isSystemDarkMode;
 
             if (isLightMode) {
                 flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 if (isMaterial3) {
                     window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
-                } else {
-                    window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.keyboard_background_light, mThemeContext.getTheme()));
                 }
             } else {
                 flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
