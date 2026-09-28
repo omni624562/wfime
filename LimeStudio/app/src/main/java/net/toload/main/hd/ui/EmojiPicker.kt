@@ -74,12 +74,13 @@ fun EmojiPicker(
         Icons.Filled.EmojiFlags           // Flags
     )
 
-    // Dark Theme Colors
-    val backgroundColor = Color(0xFF2B2B2B)
-    val accentColor = Color(0xFF4CAF50) // Green underline
-    val iconColor = Color(0xFFE2E2E2) // Light gray/white for icons
-    val secondaryTextColor = Color(0xFF9E9E9E)
-    val bottomBarColor = Color(0xFF1F1F1F)
+    // 配色依系統深淺色切換（見 KeyboardPanelColors）
+    val panelColors = keyboardPanelColors()
+    val backgroundColor = panelColors.background
+    val accentColor = panelColors.accent // Green underline
+    val iconColor = panelColors.icon // Selected category icon
+    val secondaryTextColor = panelColors.secondary
+    val bottomBarColor = panelColors.bottomBar
 
     // Helper to add to recent (同時記錄使用頻率供聯想排序)。
     // 以基底字元儲存:膚色變體去重,顯示時再套用膚色偏好
@@ -253,7 +254,7 @@ fun EmojiPicker(
             color = bottomBarColor
         ) {
             Column {
-                HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+                HorizontalDivider(color = panelColors.divider, thickness = 0.5.dp)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -305,6 +306,7 @@ fun EmojiGridItem(
     preferredTone: String? = null,
     onToneSelected: (String?) -> Unit = {}
 ) {
+    val panelColors = keyboardPanelColors()
     var showSkinTonePopup by remember { mutableStateOf(false) }
 
     // 有記住的膚色偏好時,格子直接顯示偏好膚色,點擊也送出偏好膚色
@@ -344,7 +346,7 @@ fun EmojiGridItem(
                     lineTo(0f, size.height)         
                     close()
                 }
-                drawPath(path, color = Color.LightGray.copy(alpha = 0.8f))
+                drawPath(path, color = panelColors.skinToneMark)
             }
         }
 
@@ -379,6 +381,7 @@ fun EmojiSearchPane(
     onEmojiClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val panelColors = keyboardPanelColors()
     val results = remember(query) { searchEmojis(query) }
 
     // 接著實體鍵盤時隱藏迷你鍵盤(輸入走硬體按鍵橋接),拔掉後自動恢復
@@ -414,7 +417,7 @@ fun EmojiSearchPane(
             Icon(
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = Color(0xFF9E9E9E),
+                tint = panelColors.secondary,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -424,7 +427,7 @@ fun EmojiSearchPane(
                     hasHardKeyboard -> stringResource(R.string.emoji_search_hint_physical)
                     else -> stringResource(R.string.emoji_search_hint)
                 },
-                color = if (query.isEmpty()) Color(0xFF9E9E9E) else Color.White,
+                color = if (query.isEmpty()) panelColors.secondary else panelColors.text,
                 fontSize = 16.sp,
                 modifier = Modifier.weight(1f)
             )
@@ -432,7 +435,7 @@ fun EmojiSearchPane(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(R.string.emoji_search_close),
-                    tint = Color(0xFF9E9E9E),
+                    tint = panelColors.secondary,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -443,7 +446,7 @@ fun EmojiSearchPane(
             if (query.isNotEmpty() && results.isEmpty()) {
                 Text(
                     text = stringResource(R.string.emoji_no_results),
-                    color = Color(0xFF9E9E9E),
+                    color = panelColors.secondary,
                     fontSize = 14.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -505,11 +508,12 @@ private fun searchEmojis(query: String): List<Emoji> {
 private fun MiniQwerty(
     onKey: (Char) -> Unit
 ) {
+    val panelColors = keyboardPanelColors()
     val rows = listOf("qwertyuiop", "asdfghjkl", "zxcvbnm")
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1F1F1F))
+            .background(panelColors.bottomBar)
             .padding(vertical = 2.dp)
     ) {
         rows.forEach { row ->
@@ -529,11 +533,11 @@ private fun MiniQwerty(
                             .fillMaxHeight()
                             .padding(horizontal = 2.dp, vertical = 2.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFF3A3A3A))
+                            .background(panelColors.keyBackground)
                             .clickable { onKey(c) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = c.toString(), color = Color.White, fontSize = 22.sp)
+                        Text(text = c.toString(), color = panelColors.text, fontSize = 22.sp)
                     }
                 }
                 if (sidePad > 0f) Spacer(modifier = Modifier.weight(sidePad))
@@ -548,6 +552,7 @@ fun SkinTonePopup(
     onDismiss: () -> Unit,
     onSkinToneSelected: (String) -> Unit
 ) {
+    val panelColors = keyboardPanelColors()
     val variants = remember(baseEmoji) {
         val list = mutableListOf(baseEmoji)
         list.addAll(EmojiData.SKIN_TONES.map { tone -> EmojiData.applySkinTone(baseEmoji, tone) })
@@ -565,7 +570,7 @@ fun SkinTonePopup(
     ) {
         Row(
             modifier = Modifier
-                .background(Color(0xFF2F2F2F), RoundedCornerShape(8.dp))
+                .background(panelColors.popupBackground, RoundedCornerShape(8.dp))
                 .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

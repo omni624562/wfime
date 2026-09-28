@@ -22,7 +22,10 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.lifecycle.ViewModelStore
+import androidx.compose.ui.graphics.toArgb
+import net.toload.main.hd.ui.DarkKeyboardPanelColors
 import net.toload.main.hd.ui.EmojiPicker
+import net.toload.main.hd.ui.LightKeyboardPanelColors
 import net.toload.main.hd.ui.MemoPanel
 import net.toload.main.hd.ui.compose.settings.SettingsScreen
 import net.toload.main.hd.ui.compose.settings.SettingsViewModel
@@ -42,6 +45,14 @@ abstract class ComposeWrapperView(context: Context) : android.widget.FrameLayout
  * Bridge object for creating Compose-based views that can be integrated into Java code.
  */
 object ComposeBridge {
+    // 表情符號／備忘錄面板外框的底色（露在導覽列區），與面板底部列一致（深色 #1F1F1F）。
+    // 外框只建立一次，深淺色切換後會重新接上視窗，所以在 onAttachedToWindow 套用
+    private fun panelContainerColor(context: Context): Int {
+        val isNight = (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+        return (if (isNight) DarkKeyboardPanelColors else LightKeyboardPanelColors).bottomBar.toArgb()
+    }
+
     /**
      * Creates an emoji picker view using Jetpack Compose.
      *
@@ -142,7 +153,6 @@ object ComposeBridge {
                         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                         heightPx
                     )
-                    setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
                     
                     try {
                         addView(composeView)
@@ -154,6 +164,7 @@ object ComposeBridge {
 
                 override fun onAttachedToWindow() {
                     super.onAttachedToWindow()
+                    setBackgroundColor(panelContainerColor(context))
                     composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                     if (BuildConfig.DEBUG) android.util.Log.d("EMOJI_DEBUG", "Emoji wrapper attached — lifecycle RESUMED")
                     requestApplyInsets()
@@ -263,7 +274,6 @@ object ComposeBridge {
                         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                         heightPx
                     )
-                    setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
                     
                     try {
                         addView(composeView)
@@ -275,6 +285,7 @@ object ComposeBridge {
 
                 override fun onAttachedToWindow() {
                     super.onAttachedToWindow()
+                    setBackgroundColor(panelContainerColor(context))
                     composeLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                     if (BuildConfig.DEBUG) android.util.Log.d("MEMO_DEBUG", "Memo wrapper attached — lifecycle RESUMED")
                     requestApplyInsets()

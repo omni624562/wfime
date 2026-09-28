@@ -18,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,14 +54,15 @@ fun MemoPanel(
     var showAddDialog by remember { mutableStateOf(false) }
     var memoInputText by remember { mutableStateOf("") }
 
-    // Styles & Theme
-    val backgroundColor = Color(0xFF2B2B2B)
-    val cardBackgroundColor = Color(0xFF383838)
-    val pinnedCardBackgroundColor = Color(0xFF203A2B)
-    val accentColor = Color(0xFF4CAF50) // Neon green accent
-    val iconColor = Color(0xFFE2E2E2)
-    val secondaryTextColor = Color(0xFF9E9E9E)
-    val bottomBarColor = Color(0xFF1F1F1F)
+    // Styles & Theme（配色依系統深淺色切換，見 KeyboardPanelColors）
+    val panelColors = keyboardPanelColors()
+    val backgroundColor = panelColors.background
+    val cardBackgroundColor = panelColors.card
+    val pinnedCardBackgroundColor = panelColors.pinnedCard
+    val accentColor = panelColors.accent // Neon green accent
+    val iconColor = panelColors.icon
+    val secondaryTextColor = panelColors.secondary
+    val bottomBarColor = panelColors.bottomBar
 
     Column(
         modifier = Modifier
@@ -88,7 +88,7 @@ fun MemoPanel(
 
             Text(
                 text = stringResource(R.string.memo_title),
-                color = Color.White,
+                color = panelColors.text,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
@@ -148,7 +148,7 @@ fun MemoPanel(
         }
 
         // Horizontal Divider
-        HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+        HorizontalDivider(color = panelColors.divider, thickness = 0.5.dp)
 
         // 2. Memo Cards List
         Box(
@@ -213,7 +213,7 @@ fun MemoPanel(
                                 // Content text
                                 Text(
                                     text = memo.content,
-                                    color = Color.White,
+                                    color = panelColors.text,
                                     fontSize = 14.sp,
                                     maxLines = 3,
                                     overflow = TextOverflow.Ellipsis,
@@ -251,7 +251,7 @@ fun MemoPanel(
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = stringResource(R.string.memo_delete),
-                                        tint = Color(0xFFE57373),
+                                        tint = panelColors.delete,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -270,7 +270,7 @@ fun MemoPanel(
             color = bottomBarColor
         ) {
             Column {
-                HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+                HorizontalDivider(color = panelColors.divider, thickness = 0.5.dp)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -299,7 +299,7 @@ fun MemoPanel(
     if (showAddDialog) {
         Dialog(onDismissRequest = { showAddDialog = false }) {
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF2E2E2E)),
+                colors = CardDefaults.cardColors(containerColor = panelColors.dialogCard),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -311,7 +311,7 @@ fun MemoPanel(
                 ) {
                     Text(
                         text = stringResource(R.string.memo_add_title),
-                        color = Color.White,
+                        color = panelColors.text,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -326,8 +326,8 @@ fun MemoPanel(
                             .heightIn(min = 100.dp),
                         placeholder = { Text(text = stringResource(R.string.memo_input_hint), color = secondaryTextColor) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
+                            focusedTextColor = panelColors.text,
+                            unfocusedTextColor = panelColors.text,
                             focusedBorderColor = accentColor,
                             unfocusedBorderColor = secondaryTextColor.copy(alpha = 0.5f),
                             cursorColor = accentColor
@@ -362,7 +362,7 @@ fun MemoPanel(
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = accentColor)
                         ) {
-                            Text(text = stringResource(R.string.memo_save), color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.memo_save), color = panelColors.onAccent, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
