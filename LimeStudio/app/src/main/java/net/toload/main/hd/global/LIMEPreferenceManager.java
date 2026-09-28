@@ -206,11 +206,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("similiar_enable", true);
     }
 
-    public boolean getSelectDefaultOnSliding() {
-
-        return sp.getBoolean("candidate_switch", true);
-    }
-
     public boolean getVibrateOnKeyPressed() {
 
         return sp.getBoolean("vibrate_on_keypress", false);

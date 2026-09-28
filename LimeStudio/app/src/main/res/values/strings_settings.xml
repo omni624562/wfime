@@ -84,8 +84,6 @@
     <string name="sound_on_keypress">打字音效</string>
     <string name="similiar_enable_switch">啟用關聯字典</string>
     <string name="similiar_enable_switch_summary">選字後顯示內建關聯字典的聯想詞</string>
-    <string name="candidate_switch">滑動選取</string>
-    <string name="candidate_switch_summary">滑動選取輸入法建議文字</string>
     <string name="candidate_suggestion">啟動自建關聯字</string>
     <string name="candidate_suggestion_summary">依輸入文字自動建立關聯字,並在選字後顯示</string>
     <string name="related_manager_entry">管理自建關聯字</string>

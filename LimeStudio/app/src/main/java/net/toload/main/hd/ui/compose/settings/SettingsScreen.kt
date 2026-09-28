@@ -1007,15 +1007,6 @@ fun MappingSettingsSection(
         // Group 3: 智慧學習與候選字過濾
         PreferenceCardGroup(title = stringResource(R.string.settings_group_candidate_learning), icon = Icons.Default.Storage) {
             SwitchPreference(
-                title = stringResource(R.string.candidate_switch),
-                summary = stringResource(R.string.candidate_switch_summary),
-                checked = uiState.candidateSwitch,
-                onCheckedChange = { viewModel.setCandidateSwitch(it) }
-            )
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-
-            SwitchPreference(
                 title = stringResource(R.string.candidate_suggestion),
                 summary = stringResource(R.string.candidate_suggestion_summary),
                 checked = uiState.candidateSuggestion,

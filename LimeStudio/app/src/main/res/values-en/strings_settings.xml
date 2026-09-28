@@ -32,8 +32,6 @@
     <string name="sound_on_keypress">Sound on keypress</string>
     <string name="similiar_enable_switch">Built-in related phrase dictionary</string>
     <string name="similiar_enable_switch_summary">Show suggestions from the built-in related phrase dictionary after selecting a word</string>
-    <string name="candidate_switch">Swipe to select</string>
-    <string name="candidate_switch_summary">Swipe to select input method suggestions</string>
     <string name="candidate_suggestion">User related phrases</string>
     <string name="candidate_suggestion_summary">Learn related phrases from what you type and show them after selecting a word</string>
     <string name="related_manager_entry">Manage user related phrases</string>

@@ -74,7 +74,6 @@ data class SettingsUiState(
     val similiarEnable: Boolean = true,
     val englishDictionaryEnable: Boolean = true,
     val englishDictionaryPhysicalKeyboard: Boolean = false,
-    val candidateSwitch: Boolean = true,
     val candidateSuggestion: Boolean = true,
     val learnPhrase: Boolean = true,
     val learningSwitch: Boolean = true,
@@ -185,7 +184,6 @@ class SettingsViewModel(
                     similiarEnable = preferenceManager.getParameterBoolean("similiar_enable", true),
                     englishDictionaryEnable = preferenceManager.getParameterBoolean("english_dictionary_enable", true),
                     englishDictionaryPhysicalKeyboard = preferenceManager.getParameterBoolean("english_dictionary_physical_keyboard", false),
-                    candidateSwitch = preferenceManager.getParameterBoolean("candidate_switch", true),
                     candidateSuggestion = preferenceManager.getParameterBoolean("candidate_suggestion", true),
                     learnPhrase = preferenceManager.getParameterBoolean("learn_phrase", true),
                     learningSwitch = preferenceManager.getParameterBoolean("learning_switch", true),
@@ -332,11 +330,6 @@ class SettingsViewModel(
     fun setEnglishDictionaryPhysicalKeyboard(value: Boolean) {
         preferenceManager.setParameter("english_dictionary_physical_keyboard", value)
         _uiState.update { it.copy(englishDictionaryPhysicalKeyboard = value) }
-    }
-
-    fun setCandidateSwitch(value: Boolean) {
-        preferenceManager.setParameter("candidate_switch", value)
-        _uiState.update { it.copy(candidateSwitch = value) }
     }
 
     fun setCandidateSuggestion(value: Boolean) {
