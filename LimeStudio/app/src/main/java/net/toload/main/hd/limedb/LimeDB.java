@@ -1499,9 +1499,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     String selectString = "SELECT " + FIELD_ID + ", " + FIELD_DIC_pword + ", " + FIELD_DIC_cword + ", "
                             + Lime.DB_RELATED_COLUMN_BASESCORE + ", " + Lime.DB_RELATED_COLUMN_USERSCORE
                             + ", length(" + FIELD_DIC_pword + ") as len FROM " + Lime.DB_RELATED + " where ("
-                            + FIELD_DIC_pword + " = '" + pword
-                            + "' or " + FIELD_DIC_pword + " = '" + last
-                            + "' and " + FIELD_DIC_cword + " is not null"
+                            + FIELD_DIC_pword + " = ?"
+                            + " or " + FIELD_DIC_pword + " = ?"
+                            + " and " + FIELD_DIC_cword + " is not null"
                             + ")" + originFilter
                             + " order by len desc, " + Lime.DB_RELATED_COLUMN_USERSCORE + " desc, "
                             + Lime.DB_RELATED_COLUMN_BASESCORE + " desc ";
@@ -1512,7 +1512,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                         Log.i(TAG, "getRelatedPhrase() selectString = " + selectString);
 
                     try {
-                        cursor = db.rawQuery(selectString, null);
+                        cursor = db.rawQuery(selectString, new String[] { pword, last });
                     } catch (SQLiteException sqe) {
                         if (DEBUG)
                             sqe.getStackTrace();
@@ -1521,8 +1521,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     }
 
                 } else {
-                    cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = '" + pword
-                            + "' and " + FIELD_DIC_cword + " is not null " + originFilter, null, null, null,
+                    cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
+                            + " and " + FIELD_DIC_cword + " is not null " + originFilter, new String[] { pword }, null, null,
                             Lime.DB_RELATED_COLUMN_USERSCORE + " DESC, "
                                     + Lime.DB_RELATED_COLUMN_BASESCORE + " DESC",
                             limitClause);
