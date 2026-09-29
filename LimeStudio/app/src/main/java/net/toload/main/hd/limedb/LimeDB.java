@@ -3303,47 +3303,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return cursor;
     }
 
-    /**
-     * 依 SQL 指令進行資料新增
-     */
-    public void insert(String insertsql) {
-        if (db != null && db.isOpen() &&
-                insertsql != null && insertsql.toLowerCase(Locale.ROOT).trim().startsWith("insert")) {
-            db.execSQL(insertsql);
-        }
-    }
-
-    public void add(String addsql) {
-        if (db != null && db.isOpen()) {
-            if (addsql.toLowerCase(Locale.ROOT).startsWith("insert")) {
-                db.execSQL(addsql);
-            }
-        }
-    }
-
-    /**
-     * 移除 SQL 指令的操作
-     */
-    public void remove(String removesql) {
-        if (!checkDBConnection())
-            return;
-
-        if (removesql.toLowerCase(Locale.ROOT).startsWith("delete")) {
-            db.execSQL(removesql);
-        }
-
-    }
-
-    public void update(String updatesql) {
-        if (!checkDBConnection())
-            return;
-
-        if (updatesql.toLowerCase(Locale.ROOT).startsWith("update")) {
-            db.execSQL(updatesql);
-        }
-
-    }
-
     public List<Keyboard> getKeyboard() {
         List<Keyboard> result = new ArrayList<>();
         if (!checkDBConnection())
@@ -3485,14 +3444,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
         db.insert(table, null, cv);
-
-    }
-
-    public Cursor query(String table, String where) {
-        if (!checkDBConnection())
-            return null;
-
-        return db.query(table, null, where, null, null, null, null, null);
 
     }
 

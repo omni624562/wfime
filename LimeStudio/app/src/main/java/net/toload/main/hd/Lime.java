@@ -219,21 +219,4 @@ public class Lime {
             return "0";
         }
     }
-
-    /**
-     * Escape special characters in SQL value strings.
-     * Note: Prefer using parameterized queries instead of this method.
-     *
-     * @param value The value to escape
-     * @return Escaped string safe for SQL
-     */
-    public static String formatSqlValue(String value) {
-        if (value != null) {
-            value = value.replace("\"", "\"\"");
-            value = value.replace("'", "\\'");
-            return value;
-        } else {
-            return "";
-        }
-    }
 }
