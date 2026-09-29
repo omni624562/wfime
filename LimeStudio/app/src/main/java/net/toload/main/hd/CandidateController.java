@@ -255,12 +255,12 @@ class CandidateController {
             if (picked != null && picked.getWord() != null && ic != null) {
                 String word = picked.getWord();
                 if (picked.isEmojiRecord()) {
-                    ic.commitText(word + " ", 0);
+                    ic.commitText(word + " ", 1); // 1:游標放在送出的文字後面
                 } else if (word.length() >= typed.length()
                         && word.regionMatches(true, 0, typed, 0, typed.length())) {
                     CharSequence before = ic.getTextBeforeCursor(typed.length(), 0);
                     if (before != null && typed.equalsIgnoreCase(before.toString()))
-                        ic.commitText(word.substring(typed.length()) + " ", 0);
+                        ic.commitText(word.substring(typed.length()) + " ", 1);
                 }
             }
 
