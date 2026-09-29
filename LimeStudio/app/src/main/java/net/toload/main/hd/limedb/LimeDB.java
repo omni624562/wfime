@@ -2564,15 +2564,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (code != null && code.trim().length() > 0) {
 
             Cursor cursor;
-            // Process the escape characters of query
-            code = code.replace("'", "''");
             if (word == null || word.trim().length() == 0) {
-                cursor = db.query(table, null, FIELD_CODE + " = '"
-                        + code + "'", null, null, null, null, null);
+                cursor = db.query(table, null, FIELD_CODE + " = ?",
+                        new String[]{code}, null, null, null, null);
             } else {
-                cursor = db.query(table, null, FIELD_CODE + " = '"
-                        + code + "'" + " AND " + FIELD_WORD + " = '"
-                        + word + "'", null, null, null, null, null);
+                cursor = db.query(table, null, FIELD_CODE + " = ?" + " AND " + FIELD_WORD + " = ?",
+                        new String[]{code, word}, null, null, null, null);
             }
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
