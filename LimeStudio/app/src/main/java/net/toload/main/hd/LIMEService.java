@@ -2725,6 +2725,10 @@ public class LIMEService extends InputMethodService implements
             } else {
                 sendKeyChar((char) primaryCode);
             }
+            // 英文模式按空白或 Enter 表示這個字打完了:重設英文預測的已打字,
+            // 下一個字才會從頭查(螢幕鍵盤的空白不經 handleCharacter,原本不會重設)
+            if (mEnglishOnly && tempEnglishWord != null)
+                resetTempEnglishWord();
 
         } else {
 
