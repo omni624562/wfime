@@ -25,6 +25,7 @@
 package net.toload.main.hd.data;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.database.Cursor;
 
 import java.util.ArrayList;
@@ -62,19 +63,13 @@ public class Related {
         return list;
     }
 
-    public static String getInsertQuery(Related record) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("INSERT INTO " + Lime.DB_RELATED + "(");
-        sb.append(Lime.DB_RELATED_COLUMN_PWORD + ", ");
-        sb.append(Lime.DB_RELATED_COLUMN_CWORD + ", ");
-        sb.append(Lime.DB_RELATED_COLUMN_USERSCORE + ", ");
-        sb.append(Lime.DB_RELATED_COLUMN_BASESCORE + ") VALUES(");
-        sb.append("\"" + record.getPword() + "\",");
-        sb.append("\"" + record.getCword() + "\",");
-        sb.append("\"" + record.getUserscore() + "\",");
-        sb.append("\"" + record.getBasescore() + "\"");
-        sb.append(")");
-        return sb.toString();
+    public static ContentValues getContentValues(Related record) {
+        ContentValues cv = new ContentValues();
+        cv.put(Lime.DB_RELATED_COLUMN_PWORD, record.getPword());
+        cv.put(Lime.DB_RELATED_COLUMN_CWORD, record.getCword());
+        cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, record.getUserscore());
+        cv.put(Lime.DB_RELATED_COLUMN_BASESCORE, record.getBasescore());
+        return cv;
     }
 
     public int getId() {

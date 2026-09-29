@@ -25,6 +25,7 @@
 package net.toload.main.hd.data;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.database.Cursor;
 
 import java.util.ArrayList;
@@ -66,24 +67,16 @@ public class Word {
         return list;
     }
 
-    public static String getInsertQuery(String table, Word record) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("INSERT INTO " + table + "(");
-        sb.append(Lime.DB_COLUMN_CODE + ", ");
-        if (table.equals("phonetic")) sb.append(Lime.DB_COLUMN_CODE3R + ", ");
-        sb.append(Lime.DB_COLUMN_WORD + ", ");
-        sb.append(Lime.DB_COLUMN_RELATED + ", ");
-        sb.append(Lime.DB_COLUMN_SCORE + ", ");
-        sb.append(Lime.DB_COLUMN_BASESCORE + ") VALUES(");
-        sb.append("\"" + Lime.formatSqlValue(record.getCode()) + "\",");
+    public static ContentValues getContentValues(String table, Word record) {
+        ContentValues cv = new ContentValues();
+        cv.put(Lime.DB_COLUMN_CODE, record.getCode());
         if (table.equals("phonetic"))
-            sb.append("\"" + Lime.formatSqlValue(record.getCode().replaceAll("[ 3467]", "")) + "\","); //Jeremy '15,6,6. remove 3467 tone keys from code as code3r
-        sb.append("\"" + Lime.formatSqlValue(record.getWord()) + "\",");
-        sb.append("\"" + Lime.formatSqlValue(record.getRelated()) + "\",");
-        sb.append("\"" + record.getScore() + "\",");
-        sb.append("\"" + record.getBasescore() + "\"");
-        sb.append(")");
-        return sb.toString();
+            cv.put(Lime.DB_COLUMN_CODE3R, record.getCode().replaceAll("[ 3467]", "")); //Jeremy '15,6,6. remove 3467 tone keys from code as code3r
+        cv.put(Lime.DB_COLUMN_WORD, record.getWord());
+        cv.put(Lime.DB_COLUMN_RELATED, record.getRelated() == null ? "" : record.getRelated());
+        cv.put(Lime.DB_COLUMN_SCORE, record.getScore());
+        cv.put(Lime.DB_COLUMN_BASESCORE, record.getBasescore());
+        return cv;
     }
 
     public int getId() {

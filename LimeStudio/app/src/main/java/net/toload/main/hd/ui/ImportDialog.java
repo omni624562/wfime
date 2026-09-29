@@ -219,7 +219,7 @@ public class ImportDialog extends DialogFragment {
         obj.setBasescore(0);
         obj.setUserscore(1);
 
-        datasource.add(Related.getInsertQuery(obj));
+        datasource.insert(Lime.DB_RELATED, Related.getContentValues(obj));
         Toast.makeText(activity, getResources().getString(R.string.import_related_success), Toast.LENGTH_SHORT).show();
 
     }
@@ -230,7 +230,7 @@ public class ImportDialog extends DialogFragment {
         obj.setWord(importtext);
         obj.setScore(1);
         obj.setBasescore(0);
-        datasource.add(Word.getInsertQuery(imtype, obj));
+        datasource.insert(imtype, Word.getContentValues(imtype, obj));
 
         Toast.makeText(activity, getResources().getString(R.string.import_word_success), Toast.LENGTH_SHORT).show();
 
