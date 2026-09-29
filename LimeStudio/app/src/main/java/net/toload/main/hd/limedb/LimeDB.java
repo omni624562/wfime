@@ -2729,10 +2729,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public int getHighestScoreIDOnDB(SQLiteDatabase db, String table, String code) {
         int ID = -1;
         if (code != null && code.trim().length() > 0) {
-            // Process the escape characters of query
-            code = code.replace("'", "''");
-            Cursor cursor = db.query(table, null, FIELD_CODE + " = '"
-                    + code + "'", null, null, null,
+            Cursor cursor = db.query(table, null, FIELD_CODE + " = ?",
+                    new String[]{code}, null, null,
                     FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC", null);
 
             if (cursor != null) {
