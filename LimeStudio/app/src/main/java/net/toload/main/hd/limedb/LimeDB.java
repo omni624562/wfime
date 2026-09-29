@@ -2794,12 +2794,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             Cursor cursor;
 
             if (cword == null || cword.trim().equals("")) {
-                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = '"
-                        + pword + "'" + " AND " + FIELD_DIC_cword + " IS NULL", null, null, null, null, null);
+                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
+                        + " AND " + FIELD_DIC_cword + " IS NULL", new String[]{pword}, null, null, null, null);
             } else {
-                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = '"
-                        + pword + "'" + " AND " + FIELD_DIC_cword + " = '"
-                        + cword + "'", null, null, null, null, null);
+                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
+                        + " AND " + FIELD_DIC_cword + " = ?", new String[]{pword, cword}, null, null, null, null);
             }
 
             if (cursor != null) {
