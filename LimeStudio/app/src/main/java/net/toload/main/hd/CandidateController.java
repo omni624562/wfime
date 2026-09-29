@@ -245,17 +245,23 @@ class CandidateController {
             // Log.i("EMOJI-commit-index:", index + "");
             // Log.i("EMOJI-commit:", tempEnglishList.size() + "");
 
-            if (service.tempEnglishList.get(index).isEmojiRecord()) {
-                if (ic != null)
-                    ic.commitText(
-                            service.tempEnglishList.get(index).getWord() + " ", 0);
-            } else {
-                if (ic != null)
-                    ic.commitText(
-                            service.tempEnglishList.get(index).getWord()
-                                    .substring(service.tempEnglishWord.length())
-                                    + " ",
-                            0);
+            // 用畫面上點到的候選(selectedCandidate,index 已對 mCandidateList 檢查過),不用
+            // tempEnglishList.get(index)。候選清單查出來之後已打的字或游標可能又變了(例如游標移到
+            // 字中間再打字,清單不會重查):候選字要以已打的字開頭、游標前也要正好是已打的字
+            // (跟 updateEnglishPrediction 的 matchedtemp 同一套判斷),否則不送出,
+            // 避免 substring 越界 crash 或把字尾補在錯的地方
+            Mapping picked = service.selectedCandidate;
+            String typed = service.tempEnglishWord.toString();
+            if (picked != null && picked.getWord() != null && ic != null) {
+                String word = picked.getWord();
+                if (picked.isEmojiRecord()) {
+                    ic.commitText(word + " ", 0);
+                } else if (word.length() >= typed.length()
+                        && word.regionMatches(true, 0, typed, 0, typed.length())) {
+                    CharSequence before = ic.getTextBeforeCursor(typed.length(), 0);
+                    if (before != null && typed.equalsIgnoreCase(before.toString()))
+                        ic.commitText(word.substring(typed.length()) + " ", 0);
+                }
             }
 
             service.resetTempEnglishWord();
