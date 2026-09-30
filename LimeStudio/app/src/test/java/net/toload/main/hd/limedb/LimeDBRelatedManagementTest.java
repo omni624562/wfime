@@ -102,6 +102,8 @@ public class LimeDBRelatedManagementTest {
     public void setup() {
         Context context = ApplicationProvider.getApplicationContext();
         limeDb = new LimeDB(context);
+        // 每個測試的資料目錄都是新的:重開共用連線,不沿用前一個測試留下的連線
+        limeDb.openDBConnection(true);
         db = limeDb.getWritableDatabase();
         db.execSQL("CREATE TABLE IF NOT EXISTS related (" +
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +

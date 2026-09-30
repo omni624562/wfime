@@ -34,6 +34,8 @@ public class LimeDBBackupRecordsTest {
     public void setup() {
         Context context = ApplicationProvider.getApplicationContext();
         limeDb = new LimeDB(context);
+        // 每個測試的資料目錄都是新的:重開共用連線,不沿用前一個測試留下的連線
+        limeDb.openDBConnection(true);
         SQLiteDatabase db = limeDb.getWritableDatabase();
         db.execSQL("DROP TABLE IF EXISTS dayi_user");
         db.execSQL("CREATE TABLE dayi_user (" +

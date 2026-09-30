@@ -338,7 +338,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 });
 
         // Jeremy '12,4,7 open DB connection in constructor
-        openDBConnection(true);
+        // 不強制重開:db 是整個程序共用的 static 連線,重開會先關掉它,讓其他執行緒進行中的查詢 crash
+        // (換掉資料庫檔案的流程會自己呼叫 openDBConnection(true))
+        openDBConnection(false);
 
     }
 
