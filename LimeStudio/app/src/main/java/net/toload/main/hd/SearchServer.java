@@ -376,10 +376,10 @@ public class SearchServer {
                 if (loopCacheTemp != null && !loopCacheTemp.isEmpty()) {
                     // Only add if it's not already in the result list (avoid duplicates)
                     for (Mapping m : loopCacheTemp) {
-                        // 大易只列出碼命中的字:查詢也會帶出碼比打的還短的字
-                        // (例如打 nh1 時碼為 nh、n 的 鴛 鳭 角),不列出
-                        if (tablename.startsWith("dayi") && m.getCode() != null
-                                && m.getCode().length() < currentLoopCode.length())
+                        // 大易只列出碼完全相符的字(另加下方的三碼):查詢也會帶出碼比打的還短的字
+                        // (例如打 nh1 時碼為 nh、n 的 鴛 鳭 角)和延伸碼(碼比打的還長,
+                        // 例如打 ujn 時 ujny 的 煎),都不列出
+                        if (tablename.startsWith("dayi") && !m.isExactMatchToCodeRecord())
                             continue;
                         if (seenWords.add(m.getWord())) {
                             result.add(m);
