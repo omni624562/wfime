@@ -374,8 +374,22 @@ public class SearchServer {
                 }
 
                 if (loopCacheTemp != null && !loopCacheTemp.isEmpty()) {
+                    // 大易:查詢也會帶出碼比打的還短的字(例如打 nh1 時碼為 nh、n 的 鴛 鳭 角),
+                    // 這一層有碼長 ≥ 打的碼的候選時就不列出它們;完全沒有時才保留
+                    boolean skipShorterCodes = false;
+                    if (tablename.startsWith("dayi")) {
+                        for (Mapping m : loopCacheTemp) {
+                            if (m.getCode() != null && m.getCode().length() >= currentLoopCode.length()) {
+                                skipShorterCodes = true;
+                                break;
+                            }
+                        }
+                    }
                     // Only add if it's not already in the result list (avoid duplicates)
                     for (Mapping m : loopCacheTemp) {
+                        if (skipShorterCodes && m.getCode() != null
+                                && m.getCode().length() < currentLoopCode.length())
+                            continue;
                         if (seenWords.add(m.getWord())) {
                             result.add(m);
                         }
