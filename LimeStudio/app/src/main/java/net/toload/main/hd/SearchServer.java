@@ -374,30 +374,22 @@ public class SearchServer {
                 }
 
                 if (loopCacheTemp != null && !loopCacheTemp.isEmpty()) {
-                    // 大易:查詢也會帶出碼比打的還短的字(例如打 nh1 時碼為 nh、n 的 鴛 鳭 角),
-                    // 這一層有碼長 ≥ 打的碼的候選時就不列出它們;完全沒有時才保留
-                    boolean skipShorterCodes = false;
-                    if (tablename.startsWith("dayi")) {
-                        for (Mapping m : loopCacheTemp) {
-                            if (m.getCode() != null && m.getCode().length() >= currentLoopCode.length()) {
-                                skipShorterCodes = true;
-                                break;
-                            }
-                        }
-                    }
                     // Only add if it's not already in the result list (avoid duplicates)
                     for (Mapping m : loopCacheTemp) {
-                        if (skipShorterCodes && m.getCode() != null
+                        // 大易只列出碼命中的字:查詢也會帶出碼比打的還短的字
+                        // (例如打 nh1 時碼為 nh、n 的 鴛 鳭 角),不列出
+                        if (tablename.startsWith("dayi") && m.getCode() != null
                                 && m.getCode().length() < currentLoopCode.length())
                             continue;
                         if (seenWords.add(m.getWord())) {
                             result.add(m);
                         }
                     }
-                    // For Dayi 3-code, we STOP after the first successful match level (exact match only)
-                    if (tablename.startsWith("dayi")) {
-                        break;
-                    }
+                }
+                // 大易只查打的碼這一層:沒有命中也不退到較短的碼
+                // (候選列只剩原碼,由連打切分處理)
+                if (tablename.startsWith("dayi")) {
+                    break;
                 }
 
                 currentLoopCode = currentLoopCode.substring(0, currentLoopCode.length() - 1);
