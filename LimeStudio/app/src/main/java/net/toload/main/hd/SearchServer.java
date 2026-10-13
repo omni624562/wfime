@@ -395,6 +395,25 @@ public class SearchServer {
                 currentLoopCode = currentLoopCode.substring(0, currentLoopCode.length() - 1);
             }
 
+            // 大易三碼:4 碼字也能用第 1、2 碼加最後一碼找到(例如 nh1 → nhm1 鮞、nhr1 鰤),
+            // 接在碼完全相符的字後面;只列 Big5 字(與電腦版大易一致)
+            if (tablename.startsWith("dayi") && code.length() == 3) {
+                int insertAt = 0;
+                while (insertAt < result.size() && result.get(insertAt).isExactMatchToCodeRecord())
+                    insertAt++;
+                java.nio.charset.CharsetEncoder big5 = null;
+                try {
+                    big5 = java.nio.charset.Charset.forName("Big5").newEncoder();
+                } catch (Exception e) {
+                    Log.w(TAG, "Big5 charset not available: " + e.getMessage());
+                }
+                for (Mapping m : dbadapter.getDayiThreeCodeWords(tablename, code.toLowerCase(Locale.US), 50)) {
+                    if (big5 != null && !big5.canEncode(m.getWord())) continue;
+                    if (seenWords.add(m.getWord()))
+                        result.add(insertAt++, m);
+                }
+            }
+
             // Finally add the raw composing code at the beginning
             // Jeremy '24,1,7: Don't add raw code for Dayi to prevent things like "./" showing up
             // BUT allow it if it's alphanumeric or common Dayi radicals (like ",./") so users see a reaction

@@ -2643,6 +2643,47 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     /**
+     * 大易三碼:3 碼 abc 對應的 4 碼單字(碼為 ab?c,即第 1、2 碼加最後一碼);無則空清單。
+     * 以碼的範圍查詢走索引。
+     */
+    public List<Mapping> getDayiThreeCodeWords(String table, String code, int limit) {
+        List<Mapping> results = new LinkedList<>();
+        if (!checkDBConnection()) return results;
+        if (table == null || !table.matches("[a-z0-9_]+")) return results;
+        if (code == null || code.length() != 3 || limit <= 0) return results;
+
+        String prefix = code.substring(0, 2);
+        String upperBound = prefix.substring(0, 1) + (char) (prefix.charAt(1) + 1);
+        try {
+            Cursor cursor = db.rawQuery(
+                    "SELECT " + FIELD_ID + ", " + FIELD_CODE + ", " + FIELD_WORD + ", " + FIELD_SCORE + ", "
+                            + FIELD_BASESCORE + " FROM " + table
+                            + " WHERE " + FIELD_CODE + " >= ? AND " + FIELD_CODE + " < ?"
+                            + " AND length(" + FIELD_CODE + ") = 4 AND substr(" + FIELD_CODE + ", 4, 1) = ?"
+                            + " AND length(" + FIELD_WORD + ") = 1"
+                            + " ORDER BY " + FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC, "
+                            + FIELD_ID + " ASC LIMIT " + limit,
+                    new String[]{prefix, upperBound, code.substring(2)});
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    Mapping m = new Mapping();
+                    m.setId(cursor.getString(0));
+                    m.setCode(cursor.getString(1));
+                    m.setWord(cursor.getString(2));
+                    m.setScore(cursor.getInt(3));
+                    m.setBasescore(cursor.getInt(4));
+                    m.setPartialMatchToCodeRecord();
+                    results.add(m);
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    /**
      * 依碼與詞長取詞(供切分的詞庫優先比對;大易內建詞碼為每字「首碼+末碼」的縮碼)。
      */
     public List<String> getWordsByCodeAndLength(String table, String code, int wordLength, int limit) {
