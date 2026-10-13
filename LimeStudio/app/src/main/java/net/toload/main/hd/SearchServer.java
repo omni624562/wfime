@@ -98,6 +98,7 @@ public class SearchServer {
     private static Map<String, List<String>> phraseWordsCache = null; // 縮碼_詞長 -> 詞
     private static Map<String, Boolean> pairCache = null;             // code\0word -> 是否對映
     private static Map<String, List<Mapping>> segmentCache = null;    // 碼串 -> 切分候選結果
+    private static Map<String, List<Mapping>> threeCodeCache = null;  // 3 碼 -> 三碼的 4 碼字(只含 Big5)
     private static final java.util.concurrent.atomic.AtomicBoolean prefetchRunning =
             new java.util.concurrent.atomic.AtomicBoolean(false);
 
@@ -401,14 +402,7 @@ public class SearchServer {
                 int insertAt = 0;
                 while (insertAt < result.size() && result.get(insertAt).isExactMatchToCodeRecord())
                     insertAt++;
-                java.nio.charset.CharsetEncoder big5 = null;
-                try {
-                    big5 = java.nio.charset.Charset.forName("Big5").newEncoder();
-                } catch (Exception e) {
-                    Log.w(TAG, "Big5 charset not available: " + e.getMessage());
-                }
-                for (Mapping m : dbadapter.getDayiThreeCodeWords(tablename, code.toLowerCase(Locale.US), 50)) {
-                    if (big5 != null && !big5.canEncode(m.getWord())) continue;
+                for (Mapping m : threeCodeWords(code.toLowerCase(Locale.US))) {
                     if (seenWords.add(m.getWord()))
                         result.add(insertAt++, m);
                 }
@@ -516,7 +510,7 @@ public class SearchServer {
         }
 
         List<List<String>> segLists = net.toload.main.hd.data.DayiCodeSegmenter
-                .segmentCodes(code, this::cachedTopByExactCode, 3);
+                .segmentCodes(code, this::cachedTopSegmentWord, 3);
         if (!segLists.isEmpty()) {
             // 2. 最佳切法:詞庫優先＋智慧選字上下文挑字
             addSegmentedResult(results, seen, code, refineSegmentWords(segLists.get(0)));
@@ -549,7 +543,7 @@ public class SearchServer {
     }
 
     /**
-     * 大易連打模式:code 是否可接續(為某字 exact code 或任何碼的前綴)。
+     * 大易連打模式:code 是否可接續(為某字 exact code、任何碼的前綴,或 3 碼且有三碼的字)。
      * 主執行緒同步呼叫;單筆索引查詢＋快取。DB 未就緒時回 true(退回一般行為)。
      */
     public boolean canExtendCode(String rawCode) {
@@ -559,24 +553,64 @@ public class SearchServer {
         String key = tablename + "_" + code;
         Boolean cached = prefixCache.get(key);
         if (cached != null) return cached;
-        boolean result = dbadapter.hasCodeOrPrefix(tablename, code);
+        boolean result = dbadapter.hasCodeOrPrefix(tablename, code) || !threeCodeWords(code).isEmpty();
         prefixCache.put(key, result);
         return result;
     }
 
     /**
-     * 大易連打模式:取 exact code 首選字(主執行緒同步 fallback);無則 null。
+     * 大易連打模式:取首選字(碼完全相符,沒有時用三碼;主執行緒同步 fallback);無則 null。
      */
     public Mapping getTopExactMapping(String rawCode) {
         if (rawCode == null || rawCode.isEmpty() || !tablename.startsWith("dayi")) return null;
-        return cachedTopByExactCode(rawCode.toLowerCase(Locale.US));
+        return cachedTopSegmentWord(rawCode.toLowerCase(Locale.US));
+    }
+
+    /**
+     * 大易三碼:3 碼 abc 對應的 4 碼單字(碼為 ab?c),只留 Big5 字(與電腦版大易一致);
+     * 不是 3 碼回空清單。
+     */
+    private List<Mapping> threeCodeWords(String code) {
+        if (code == null || code.length() != 3) return new LinkedList<>();
+        if (threeCodeCache == null) threeCodeCache = newLruMap(MAX_CACHE_ENTRIES);
+        String key = tablename + "_" + code;
+        List<Mapping> cached = threeCodeCache.get(key);
+        if (cached != null) return cached;
+        java.nio.charset.CharsetEncoder big5 = null;
+        try {
+            big5 = java.nio.charset.Charset.forName("Big5").newEncoder();
+        } catch (Exception e) {
+            Log.w(TAG, "Big5 charset not available: " + e.getMessage());
+        }
+        List<Mapping> result = new LinkedList<>();
+        for (Mapping m : dbadapter.getDayiThreeCodeWords(tablename, code, 50)) {
+            if (big5 != null && !big5.canEncode(m.getWord())) continue;
+            result.add(m);
+        }
+        threeCodeCache.put(key, result);
+        return result;
     }
 
     // ---- 切分內部工具(皆經 LRU 快取) ----
 
-    private Mapping cachedTopByExactCode(String code) {
-        List<Mapping> list = cachedTopWords(code);
+    /** 連打切分/連打模式查一段碼的字:碼完全相符的字,沒有時(3 碼)用三碼的字 */
+    private List<Mapping> cachedSegmentWords(String code) {
+        List<Mapping> exact = cachedTopWords(code);
+        if (!exact.isEmpty()) return exact;
+        return threeCodeWords(code);
+    }
+
+    private Mapping cachedTopSegmentWord(String code) {
+        List<Mapping> list = cachedSegmentWords(code);
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    /** 這段碼是否對映到此字(完全相符,或 3 碼的三碼) */
+    private boolean segmentMapsToWord(String code, String word) {
+        if (cachedCodeMapsToWord(code, word)) return true;
+        for (Mapping m : threeCodeWords(code))
+            if (word.equals(m.getWord())) return true;
+        return false;
     }
 
     private List<Mapping> cachedTopWords(String code) {
@@ -623,7 +657,7 @@ public class SearchServer {
     private String plainSegmentWords(List<String> segs) {
         StringBuilder sb = new StringBuilder();
         for (String segCode : segs) {
-            Mapping top = cachedTopByExactCode(segCode);
+            Mapping top = cachedTopSegmentWord(segCode);
             if (top == null || top.getWord() == null) return null;
             sb.append(top.getWord());
         }
@@ -652,7 +686,7 @@ public class SearchServer {
                     if (phrase.length() != len) continue;
                     boolean ok = true;
                     for (int j = 0; j < len && ok; j++)
-                        ok = cachedCodeMapsToWord(segs.get(i + j), String.valueOf(phrase.charAt(j)));
+                        ok = segmentMapsToWord(segs.get(i + j), String.valueOf(phrase.charAt(j)));
                     if (ok) {
                         sb.append(phrase);
                         prevChar = String.valueOf(phrase.charAt(len - 1));
@@ -663,7 +697,7 @@ public class SearchServer {
                 }
             }
             if (!matched) {
-                List<Mapping> tops = cachedTopWords(segs.get(i));
+                List<Mapping> tops = cachedSegmentWords(segs.get(i));
                 if (tops.isEmpty() || tops.get(0).getWord() == null) return null;
                 String chosen = tops.get(0).getWord();
                 if (smartMgr != null && prevChar != null && !prevChar.isEmpty()) {
@@ -819,6 +853,7 @@ public class SearchServer {
         phraseWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         pairCache = newLruMap(MAX_CACHE_ENTRIES);
         segmentCache = newLruMap(MAX_CACHE_ENTRIES);
+        threeCodeCache = newLruMap(MAX_CACHE_ENTRIES);
 
         // initial exact match stack here
         suggestionLoL = new LinkedList<>();

@@ -91,6 +91,8 @@ public class SearchServerDayiCandidateTest {
         insert(db, "dayi", "d9", "是", 0, 900);
         insert(db, "dayi", "dfmu", "曀", 0, 0);
         insert(db, "dayi", "a.na", "佽", 0, 0);
+        insert(db, "dayi", "df", "里", 0, 300);
+        insert(db, "dayi", "u", "艸", 0, 10);
         insert(db, "phonetic", "j", "甲", 1, 0);
         insert(db, "phonetic", "ji", "丙", 1, 0);
         insert(db, "phonetic", "jio", "丁", 1, 0);
@@ -131,6 +133,17 @@ public class SearchServerDayiCandidateTest {
         for (Mapping m : list)
             if (!m.isComposingCodeRecord()) exact.add(m.isExactMatchToCodeRecord());
         assertEquals(Arrays.asList(true, false, false), exact);
+    }
+
+    @Test
+    public void continuousTypingUsesThreeCode() {
+        // 連打切分:dfu 是 曀 的三碼,nh1dfu 應切成 詹＋曀,而不是只用完整碼切成 詹＋里＋艸
+        List<Mapping> segmented = searchServer.getSegmentedPhraseMappings("nh1dfu");
+        assertTrue(!segmented.isEmpty());
+        assertEquals("詹曀", segmented.get(0).getWord());
+        // 連打模式:三碼也算可接續的碼,首選字用三碼的字
+        assertTrue(searchServer.canExtendCode("dfu"));
+        assertEquals("曀", searchServer.getTopExactMapping("dfu").getWord());
     }
 
     @Test
