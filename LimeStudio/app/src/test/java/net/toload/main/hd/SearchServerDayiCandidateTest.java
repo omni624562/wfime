@@ -147,6 +147,21 @@ public class SearchServerDayiCandidateTest {
     }
 
     @Test
+    public void lookupsDuringDatabaseHoldAreNotCached() {
+        // 匯入／備份中資料庫鎖定時查不到,解除後要能查到,不能沿用鎖定時快取的「無此碼」
+        LimeDB holder = new LimeDB(ApplicationProvider.getApplicationContext());
+        holder.holdDBConnection();
+        try {
+            assertTrue(searchServer.canExtendCode("dfu"));
+            assertEquals(null, searchServer.getTopExactMapping("dfu"));
+        } finally {
+            holder.unHoldDBConnection();
+        }
+        assertEquals("曀", searchServer.getTopExactMapping("dfu").getWord());
+        assertTrue(searchServer.canExtendCode("dfu"));
+    }
+
+    @Test
     public void otherInputMethodsUnchanged() throws Exception {
         searchServer.setTablename("phonetic", false, false);
         waitPrefetch();

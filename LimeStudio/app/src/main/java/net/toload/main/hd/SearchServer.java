@@ -523,7 +523,7 @@ public class SearchServer {
             }
         }
 
-        segmentCache.put(key, results);
+        if (!dbadapter.isDatabseOnHold()) segmentCache.put(key, results); // 鎖定中切不出不快取
         return results;
     }
 
@@ -555,6 +555,8 @@ public class SearchServer {
         String key = tablename + "_" + code;
         Boolean cached = prefixCache.get(key);
         if (cached != null) return cached;
+        // 匯入／備份中資料庫鎖定:查不到不代表無此碼,退回一般行為且不快取
+        if (dbadapter.isDatabseOnHold()) return true;
         boolean result = dbadapter.hasCodeOrPrefix(tablename, code) || !threeCodeWords(code).isEmpty();
         prefixCache.put(key, result);
         return result;
@@ -589,7 +591,7 @@ public class SearchServer {
             if (big5 != null && !big5.canEncode(m.getWord())) continue;
             result.add(m);
         }
-        threeCodeCache.put(key, result);
+        if (!dbadapter.isDatabseOnHold()) threeCodeCache.put(key, result); // 鎖定中查不到不快取
         return result;
     }
 
@@ -621,7 +623,7 @@ public class SearchServer {
         List<Mapping> cached = topWordsCache.get(key);
         if (cached != null) return cached;
         List<Mapping> result = dbadapter.getTopWordsByExactCode(tablename, code, 5);
-        topWordsCache.put(key, result);
+        if (!dbadapter.isDatabseOnHold()) topWordsCache.put(key, result); // 鎖定中查不到不快取
         return result;
     }
 
@@ -631,7 +633,7 @@ public class SearchServer {
         List<String> cached = phraseWordsCache.get(key);
         if (cached != null) return cached;
         List<String> result = dbadapter.getWordsByCodeAndLength(tablename, code, wordLength, 3);
-        phraseWordsCache.put(key, result);
+        if (!dbadapter.isDatabseOnHold()) phraseWordsCache.put(key, result); // 鎖定中查不到不快取
         return result;
     }
 
@@ -641,7 +643,7 @@ public class SearchServer {
         Boolean cached = pairCache.get(key);
         if (cached != null) return cached;
         boolean result = dbadapter.codeMapsToWord(tablename, code, word);
-        pairCache.put(key, result);
+        if (!dbadapter.isDatabseOnHold()) pairCache.put(key, result); // 鎖定中查不到不快取
         return result;
     }
 
