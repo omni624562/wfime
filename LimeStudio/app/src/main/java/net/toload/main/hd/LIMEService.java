@@ -4507,17 +4507,6 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    public void requestFullRecords(boolean isRelatedPhrase) {
-        if (DEBUG)
-            Log.i(TAG, "requestFullRecords()");
-
-        if (isRelatedPhrase)
-            this.updateRelatedPhrase(true);
-        else
-            this.updateCandidates(true);
-
-    }
-
     public void removeCandidateManually(int index) {
         if (mCandidateList != null && index >= 0 && index < mCandidateList.size()) {
             Mapping mapping = mCandidateList.get(index);
