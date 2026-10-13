@@ -341,7 +341,9 @@ public class SearchServer {
         if (code != null) {
             // clear mappingidx when user switching between softkeyboard and hard keyboard.
             // Jeremy '11,6,11
-            if (isPhysicalKeyboardPressed == softkeyboard)
+            // 背景預取不改這個共用旗標(預取一律用螢幕鍵盤參數呼叫):用目前的狀態查,
+            // 避免使用者正在用實體鍵盤時被改回螢幕鍵盤
+            if (!prefetchCache && isPhysicalKeyboardPressed == softkeyboard)
                 isPhysicalKeyboardPressed = !softkeyboard;
 
             // Jeremy '11,9, 3 remove cached keyname when request full records
