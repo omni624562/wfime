@@ -88,47 +88,6 @@ public class Keyboard {
     }
 
 
-    public static String getInsertQuery(Keyboard record) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("INSERT INTO " + Lime.DB_KEYBOARD + "(");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_ID + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_CODE + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_NAME + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_DESC + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_TYPE + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_IMAGE + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_IMKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_IMSHIFTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_ENGKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_ENGSHIFTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_SYMBOLKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_SYMBOLSHIFTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_DEFAULTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_DEFAULTSHIFTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_EXTENDEDKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_EXTENDEDSHIFTKB + ", ");
-        sb.append(Lime.DB_KEYBOARD_COLUMN_DISABLE + ") VALUES(");
-        sb.append("\"" + record.getId() + "\",");
-        sb.append("\"" + record.getCode() + "\",");
-        sb.append("\"" + record.getName() + "\",");
-        sb.append("\"" + record.getDesc() + "\",");
-        sb.append("\"" + record.getType() + "\",");
-        sb.append("\"" + record.getImage() + "\",");
-        sb.append("\"" + record.getImkb() + "\",");
-        sb.append("\"" + record.getImshiftkb() + "\",");
-        sb.append("\"" + record.getEngkb() + "\",");
-        sb.append("\"" + record.getEngshiftkb() + "\",");
-        sb.append("\"" + record.getSymbolkb() + "\",");
-        sb.append("\"" + record.getSymbolshiftkb() + "\",");
-        sb.append("\"" + record.getDefaultkb() + "\",");
-        sb.append("\"" + record.getDefaultshiftkb() + "\",");
-        sb.append("\"" + record.getExtendedkb() + "\",");
-        sb.append("\"" + record.getExtendedshiftkb() + "\",");
-        sb.append("\"" + record.isDisable() + "\"");
-        sb.append(")");
-        return sb.toString();
-    }
-
     public int getId() {
         return id;
     }

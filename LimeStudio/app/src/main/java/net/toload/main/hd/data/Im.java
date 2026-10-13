@@ -70,29 +70,6 @@ public class Im {
         return list;
     }
 
-    public static String getInsertQuery(Im record) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("INSERT INTO " + Lime.DB_IM + "(");
-        sb.append(Lime.DB_IM_COLUMN_CODE + ", ");
-        sb.append(Lime.DB_IM_COLUMN_TITLE + ", ");
-        sb.append(Lime.DB_IM_COLUMN_DESC + ", ");
-        sb.append(Lime.DB_IM_COLUMN_KEYBOARD + ", ");
-        sb.append(Lime.DB_IM_COLUMN_DISABLE + ", ");
-        sb.append(Lime.DB_IM_COLUMN_SELKEY + ", ");
-        sb.append(Lime.DB_IM_COLUMN_ENDKEY + ", ");
-        sb.append(Lime.DB_IM_COLUMN_SPACESTYLE + ") VALUES(");
-        sb.append("\"" + record.getCode() + "\",");
-        sb.append("\"" + record.getTitle() + "\",");
-        sb.append("\"" + record.getDesc() + "\",");
-        sb.append("\"" + record.getKeyboard() + "\",");
-        sb.append("\"" + record.isDisable() + "\",");
-        sb.append("\"" + record.getSelkey() + "\",");
-        sb.append("\"" + record.getEndkey() + "\",");
-        sb.append("\"" + record.getSpacestyle() + "\"");
-        sb.append(")");
-        return sb.toString();
-    }
-
     public int getId() {
         return id;
     }
