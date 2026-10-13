@@ -248,6 +248,8 @@ public class LIMEService extends InputMethodService implements
     SearchServer SearchSrv = null;
     // Auto Commmit Value
     private int auto_commit = 0;
+    // 電話鍵盤自動上字時這一碼的結果還沒到:記下查詢序號,結果套用時再上字
+    private int mAutoCommitQuerySeq = -1;
     // Disable physical keyboard candidate words selection
     private boolean disable_physical_selection = false;
     String LDComposingBuffer = ""; // Jeremy '11,7,30 for learning continuous typing phrases
@@ -2753,9 +2755,14 @@ public class LIMEService extends InputMethodService implements
                 if (mComposing != null && mComposing.length() == auto_commit &&
                         currentSoftKeyboard != null && currentSoftKeyboard.contains("phone")) {
                     InputConnection ic = getCurrentInputConnection();
-                    // 這一碼的查詢才剛送出:先套用它的結果再上字,不要上到前一碼的首選
-                    if (ensureCandidatesCurrent())
-                        commitTyped(ic);
+                    // 這一碼的查詢才剛送出:先套用它的結果再上字,不要上到前一碼的首選;
+                    // 查無結果時不上字(否則會送出前一碼殘留的首選),等不到結果就在結果到時再上字
+                    if (ensureCandidatesCurrent()) {
+                        if (hasCandidatesShown && mCandidateList != null && !mCandidateList.isEmpty())
+                            commitTyped(ic);
+                    } else {
+                        mAutoCommitQuerySeq = mQuerySeq;
+                    }
 
                 }
             }
@@ -3366,6 +3373,10 @@ public class LIMEService extends InputMethodService implements
                             mAppliedQuerySeq = querySeq;
                             mLastSuggestionsCode = finalKeyString;
                             setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
+                            if (mAutoCommitQuerySeq == querySeq) {
+                                mAutoCommitQuerySeq = -1;
+                                commitTyped(getCurrentInputConnection());
+                            }
                         });
                         if (DEBUG)
                             Log.i(TAG, "updateCandidates(): display selkey:" + selkey
@@ -3377,6 +3388,7 @@ public class LIMEService extends InputMethodService implements
                             mAppliedQuerySeq = querySeq;
                             mLastSuggestionsCode = null;
                             clearSuggestions();
+                            if (mAutoCommitQuerySeq == querySeq) mAutoCommitQuerySeq = -1; // 查無結果:不上字
                         });
                     }
 
