@@ -65,7 +65,9 @@ class LimeQueryEngine {
      * Covert composing codes into composing text (reading string).
      *
      */
-    String keyToKeyname(String code, String table, Boolean composingText) {
+    // 查詢執行緒與背景預取會同時呼叫 getMappingByCode/keyToKeyname,這些方法共用 lastCode、
+    // lastValidDualCodeList 與按鍵對照表:同步執行,避免字根顯示拼到別次查詢的結果
+    synchronized String keyToKeyname(String code, String table, Boolean composingText) {
         // Jeremy '11,8,30
         if (composingText && code.length() > LimeDB.COMPOSING_CODE_LENGTH_LIMIT)
             return code;
@@ -342,7 +344,7 @@ class LimeQueryEngine {
     /**
      * Retrieve matched records
      */
-    List<Mapping> getMappingByCode(String code, boolean softKeyboard, boolean getAllRecords) {
+    synchronized List<Mapping> getMappingByCode(String code, boolean softKeyboard, boolean getAllRecords) {
 
         String codeorig = code;
 
@@ -521,7 +523,7 @@ class LimeQueryEngine {
         return selectClause.toString();
     }
 
-    String preProcessingRemappingCode(String code) {
+    synchronized String preProcessingRemappingCode(String code) {
         if (LimeDB.DEBUG)
             Log.i(LimeDB.TAG, "preProcessingRemappingCode(): tablename = " + db.tablename + " , code=" + code);
         if (code != null) {
