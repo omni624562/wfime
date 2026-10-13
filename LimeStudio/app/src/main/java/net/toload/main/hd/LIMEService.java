@@ -2722,9 +2722,17 @@ public class LIMEService extends InputMethodService implements
 
             if (hasCandidatesShown) { // Replace isCandidateShown() with hasCandidatesShown by Jeremy '12,5,6
                 if (!pickHighlightedCandidate()) {// Jeremy '12,5,11 fixed for not sedning related.
-                    if (mComposing.length() == 0)
-                        hideCandidateView();
-                    sendKeyChar((char) primaryCode);
+                    // 組字中按空白而候選列沒有選定項目(注音打完聲調、倉頡等):上第一個候選,
+                    // 不要送出空白而把組字留著;沒有組字(例如關聯字)時照舊送出空白
+                    if (primaryCode == MY_KEYCODE_SPACE && !mEnglishOnly && mComposing.length() > 0) {
+                        if (ensureCandidatesCurrent() && hasCandidatesShown
+                                && mCandidateList != null && !mCandidateList.isEmpty())
+                            pickCandidateManually(0);
+                    } else {
+                        if (mComposing.length() == 0)
+                            hideCandidateView();
+                        sendKeyChar((char) primaryCode);
+                    }
 
                 }
 
