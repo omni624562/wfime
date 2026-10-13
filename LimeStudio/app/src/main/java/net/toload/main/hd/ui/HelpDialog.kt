@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -69,7 +70,7 @@ fun HelpDialogContent(onDismiss: () -> Unit) {
     val tabs = listOf(
         Triple(0, stringResource(R.string.help_tab_features), Icons.Default.AutoAwesome),
         Triple(1, stringResource(R.string.help_tab_keyboard), Icons.Default.Keyboard),
-        Triple(2, stringResource(R.string.help_tab_changelog), Icons.Default.List)
+        Triple(2, stringResource(R.string.help_tab_changelog), Icons.AutoMirrored.Filled.List)
     )
 
     Surface(

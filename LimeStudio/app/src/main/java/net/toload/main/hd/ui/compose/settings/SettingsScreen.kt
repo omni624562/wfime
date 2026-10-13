@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -597,7 +598,7 @@ fun KeyboardSettingsSection(
         }
 
         // Group 3: 鍵盤互動與回饋
-        PreferenceCardGroup(title = stringResource(R.string.settings_group_key_feedback), icon = Icons.Default.VolumeUp) {
+        PreferenceCardGroup(title = stringResource(R.string.settings_group_key_feedback), icon = Icons.AutoMirrored.Filled.VolumeUp) {
             SwitchPreference(
                 title = stringResource(R.string.vibrate_on_keypress),
                 checked = uiState.vibrateOnKeypress,

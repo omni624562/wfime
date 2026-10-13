@@ -44,7 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.Settings
@@ -361,7 +361,7 @@ open class CandidateView @JvmOverloads constructor(
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Assignment,
+                    imageVector = Icons.AutoMirrored.Filled.Assignment,
                     contentDescription = "Memo",
                     tint = c.icon,
                     modifier = Modifier.size(24.dp)
