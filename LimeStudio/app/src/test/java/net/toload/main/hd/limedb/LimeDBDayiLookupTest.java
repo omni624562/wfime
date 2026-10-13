@@ -155,4 +155,34 @@ public class LimeDBDayiLookupTest {
         assertTrue(limeDb.hasCodeOrPrefix("dayi", "a'"));
         assertNotNull(limeDb.getTopWordByExactCode("dayi", "a'b"));
     }
+
+    // ===================== addOrUpdateMappingRecord 表名驗證 =====================
+
+    private String dumpDayi() {
+        StringBuilder sb = new StringBuilder();
+        android.database.Cursor c = db.rawQuery("SELECT _id, code, word, score FROM dayi ORDER BY _id", null);
+        while (c.moveToNext())
+            sb.append(c.getLong(0)).append(',').append(c.getString(1)).append(',')
+                    .append(c.getString(2)).append(',').append(c.getInt(3)).append(';');
+        c.close();
+        return sb.toString();
+    }
+
+    @Test
+    public void testAddOrUpdate_ValidTableWrites() {
+        limeDb.addOrUpdateMappingRecord("dayi", "zz", "字", 3);
+        Mapping m = limeDb.getTopWordByExactCode("dayi", "zz");
+        assertNotNull(m);
+        assertEquals("字", m.getWord());
+        assertEquals(3, m.getScore());
+    }
+
+    @Test
+    public void testAddOrUpdate_InvalidTableRejected() {
+        String before = dumpDayi();
+        // 表名後面的 -- 會把 WHERE 變成註解:沒驗證時會查到第一列並把它的分數加 1
+        limeDb.addOrUpdateMappingRecord("dayi --", "zz", "字", -1);
+        limeDb.addOrUpdateMappingRecord("dayi; DROP TABLE dayi", "zz", "字", -1);
+        assertEquals(before, dumpDayi());
+    }
 }

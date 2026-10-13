@@ -1068,6 +1068,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             return;
 
         try {
+            // 表名來自呼叫端(例如還原學習紀錄時的輸入法代碼),會串進 SQL,先驗證
+            table = validateTableName(table);
             Mapping munit = isMappingExistOnDB(db, table, code, word);
             ContentValues cv = new ContentValues();
 
