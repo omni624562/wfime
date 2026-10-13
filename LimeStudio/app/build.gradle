@@ -68,9 +68,9 @@ android {
             buildConfigField "boolean", "DEBUG_LOGGING", "true"
         }
         release {
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
             minifyEnabled = true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "boolean", "DEBUG_LOGGING", "false"
         }
