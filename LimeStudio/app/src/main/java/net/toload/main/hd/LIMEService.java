@@ -4334,6 +4334,15 @@ public class LIMEService extends InputMethodService implements
                     && !currentSoftKeyboard.contains("phone")
                     && (!hasPhysicalKeyPressed || mLIMEPref.getEnglishPredictionOnPhysicalKeyboard())) {
                 if (Character.isLetter((char) primaryCode)) {
+                    // 已記下的英文字要正好接在游標前:游標被移走、欄位被 app 清空或改寫、中間打了
+                    // 符號或中文時就對不上,先重設,不要接著上一個字查
+                    if (tempEnglishWord.length() > 0) {
+                        InputConnection eic = getCurrentInputConnection();
+                        CharSequence before = (eic != null)
+                                ? eic.getTextBeforeCursor(tempEnglishWord.length(), 0) : null;
+                        if (before == null || !tempEnglishWord.toString().equalsIgnoreCase(before.toString()))
+                            resetTempEnglishWord();
+                    }
                     this.tempEnglishWord.append((char) primaryCode);
                     this.updateEnglishPrediction();
                 } else {
