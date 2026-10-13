@@ -1640,7 +1640,9 @@ public class LIMEService extends InputMethodService implements
                     }
                     selectedCandidate = null;
                     clearSuggestions();
-                    getCurrentInputConnection().commitText(symbol, 1);
+                    InputConnection symbolIc = getCurrentInputConnection();
+                    if (symbolIc != null)
+                        symbolIc.commitText(symbol, 1);
                     return true;
                 }
             }
@@ -1677,7 +1679,9 @@ public class LIMEService extends InputMethodService implements
                         }
                         selectedCandidate = null;
                         clearSuggestions();
-                        getCurrentInputConnection().commitText(symbol, 1);
+                        InputConnection symbolIc = getCurrentInputConnection();
+                        if (symbolIc != null)
+                            symbolIc.commitText(symbol, 1);
                         mDayiSymbolPrefix = false;
                         return true;
                     } else {
@@ -2037,7 +2041,9 @@ public class LIMEService extends InputMethodService implements
                 String s = ChineseSymbol.getSymbol(t);
                 if (s != null) {
                     clearSuggestions();
-                    getCurrentInputConnection().commitText(s, 1);
+                    InputConnection symbolIc = getCurrentInputConnection();
+                    if (symbolIc != null)
+                        symbolIc.commitText(s, 1);
                     hasSymbolEntered = true;
                     if (hasMenuPress)
                         hasMenuProcessed = true;
@@ -3895,7 +3901,9 @@ public class LIMEService extends InputMethodService implements
                 if (shouldDiscard) {
                     clearComposing(true);
                 } else {
-                    getCurrentInputConnection().commitText(mComposing, 1);
+                    InputConnection composingIc = getCurrentInputConnection();
+                    if (composingIc != null)
+                        composingIc.commitText(mComposing, 1);
                     finishComposing();
                 }
             }
@@ -4352,8 +4360,9 @@ public class LIMEService extends InputMethodService implements
 
             }
 
-            getCurrentInputConnection().commitText(
-                    String.valueOf((char) primaryCode), 1);
+            InputConnection charIc = getCurrentInputConnection();
+            if (charIc != null)
+                charIc.commitText(String.valueOf((char) primaryCode), 1);
         }
 
         if (!(!hasPhysicalKeyPressed && hasDistinctMultitouch))
