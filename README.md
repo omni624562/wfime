@@ -52,15 +52,15 @@ WFIME (Wheat Fields Input Method Editor) is a sophisticated Android IME applicat
 ### 🚀 Installation
 
 #### From APK
-1. Download the latest `app-release.apk`
+1. Download the latest `app-phone-release.apk` (phones) or `app-tablet-release.apk` (tablets)
 2. Enable "Install from Unknown Sources" in Settings
 3. Install the APK
 4. Enable WFIME in Settings → System → Languages & Input → On-screen keyboard
 
 #### From Source
 ```bash
-git clone https://github.com/omni624562/nanime-main.git
-cd nanime-main/LimeStudio
+git clone https://github.com/omni624562/wfime.git
+cd wfime/LimeStudio
 ./gradlew assembleRelease
 ```
 
@@ -69,7 +69,7 @@ cd nanime-main/LimeStudio
 This repository is organized as a **monorepo** containing the Android project and related resources:
 
 ```
-nanime-main/                    # Git repository root
+wfime/                    # Git repository root
 ├── LimeStudio/                 # ⭐ Android project (open this in Android Studio)
 │   ├── app/                    # Application source code
 │   │   └── src/main/java/      # Java/Kotlin source files
@@ -88,8 +88,8 @@ nanime-main/                    # Git repository root
 
 **📌 Important for Developers:**
 - **For Android development:** Open `LimeStudio/` directory in Android Studio
-- **For database/resource management:** Work in the root `nanime-main/` directory
-- **For Git operations:** Execute commands from root `nanime-main/` directory
+- **For database/resource management:** Work in the root `wfime/` directory
+- **For Git operations:** Execute commands from root `wfime/` directory
 
 ### 🛠️ Technology Stack
 
@@ -145,7 +145,7 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 - UI/UX improvements
 - Documentation translations
 
-See [open issues](https://github.com/omni624562/nanime-main/issues) for current needs.
+See [open issues](https://github.com/omni624562/wfime/issues) for current needs.
 
 ### 📄 License
 
@@ -184,7 +184,7 @@ See [docs/SECURITY_ANALYSIS.md](docs/SECURITY_ANALYSIS.md) for comprehensive sec
 
 ### 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/omni624562/nanime-main/issues)
+- **Issues:** [GitHub Issues](https://github.com/omni624562/wfime/issues)
 - **Email:** nanchan.tw@gmail.com
 
 ---
@@ -226,15 +226,15 @@ WFIME（麥田輸入法編輯器）是一個基於 LIME IME 開源專案衍生�
 ### 🚀 安裝方式
 
 #### 從 APK 安裝
-1. 下載最新的 `app-release.apk`
+1. 下載最新的 `app-phone-release.apk`（手機）或 `app-tablet-release.apk`（平板）
 2. 在設定中啟用「允許安裝未知來源的應用程式」
 3. 安裝 APK
 4. 在設定 → 系統 → 語言與輸入法 → 螢幕鍵盤中啟用 WFIME
 
 #### 從原始碼建置
 ```bash
-git clone https://github.com/omni624562/nanime-main.git
-cd nanime-main/LimeStudio
+git clone https://github.com/omni624562/wfime.git
+cd wfime/LimeStudio
 ./gradlew assembleRelease
 ```
 
@@ -243,7 +243,7 @@ cd nanime-main/LimeStudio
 本儲存庫採用 **monorepo** 組織結構，包含 Android 專案和相關資源：
 
 ```
-nanime-main/                    # Git 儲存庫根目錄
+wfime/                    # Git 儲存庫根目錄
 ├── LimeStudio/                 # ⭐ Android 專案（在 Android Studio 中開啟此目錄）
 │   ├── app/                    # 應用程式原始碼
 │   │   └── src/main/java/      # Java/Kotlin 原始檔案
@@ -262,8 +262,8 @@ nanime-main/                    # Git 儲存庫根目錄
 
 **📌 開發者注意事項：**
 - **Android 開發：** 在 Android Studio 中開啟 `LimeStudio/` 目錄
-- **資料庫/資源管理：** 在根目錄 `nanime-main/` 中作業
-- **Git 操作：** 從根目錄 `nanime-main/` 執行指令
+- **資料庫/資源管理：** 在根目錄 `wfime/` 中作業
+- **Git 操作：** 從根目錄 `wfime/` 執行指令
 
 ### 🛠️ 技術架構
 
@@ -319,7 +319,7 @@ nanime-main/                    # Git 儲存庫根目錄
 - UI/UX 改進
 - 文件翻譯
 
-請查看[開放問題](https://github.com/omni624562/nanime-main/issues)了解當前需求。
+請查看[開放問題](https://github.com/omni624562/wfime/issues)了解當前需求。
 
 ### 📄 授權
 
@@ -358,7 +358,7 @@ WFIME 採用 **GNU General Public License v3.0** 授權。
 
 ### 📞 支援
 
-- **問題回報：** [GitHub Issues](https://github.com/omni624562/nanime-main/issues)
+- **問題回報：** [GitHub Issues](https://github.com/omni624562/wfime/issues)
 - **電子郵件：** nanchan.tw@gmail.com
 
 ---

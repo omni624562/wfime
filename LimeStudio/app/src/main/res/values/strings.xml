@@ -145,6 +145,15 @@
     <string name="help_log_20260927_4">「自動隱藏軟鍵盤」設定生效：關閉後接實體鍵盤仍顯示螢幕鍵盤。</string>
     <string name="help_log_20260927_5">分享文字的匯入對話框可用返回鍵關閉，旋轉畫面後也不再重複跳出。</string>
     <string name="help_log_20260927_6">多項穩定性修正：資料庫鎖定時不再卡住、過長的按鍵標籤自動縮小。</string>
+    <string name="help_log_20260927_7">大易候選只列碼完全相符的字，並支援三碼（第 1、2 碼加最後一碼），與電腦版大易一致；連打也能用三碼。</string>
+    <string name="help_log_20260927_8">新增淺色模式的候選列與面板配色。</string>
+    <string name="help_log_20260927_9">修正快速刪除或快打時，候選列殘留舊字、空白鍵上到前一碼的字。</string>
+    <string name="help_log_20260927_10">智慧選字只提升碼完全相符的字，不再把其他碼的字排到前面。</string>
+    <string name="help_log_20260927_11">英文預測修正：點選候選不再當機、空白後的下一個字也有預測、選字後游標位置正確、移動游標後重新預測。</string>
+    <string name="help_log_20260927_12">注音等輸入法組字中按空白會上第一個候選；電話鍵盤自動上字更穩定。</string>
+    <string name="help_log_20260927_13">多項穩定性修正：分享文字開啟、長按刪除關聯字、新增備忘錄時不再當機，字根顯示不再錯亂。</string>
+    <string name="help_log_20260927_14">學字與匯入改用安全的資料庫查詢，含引號的詞也能正常學習與匯入。</string>
+    <string name="help_log_20260927_15">移除滑動選字與未使用的佈景主題。</string>
     <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁改善 (▲/▼)。</string>
     <string name="help_log_20260601_2">平板雙欄全螢幕沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
     <string name="help_log_20260601_3">大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。</string>

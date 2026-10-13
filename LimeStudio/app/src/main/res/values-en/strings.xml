@@ -65,6 +65,15 @@
     <string name="help_log_20260927_4">The \"Auto-hide on-screen keyboard\" setting now works: turn it off to keep the on-screen keyboard while a physical keyboard is connected.</string>
     <string name="help_log_20260927_5">The share-text import dialog can be closed with Back and no longer pops up again after rotating the screen.</string>
     <string name="help_log_20260927_6">Stability fixes: a locked database no longer freezes input, and key labels that are too long shrink to fit.</string>
+    <string name="help_log_20260927_7">Dayi candidates now list only exact code matches and support three-code input (1st, 2nd and last root), matching desktop Dayi; continuous typing also accepts three-code input.</string>
+    <string name="help_log_20260927_8">Added light-mode colors for the candidate bar and panels.</string>
+    <string name="help_log_20260927_9">Fixed stale candidates after fast deleting or typing, and Space picking a character from the previous code.</string>
+    <string name="help_log_20260927_10">Smart selection only promotes exact code matches instead of characters from other codes.</string>
+    <string name="help_log_20260927_11">English prediction fixes: tapping a suggestion no longer crashes, words after a space get predictions, the cursor lands after the picked word, and moving the cursor restarts prediction.</string>
+    <string name="help_log_20260927_12">Space now picks the first candidate while composing in Chuyin and other input methods; phone-keypad auto-commit is more reliable.</string>
+    <string name="help_log_20260927_13">Stability fixes: no more crashes when opening shared text, deleting a related phrase by long press or adding a memo, and root display no longer mixes up.</string>
+    <string name="help_log_20260927_14">Learning and import now use safe database queries, so words with quotes are learned and imported correctly.</string>
+    <string name="help_log_20260927_15">Removed swipe selection and unused themes.</string>
     <string name="help_log_20260601_1">Dayi left-side paging for external physical keyboards (▲/▼).</string>
     <string name="help_log_20260601_2">Upgraded the two-pane full-screen immersive settings console on tablets and hid the XML AppBarLayout.</string>
     <string name="help_log_20260601_3">Redesigned the Dayi smart selection AI card and added a green/grey breathing status light.</string>

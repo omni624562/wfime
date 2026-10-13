@@ -401,14 +401,23 @@ fun TabUpdateLog() {
     val logs = listOf(
         UpdateLogItem(
             version = "v1.5.0",
-            date = "2026.09.27",
+            date = "2026.10.14",
             changes = listOf(
                 stringResource(R.string.help_log_20260927_1),
                 stringResource(R.string.help_log_20260927_2),
                 stringResource(R.string.help_log_20260927_3),
                 stringResource(R.string.help_log_20260927_4),
                 stringResource(R.string.help_log_20260927_5),
-                stringResource(R.string.help_log_20260927_6)
+                stringResource(R.string.help_log_20260927_6),
+                stringResource(R.string.help_log_20260927_7),
+                stringResource(R.string.help_log_20260927_8),
+                stringResource(R.string.help_log_20260927_9),
+                stringResource(R.string.help_log_20260927_10),
+                stringResource(R.string.help_log_20260927_11),
+                stringResource(R.string.help_log_20260927_12),
+                stringResource(R.string.help_log_20260927_13),
+                stringResource(R.string.help_log_20260927_14),
+                stringResource(R.string.help_log_20260927_15)
             )
         ),
         UpdateLogItem(
