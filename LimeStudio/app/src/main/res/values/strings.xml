@@ -190,4 +190,8 @@
     <string name="im_switch_label_default">中</string>
     <string name="ime_name_english">英</string>
     <string name="space_label_english">英文</string>
+    <!-- 長按候選列的關聯字刪除 -->
+    <string name="candidate_related_delete_title">刪除關聯字</string>
+    <string name="candidate_related_delete_message">要從關聯字移除「%1$s → %2$s」嗎?</string>
+    <string name="candidate_related_delete_confirm">刪除</string>
 </resources>

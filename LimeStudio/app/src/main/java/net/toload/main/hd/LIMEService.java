@@ -4495,13 +4495,16 @@ public class LIMEService extends InputMethodService implements
             if (mapping.isRelatedPhraseRecord()) {
                 
                 androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(mThemeContext)
-                    .setTitle("Delete Suggestion")
-                    .setMessage("Remove '" + mapping.getWord() + "' from related words list?")
-                    .setPositiveButton("Delete", (dialogInterface, which) -> {
+                    .setTitle(R.string.candidate_related_delete_title)
+                    .setMessage(getString(R.string.candidate_related_delete_message, mapping.getPword(), mapping.getWord()))
+                    .setPositiveButton(R.string.candidate_related_delete_confirm, (dialogInterface, which) -> {
                         SearchSrv.deleteRelatedPhrase(mapping.getPword(), mapping.getWord());
-                        mCandidateList.remove(index);
-                        setSuggestions(mCandidateList, false, "");
-                        Toast.makeText(this, "Removed", Toast.LENGTH_SHORT).show();
+                        // 對話框開著時候選清單可能已換掉(旋轉、切換 app、打了別的字),
+                        // 用這筆物件本身移除,找不到就不動畫面,不用舊的 index
+                        if (mCandidateList != null && mCandidateList.remove(mapping))
+                            setSuggestions(mCandidateList, false, "");
+                        Toast.makeText(this, getString(R.string.related_manager_deleted,
+                                mapping.getPword(), mapping.getWord()), Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .create();
