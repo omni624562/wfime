@@ -274,10 +274,6 @@ public class LIMEPreferenceManager {
         return 0;
     }
 
-    public void setResetCacheFlag(boolean value) {
-        sp.edit().putBoolean("searchsrv_reset_cache", value).apply();
-    }
-
     /*
      * INT Parameter SET/GET
      */

@@ -66,7 +66,6 @@ public class DBServer {
     protected static LimeDB datasource = null; // static LIMEDB for shared LIMEDB between DBServer instances
     protected static LIMEPreferenceManager mLIMEPref = null;
     protected static Context appContext = null;
-    private static boolean remoteFileDownloading = false;
     private static String loadingTablename = ""; // Jeremy '12,6,2 change all variable to static for all instances to
                                                  // share these variables
     private static boolean abortDownload = false;
@@ -462,12 +461,10 @@ public class DBServer {
 
         // mLIMEPref.setParameter("reload_database", true);
         abortDownload = false;
-        remoteFileDownloading = true;
         File target = downloadRemoteFile(url, folder, filename);
         if (!target.exists() || target == null || target.length() == 0) {
             target = downloadRemoteFile(backup_url, folder, filename);
         }
-        remoteFileDownloading = false;
         return target;
     }
 

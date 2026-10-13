@@ -88,7 +88,6 @@ public class SearchServer {
      * Store the mapping of typing code and mapped code from getMappingByCode on db
      * Jeremy '12,6,5
      */
-    private static Map<String, List<String>> coderemapcache = null;
     // Jeremy '15,6,8 TODO resolved: related phrases are now cached across keystrokes
     private static Map<String, List<Mapping>> relatedcache = null; // word -> related phrase list
     private static Map<String, Mapping> relatedPhraseCache = null; // pword\0cword -> Mapping (null = no record)
@@ -849,7 +848,6 @@ public class SearchServer {
         engcache = newLruMap(MAX_CACHE_ENTRIES);
         emojicache = newLruMap(MAX_CACHE_ENTRIES);
         keynamecache = newLruMap(MAX_CACHE_ENTRIES);
-        coderemapcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedcache = newLruMap(MAX_CACHE_ENTRIES);
         relatedPhraseCache = newLruMap(MAX_CACHE_ENTRIES);
         topWordsCache = newLruMap(MAX_CACHE_ENTRIES);
@@ -1227,18 +1225,7 @@ public class SearchServer {
      *
      */
     private void removeRemappedCodeCachedMappings(String code) {
-        if (DEBUG)
-            Log.i(TAG, "removeRemappedCodeCachedMappings() on code ='" + code + "' coderemapcache.size="
-                    + coderemapcache.size());
-        List<String> codelist = coderemapcache.get(cacheKey(code));
-        if (codelist != null) {
-            for (String entry : codelist) {
-                if (DEBUG)
-                    Log.i(TAG, "removeRemappedCodeCachedMappings() remove code= '" + entry + "' from cache.");
-                cache.remove(cacheKey(entry));
-            }
-        } else
-            cache.remove(cacheKey(code)); // Jeremy '12,6,6 no remap. remove the code mapping from cache.
+        cache.remove(cacheKey(code)); // Jeremy '12,6,6 no remap. remove the code mapping from cache.
     }
 
     private void updateSimilarCodeCache(String code) {
@@ -1406,9 +1393,6 @@ public class SearchServer {
             keynamecache.clear();
         }
 
-        if (coderemapcache != null) {
-            coderemapcache.clear();
-        }
     }
 
     public List<Mapping> getEnglishSuggestions(String word) {

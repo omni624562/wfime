@@ -194,7 +194,6 @@ public class LIMEBaseKeyboard {
     /**
      * List of modifier keys such as Shift & Alt, if any
      */
-    private List<Key> mModifierKeys;
 
     /**
      * Width of the screen available to fit the keyboard
@@ -840,7 +839,6 @@ public class LIMEBaseKeyboard {
         mDefaultVerticalGap = 0;
         mDefaultHeight = mDefaultWidth;
         mKeys = new ArrayList<Key>();
-        mModifierKeys = new ArrayList<Key>();
         mKeyboardMode = modeId;
         mKeySizeScale = keySizeScale;
         mShowArrowKeys = showArrowKeys;
@@ -1163,7 +1161,6 @@ public class LIMEBaseKeyboard {
                 Log.i(TAG, "createArrowKeysRow(): key[" + i + "]" + "; x = " + x);
 
             mKeys.add(key);
-            // mModifierKeys.add(key);
             if (x > mTotalWidth) {
                 mTotalWidth = x;
             }
@@ -1282,9 +1279,6 @@ public class LIMEBaseKeyboard {
                         if (key.codes[0] == KEYCODE_SHIFT) {
                             mShiftKey = key;
                             mShiftKeyIndex = mKeys.size() - 1;
-                            mModifierKeys.add(key);
-                        } else if (key.codes[0] == KEYCODE_ALT) {
-                            mModifierKeys.add(key);
                         }
                     } else if (TAG_KEYBOARD.equals(tag)) {
                         parseKeyboardAttributes(res, parser);

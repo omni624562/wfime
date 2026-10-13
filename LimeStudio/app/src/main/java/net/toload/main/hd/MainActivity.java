@@ -41,7 +41,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentManager;
 
 import java.io.File;
@@ -310,19 +309,6 @@ public class MainActivity extends AppCompatActivity {
         if (progress.isShowing()) {
             progress.setMessage(value);
         }
-    }
-
-    public void shareTo(String filepath, String type) {
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType(type);
-
-        File target = new File(filepath);
-        Uri targetfile = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", target);
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, targetfile);
-        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, target.getName());
-        startActivity(Intent.createChooser(sharingIntent, target.getName()));
     }
 
     public void initialDefaultPreference() {

@@ -178,7 +178,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private int mLabelTextSize;
     private int mSmallLabelTextSize;
     private int mSubLabelTextSize;
-    private int mSymbolColorScheme = 0;
     private int mShadowColor;
     private float mShadowRadius;
     private Drawable mKeyBackground;
@@ -534,8 +533,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         mKeyTextStyle = Typeface.defaultFromStyle(textStyle);
                         break;
                 }
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_symbolColorScheme) {
-                mSymbolColorScheme = a.getInt(attr, 0);
             }
         }
 

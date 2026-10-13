@@ -69,12 +69,6 @@ public class MainActivityHandler extends Handler {
                 activity.showToastMessage("Error", length);
             }
 
-        } else if (action != null && action.equalsIgnoreCase("sharezip")) {
-            String filepath = msg.getData().getString("filepath");
-            activity.shareTo(filepath, Lime.SHARE_TYPE_ZIP);
-        } else if (action != null && action.equalsIgnoreCase("sharetxt")) {
-            String filepath = msg.getData().getString("filepath");
-            activity.shareTo(filepath, Lime.SHARE_TYPE_TXT);
         } else if (action != null && action.equalsIgnoreCase("initialpreference")) {
             activity.initialDefaultPreference();
         }

@@ -97,7 +97,6 @@ public class Lime {
     public static final String DB_TABLE_PHONETIC = "phonetic";
 
     // ==================== IM Type Names ====================
-    public static final String IM_CUSTOM = "custom";
     public static final String IM_DAYI = "dayi";
     public static final String IM_DAYIUNI = "dayiuni";
     public static final String IM_DAYIUNIP = "dayiunip";
@@ -182,8 +181,6 @@ public class Lime {
     public static final String DEVICE = "device";
 
     // ==================== File Types ====================
-    public static final String SHARE_TYPE_TXT = "text/plain";
-    public static final String SHARE_TYPE_ZIP = "application/zip";
     public static final String IMPORT_TEXT = "import_text";
     public static final String SUPPORT_FILE_EXT_TXT = "txt";
     public static final String SUPPORT_FILE_EXT_LIME = "lime";

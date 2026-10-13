@@ -47,9 +47,7 @@ public class LIMEKeyboardSwitcher {
     public static final int MODE_EMAIL = 5;
     public static final int MODE_IM = 6;
     public static final int MODE_NUMBER = 7;
-    public static final int MODE_TEXT_QWERTY = 0;
     public static final int MODE_TEXT_ALPHA = 1;
-    public static final int MODE_TEXT_COUNT = 2;
     public static final int KEYBOARDMODE_NORMAL = R.id.mode_normal;
     public static final int KEYBOARDMODE_URL = R.id.mode_url;
     public static final int KEYBOARDMODE_EMAIL = R.id.mode_email;
