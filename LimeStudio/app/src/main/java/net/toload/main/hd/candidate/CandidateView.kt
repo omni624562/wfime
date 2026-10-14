@@ -49,6 +49,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Mood
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.derivedStateOf
@@ -418,7 +419,24 @@ open class CandidateView @JvmOverloads constructor(
                 )
             }
 
-            // 4. 設定主控台
+            // 4. 語音輸入(有啟用語音輸入法時才顯示)
+            if (mService?.hasVoiceInput() == true) {
+                IconButton(
+                    onClick = {
+                        mService?.switchToVoiceInput()
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = "Voice input",
+                        tint = c.icon,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            // 5. 設定主控台
             IconButton(
                 onClick = {
                     try {

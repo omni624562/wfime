@@ -25,14 +25,11 @@
 package net.toload.main.hd.global;
 
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import android.util.Log;
-import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.app.NotificationCompat;
@@ -187,40 +184,6 @@ public class LIMEUtilities {
 
     private static Bitmap getNotificationIconBitmap(Context context) {
         return BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
-    }
-
-    public static String isVoiceSearchServiceExist(Context context) {
-        if (DEBUG)
-            Log.i(TAG, "isVoiceSearchServiceExist()");
-
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        List<InputMethodInfo> mInputMethodProperties = imm.getEnabledInputMethodList();
-
-        // boolean isVoiceSearchServiceEnabled = false;
-        for (int i = 0; i < mInputMethodProperties.size(); i++) {
-            InputMethodInfo imi = mInputMethodProperties.get(i);
-            if (DEBUG)
-                Log.i(TAG, "enabled IM " + i + ":" + imi.getId());
-
-            if (imi.getId().equals("com.google.android.voice-search/.ime.VoiceInputMethodService")) {
-                return "com.google.android.voice-search/.ime.VoiceInputMethodService";
-            } else if (imi.getId().equals(
-                    "com.google.android.googlequicksearchbox/com.google.android.voice-search.ime.VoiceInputMethodService")) {
-                return "com.google.android.googlequicksearchbox/com.google.android.voice-search.ime.VoiceInputMethodService";
-            }
-        }
-        return null;
-
-    }
-
-    public static String getVoiceSearchIMId(Context context) {
-        ComponentName voiceInputComponent = new ComponentName("com.google.android.voice-search",
-                "com.google.android.voice-search.ime.VoceInputMethodService");
-        if (DEBUG)
-            Log.i(TAG, "getVoiceSearchIMId(), Component name = "
-                    + voiceInputComponent.flattenToString() + ", id = "
-                    + voiceInputComponent.flattenToShortString());
-        return voiceInputComponent.flattenToShortString();
     }
 
     public static void showInputMethodPicker(Context context) {

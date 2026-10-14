@@ -53,6 +53,9 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -2845,6 +2848,33 @@ public class LIMEService extends InputMethodService implements
 
         if (DEBUG)
             Log.i(TAG, "buildActivatedIMList(): delegated to helper, activeIM=" + activeIM);
+    }
+
+    // 語音輸入:找已啟用、子類型為 voice 的其他輸入法(例如 Google 語音輸入、Samsung 語音輸入)
+    private android.util.Pair<String, InputMethodSubtype> findVoiceInputMethod() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm == null)
+            return null;
+        for (InputMethodInfo imi : imm.getEnabledInputMethodList()) {
+            if (imi.getPackageName().equals(getPackageName()))
+                continue;
+            for (InputMethodSubtype subtype : imm.getEnabledInputMethodSubtypeList(imi, true)) {
+                if ("voice".equals(subtype.getMode()))
+                    return new android.util.Pair<>(imi.getId(), subtype);
+            }
+        }
+        return null;
+    }
+
+    public boolean hasVoiceInput() {
+        return findVoiceInputMethod() != null;
+    }
+
+    // 切到語音輸入法;說完後語音輸入法會自己切回原本的輸入法
+    public void switchToVoiceInput() {
+        android.util.Pair<String, InputMethodSubtype> voice = findVoiceInputMethod();
+        if (voice != null)
+            switchInputMethod(voice.first, voice.second);
     }
 
     /**
