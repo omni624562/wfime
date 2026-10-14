@@ -34,9 +34,6 @@ import java.text.DecimalFormat;
 /**
  * Core constants for LIME IME application.
  * Contains database schema definitions, IM types, and utility methods.
- * 
- * Note: For storage paths and download URLs, see
- * {@link net.toload.main.hd.global.LIME}
  */
 public class Lime {
 
@@ -44,9 +41,7 @@ public class Lime {
 
     // ==================== Database Settings ====================
     public static final String DATABASE_NAME = "lime.db";
-    public static final String DATABASE_EXT = ".db";
-    public static final String DATABASE_BACKUP_NAME = "backup.zip";
-    public static final String DATABASE_CLOUD_TEMP = "cloudtemp.zip";
+    public static final int LIMEDB_CACHE_SIZE = 1024;
 
     /**
      * Get the database folder path using app-specific storage.
@@ -63,10 +58,6 @@ public class Lime {
         return dbDir != null ? dbDir.getAbsolutePath() : context.getFilesDir().getAbsolutePath();
     }
 
-    // ==================== News ====================
-    public static final String LIME_NEWS_CONTENT = "lime_news_content";
-    public static final String LIME_NEWS_CONTENT_URL = "https://github.com/omni624562/wfime/raw/main/Resources/Message/content.html";
-
     // ==================== File Constants ====================
     public static final String separator = java.io.File.separator;
     public static final String DATABASE_IM_TEMP = "temp";
@@ -81,15 +72,11 @@ public class Lime {
     public static final String DATABASE_CLOUD_IM_PHONETIC_BIG5 = DATABASE_CLOUD_URL_BASED + "phoneticbig5.zip";
     public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE = DATABASE_CLOUD_URL_BASED + "phoneticcomplete.zip";
     public static final String DATABASE_CLOUD_IM_PHONETICCOMPLETE_BIG5 = DATABASE_CLOUD_URL_BASED + "phoneticcompletebig5.zip";
-    public static final String DATABASE_CLOUD_IM_PHONETIC_KEYBOARD = "phonetic";
 
     // Dayi IM downloads
     public static final String DATABASE_CLOUD_IM_DAYI = DATABASE_CLOUD_URL_BASED + "dayi.zip";
     public static final String DATABASE_CLOUD_IM_DAYIUNI = DATABASE_CLOUD_URL_BASED + "dayiuni.zip";
     public static final String DATABASE_CLOUD_IM_DAYIUNIP = DATABASE_CLOUD_URL_BASED + "dayiunip.zip";
-    public static final String DATABASE_CLOUD_IM_DAYI_KEYBOARD = "dayi";
-
-
 
     // ==================== Database Tables ====================
     public static final String DB_TABLE_CUSTOM = "custom";
@@ -157,28 +144,11 @@ public class Lime {
 
     // ==================== IM Type Fields ====================
     public static final String IM_TYPE_NAME = "name";
-    public static final String IM_TYPE_SOURCE = "source";
-    public static final String IM_TYPE_AMOUNT = "amount";
-    public static final String IM_TYPE_IMPORT = "import";
     public static final String IM_TYPE_KEYBOARD = "keyboard";
-    public static final String IM_TYPE_SELKEY = "selkey";
-    public static final String IM_TYPE_ENDKEY = "endkey";
-    public static final String IM_TYPE_SPACESTYLE = "spacestyle";
 
     // ==================== Display Settings ====================
-    public static final int IM_MANAGE_DISPLAY_AMOUNT = 100;
     public static final float HALF_ALPHA_VALUE = .5f;
     public static final float NORMAL_ALPHA_VALUE = 1f;
-
-    // ==================== Preference Keys ====================
-    public static final String DB_CHECK_RELATED_USERSCORE = "db_user_score_check";
-    public static final String DATABASE_DOWNLOAD_STATUS = "database_download_status";
-
-    // ==================== Backup/Restore ====================
-    public static final String BACKUP = "backup";
-    public static final String RESTORE = "restore";
-    public static final String LOCAL = "LOCAL";
-    public static final String DEVICE = "device";
 
     // ==================== File Types ====================
     public static final String IMPORT_TEXT = "import_text";
@@ -186,7 +156,6 @@ public class Lime {
     public static final String SUPPORT_FILE_EXT_LIME = "lime";
     public static final String SUPPORT_FILE_EXT_LIMEDB = "limedb";
     public static final String SUPPORT_FILE_EXT_CIN = "cin";
-    public static final String EXPORT_FILENAME_RELATED = "lime.related";
 
     // ==================== Emoji Settings ====================
     public static final int EMOJI_EN = 1;
@@ -194,10 +163,6 @@ public class Lime {
     public static final int EMOJI_CN = 3;
     public static final String EMOJI_FIELD_TAG = "tag";
     public static final String EMOJI_FIELD_VALUE = "value";
-
-    // ==================== Payment (Legacy) ====================
-    public static final String PAYMENT_FLAG = "PAYMENT_FLAG";
-    public static final int PAYMENT_REQUEST_CODE = 1001;
 
     // ==================== Utility Methods ====================
 

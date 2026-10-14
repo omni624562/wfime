@@ -45,7 +45,6 @@ import net.toload.main.hd.Lime;
 import net.toload.main.hd.R;
 import net.toload.main.hd.data.KeyboardObj;
 import net.toload.main.hd.data.Word;
-import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.limedb.LimeDB;
 
 public class SetupImLoadRunnable implements Runnable {
@@ -54,7 +53,6 @@ public class SetupImLoadRunnable implements Runnable {
     private final Activity activity;
     private final SetupImHandler handler;
     private final LimeDB datasource;
-    private final LIMEPreferenceManager mLIMEPref;
     private final Context mContext;
     private final boolean restorePreference;
     // Global
@@ -72,7 +70,6 @@ public class SetupImLoadRunnable implements Runnable {
         this.activity = activity;
         this.dbsrv = new DBServer(activity);
         this.datasource = new LimeDB(activity);
-        this.mLIMEPref = new LIMEPreferenceManager(activity);
         this.restorePreference = restorePreference;
         this.mContext = activity.getBaseContext();
     }
@@ -113,7 +110,6 @@ public class SetupImLoadRunnable implements Runnable {
             return;
         }
 
-        mLIMEPref.setParameter("_table", "");
         DBServer.resetCache();
 
         if (restorePreference) {

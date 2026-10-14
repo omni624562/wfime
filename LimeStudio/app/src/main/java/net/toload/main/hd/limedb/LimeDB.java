@@ -59,7 +59,6 @@ import net.toload.main.hd.data.KeyboardObj;
 import net.toload.main.hd.data.Mapping;
 import net.toload.main.hd.data.Related;
 import net.toload.main.hd.data.Word;
-import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEProgressListener;
 import net.toload.main.hd.global.LIMEUtilities;
@@ -222,10 +221,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // unbounded map would grow monotonically. Evicted entries are recomputed from
     // the USERSCORE column via isRelatedPhraseExistOnDB(), so eviction is lossless.
     private final java.util.Map<String, Integer> relatedscore = java.util.Collections.synchronizedMap(
-            new java.util.LinkedHashMap<String, Integer>(LIME.LIMEDB_CACHE_SIZE, 0.75f, true) {
+            new java.util.LinkedHashMap<String, Integer>(Lime.LIMEDB_CACHE_SIZE, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(java.util.Map.Entry<String, Integer> eldest) {
-                    return size() > LIME.LIMEDB_CACHE_SIZE;
+                    return size() > Lime.LIMEDB_CACHE_SIZE;
                 }
             });
     private File filename = null;
@@ -252,17 +251,17 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
     public LimeDB(Context context) {
 
-        super(context.getApplicationContext(), LIME.DATABASE_NAME, null, DATABASE_VERSION);
+        super(context.getApplicationContext(), Lime.DATABASE_NAME, null, DATABASE_VERSION);
         this.mContext = context.getApplicationContext();
 
         mLIMEPref = new LIMEPreferenceManager(mContext);
 
         // Bounded LRU — invalid codes accumulate forever on an unbounded map
         blackListCache = java.util.Collections.synchronizedMap(
-                new java.util.LinkedHashMap<String, Boolean>(LIME.LIMEDB_CACHE_SIZE, 0.75f, true) {
+                new java.util.LinkedHashMap<String, Boolean>(Lime.LIMEDB_CACHE_SIZE, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry(java.util.Map.Entry<String, Boolean> eldest) {
-                        return size() > LIME.LIMEDB_CACHE_SIZE;
+                        return size() > Lime.LIMEDB_CACHE_SIZE;
                     }
                 });
 
@@ -1986,8 +1985,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     if (!threadAborted)
                         progressPercentageDone = 100;
                     finish = true;
-
-                    mLIMEPref.setParameter("_table", "");
 
                     setImInfo(table, "source", filename.getName());
                     if (imname == null || imname.isEmpty()) {

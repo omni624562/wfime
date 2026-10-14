@@ -43,8 +43,6 @@ import java.io.InputStream;
 
 import net.toload.main.hd.Lime;
 import net.toload.main.hd.R;
-import net.toload.main.hd.global.LIME;
-import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEUtilities;
 
 //import android.database.DatabaseErrorHandler;
@@ -54,7 +52,6 @@ public abstract class LimeSQLiteOpenHelper {
     private final static boolean DEBUG = false;
     private final static String TAG = "LimeSQLiteOpenHelper";
     private static SQLiteDatabase mDatabase = null;
-    private final LIMEPreferenceManager mLIMEPref;
     private final String mName;
     // private final CursorFactory mFactory;
     private final int mNewVersion;
@@ -92,21 +89,12 @@ public abstract class LimeSQLiteOpenHelper {
         mNewVersion = version;
         // mErrorHandler = errorHandler;
 
-        mLIMEPref = new LIMEPreferenceManager(context.getApplicationContext());
 
-    }
-
-    private String getDBPath(String dbTarget) {
-        // Always use device storage - sdcard storage is deprecated
-        return new File(Lime.getDatabaseDeviceFolder(mContext) + File.separator + Lime.DATABASE_NAME).getAbsolutePath();
     }
 
     private String getDBPath() {
-        String dbtarget = mLIMEPref.getParameterString("dbtarget");
-        if (DEBUG)
-            Log.i(TAG, "getDBPath(): " + getDBPath(dbtarget));
-        return getDBPath(dbtarget);
-
+        // Always use device storage - sdcard storage is deprecated
+        return new File(Lime.getDatabaseDeviceFolder(mContext) + File.separator + Lime.DATABASE_NAME).getAbsolutePath();
     }
 
     public synchronized SQLiteDatabase getWritableDatabase() {
@@ -147,9 +135,6 @@ public abstract class LimeSQLiteOpenHelper {
                     from.close();
                 }
                 to.close();
-
-                // The preloaded database has new column user_score in the table related
-                mLIMEPref.setParameter(Lime.DB_CHECK_RELATED_USERSCORE, true);
 
             } catch (IOException e) {
                 e.printStackTrace();

@@ -315,7 +315,6 @@ public class LIMEService extends InputMethodService implements
         }
 
         // Initialize Global Package Name for paths
-        net.toload.main.hd.global.LIME.PACKAGE_NAME = getPackageName();
 
         SearchSrv = new SearchServer(this);
         mEnglishOnly = false;

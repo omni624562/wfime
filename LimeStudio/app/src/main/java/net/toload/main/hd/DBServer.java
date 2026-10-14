@@ -48,7 +48,6 @@ import java.util.zip.ZipOutputStream;
 
 import net.toload.main.hd.data.KeyboardObj;
 import net.toload.main.hd.data.Word;
-import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.global.LIMEProgressListener;
 import net.toload.main.hd.global.LIMEUtilities;

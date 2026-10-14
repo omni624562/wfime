@@ -26,10 +26,7 @@ package net.toload.main.hd;
 
 import net.toload.main.hd.ui.LoadingDialogHelper;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.widget.Toast;
@@ -42,7 +39,6 @@ import androidx.fragment.app.FragmentManager;
 import java.util.List;
 
 import net.toload.main.hd.data.Im;
-import net.toload.main.hd.global.LIME;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.limedb.LimeDB;
 import net.toload.main.hd.ui.ImportDialog;
@@ -113,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
 
         this.mLIMEPref = new LIMEPreferenceManager(this);
 
-        LIME.PACKAGE_NAME = getApplicationContext().getPackageName();
 
         // initial imlist
         initialImList();
@@ -131,19 +126,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        String versionstr = "";
-        PackageInfo pInfo;
-        try {
-            pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            versionstr = "v" + pInfo.versionName + " - " + pInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("MainActivity", "Package not found: " + e.getMessage());
-        }
-
-        String cversion = mLIMEPref.getParameterString("current_version", "");
-        if (cversion == null || cversion.isEmpty() || !cversion.equals(versionstr)) {
-            mLIMEPref.setParameter("current_version", versionstr);
-        }
 
 
 
