@@ -114,7 +114,6 @@ public class SetupImLoadRunnable implements Runnable {
         }
 
         mLIMEPref.setParameter("_table", "");
-        // mLIMEPref.setResetCacheFlag(true);
         DBServer.resetCache();
 
         if (restorePreference) {
@@ -160,30 +159,6 @@ public class SetupImLoadRunnable implements Runnable {
                         recordcount++;
 
                         datasource.addOrUpdateMappingRecord(imtype, w.getCode(), w.getWord(), w.getScore());
-                        /*
-                         * // update record
-                         * String key = w.getCode() + w.getWord();
-                         * 
-                         * if(wordcheck.containsKey(key)){
-                         * try{
-                         * datasource.execSQL("update " + imtype + " set " + Lime.DB_COLUMN_SCORE +
-                         * " = " + w.getScore()
-                         * + " WHERE " + Lime.DB_COLUMN_CODE + " = '" + w.getCode() + "'"
-                         * + " AND " + Lime.DB_COLUMN_WORD + " = '" + w.getWord() + "'"
-                         * );
-                         * }catch(Exception e){
-                         * e.printStackTrace();
-                         * }
-                         * }else{
-                         * try{
-                         * Word temp = wordcheck.get(key);
-                         * String insertsql = Word.getInsertQuery(imtype, temp);
-                         * datasource.execSQL(insertsql);
-                         * }catch(Exception e){
-                         * e.printStackTrace();
-                         * }
-                         * }
-                         */
                         // Update Progress
                         int progress = (int) ((double) recordcount / recordtotal * 90 + 10);
 
@@ -200,7 +175,6 @@ public class SetupImLoadRunnable implements Runnable {
                     e.printStackTrace();
                 }
 
-                // datasource.restoreUserRecordsStep2(imtype);
                 handler.updateProgress(100);
             }
         }

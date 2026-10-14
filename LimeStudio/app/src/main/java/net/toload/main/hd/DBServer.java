@@ -166,7 +166,6 @@ public class DBServer {
                 restoreDefaultSharedPreference(checkpref);
             }
 
-            // mLIMEPref.setResetCacheFlag(true);
             resetCache();
 
             // Check and upgrade the database table
@@ -348,7 +347,6 @@ public class DBServer {
         // datasource.close();
 
         // Reset for SearchSrv
-        // mLIMEPref.setResetCacheFlag(true);
         resetCache();
     }
 
@@ -360,7 +358,6 @@ public class DBServer {
         datasource.deleteAll(tablename);
 
         // Reset cache in SearchSrv
-        // mLIMEPref.setResetCacheFlag(true);
         resetCache();
     }
 
@@ -401,7 +398,6 @@ public class DBServer {
             // 解壓出的檔案匯入後即不再需要
             for (String path : unzipFilePaths)
                 new File(path).delete();
-            // mLIMEPref.setResetCacheFlag(true);
             resetCache();
             return count;
         }

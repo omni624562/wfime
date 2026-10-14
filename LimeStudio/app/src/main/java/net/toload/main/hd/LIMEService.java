@@ -243,7 +243,7 @@ public class LIMEService extends InputMethodService implements
     private String mIMActivatedState = ""; // Jeremy '12,5,3, renamed from keyboardSelectedState
     private List<String> activatedIMNameList; // Jeremy '12,4,30 renamed from keyboardList
     private List<String> activatedIMShortNameList; // Jeremy '12,4,30 renamed from keyboardShortname
-    List<String> activatedIMList; // jerem '12,4,30 reanmed from keybaordCodeList; package-private for PhysicalKeyHandler
+    List<String> activatedIMList; // jerem '12,4,30 reanmed from keybaordCodeList
     String currentSoftKeyboard = ""; // Jeremy '12,4,30 reanmed from keybaord_xml;
     SearchServer SearchSrv = null;
     // Auto Commmit Value
@@ -2948,7 +2948,6 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    // Package-private so PhysicalKeyHandler can invoke IM cycling via Ctrl+`
     void switchToNextActivatedIM(boolean forward) { // forward: true, next IM; false prev. IM
         if (DEBUG)
             Log.i(TAG, "switchToNextActivatedIM()");
