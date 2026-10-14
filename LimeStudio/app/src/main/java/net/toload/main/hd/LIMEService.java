@@ -3790,7 +3790,9 @@ public class LIMEService extends InputMethodService implements
                 getComposingDisplayString(mComposing.toString());
                 updateCandidates();
             }
-        } else if (hasCandidatesShown) {
+        } else if (hasCandidatesShown && !mEnglishOnly) {
+            // 中文模式的關聯字清單:第一次 Delete 先收起清單。英文模式的候選是英文預測,
+            // 每刪一個字就會重新出現,照舊收起會變成每兩次才刪一個字,所以直接刪字
             hideCandidateView();
         } else {
             // No composing text - send backspace to editor
