@@ -1506,7 +1506,7 @@ public class LIMEService extends InputMethodService implements
             mCompletions = completions;
             if (!mEnglishOnly) { // Jeremy '12,4,29 use mEnglishOnly instead of onIM
                 if (mComposing.length() == 0)
-                    updateRelatedPhrase(false);
+                    updateRelatedPhrase();
             }
             if (mEnglishOnly && !mPredictionOn) {
                 setSuggestions(buildCompletionList(), false, "");
@@ -2436,7 +2436,7 @@ public class LIMEService extends InputMethodService implements
                             committedCandidate = new Mapping(selectedCandidate);
                             selectedCandidate = null;
                             clearComposing(false);
-                            updateRelatedPhrase(false);
+                            updateRelatedPhrase();
 
                             if (committedCandidate != null && committedCandidate.getWord() != null) {
                                 if (committedCandidate.isSegmentedPhraseRecord()) {
@@ -3155,10 +3155,6 @@ public class LIMEService extends InputMethodService implements
         updateShiftKeyState(getCurrentInputEditorInfo());
     }
 
-    void updateCandidates() {
-        this.updateCandidates(false);
-    }
-
     void updateChineseSymbol() {
         // ChineseSymbol chineseSym = new ChineseSymbol();
         hasChineseSymbolCandidatesShown = true;
@@ -3184,7 +3180,7 @@ public class LIMEService extends InputMethodService implements
      * Update the list of available candidates from the current composing text.
      * This will need to be filled in by however you are determining candidates.
      */
-    public void updateCandidates(final boolean getAllRecords) {
+    public void updateCandidates() {
 
         if (DEBUG)
             Log.i(TAG, "updateCandidate():Update Candidate mComposing:" + mComposing);
@@ -3225,7 +3221,7 @@ public class LIMEService extends InputMethodService implements
 
                     try {
                         list.addAll(
-                                SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, getAllRecords));
+                                SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, false));
                     } catch (Exception e) {
                         e.printStackTrace();
                         notifyDbQueryError();
@@ -3571,7 +3567,7 @@ public class LIMEService extends InputMethodService implements
     /*
      * Update dictionary view
      */
-    void updateRelatedPhrase(final boolean getAllRecords) {
+    void updateRelatedPhrase() {
         if (DEBUG)
             Log.i(TAG, "updateRelatedPhrase()");
         hasChineseSymbolCandidatesShown = false;
@@ -3606,7 +3602,7 @@ public class LIMEService extends InputMethodService implements
                         try {
                             if (!committedCandidate.isEmojiRecord()
                                     && !committedCandidate.isChinesePunctuationSymbolRecord()) {
-                                list.addAll(SearchSrv.getRelatedPhrase(committedCandidate.getWord(), getAllRecords));
+                                list.addAll(SearchSrv.getRelatedPhrase(committedCandidate.getWord(), false));
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
