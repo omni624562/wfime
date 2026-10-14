@@ -25,14 +25,10 @@
 package net.toload.main.hd;
 
 import net.toload.main.hd.ui.LoadingDialogHelper;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -43,11 +39,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import net.toload.main.hd.data.Im;
@@ -138,30 +129,6 @@ public class MainActivity extends AppCompatActivity {
             if ("text/plain".equals(type)) {
                 handleSendText(getIntent());
             }
-        } else if (Intent.ACTION_VIEW.equals(action) && type != null) {
-            String scheme = intent.getScheme();
-            ContentResolver resolver = getContentResolver();
-
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                    || ContentResolver.SCHEME_FILE.equals(scheme)
-                    || scheme.equals("http") || scheme.equals("https")) {
-                Uri uri = intent.getData();
-                String fileName = getContentName(resolver, uri);
-                if (fileName == null) {
-                    fileName = uri.getLastPathSegment();
-                }
-                InputStream input = null;
-                try {
-                    input = resolver.openInputStream(uri);
-                } catch (FileNotFoundException e) {
-                    Log.e("MainActivity", "Failed to open input stream: " + e.getMessage());
-                }
-                // Use cache directory instead of deprecated external storage
-                String importFilepath = getCacheDir().getAbsolutePath() + File.separator + fileName;
-                InputStreamToFile(input, importFilepath);
-                showToastMessage("Got file " + importFilepath, Toast.LENGTH_SHORT);
-            }
-
         }
 
         String versionstr = "";
@@ -204,26 +171,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    private String getContentName(ContentResolver resolver, Uri uri) {
-        try (Cursor cursor = resolver.query(uri, null, null, null, null)) {
-            if (cursor == null || !cursor.moveToFirst()) return null;
-            int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-            return nameIndex >= 0 ? cursor.getString(nameIndex) : null;
-        }
-    }
-
-    private void InputStreamToFile(InputStream in, String file) {
-        try (OutputStream out = new FileOutputStream(new File(file))) {
-            byte[] buffer = new byte[102400];
-            int size;
-            while ((size = in.read(buffer)) != -1) {
-                out.write(buffer, 0, size);
-            }
-        } catch (Exception e) {
-            Log.e("MainActivity", "InputStreamToFile exception: " + e.getMessage());
-        }
-    }
 
     void handleSendText(Intent intent) {
         String importtext = intent.getStringExtra(Intent.EXTRA_TEXT);
