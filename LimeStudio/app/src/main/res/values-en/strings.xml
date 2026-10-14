@@ -5,7 +5,6 @@
     <string name="error_restore_not_found">Database or backup file not found</string>
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
-    <string name="action_reset">Reset to defaults</string>
     <string name="action_help">Help</string>
     <string name="setup_im_import_complete">Database import completed</string>
     <string name="setup_im_download">Download input methods</string>

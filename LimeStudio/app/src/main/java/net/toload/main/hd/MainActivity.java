@@ -274,10 +274,6 @@ public class MainActivity extends AppCompatActivity {
             net.toload.main.hd.ui.HelpDialog helpDialog = new net.toload.main.hd.ui.HelpDialog();
             helpDialog.show(getSupportFragmentManager(), "helpDialog");
             return true;
-        } else if (id == R.id.action_reset) {
-            // Reset functionality
-            showToastMessage(getString(R.string.action_reset), Toast.LENGTH_SHORT);
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -390,16 +386,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 net.toload.main.hd.ui.HelpDialog helpDialog = new net.toload.main.hd.ui.HelpDialog();
                 helpDialog.show(getSupportFragmentManager(), "helpDialog");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    public void performReset() {
-        runOnUiThread(() -> {
-            try {
-                showToastMessage(getString(R.string.action_reset), Toast.LENGTH_SHORT);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -405,7 +405,6 @@
     <string name="settings_nav_keyboard">虛擬鍵盤與回饋</string>
     <string name="settings_nav_im_engine">輸入法引擎設定</string>
     <string name="settings_nav_mapping">字根與對照表管理</string>
-    <string name="settings_reset">重置設定值</string>
     <string name="settings_category_load_mapping">載入對照表</string>
     <string name="settings_phonetic_loaded">注音 (已載入)</string>
     <string name="settings_phonetic_load">載入注音對照表</string>

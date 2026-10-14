@@ -182,7 +182,6 @@
     <string name="settings_nav_keyboard">On-screen keyboard &amp; feedback</string>
     <string name="settings_nav_im_engine">Input method engine</string>
     <string name="settings_nav_mapping">Key codes &amp; mapping tables</string>
-    <string name="settings_reset">Reset settings</string>
     <string name="settings_category_load_mapping">Load mapping tables</string>
     <string name="settings_phonetic_loaded">Chuyin (loaded)</string>
     <string name="settings_phonetic_load">Load Chuyin</string>

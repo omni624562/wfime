@@ -39,7 +39,6 @@
 
 
 
-    <string name="action_reset">恢復原廠設定</string>
     <string name="action_help">使用說明</string>
     <string name="action_preference" translatable="false">麥田輸入法</string>
 
