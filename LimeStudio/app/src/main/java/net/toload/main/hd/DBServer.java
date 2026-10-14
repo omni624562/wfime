@@ -26,7 +26,6 @@ package net.toload.main.hd;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import android.util.Log;
 
@@ -38,14 +37,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -79,185 +75,6 @@ public class DBServer {
 
     public static void resetCache() {
         SearchServer.resetCache(true);
-    }
-
-    public static void backupDatabase() {
-        if (DEBUG)
-            Log.i(TAG, "backupDatabase()");
-        // showNotificationMessage(appContext.getText(R.string.l3_initial_backup_start) + "");
-
-        String externalFolder = LIME.getExternalLimeFolder(appContext);
-        if (externalFolder == null) {
-            Log.e(TAG, "External storage not available for backup");
-            return;
-        }
-        File limedir = new File(externalFolder);
-        if (!limedir.exists()) {
-            limedir.mkdirs();
-        }
-
-        // backup shared preferences
-        File fileSharedPrefsBackup = new File(LIME.getLimeDataRootFolder(appContext), LIME.SHARED_PREFS_BACKUP_NAME);
-        if (fileSharedPrefsBackup.exists())
-            fileSharedPrefsBackup.delete();
-        backupDefaultSharedPreference(fileSharedPrefsBackup);
-
-        // create backup file list.
-        List<String> backupFileList = new ArrayList<>();
-        backupFileList.add("databases" + File.separator + LIME.DATABASE_NAME);
-        backupFileList.add("databases" + File.separator + LIME.DATABASE_JOURNAL);
-        backupFileList.add(LIME.SHARED_PREFS_BACKUP_NAME);
-
-        // hold database connection and close database.
-        // mLIMEPref.holdDatabaseCoonection(true);
-        datasource.holdDBConnection(); // Jeremy '15,5,23
-        closeDatabse();
-
-        // ready to zip backup file list
-        try {
-            LIMEUtilities.zip(externalFolder + File.separator + LIME.DATABASE_BACKUP_NAME, backupFileList,
-                    LIME.getLimeDataRootFolder(appContext), true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showNotificationMessage(appContext.getText(R.string.l3_initial_backup_error) + "");
-        } finally {
-            showNotificationMessage(appContext.getText(R.string.l3_initial_backup_end) + "");
-        }
-
-        // backup finished. unhold the database connection and false reopen the
-        // database.
-        datasource.unHoldDBConnection(); // Jeremy '15,5,23
-        datasource.openDBConnection(true);
-
-        // cleanup the shared preference backup file.
-        if (fileSharedPrefsBackup != null && fileSharedPrefsBackup.exists())
-            fileSharedPrefsBackup.delete();
-    }
-
-    public static void restoreDatabase() {
-        File backupFile = new File(new File(appContext.getFilesDir(), "backups"), LIME.DATABASE_BACKUP_NAME);
-        restoreDatabase(backupFile.getAbsolutePath());
-    }
-
-    public static void restoreDatabase(String srcFilePath) {
-
-        File check = new File(srcFilePath);
-
-        if (check.exists()) {
-
-            datasource.holdDBConnection(); // Jeremy '15,5,23
-            closeDatabse();
-
-            try {
-                LIMEUtilities.unzip(srcFilePath, LIME.getLimeDataRootFolder(appContext), true);
-            } catch (Exception e) {
-                e.printStackTrace();
-                showNotificationMessage(appContext.getText(R.string.l3_initial_restore_error) + "");
-            } finally {
-                showNotificationMessage(appContext.getText(R.string.l3_initial_restore_end) + "");
-            }
-
-            datasource.unHoldDBConnection(); // Jeremy '15,5,23
-            datasource.openDBConnection(true);
-
-            // restore shared preference
-            File checkpref = new File(LIME.getLimeDataRootFolder(appContext), LIME.SHARED_PREFS_BACKUP_NAME);
-            if (checkpref.exists()) {
-                restoreDefaultSharedPreference(checkpref);
-            }
-
-            resetCache();
-
-            // Check and upgrade the database table
-            datasource.checkAndUpdateRelatedTable();
-
-        } else {
-            showNotificationMessage(appContext.getText(R.string.error_restore_not_found) + "");
-
-        }
-
-    }
-
-    public static void backupDefaultSharedPreference(File sharePrefs) {
-
-        if (sharePrefs.exists())
-            sharePrefs.delete();
-
-        ObjectOutputStream output = null;
-        try {
-            output = new ObjectOutputStream(new FileOutputStream(sharePrefs));
-            SharedPreferences pref = appContext.getSharedPreferences(appContext.getPackageName() + "_preferences",
-                    Context.MODE_PRIVATE);
-            output.writeObject(pref.getAll());
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (output != null) {
-                    output.flush();
-                    output.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void restoreDefaultSharedPreference(File sharePrefs) {
-        ObjectInputStream inputStream = null;
-
-        try {
-            inputStream = new ObjectInputStream(new FileInputStream(sharePrefs));
-            SharedPreferences.Editor prefEdit = appContext
-                    .getSharedPreferences(appContext.getPackageName() + "_preferences", Context.MODE_PRIVATE).edit();
-            prefEdit.clear();
-            Map<String, ?> entries = (Map<String, ?>) inputStream.readObject();
-            for (Map.Entry<String, ?> entry : entries.entrySet()) {
-                Object v = entry.getValue();
-                String key = entry.getKey();
-
-                if (v instanceof Boolean)
-                    prefEdit.putBoolean(key, (Boolean) v);
-                else if (v instanceof Float)
-                    prefEdit.putFloat(key, (Float) v);
-                else if (v instanceof Integer)
-                    prefEdit.putInt(key, (Integer) v);
-                else if (v instanceof Long)
-                    prefEdit.putLong(key, (Long) v);
-                else if (v instanceof String) {
-                    if (!v.equals("PAYMENT_FLAG"))
-                        prefEdit.putString(key, ((String) v));
-                }
-            }
-            prefEdit.apply();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    public static void closeDatabse() {
-        Log.i(TAG, "closeDatabase()");
-        if (datasource != null) {
-            datasource.close();
-        }
     }
 
     /*

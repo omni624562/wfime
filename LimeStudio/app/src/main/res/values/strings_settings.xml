@@ -243,10 +243,6 @@
 
     <string name="l3_initial_download_failed">資料轉換錯誤, 請重置資料庫再重新下載!</string>
     <string name="l3_initial_download_write_sdcard_failed">請確定SDCARD已掛載, 重置資料庫再重新下載!</string>
-    <string name="l3_initial_backup_end">資料庫備份完成</string>
-    <string name="l3_initial_backup_error">資料庫備份失敗</string>
-    <string name="l3_initial_restore_error">還原失敗, 請確定備份檔案存在.</string>
-    <string name="l3_initial_restore_end">資料庫還原完成</string>
 
 
 

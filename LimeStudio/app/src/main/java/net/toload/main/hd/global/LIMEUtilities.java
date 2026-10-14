@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import net.toload.main.hd.R;
 
@@ -77,130 +76,6 @@ public class LIMEUtilities {
             return mfile;
         else
             return null;
-    }
-
-    /*
-     * Zip singl file into single zip.
-     * sourceFile should be assigned with absolute path.
-     *
-     */
-    public static void zip(String zipFilePath, String sourceFile, Boolean OverWrite) throws Exception {
-        zip(zipFilePath, sourceFile, "", OverWrite);
-    }
-
-    /*
-     * Zip singl file into single zip.
-     * sourceFile is specify relative to the baseFolderPath.
-     * sourceFile should be assigned with absolute path if baseFolderPath is null of
-     * empty
-     *
-     */
-    public static void zip(String zipFilePath, String sourceFile, String baseFolderPath, Boolean OverWrite)
-            throws Exception {
-        List<String> sourceFileList = new ArrayList<>();
-        sourceFileList.add(sourceFile);
-        zip(zipFilePath, sourceFileList, baseFolderPath, OverWrite);
-    }
-
-    /*
-     * Zip multile files into single zip.
-     * sourceFiles should be assigned with absolute path.
-     *
-     */
-    public static void zip(String zipFilePath, List<String> sourceFiles, Boolean OverWrite) throws Exception {
-        zip(zipFilePath, sourceFiles, "", OverWrite);
-    }
-
-    /*
-     * Zip multile files into single zip.
-     * sourceFiles is specify relative to the baseFolderPath.
-     * sourceFiles should be assigned with absolute path if baseFolderPath is null
-     * of empty
-     *
-     */
-    public static void zip(String zipFilePath, List<String> sourceFiles, String baseFolderPath, Boolean OverWrite)
-            throws Exception {
-        File zipFile = new File(zipFilePath);
-        if (zipFile.exists() && !OverWrite)
-            return;
-        else if (zipFile.exists() && OverWrite)
-            zipFile.delete();
-
-        if (baseFolderPath == null)
-            baseFolderPath = "";
-
-        final String finalBaseFolderPath = baseFolderPath;
-        try (FileOutputStream outStream = new FileOutputStream(zipFile);
-             ZipOutputStream zos = new ZipOutputStream(outStream)) {
-            for (String item : sourceFiles) {
-                String itemName = (item.startsWith(File.separator) || finalBaseFolderPath.endsWith(File.separator)) ? item
-                        : (File.separator + item);
-
-                if (finalBaseFolderPath.equals("")) // absolute path
-                    addFileToZip(finalBaseFolderPath + itemName, zos);
-                else // relative path
-                    addFileToZip(finalBaseFolderPath + itemName, finalBaseFolderPath, zos);
-            }
-            zos.flush();
-        }
-
-    }
-
-    private static void addFileToZip(String sourceFilePath, String baseFolderPath, ZipOutputStream zos)
-            throws Exception {
-        addFileToZip("", sourceFilePath, baseFolderPath, zos);
-    }
-
-    private static void addFileToZip(String sourceFilePath, ZipOutputStream zos) throws Exception {
-        addFileToZip("", sourceFilePath, "", zos);
-    }
-
-    private static void addFileToZip(String sourceFolderPath, String sourceFilePath, String baseFolderPath,
-            ZipOutputStream zos) throws Exception {
-
-        File item = new File(sourceFilePath);
-        if (item == null || !item.exists())
-            return; // skip if the file is not exist
-        if (isSymLink(item))
-            return; // do nothing to symbolic links.
-
-        if (baseFolderPath == null)
-            baseFolderPath = "";
-
-        if (item.isDirectory()) {
-            for (String subItem : item.list()) {
-                addFileToZip(sourceFolderPath + File.separator + item.getName(),
-                        sourceFilePath + File.separator + subItem, baseFolderPath, zos);
-            }
-        } else {
-            byte[] buf = new byte[102400]; // 100k buffer
-            int len;
-            try (FileInputStream inStream = new FileInputStream(sourceFilePath)) {
-                if (baseFolderPath.equals("")) // sourceFiles in absolute path, zip the file with absolute path
-                    zos.putNextEntry(new ZipEntry(sourceFilePath));
-                else {// relative path
-                    String relativePath = sourceFilePath.substring(baseFolderPath.length());
-                    zos.putNextEntry(new ZipEntry(relativePath));
-                }
-
-                while ((len = inStream.read(buf)) > 0) {
-                    zos.write(buf, 0, len);
-                }
-            }
-        }
-    }
-
-    public static boolean isSymLink(File filePath) throws IOException {
-        if (filePath == null)
-            throw new NullPointerException("filePath cannot be null");
-        File canonical;
-        if (filePath.getParent() == null) {
-            canonical = filePath;
-        } else {
-            File canonDir = filePath.getParentFile().getCanonicalFile();
-            canonical = new File(canonDir, filePath.getName());
-        }
-        return !canonical.getCanonicalFile().equals(canonical.getAbsoluteFile());
     }
 
     public static List<String> unzip(String zipFilePath, String targetFolder, Boolean OverWrite) throws IOException {

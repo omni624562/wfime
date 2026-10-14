@@ -74,10 +74,6 @@
     <string name="l3_tab_initial_error">Download failed. Please make sure the device is connected to the internet.</string>
     <string name="l3_initial_download_failed">Data conversion error. Please reset the database and download again!</string>
     <string name="l3_initial_download_write_sdcard_failed">Please make sure the SD card is mounted, then reset the database and download again!</string>
-    <string name="l3_initial_backup_end">Database backup completed</string>
-    <string name="l3_initial_backup_error">Database backup failed</string>
-    <string name="l3_initial_restore_error">Restore failed. Please make sure the backup file exists.</string>
-    <string name="l3_initial_restore_end">Database restore completed</string>
     <string name="l3_im_download_from_dayi">Install OpenVanilla Dayi key codes</string>
     <string name="l3_im_download_from_phonetic">Install OpenVanilla Chuyin key codes</string>
     <string name="l3_im_download_from_phonetic_big5">Install OpenVanilla Chuyin key codes (Big5)</string>

@@ -2,7 +2,6 @@
 <resources>
     <!-- app_name / action_preference 為品牌名稱「麥田輸入法」，刻意不翻譯（沿用預設值） -->
     <string name="foreground_service_notification_text">Input method service is running</string>
-    <string name="error_restore_not_found">Database or backup file not found</string>
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="action_help">Help</string>
