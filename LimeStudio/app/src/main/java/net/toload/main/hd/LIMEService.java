@@ -3032,20 +3032,6 @@ public class LIMEService extends InputMethodService implements
             // intermediate radicals/composing text from being injected into the host application's editor.
             getComposingDisplayString(keyString);
 
-            // Art '30,Sep,2011 restrict the length of composing text for Stroke5
-            /*
-            if (currentSoftKeyboard.contains("wb")) {
-                if (keyString.length() > 5) {
-                    keyString = keyString.substring(0, 5);
-                    mComposing = new StringBuilder();
-                    mComposing.append(keyString);
-                    // InputConnection ic = getCurrentInputConnection();
-                    // if (ic != null && mPredictionOn)
-                    // Just update CandidateView composing text
-                    getComposingDisplayString(keyString);
-                }
-            }
-            */
 
             final String finalKeyString = keyString;
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;

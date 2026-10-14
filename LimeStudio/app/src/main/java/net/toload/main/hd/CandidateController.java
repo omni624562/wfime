@@ -270,12 +270,5 @@ class CandidateController {
 
         }
 
-        /*
-        if (currentSoftKeyboard.contains("wb")) {
-            if (ic != null && mPredictionOn)
-                ic.setComposingText("", 0);
-        }
-        */
-
     }
 }

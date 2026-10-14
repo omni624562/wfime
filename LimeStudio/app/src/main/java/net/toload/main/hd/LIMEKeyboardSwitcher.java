@@ -400,14 +400,9 @@ public class LIMEKeyboardSwitcher {
                         break;
                     case MODE_URL:
                         // Log.i("ART","KBMODE ->: url");
-                        if (!imcode.equals("wb")) {
-                            if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
-                                kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
-                                        KEYBOARDMODE_URL, true);
-                            } else {
-                                kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
-                                        KEYBOARDMODE_URL, true);
-                            }
+                        if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
+                            kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
+                                    KEYBOARDMODE_URL, true);
                         } else {
                             kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
                                     KEYBOARDMODE_URL, true);
@@ -415,17 +410,12 @@ public class LIMEKeyboardSwitcher {
                         break;
                     case MODE_EMAIL:
                         // Log.i("ART","KBMODE ->: email");
-                        if (!imcode.equals("wb")) {
-                            if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
-                                kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
-                                        KEYBOARDMODE_EMAIL, true);
-                            } else {
-                                kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
-                                        KEYBOARDMODE_EMAIL, true);
-                            }
+                        if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
+                            kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
+                                    KEYBOARDMODE_EMAIL, true);
                         } else {
                             kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
-                                    KEYBOARDMODE_URL, true);
+                                    KEYBOARDMODE_EMAIL, true);
                         }
                         break;
                     default:
@@ -438,14 +428,9 @@ public class LIMEKeyboardSwitcher {
                             mIsChinese = true;
                         } else {// if(!isIm){ //English normal keyboard
 
-                            if (!imcode.equals("wb")) {
-                                if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
-                                    kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
-                                            KEYBOARDMODE_NORMAL, true);
-                                } else {
-                                    kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
-                                            KEYBOARDMODE_NORMAL, true);
-                                }
+                            if (isTablet || mLIMEPref.getShowNumberRowInEnglish()) {
+                                kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_number_shift" : "lime_number"),
+                                        KEYBOARDMODE_NORMAL, true);
                             } else {
                                 kid = new KeyboardId(getKeyboardXMLID(isShift ? "lime_shift" : "lime"),
                                         KEYBOARDMODE_NORMAL, true);
