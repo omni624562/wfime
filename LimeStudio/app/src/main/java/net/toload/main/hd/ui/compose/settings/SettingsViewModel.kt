@@ -65,8 +65,6 @@ data class SettingsUiState(
     val disablePhysicalSelkey: Boolean = false,
     val autoCommit: String = "0",
     val selkeyOption: String = "0",
-    val phoneticKeyboardType: String = "standard",
-    val physicalKeyboardType: String = "normal_keyboard",
     val reverseLookupNotify: Boolean = true,
 
     // Mapping preferences
@@ -175,8 +173,6 @@ class SettingsViewModel(
                     disablePhysicalSelkey = preferenceManager.getParameterBoolean("disable_physical_selkey", false),
                     autoCommit = preferenceManager.getParameterString("auto_commit", "0"),
                     selkeyOption = preferenceManager.getParameterString("selkey_option", "0"),
-                    phoneticKeyboardType = preferenceManager.getPhoneticKeyboardType(),
-                    physicalKeyboardType = preferenceManager.getParameterString("physical_keyboard_type", "normal_keyboard"),
                     reverseLookupNotify = preferenceManager.getParameterBoolean("reverse_lookup_notify", true),
 
                     // Mapping
@@ -293,16 +289,6 @@ class SettingsViewModel(
     fun setSelkeyOption(value: String) {
         preferenceManager.setParameter("selkey_option", value)
         _uiState.update { it.copy(selkeyOption = value) }
-    }
-
-    fun setPhoneticKeyboardType(value: String) {
-        preferenceManager.setParameter("phonetic_keyboard_type", value)
-        _uiState.update { it.copy(phoneticKeyboardType = value) }
-    }
-
-    fun setPhysicalKeyboardType(value: String) {
-        preferenceManager.setParameter("physical_keyboard_type", value)
-        _uiState.update { it.copy(physicalKeyboardType = value) }
     }
 
     fun setReverseLookupNotify(value: Boolean) {

@@ -13,8 +13,6 @@
     <string name="persistent_language_mode_summary">Keep the Chinese/English mode until you switch it</string>
     <string name="number_row_in_english">Number row on English keyboard</string>
     <string name="number_row_in_english_summary">Show a number row on the English keyboard (5-row keyboard)</string>
-    <string name="physical_keyboard">Physical keyboard options</string>
-    <string name="phonetic_keyboard">Chuyin keyboard options</string>
     <string name="im">Input method</string>
     <string name="enable_english_dictionary">English dictionary</string>
     <string name="enable_english_dictionary_summary">Show English suggestions in English input mode</string>
@@ -116,18 +114,6 @@
         <item>First selection key picks English (mixed mode)</item>
         <item>First selection key picks the 1st Chinese candidate</item>
         <item>First selection key picks the 2nd Chinese candidate</item>
-    </string-array>
-    <string-array name="physical_keyboard_options">
-        <item>Standard keyboard</item>
-        <item>Desire Z</item>
-        <item>ChaCha</item>
-        <item>Milestone</item>
-        <item>Milestone 2</item>
-        <item>Milestone 3</item>
-        <item>XPERIA PRO</item>
-    </string-array>
-    <string-array name="phonetic_keyboard_type">
-        <item>Standard</item>
     </string-array>
     <string-array name="keyboard">
         <item>Dayi input method</item>

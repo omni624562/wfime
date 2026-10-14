@@ -890,36 +890,6 @@ fun ImSettingsSection(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
-            val phoneticEntries = stringArrayResource(R.array.phonetic_keyboard_type_values)
-            val phoneticLabels = stringArrayResource(R.array.phonetic_keyboard_type)
-            ListPreference(
-                title = stringResource(R.string.phonetic_keyboard),
-                summary = phoneticLabels.getOrNull(phoneticEntries.indexOf(uiState.phoneticKeyboardType))
-                    ?: phoneticLabels.firstOrNull() ?: "",
-                selectedValue = uiState.phoneticKeyboardType,
-                entries = phoneticEntries.toList(),
-                labels = phoneticLabels.toList(),
-                onValueSelected = { viewModel.setPhoneticKeyboardType(it) },
-                dialogTitle = stringResource(R.string.phonetic_keyboard)
-            )
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-
-            val physicalKbEntries = stringArrayResource(R.array.physical_keyboard_options_values)
-            val physicalKbLabels = stringArrayResource(R.array.physical_keyboard_options)
-            ListPreference(
-                title = stringResource(R.string.physical_keyboard),
-                summary = physicalKbLabels.getOrNull(physicalKbEntries.indexOf(uiState.physicalKeyboardType))
-                    ?: physicalKbLabels.firstOrNull() ?: "",
-                selectedValue = uiState.physicalKeyboardType,
-                entries = physicalKbEntries.toList(),
-                labels = physicalKbLabels.toList(),
-                onValueSelected = { viewModel.setPhysicalKeyboardType(it) },
-                dialogTitle = stringResource(R.string.physical_keyboard)
-            )
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-
             SwitchPreference(
                 title = stringResource(R.string.reverse_lookup_notify),
                 checked = uiState.reverseLookupNotify,

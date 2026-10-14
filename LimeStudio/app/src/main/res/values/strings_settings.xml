@@ -58,8 +58,6 @@
     <string name="number_row_in_english_summary">在英文鍵盤顯示數字列(5列鍵盤)</string>
 
 
-    <string name="physical_keyboard">實體鍵盤選項</string>
-    <string name="phonetic_keyboard">注音鍵盤選項</string>
 
 
     <string name="im">輸入法</string>
@@ -193,19 +191,7 @@
     </string-array>
 
     <!-- Physical keyboard options List -->
-    <string-array name="physical_keyboard_options">
-        <item>一般鍵盤</item>
-        <item>Desire Z</item>
-        <item>ChaCha</item>
-        <item>Milestone</item>
-        <item>Milestone 2</item>
-        <item>Milestone 3</item>
-        <item>XPERIA PRO</item>
-    </string-array>
 
-    <string-array name="phonetic_keyboard_type">
-        <item>標準</item>
-    </string-array>
 
     <!-- IM Reverse Lookup List -->
     <!-- Keyboard Selection List -->
@@ -354,18 +340,6 @@
         <item>1</item>
         <item>0.9</item>
         <item>0.8</item>
-    </string-array>
-    <string-array name="phonetic_keyboard_type_values">
-        <item>standard</item>
-    </string-array>
-    <string-array name="physical_keyboard_options_values">
-        <item>normal_keyboard</item>
-        <item>desireZ</item>
-        <item>chacha</item>
-        <item>milestone</item>
-        <item>milestone2</item>
-        <item>milestone3</item>
-        <item>xperiapro</item>
     </string-array>
     <string-array name="show_arrow_keys_values">
         <item>0</item>

@@ -734,12 +734,7 @@ public class SearchServer {
             realCodeLen = currentCode.length();
         } else {
             if (tablename.equals("phonetic")) {
-                String selectedPhoneticKeyboardType = mLIMEPref.getParameterString("phonetic_keyboard_type",
-                        "standard");
                 String lcode = currentCode;
-                if (selectedPhoneticKeyboardType.startsWith("eten")) {
-                    lcode = dbadapter.preProcessingRemappingCode(currentCode);
-                }
                 String noToneCode = code.replaceAll("[3467 ]", "");
                 if (code.equals(noToneCode)) {
                     realCodeLen = code.length();
@@ -1470,9 +1465,7 @@ public class SearchServer {
             // Jeremy '11,6,19 Rewrite for IM has symbol mapping like ETEN
             if (!validSelkey || tablename.startsWith("dayi") || tablename.equals("phonetic")) {
                 if (hasNumberMapping && hasSymbolMapping) {
-                    if (tablename.startsWith("dayi")
-                            || (tablename.equals("phonetic")
-                                    && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
+                    if (tablename.startsWith("dayi") || tablename.equals("phonetic")) {
                         selkey = " []-'^&*(";
                     } else {
                         selkey = "!@#$%^&*()";

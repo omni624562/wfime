@@ -47,54 +47,11 @@ public class HardKeyHelper {
         // Jeremy '12,5,28 after honeycomb use the metastate sent form KeyEvent to
         // proces the shift/cap_lock etc...
 
-        int metaState;
-        if (service.mLIMEPref.getPhysicalKeyboardType().equals("standard"))
-            metaState = event.getMetaState();
-        else
-            metaState = LIMEMetaKeyKeyListener.getMetaState(service.mMetaState);
+        int metaState = LIMEMetaKeyKeyListener.getMetaState(service.mMetaState);
 
         int c = event.getUnicodeChar(metaState);
 
         InputConnection ic = service.getCurrentInputConnection();
-
-        /// Jeremy '12,4,1 XPERIA Pro force translating special keys
-        if (service.mLIMEPref.getPhysicalKeyboardType().equals("xperiapro")) {
-            boolean isShift = LIMEMetaKeyKeyListener.getMetaState(service.mMetaState,
-                    LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0;
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_AT:
-                    if (isShift)
-                        c = '/';
-                    else
-                        c = '!';
-                    break;
-                case KeyEvent.KEYCODE_APOSTROPHE:
-                    if (isShift)
-                        c = '"';
-                    else
-                        c = '\'';
-                    break;
-                case KeyEvent.KEYCODE_GRAVE:
-                    if (isShift)
-                        c = '~';
-                    else
-                        c = '`';
-                    break;
-                case KeyEvent.KEYCODE_COMMA:
-                    if (isShift)
-                        c = '?';
-                    else
-                        c = '.';
-                    break;
-                case KeyEvent.KEYCODE_PERIOD:
-                    if (isShift)
-                        c = '>';
-                    else
-                        c = '@';
-                    break;
-
-            }
-        }
 
         if (c == 0 || ic == null) {
             return false;

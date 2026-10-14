@@ -175,7 +175,7 @@ public class LIMEPreferenceManager {
 
     public String getPhysicalKeyboardType() {
 
-        return sp.getString("physical_keyboard_type", "normal_keyboard");
+        return "normal_keyboard"; // 舊機型（Milestone、Desire Z 等）的實體鍵盤對應已移除
     }
 
     public int getAutoCommitValue() {
@@ -184,7 +184,7 @@ public class LIMEPreferenceManager {
 
     public String getPhoneticKeyboardType() {
 
-        return sp.getString("phonetic_keyboard_type", "standard");
+        return "standard"; // 倚天、許氏注音鍵盤已移除
     }
 
     public boolean getDisablePhysicalSelkey() {

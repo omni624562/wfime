@@ -1899,12 +1899,8 @@ public class LIMEService extends InputMethodService implements
                     hasKeyProcessed = true;
                 }
                 return true;
-            case KeyEvent.KEYCODE_TAB: // Jeremy '12.6,22 Force bypassing tab processing to super if not on milestone 2
-                                       // with alt on (alt+tab = ~ on milestone2)
-                if (!(LIMEMetaKeyKeyListener.getMetaState(mMetaState,
-                        LIMEMetaKeyKeyListener.META_ALT_ON) > 0
-                        && mLIMEPref.getPhysicalKeyboardType().equals("milestone2")))
-                    break;
+            case KeyEvent.KEYCODE_TAB: // Jeremy '12.6,22 Force bypassing tab processing to super
+                break;
             case KeyEvent.KEYCODE_GRAVE: // ` (key left of 1) — Ctrl+\ cycles internal IMs (大易↔注音)
                 if (hasCtrlPress || event.isCtrlPressed()) {
                     switchToNextActivatedIM(true);
@@ -2176,9 +2172,7 @@ public class LIMEService extends InputMethodService implements
                     // switchChiEng(); // Jeremy '11,8,15 moved to onKeyDown()
                     return true;
                 } else if (LIMEMetaKeyKeyListener.getMetaState(mMetaState,
-                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0 // Jeremy '12,4,29 use mEnglishOnly
-                        && !mLIMEPref.getPhysicalKeyboardType().equals("xperiapro")) { // '12,4,1 Jeremy XPERIA Pro does
-                                                                                       // not use this key as @
+                        LIMEMetaKeyKeyListener.META_SHIFT_ON) > 0) { // Jeremy '12,4,29 use mEnglishOnly
                     // alt-@ is conflict with symbol input thus altered to shift-@ Jeremy '11,8,15
                     // alt-@ switch to next active keyboard.
                     // nextActiveKeyboard(true);
@@ -3068,8 +3062,7 @@ public class LIMEService extends InputMethodService implements
                         }
                         String mixedModeSelkey = "`";
                         if (hasSymbolMapping && !activeIM.startsWith("dayi")
-                                && !(activeIM.equals("phonetic")
-                                        && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
+                                && !activeIM.equals("phonetic")) {
                             mixedModeSelkey = " ";
                         }
 
@@ -3913,10 +3906,8 @@ public class LIMEService extends InputMethodService implements
             case "phonetic":
                 mKeyboardSwitcher.setKeyboardMode(activeIM,
                         LIMEKeyboardSwitcher.MODE_TEXT, mImeOptions, true, false, false);
-                // Jeremy '11,6,18 ETEN 26 has no number mapping
-                boolean standardPhonetic = !(mLIMEPref.getPhoneticKeyboardType().equals("eten26"));
-                hasNumberMapping = standardPhonetic;
-                hasSymbolMapping = standardPhonetic;
+                hasNumberMapping = true;
+                hasSymbolMapping = true;
                 break;
             default:
                 if (activeIM != null && activeIM.startsWith("dayi")) {
@@ -3930,9 +3921,6 @@ public class LIMEService extends InputMethodService implements
                 }
                 break;
         }
-        // Jeremy '11,9,3 for phone numeric key direct input on chacha
-        if (mLIMEPref.getPhysicalKeyboardType().equals("chacha"))
-            hasNumberMapping = false;
         String tablename = activeIM;
         if (tablename.equals("custom") || tablename.equals("phone")) {
             tablename = "custom";
@@ -3952,8 +3940,7 @@ public class LIMEService extends InputMethodService implements
         // Jeremy '12,4,1 only do selkey on starndard keyboard
 
         // Check if disable physical key option is open
-        if ((disable_physical_selection && hasPhysicalKeyPressed)
-                || !mLIMEPref.getPhysicalKeyboardType().equals("normal_keyboard")) {
+        if (disable_physical_selection && hasPhysicalKeyPressed) {
             return false;
         }
 
@@ -3994,8 +3981,7 @@ public class LIMEService extends InputMethodService implements
 
                 String mixedModeSelkey = "`";
                 if (hasSymbolMapping && !activeIM.startsWith("dayi")
-                        && !(activeIM.equals("phonetic")
-                                && mLIMEPref.getPhoneticKeyboardType().equals("standard"))) {
+                        && !activeIM.equals("phonetic")) {
                     mixedModeSelkey = " ";
                 }
 

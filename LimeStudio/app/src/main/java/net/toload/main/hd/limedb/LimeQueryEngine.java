@@ -128,7 +128,7 @@ class LimeQueryEngine {
         if (keysDefMap.get(keytable) == null
                 || keysDefMap.get(keytable).size() == 0) {
 
-            String keyString, keynameString, finalKeynameString = null;
+            String keyString, keynameString;
             // Jeremy 11,6,4 Load keys and keynames from im table.
             keyString = db.getImInfo(table, "imkeys");
             keynameString = db.getImInfo(table, "imkeynames");
@@ -142,77 +142,11 @@ class LimeQueryEngine {
             if (table.startsWith("phonetic") || table.startsWith("dayi") ||
                     keyString.equals("") || keynameString.equals("")) {
                 if (table.startsWith("phonetic")) {
-                    if (composingText) { // building composing text popup
-                        if (phonetickeyboardtype.equals("eten")) {
-                            keyString = LimeDB.ETEN_KEY;
-                            if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed)
-                                keynameString = LimeDB.MILESTONE_ETEN_CHAR;
-                            else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed)
-                                keynameString = LimeDB.MILESTONE2_ETEN_CHAR;
-                            else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed)
-                                keynameString = LimeDB.MILESTONE3_ETEN_CHAR;
-                            else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed)
-                                keynameString = LimeDB.DESIREZ_ETEN_CHAR;
-                            else
-                                keynameString = LimeDB.ETEN_CHAR;
-                        } else if (phonetickeyboardtype.startsWith("eten26")) {
-                            keyString = LimeDB.ETEN26_KEY;
-                            keynameString = LimeDB.ETEN26_CHAR_INITIAL;
-                            finalKeynameString = LimeDB.ETEN26_CHAR_FINAL;
-                        } else if (phonetickeyboardtype.startsWith("hsu")) {
-                            keyString = LimeDB.HSU_KEY;
-                            keynameString = LimeDB.HSU_CHAR_INITIAL;
-                            finalKeynameString = LimeDB.HSU_CHAR_FINAL;
-                        } else if ((keyboardtype.equals("milestone") || keyboardtype.equals("milestone2"))
-                                && isPhysicalKeyboardPressed) {
-                            keyString = LimeDB.MILESTONE_KEY;
-                            keynameString = LimeDB.MILESTONE_BPMF_CHAR;
-                        } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
-                            keyString = LimeDB.MILESTONE3_KEY;
-                            keynameString = LimeDB.MILESTONE3_BPMF_CHAR;
-                        } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
-                            keyString = LimeDB.DESIREZ_KEY;
-                            keynameString = LimeDB.DESIREZ_BPMF_CHAR;
-                        } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
-                            keyString = LimeDB.CHACHA_KEY;
-                            keynameString = LimeDB.CHACHA_BPMF_CHAR;
-                        } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) {
-                            keyString = LimeDB.XPERIAPRO_KEY;
-                            keynameString = LimeDB.BPMF_CHAR;
-                        } else {
-                            keyString = LimeDB.BPMF_KEY;
-                            keynameString = LimeDB.BPMF_CHAR;
-                        }
-
-                    } else {
-                        keyString = LimeDB.BPMF_KEY;
-                        keynameString = LimeDB.BPMF_CHAR;
-                    }
+                    keyString = LimeDB.BPMF_KEY;
+                    keynameString = LimeDB.BPMF_CHAR;
                 } else if (table.startsWith("dayi")) {
-                    if (isPhysicalKeyboardPressed && composingText) { // only do this on composing mapping popup
-                        switch (keyboardtype) {
-                            case "milestone":
-                            case "milestone2":
-                                keyString = LimeDB.MILESTONE_KEY;
-                                keynameString = LimeDB.MILESTONE_DAYI_CHAR;
-                                break;
-                            case "milestone3":
-                                keyString = LimeDB.MILESTONE3_KEY;
-                                keynameString = LimeDB.MILESTONE3_DAYI_CHAR;
-                                break;
-                            case "desireZ":
-                                keyString = LimeDB.DESIREZ_KEY;
-                                keynameString = LimeDB.DESIREZ_DAYI_CHAR;
-                                break;
-                            default:
-                                keyString = LimeDB.DAYI_KEY;
-                                keynameString = LimeDB.DAYI_CHAR;
-                                break;
-                        }
-                    } else {
-                        keyString = LimeDB.DAYI_KEY;
-                        keynameString = LimeDB.DAYI_CHAR;
-                    }
+                    keyString = LimeDB.DAYI_KEY;
+                    keynameString = LimeDB.DAYI_CHAR;
                 }
             }
             if (LimeDB.DEBUG)
@@ -220,34 +154,23 @@ class LimeQueryEngine {
                         "keyToKeyname():keyboardtype:" + keyboardtype + " phonetickeyboardtype:" + phonetickeyboardtype
                                 +
                                 " composing?:" + composingText +
-                                " keyString:" + keyString + " keynameString:" + keynameString + " finalkeynameString:"
-                                + finalKeynameString);
+                                " keyString:" + keyString + " keynameString:" + keynameString);
             if (keyString != null && keyString.length() > 0) {
                 HashMap<String, String> keyMap = new HashMap<>();
-                HashMap<String, String> finalKeyMap = null;
-                if (finalKeynameString != null)
-                    finalKeyMap = new HashMap<>();
 
                 String[] charlist = keynameString.split("\\|");
-                String[] finalCharlist = null;
 
-                if (finalKeyMap != null)
-                    finalCharlist = finalKeynameString.split("\\|");
 
                 // Ignore the exception of key name mapping.
                 try {
                     for (int i = 0; i < keyString.length(); i++) {
                         keyMap.put(keyString.substring(i, i + 1), charlist[i]);
-                        if (finalKeyMap != null)
-                            finalKeyMap.put(keyString.substring(i, i + 1), finalCharlist[i]);
                     }
                 } catch (Exception ignored) {
                 }
 
                 keyMap.put("|", "|"); // put the seperator for multi-code display
                 keysDefMap.put(keytable, keyMap);
-                if (finalKeyMap != null)
-                    keysDefMap.put("final_" + keytable, finalKeyMap);
             }
 
         }
@@ -268,66 +191,11 @@ class LimeQueryEngine {
 
             String result = "";
             HashMap<String, String> keyMap = keysDefMap.get(keytable);
-            HashMap<String, String> finalKeyMap = keysDefMap.get("final_" + keytable);
             // do the real conversion
-
-            if (finalKeyMap == null) {
-                for (int i = 0; i < code.length(); i++) {
-                    String c = keyMap.get(code.substring(i, i + 1));
-                    if (c != null)
-                        result = result + c;
-                }
-            } else {
-
-                if (code.length() == 1) {
-
-                    String c = "";
-                    if (phonetickeyboardtype.startsWith("eten26") &&
-                            (code.equals("q") || code.equals("w")
-                                    || code.equals("d") || code.equals("f")
-                                    || code.equals("j") || code.equals("k"))) {
-                        // Dual mapped INITIALS have words mapped for ��and �� for ETEN26
-                        c = keyMap.get(code);
-                    } else if (phonetickeyboardtype.startsWith("hsu")) // Jeremy '12,5,31 process hsu with dual code
-                                                                       // mapping only.
-                        c = keyMap.get(code);
-                    // }else{
-                    // c = finalKeyMap.get(code);
-                    // }
-                    if (c != null)
-                        result = c.trim();
-                } else {
-                    for (int i = 0; i < code.length(); i++) {
-                        String c;
-                        if (i > 0) {
-                            // Jeremy '12,6,3 If the last character is a tone symbol, the preceding will be
-                            // intial
-                            if (db.tablename.equals("phonetic")
-                                    && i > 1
-                                    && code.substring(0, i).matches(".+[sdfj ]$")
-                                    && phonetickeyboardtype.startsWith("hsu")) {
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                            + code.substring(0, i));
-                                c = keyMap.get(code.substring(i, i + 1));
-                            } else if (db.tablename.equals("phonetic")
-                                    && i > 1
-                                    && code.substring(0, i).matches(".+[dfjk ]$")
-                                    && phonetickeyboardtype.startsWith("eten26")) {
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                            + code.substring(0, i));
-                                c = keyMap.get(code.substring(i, i + 1));
-                            } else
-                                c = finalKeyMap.get(code.substring(i, i + 1));
-                        } else {
-                            c = keyMap.get(code.substring(i, i + 1));
-                        }
-                        if (c != null)
-                            result = result + c.trim();
-                    }
-
-                }
+            for (int i = 0; i < code.length(); i++) {
+                String c = keyMap.get(code.substring(i, i + 1));
+                if (c != null)
+                    result = result + c;
             }
             if (LimeDB.DEBUG)
                 Log.i(LimeDB.TAG, "keyToKeyname():returning:" + result);
@@ -541,7 +409,7 @@ class LimeQueryEngine {
         if (code != null) {
             String keyboardtype = db.mLIMEPref.getPhysicalKeyboardType();
             String phonetickeyboardtype = db.mLIMEPref.getPhoneticKeyboardType();
-            String keyString = "", keyRemapString = "", finalKeyRemapString = null;
+            String keyString = "", keyRemapString = "";
             String newcode = code;
             String remaptable = db.tablename;
 
@@ -558,42 +426,10 @@ class LimeQueryEngine {
             if (keysReMap.get(remaptable) == null
                     || keysReMap.get(remaptable).size() == 0) {
 
-                if (db.tablename.equals("phonetic") && phonetickeyboardtype.startsWith("eten26")) {
-                    keyString = LimeDB.ETEN26_KEY;
-                    keyRemapString = LimeDB.ETEN26_KEY_REMAP_INITIAL;
-                    finalKeyRemapString = LimeDB.ETEN26_KEY_REMAP_FINAL;
-                } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.startsWith("hsu")) {
-                    keyString = LimeDB.HSU_KEY;
-                    keyRemapString = LimeDB.HSU_KEY_REMAP_INITIAL;
-                    finalKeyRemapString = LimeDB.HSU_KEY_REMAP_FINAL;
-                } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                    keyString = LimeDB.ETEN_KEY;
-                    // + SHIFTED_NUMBERIC_KEY + SHIFTED_SYMBOL_KEY;
-                    keyRemapString = LimeDB.ETEN_KEY_REMAP;
-                    // + SHIFTED_NUMBERIC_ETEN_KEY_REMAP + SHIFTED_SYMBOL_ETEN_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && db.tablename.equals("phonetic") && keyboardtype.equals("desireZ")) {
-                    // Desire Z phonetic keybaord
-                    keyString = LimeDB.DESIREZ_KEY;
-                    keyRemapString = LimeDB.DESIREZ_BPMF_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && db.tablename.equals("phonetic") && keyboardtype.equals("chacha")) {
-                    // Desire Z phonetic keybaord
-                    keyString = LimeDB.CHACHA_KEY;
-                    keyRemapString = LimeDB.CHACHA_BPMF_KEY_REMAP;
-                } else if (isPhysicalKeyboardPressed
-                        && db.tablename.equals("phonetic") && keyboardtype.equals("xperiapro")) {
-                    // XPERIA PRO phonetic keybaord
-                    keyString = LimeDB.XPERIAPRO_KEY;
-                    keyRemapString = LimeDB.XPERIAPRO_BPMF_KEY_REMAP;
-
-                } else if (!isPhysicalKeyboardPressed) {
-                    if (db.tablename.startsWith("dayi")
-                            || db.tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        keyString = LimeDB.SHIFTED_NUMBERIC_KEY + LimeDB.SHIFTED_SYMBOL_KEY;
-                        keyRemapString = LimeDB.SHIFTED_NUMBERIC_KEY_REMAP + LimeDB.SHIFTED_SYMBOL_KEY_REMAP;
-                    }
-
+                if (!isPhysicalKeyboardPressed
+                        && (db.tablename.startsWith("dayi") || db.tablename.equals("phonetic"))) {
+                    keyString = LimeDB.SHIFTED_NUMBERIC_KEY + LimeDB.SHIFTED_SYMBOL_KEY;
+                    keyRemapString = LimeDB.SHIFTED_NUMBERIC_KEY_REMAP + LimeDB.SHIFTED_SYMBOL_KEY_REMAP;
                 }
 
                 if (LimeDB.DEBUG)
@@ -602,18 +438,11 @@ class LimeQueryEngine {
 
                 if (!keyString.equals("")) {
                     HashMap<String, String> reMap = new HashMap<>();
-                    HashMap<String, String> finalReMap = null;
-                    if (finalKeyRemapString != null)
-                        finalReMap = new HashMap<>();
 
                     for (int i = 0; i < keyString.length(); i++) {
                         reMap.put(keyString.substring(i, i + 1), keyRemapString.substring(i, i + 1));
-                        if (finalReMap != null)
-                            finalReMap.put(keyString.substring(i, i + 1), finalKeyRemapString.substring(i, i + 1));
                     }
                     keysReMap.put(remaptable, reMap);
-                    if (finalReMap != null)
-                        keysReMap.put("final_" + remaptable, finalReMap);
                 }
             }
 
@@ -627,74 +456,17 @@ class LimeQueryEngine {
             if (keysReMap.get(remaptable) != null
                     && keysReMap.get(remaptable).size() != 0) {
                 HashMap<String, String> reMap = keysReMap.get(remaptable);
-                HashMap<String, String> finalReMap = keysReMap.get("final_" + remaptable);
 
                 newcode = "";
                 String c;
 
-                if (finalReMap == null) {
-                    for (int i = 0; i < code.length(); i++) {
-                        String s = code.substring(i, i + 1);
-                        c = reMap.get(s);
-                        if (c != null)
-                            newcode = newcode + c;
-                        else
-                            newcode = newcode + s;
-                    }
-
-                } else {
-
-                    if (code.length() == 1) {
-                        if (phonetickeyboardtype.startsWith("eten26") &&
-                                (code.equals("q") || code.equals("w")
-                                        || code.equals("d") || code.equals("f")
-                                        || code.equals("j") || code.equals("k"))) {
-                            c = reMap.get(code);
-                        } else if (phonetickeyboardtype.startsWith("hsu") &&
-                                (code.equals("a") || code.equals("e") ||
-                                        code.equals("s") || code.equals("d") || code.equals("f") || code.equals("j"))) {
-                            c = reMap.get(code);
-                        } else {
-                            c = finalReMap.get(code);
-                        }
-                        if (c != null)
-                            newcode = c;
-                        else
-                            newcode = code;
-
-                    } else {
-                        for (int i = 0; i < code.length(); i++) {
-                            String s = code.substring(i, i + 1);
-                            if (i > 0) {
-                                // Jeremy '12,6,3 If the last character is a tone symbol, the preceding will be
-                                // intial
-                                if (db.tablename.equals("phonetic")
-                                        && i > 1
-                                        && code.substring(0, i).matches(".+[sdfj ]$")
-                                        && phonetickeyboardtype.startsWith("hsu")) {
-                                    if (LimeDB.DEBUG)
-                                        Log.i(LimeDB.TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                                + code.substring(0, i));
-                                    c = reMap.get(s);
-                                } else if (db.tablename.equals("phonetic")
-                                        && i > 1
-                                        && code.substring(0, i).matches(".+[dfjk ]$")
-                                        && phonetickeyboardtype.startsWith("eten26")) {
-                                    if (LimeDB.DEBUG)
-                                        Log.i(LimeDB.TAG, "preProcessingRemappingCode() hsu finalremap, subcode = "
-                                                + code.substring(0, i));
-                                    c = reMap.get(s);
-                                } else
-                                    c = finalReMap.get(s);
-                            } else
-                                c = reMap.get(s);
-
-                            if (c != null)
-                                newcode = newcode + c;
-                            else
-                                newcode = newcode + s;
-                        }
-                    }
+                for (int i = 0; i < code.length(); i++) {
+                    String s = code.substring(i, i + 1);
+                    c = reMap.get(s);
+                    if (c != null)
+                        newcode = newcode + c;
+                    else
+                        newcode = newcode + s;
                 }
             }
 
@@ -733,75 +505,6 @@ class LimeQueryEngine {
 
             if (keysDualMap.get(remaptable) == null
                     || keysDualMap.get(remaptable).size() == 0) {
-                if (db.tablename.equals("phonetic") && phonetickeyboardtype.startsWith("eten26")) {
-                    dualKey = LimeDB.ETEN26_DUALKEY;
-                    dualKeyRemap = LimeDB.ETEN26_DUALKEY_REMAP;
-                } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.startsWith("hsu")) {
-                    dualKey = LimeDB.HSU_DUALKEY;
-                    dualKeyRemap = LimeDB.HSU_DUALKEY_REMAP;
-                } else if (keyboardtype.equals("milestone") && isPhysicalKeyboardPressed) {
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.MILESTONE_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE_ETEN_DUALKEY_REMAP;
-                    } else {
-                        dualKey = LimeDB.MILESTONE_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("milestone2") && isPhysicalKeyboardPressed) {
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.MILESTONE2_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE2_ETEN_DUALKEY_REMAP;
-                    } else {
-                        dualKey = LimeDB.MILESTONE2_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE2_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("milestone3") && isPhysicalKeyboardPressed) {
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.MILESTONE3_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE3_ETEN_DUALKEY_REMAP;
-                    } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = LimeDB.MILESTONE3_BPMF_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE3_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = LimeDB.MILESTONE3_DUALKEY;
-                        dualKeyRemap = LimeDB.MILESTONE3_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("desireZ") && isPhysicalKeyboardPressed) {
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.DESIREZ_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.DESIREZ_ETEN_DUALKEY_REMAP;
-                    } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = LimeDB.DESIREZ_BPMF_DUALKEY;
-                        dualKeyRemap = LimeDB.DESIREZ_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = LimeDB.DESIREZ_DUALKEY;
-                        dualKeyRemap = LimeDB.DESIREZ_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("chacha") && isPhysicalKeyboardPressed) {
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.CHACHA_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.CHACHA_ETEN_DUALKEY_REMAP;
-                    } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        dualKey = LimeDB.CHACHA_BPMF_DUALKEY;
-                        dualKeyRemap = LimeDB.CHACHA_BPMF_DUALKEY_REMAP;
-                    } else {
-                        dualKey = LimeDB.CHACHA_DUALKEY;
-                        dualKeyRemap = LimeDB.CHACHA_DUALKEY_REMAP;
-                    }
-                } else if (keyboardtype.equals("xperiapro") && isPhysicalKeyboardPressed) { // Jeremy '12,4,1
-                    if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("eten")) {
-                        dualKey = LimeDB.XPERIAPRO_ETEN_DUALKEY;
-                        dualKeyRemap = LimeDB.XPERIAPRO_ETEN_DUALKEY_REMAP;
-                    } else if (db.tablename.equals("phonetic") && phonetickeyboardtype.equals("standard")) {
-                        // no dual key here
-                        dualKey = "";
-                        dualKeyRemap = "";
-                    } else {
-                        dualKey = LimeDB.XPERIAPRO_DUALKEY;
-                        dualKeyRemap = LimeDB.XPERIAPRO_DUALKEY_REMAP;
-                    }
-                }
-
                 HashMap<String, String> reMap = new HashMap<>();
                 if (LimeDB.DEBUG)
                     Log.i(LimeDB.TAG, "preProcessingForExtraQueryConditions(): dualKey=" + dualKey + " dualKeyRemap="

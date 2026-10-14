@@ -113,80 +113,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     final static String SHIFTED_NUMBERIC_KEY_REMAP = "1234567890";
     final static String SHIFTED_SYMBOL_KEY = "<>?_:+\"";
     final static String SHIFTED_SYMBOL_KEY_REMAP = ",./-;='";
-    final static String ETEN_KEY = "abcdefghijklmnopqrstuvwxyz12347890-=;',./!@#$&*()<>?_+:\"";
-    final static String ETEN_KEY_REMAP = "81v2uzrc9bdxasiqoknwme,j.l7634f0p;/-yh5tg7634f0p;5tg/yh-";
-    final static String ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ" +
-            "|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄓ|ㄔ|ㄕ|ㄥ|ㄦ|ㄗ|ㄘ";
-    final static String ETEN26_KEY = "qazwsxedcrfvtgbyhnujmikolp,.";
-    final static String ETEN26_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
-    final static String ETEN26_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
-    final static String ETEN26_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String ETEN26_DUALKEY = "yhvewrscpaxqs3467";
-    final static String ETEN26_CHAR_INITIAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|ㄉ|(ㄕ/ㄒ)|ㄜ|ㄈ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ㄖ|(ㄇ/ㄢ)|ㄞ|ㄎ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
-    final static String ETEN26_CHAR_FINAL = "(ㄗ/ㄟ)|ㄚ|ㄠ|(ㄘ/ㄝ)|ㄙ|ㄨ|ㄧ|˙|(ㄕ/ㄒ)|ㄜ|ˊ|(ㄍ/ㄑ)|(ㄊ/ㄤ)|(ㄐ/ㄓ)|ㄅ|ㄔ|(ㄏ/ㄦ)|(ㄋ/ㄣ)|ㄩ|ˇ|(ㄇ/ㄢ)|ㄞ|ˋ|ㄛ|(ㄌ/ㄥ)|(ㄆ/ㄡ)|，|。";
-    final static String MILESTONE3_DAYI_CHAR = "言|石|人|心|牛|山|革|水|目|一|日|鹿|四|工|土|禾|王|糸|手|馬|門|火|鳥|魚|田|" +
-            "艸|月|雨|米|木|立|(力/虫)|足|口|女|舟|金|耳|竹";
-    final static String MILESTONE3_BPMF_CHAR = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|" +
-            "ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|(ㄠ/ㄤ)|(ㄡ/ㄥ)|ㄢ|ㄣ|ㄥ";
 
     private final static String CJ_KEY = "abcdefghijklmnopqrstuvwxyz";
     private final static String CJ_CHAR = "日|月|金|木|水|火|土|竹|戈|十|大|中|一|弓|人|心|手|口|尸|廿|山|女|田|難|卜";
-    final static String MILESTONE_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    final static String MILESTONE_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    final static String MILESTONE_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
-    final static String MILESTONE_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    final static String MILESTONE_DUALKEY = "yhvewrscpaxq3467";
-    final static String MILESTONE_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String MILESTONE_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String MILESTONE_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String MILESTONE2_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    final static String MILESTONE2_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄦ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    final static String MILESTONE2_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    final static String MILESTONE2_DUALKEY = "yhvewrscpaxq3467";
-    final static String MILESTONE2_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String MILESTONE2_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String MILESTONE2_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String MILESTONE3_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,./";
-    final static String MILESTONE3_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    final static String MILESTONE3_DUALKEY = "yhvewrscpaxq3467";
-    final static String MILESTONE3_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String MILESTONE3_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String MILESTONE3_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String MILESTONE3_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    final static String MILESTONE3_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String DESIREZ_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String DESIREZ_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    final static String DESIREZ_DAYI_CHAR = "言|牛|目|四|王|車|田|八|足|金|一|工|糸|火|舟|竹|戈|十|大|中|水|手|鳥|月|立|女|虫|心|鹿|禾|馬|魚|雨|力|口|日|石|人|革";
-    final static String DESIREZ_ETEN_CHAR = "ㄚ|ㄅ|ㄒ|ㄉ|ㄧ|ㄈ|ㄐ|ㄏ|ㄞ|ㄖ|ㄎ|ㄌ|ㄇ|ㄋ|ㄛ|ㄆ|ㄟ|ㄜ|ㄙ|ㄊ|ㄩ|ㄍ|ㄝ|ㄨ|ㄡ|ㄠ|˙|ˊ|ˇ|ˋ|ㄑ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ|ㄗ|ㄘ|ㄓ|ㄔ|ㄕ";
-    final static String DESIREZ_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String DESIREZ_DUALKEY = "yhvewrscpaxq3467";
-    final static String DESIREZ_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String DESIREZ_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String DESIREZ_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String DESIREZ_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    final static String DESIREZ_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String CHACHA_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String CHACHA_BPMF_CHAR = "ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄢ|ㄆ|ㄊ|ㄍ|ㄐ|ㄔ|ㄗ|ㄧ|ㄛ|ㄟ|ㄣ|ㄇ|ㄋ|ㄎ|ㄑ|ㄕ|ㄘ|ㄨ|ㄜ|ㄠ|ㄤ|ㄈ|ㄌ|ㄏ|ㄒ|ㄖ|ㄙ|ㄩ|ㄝ|ㄡ|ㄥ";
-    final static String CHACHA_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String CHACHA_DUALKEY = "yhvewrscpaxq3467";
-    final static String CHACHA_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String CHACHA_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String CHACHA_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String CHACHA_BPMF_DUALKEY = "yhvewrscpaxqs3467";
-    final static String CHACHA_BPMF_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String XPERIAPRO_KEY = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String XPERIAPRO_BPMF_KEY_REMAP = "1234567890qwertyuiopasdfghjklzxcvbnm,.";
-    final static String XPERIAPRO_DUALKEY = "yhvewrscpaxq3467";
-    final static String XPERIAPRO_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz";
-    final static String XPERIAPRO_ETEN_DUALKEY = "yhvewrscpaxqs3467";
-    final static String XPERIAPRO_ETEN_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
-    final static String HSU_KEY = "1qaz2wsx3edc4rfv5tgb6yhn7ujm8ik,9ol.0p;/-";
-    final static String HSU_CHAR_INITIAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
-    final static String HSU_CHAR_FINAL = "ㄅ|ㄆ|ㄇ|ㄈ|ㄉ|ㄊ|ㄋ|ㄌ|ˇ|ㄍ|ㄎ|ㄏ|ˋ|ㄐ|ㄑ|ㄒ|ㄓ|ㄔ|ㄕ|ㄖ|ˊ|ㄗ|ㄘ|ㄙ|˙|ㄧ|ㄨ|ㄩ|ㄚ|ㄛ|ㄜ|ㄝ|ㄞ|ㄟ|ㄠ|ㄡ|ㄢ|ㄣ|ㄤ|ㄥ|ㄦ";
-    final static String HSU_KEY_REMAP_INITIAL = "y8lhnju2vkzewr1tcsmba9dixq<>";
-    final static String HSU_KEY_REMAP_FINAL = "y8lhnju7vk6ewr1tcsm3a94ixq<>";
-    final static String HSU_DUALKEY = "yhvewrscpaxqs3467";
-    final static String HSU_DUALKEY_REMAP = "o,gf;5p-s0/.pbdz2";
     private final static String ARRAY_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
     private final static String ARRAY_CHAR = "1-|2-|3-|4-|5-|6-|7-|8-|9-|0-|1⇡|2⇡|3⇡|4⇡|5⇡|6⇡|7⇡|8⇡|9⇡|0⇡|1⇣|2⇣|3⇣|4⇣|5⇣|6⇣|7⇣|8⇣|9⇣|0⇣|？|＊|．|，|。";
 
@@ -644,28 +573,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * @param dbin sqlite database object
      */
     private void checkPhoneticKeyboardSettingOnDB(SQLiteDatabase dbin) {
-        String selectedPhoneticKeyboardType = mLIMEPref.getPhoneticKeyboardType();
-        if (DEBUG)
-            Log.i("OnUpgrade()", "phonetickeyboardtype:" + selectedPhoneticKeyboardType);
-        switch (selectedPhoneticKeyboardType) {
-            case "hsu":
-                setIMKeyboardOnDB(dbin, "phonetic",
-                        getKeyboardInfoOnDB(dbin, "hsu", "desc"), "hsu");// jeremy '12,6,6 new hsu and et26 keybaord
-
-                break;
-            case "eten26":
-                setIMKeyboardOnDB(dbin, "phonetic",
-                        getKeyboardInfoOnDB(dbin, "et26", "desc"), "et26");
-                break;
-            case "eten":
-                setIMKeyboardOnDB(dbin, "phonetic",
-                        getKeyboardInfoOnDB(dbin, "phoneticet41", "desc"), "phoneticet41");
-                break;
-            default:
-                setIMKeyboardOnDB(dbin, "phonetic",
-                        getKeyboardInfoOnDB(dbin, "phonetic", "desc"), "phonetic");
-                break;
-        }
+        setIMKeyboardOnDB(dbin, "phonetic",
+                getKeyboardInfoOnDB(dbin, "phonetic", "desc"), "phonetic");
     }
 
     /*
@@ -2127,36 +2036,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     // '11,5,23 by Jeremy: Preset keyboard info. by tablename
                     KeyboardObj kobj = getKeyboardObj(table);
                     if (table.equals("phonetic")) {
-                        String selectedPhoneticKeyboardType = mLIMEPref.getParameterString("phonetic_keyboard_type",
-                                "standard");
-                        switch (selectedPhoneticKeyboardType) {
-                            case "standard":
-                                kobj = getKeyboardObj("phonetic");
-                                break;
-                            case "eten":
-                                kobj = getKeyboardObj("phoneticet41");
-                                break;
-                            case "eten26":
-                                if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
-                                    kobj = getKeyboardObj("limenum");
-                                } else {
-                                    kobj = getKeyboardObj("lime");
-                                }
-                                break;
-                            case "eten26_symbol":
-                                kobj = getKeyboardObj("et26");
-                                break;
-                            case "hsu": // Jeremy '12,7,6 Add HSU english keyboard support
-                                if (mLIMEPref.getParameterBoolean("number_row_in_english", false)) {
-                                    kobj = getKeyboardObj("limenum");
-                                } else {
-                                    kobj = getKeyboardObj("lime");
-                                }
-                                break;
-                            case "hsu_symbol":
-                                kobj = getKeyboardObj("hsu");
-                                break;
-                        }
+                        kobj = getKeyboardObj("phonetic");
                     } else if (table.startsWith("dayi")) {
                         kobj = getKeyboardObj("dayi");
                     } else if (kobj == null) { // Jeremy '12,5,21 chose english with number keyboard if the optione is
