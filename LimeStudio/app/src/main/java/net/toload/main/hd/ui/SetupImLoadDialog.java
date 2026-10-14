@@ -554,13 +554,7 @@ public class SetupImLoadDialog extends DialogFragment {
 
                         if (check) {
 
-                            String backupTableName = imtype + "_user";
-
-                            // check if user data backup table is present and have valid records
-                            int userRecordsCount = datasource.countMapping(backupTableName);
                             handler.updateProgress(10);
-                            if (userRecordsCount == 0)
-                                return;
 
                             try {
                                 Cursor cursorbackup = datasource.listBackupRecords(imtype);
