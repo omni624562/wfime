@@ -18,7 +18,8 @@
     <string name="enable_english_dictionary_summary">Show English suggestions in English input mode</string>
     <string name="enable_english_dictionary_physical_keyboard">English dictionary for physical keyboard</string>
     <string name="enable_english_dictionary_physical_keyboard_summary">Show English suggestions when typing English on a physical keyboard</string>
-    <string name="reverse_lookup_notify">Show reverse lookup notifications</string>
+    <string name="reverse_lookup">Reverse lookup</string>
+    <string name="reverse_lookup_summary">After choosing a character, show its code in the other input method at the left of the candidate bar (Chuyin when typing Dayi, Dayi roots when typing Chuyin). The other input method must be imported</string>
     <string name="selkey_option_list">Selection key preference</string>
     <string name="similiar_list">Number of suggestions</string>
     <string name="vibrate_on_keypress">Vibrate on keypress</string>

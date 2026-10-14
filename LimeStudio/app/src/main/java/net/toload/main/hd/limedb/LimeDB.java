@@ -1165,7 +1165,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
             if (keyword != null && !keyword.trim().equals("")) {
                 Cursor cursor;
-                cursor = db.query(table, null, FIELD_WORD + " = ?", new String[] { keyword },
+                cursor = db.query(validateTableName(table), null, FIELD_WORD + " = ?", new String[] { keyword },
                         null, null, null, null);
                 if (DEBUG)
                     Log.i(TAG, "getRmapping():tablename:" + table + "  keyworad:"

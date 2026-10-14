@@ -78,12 +78,15 @@ public class LIMEPreferenceManager {
 
     }
 
+    // 字根反查:打大易時查注音、打注音時查大易碼;關閉或其他輸入法回傳 "none"
     public String getRerverseLookupTable(String table) {
-        if (table.equals("phonetic")) {
-            return sp.getString("bpmf_im_reverselookup", "none");
-        } else {
-            return sp.getString(table + "_im_reverselookup", "none");
-        }
+        if (!sp.getBoolean("reverse_lookup", false))
+            return "none";
+        if (table.startsWith("dayi"))
+            return "phonetic";
+        if (table.equals("phonetic"))
+            return "dayi";
+        return "none";
     }
 
     public boolean getFixedCandidateViewDisplay() {
@@ -140,10 +143,6 @@ public class LIMEPreferenceManager {
 
     public Integer getEmojiDisplayPosition() {
         return Integer.parseInt(sp.getString("enable_emoji_position", "3"));
-    }
-
-    public boolean getReverseLookupNotify() {
-        return sp.getBoolean("reverse_lookup_notify", true);
     }
 
     public boolean getPersistentLanguageMode() {

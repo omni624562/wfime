@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
@@ -151,6 +153,8 @@ open class CandidateView @JvmOverloads constructor(
     private var currentPage by mutableIntStateOf(0)
     private var _composingText by mutableStateOf("")
     private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
+    // 字根反查結果(例如「日=ㄖˋ」):選字後顯示在候選列左側,開始打下一個字時清掉
+    private var _reverseLookupHint by mutableStateOf("")
     // Cached font size scale — read from SharedPreferences once, updated via updateFontSize()
     // Stored as Compose state so CandidateRow recomposes automatically when it changes
     private var _fontSizeScale by mutableFloatStateOf(1f)
@@ -322,10 +326,16 @@ open class CandidateView @JvmOverloads constructor(
         currentPage = 0
         _composingText = ""
         _rawKeycode = ""
+        _reverseLookupHint = ""
     }
     
     open fun setRawKeycode(keycode: String) {
         _rawKeycode = keycode
+        if (keycode.isNotEmpty()) _reverseLookupHint = ""
+    }
+
+    fun setReverseLookupHint(text: String) {
+        _reverseLookupHint = text
     }
     
     fun setEmbeddedComposingView(view: TextView?) {
@@ -491,6 +501,7 @@ open class CandidateView @JvmOverloads constructor(
             // This prevents the "infinity maximum width constraints" crash when measured with MeasureSpec.UNSPECIFIED.
             if (constraints.maxWidth != androidx.compose.ui.unit.Constraints.Infinity) {
                     val isToolbarMode = suggestions.isEmpty() && _composingText.isEmpty() && _rawKeycode.isEmpty()
+                            && _reverseLookupHint.isEmpty()
                     if (isToolbarMode) {
                         ToolbarRow(candidateFontSize)
                     } else {
@@ -538,6 +549,27 @@ open class CandidateView @JvmOverloads constructor(
                                         fontSize = slotFontSize,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
+                                    )
+                                }
+                            }
+
+                            if (_reverseLookupHint.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                                        .widthIn(max = 180.dp)
+                                        .fillMaxHeight()
+                                        .background(c.chipBackground, RoundedCornerShape(6.dp))
+                                        .border(1.dp, c.chipBorder.copy(alpha = 0.7f), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 8.dp),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(
+                                        text = _reverseLookupHint,
+                                        color = c.selectedText,
+                                        fontSize = (candidateFontSize.value * 0.75f).sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -879,6 +911,7 @@ open class CandidateView @JvmOverloads constructor(
     
     fun setComposingText(text: String) {
         _composingText = text
+        if (text.isNotEmpty()) _reverseLookupHint = ""
     }
     fun forceHide() {
         clear()

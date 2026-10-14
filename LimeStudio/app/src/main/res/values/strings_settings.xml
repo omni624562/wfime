@@ -66,7 +66,8 @@
     <string name="enable_english_dictionary_physical_keyboard">實體鍵盤啟用英文字典</string>
     <string name="enable_english_dictionary_physical_keyboard_summary">實體鍵盤使用英文輸入模式時，顯示英文建議字</string>
 
-    <string name="reverse_lookup_notify">啟用字根反查跳出提示</string>
+    <string name="reverse_lookup">字根反查</string>
+    <string name="reverse_lookup_summary">選字後在候選列左側顯示這個字在另一個輸入法的字根（打大易顯示注音，打注音顯示大易字根），需已匯入另一個輸入法</string>
 
     <string name="selkey_option_list">設定選字鍵預選順序</string>
 

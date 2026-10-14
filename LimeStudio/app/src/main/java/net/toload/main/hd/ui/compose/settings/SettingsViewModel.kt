@@ -65,7 +65,7 @@ data class SettingsUiState(
     val disablePhysicalSelkey: Boolean = false,
     val autoCommit: String = "0",
     val selkeyOption: String = "0",
-    val reverseLookupNotify: Boolean = true,
+    val reverseLookup: Boolean = false,
 
     // Mapping preferences
     val similiarList: String = "20",
@@ -173,7 +173,7 @@ class SettingsViewModel(
                     disablePhysicalSelkey = preferenceManager.getParameterBoolean("disable_physical_selkey", false),
                     autoCommit = preferenceManager.getParameterString("auto_commit", "0"),
                     selkeyOption = preferenceManager.getParameterString("selkey_option", "0"),
-                    reverseLookupNotify = preferenceManager.getParameterBoolean("reverse_lookup_notify", true),
+                    reverseLookup = preferenceManager.getParameterBoolean("reverse_lookup", false),
 
                     // Mapping
                     similiarList = preferenceManager.getParameterString("similiar_list", "20"),
@@ -291,9 +291,9 @@ class SettingsViewModel(
         _uiState.update { it.copy(selkeyOption = value) }
     }
 
-    fun setReverseLookupNotify(value: Boolean) {
-        preferenceManager.setParameter("reverse_lookup_notify", value)
-        _uiState.update { it.copy(reverseLookupNotify = value) }
+    fun setReverseLookup(value: Boolean) {
+        preferenceManager.setParameter("reverse_lookup", value)
+        _uiState.update { it.copy(reverseLookup = value) }
     }
 
     // Mapping preference setters

@@ -891,9 +891,10 @@ fun ImSettingsSection(
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
             SwitchPreference(
-                title = stringResource(R.string.reverse_lookup_notify),
-                checked = uiState.reverseLookupNotify,
-                onCheckedChange = { viewModel.setReverseLookupNotify(it) }
+                title = stringResource(R.string.reverse_lookup),
+                summary = stringResource(R.string.reverse_lookup_summary),
+                checked = uiState.reverseLookup,
+                onCheckedChange = { viewModel.setReverseLookup(it) }
             )
         }
     }

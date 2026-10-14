@@ -2405,8 +2405,10 @@ public class LIMEService extends InputMethodService implements
                                 } else {
                                     SearchSrv.learnRelatedPhraseAndUpdateScore(committedCandidate);
 
-                                    // do reverse lookup and display notification if required.
-                                    SearchSrv.getCodeListStringFromWord(committedCandidate.getWord());
+                                    // 字根反查:結果顯示在候選列左側,開始打下一個字時消失
+                                    String reverseLookup = SearchSrv.getCodeListStringFromWord(committedCandidate.getWord());
+                                    if (reverseLookup != null && mCandidateView != null)
+                                        mCandidateView.setReverseLookupHint(reverseLookup);
                                 }
                             }
                         }

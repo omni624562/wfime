@@ -25,11 +25,9 @@
 package net.toload.main.hd;
 
 import android.content.Context;
-import android.content.Intent;
 
 import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,12 +41,10 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.toload.main.hd.R;
 import net.toload.main.hd.data.ImObj;
 import net.toload.main.hd.data.KeyboardObj;
 import net.toload.main.hd.data.Mapping;
 import net.toload.main.hd.global.LIMEPreferenceManager;
-import net.toload.main.hd.global.LIMEUtilities;
 import net.toload.main.hd.global.SmartSelectionManager;
 import net.toload.main.hd.limedb.LimeDB;
 
@@ -240,19 +236,10 @@ public class SearchServer {
      */
 
     // Add by jeremy '10, 4,1
-    public void getCodeListStringFromWord(final String word) {
-
+    // 字根反查結果(例如「日=ㄖˋ」);沒開反查或查無資料時回傳 null
+    public String getCodeListStringFromWord(final String word) {
         String result = dbadapter.getCodeListStringByWord(word);
-        if (result != null && !result.equals("")) {
-            LIMEUtilities.showNotification(
-                    mContext, true, mContext.getText(R.string.ime_setting), result,
-                    new Intent(mContext, MainActivity.class));
-
-            if (mLIMEPref.getReverseLookupNotify()) {
-                Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
-            }
-        }
-
+        return (result == null || result.isEmpty()) ? null : result;
     }
 
     private String cacheKey(String code) {
