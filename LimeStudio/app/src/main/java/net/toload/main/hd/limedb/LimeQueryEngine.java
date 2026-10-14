@@ -424,6 +424,11 @@ class LimeQueryEngine {
                     int codeLen = code.length();
 
                     String limitClause = (getAllRecords) ? LimeDB.FINAL_RESULT_LIMIT : LimeDB.INITIAL_RESULT_LIMIT;
+                    // 候選列已沒有「捲到底載入更多」,精確碼的字要一次全部查出來;否則注音 ㄧˋ
+                    // 這類同音字多的碼只看得到前 15 個。精確碼不超過上限時照舊
+                    int exactCount = countExactMatches(codeCol, code, extraExactMatchClause);
+                    if (exactCount > Integer.parseInt(limitClause))
+                        limitClause = String.valueOf(exactCount);
 
                     // Jeremy '15, 6, 1 between search clause without using related column for
                     // better sorting order.
@@ -492,6 +497,13 @@ class LimeQueryEngine {
         }
 
         return result;
+    }
+
+    private int countExactMatches(String codeCol, String code, String extraExactMatchClause) {
+        try (Cursor c = LimeDB.db.rawQuery("select count(*) from " + db.tablename + " where word is not null and ("
+                + codeCol + " = ? " + extraExactMatchClause + ")", new String[]{code})) {
+            return c.moveToFirst() ? c.getInt(0) : 0;
+        }
     }
 
     /*
