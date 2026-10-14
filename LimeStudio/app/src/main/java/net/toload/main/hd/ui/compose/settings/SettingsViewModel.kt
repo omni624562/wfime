@@ -45,7 +45,7 @@ import net.toload.main.hd.global.SmartSelectionManager
  */
 data class SettingsUiState(
     // Keyboard preferences
-    val enableEmoji: Boolean = false,
+    val enableEmoji: Boolean = true,
     val emojiPosition: String = "3",
     val persistentLanguageMode: Boolean = false,
     val numberRowInEnglish: Boolean = true,
@@ -54,7 +54,7 @@ data class SettingsUiState(
     val splitKeyboardMode: String = "0",
     val keyboardSize: String = "1",
     val fontSize: String = "1",
-    val vibrateOnKeypress: Boolean = true,
+    val vibrateOnKeypress: Boolean = false,
     val vibrateLevel: String = "40",
     val soundOnKeypress: Boolean = false,
     val switchEnglishMode: Boolean = false,
@@ -155,7 +155,7 @@ class SettingsViewModel(
             _uiState.update {
                 SettingsUiState(
                     // Keyboard
-                    enableEmoji = preferenceManager.getParameterBoolean("enable_emoji", false),
+                    enableEmoji = preferenceManager.getParameterBoolean("enable_emoji", true),
                     emojiPosition = preferenceManager.getParameterString("enable_emoji_position", "3"),
                     persistentLanguageMode = preferenceManager.getParameterBoolean("persistent_language_mode", false),
                     numberRowInEnglish = preferenceManager.getParameterBoolean("number_row_in_english", true),
@@ -164,7 +164,7 @@ class SettingsViewModel(
                     splitKeyboardMode = preferenceManager.getParameterString("split_keyboard_mode", "0"),
                     keyboardSize = preferenceManager.getParameterString("keyboard_size", "1"),
                     fontSize = preferenceManager.getParameterString("font_size", "1"),
-                    vibrateOnKeypress = preferenceManager.getParameterBoolean("vibrate_on_keypress", true),
+                    vibrateOnKeypress = preferenceManager.getParameterBoolean("vibrate_on_keypress", false),
                     vibrateLevel = preferenceManager.getParameterString("vibrate_level", "40"),
                     soundOnKeypress = preferenceManager.getParameterBoolean("sound_on_keypress", false),
                     switchEnglishMode = preferenceManager.getParameterBoolean("switch_english_mode", false),
