@@ -710,19 +710,15 @@ public class SearchServer {
         String code = selectedMapping.getCode();
         if (code == null) return 0;
         int realCodeLen = code.length();
-        if (LimeDB.isCodeDualMapped()) { // abandon LD support for dual mapped codes. Jeremy '15,6,5
-            realCodeLen = currentCode.length();
-        } else {
-            if (tablename.equals("phonetic")) {
-                String lcode = currentCode;
-                String noToneCode = code.replaceAll("[3467 ]", "");
-                if (code.equals(noToneCode)) {
-                    realCodeLen = code.length();
-                } else if (!lcode.startsWith(code) && lcode.startsWith(noToneCode)) {
-                    realCodeLen = noToneCode.length();
-                } else {
-                    realCodeLen = currentCode.length(); // unexpected condition.
-                }
+        if (tablename.equals("phonetic")) {
+            String lcode = currentCode;
+            String noToneCode = code.replaceAll("[3467 ]", "");
+            if (code.equals(noToneCode)) {
+                realCodeLen = code.length();
+            } else if (!lcode.startsWith(code) && lcode.startsWith(noToneCode)) {
+                realCodeLen = noToneCode.length();
+            } else {
+                realCodeLen = currentCode.length(); // unexpected condition.
             }
         }
 

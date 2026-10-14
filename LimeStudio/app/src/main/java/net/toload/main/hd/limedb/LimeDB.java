@@ -98,8 +98,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                                                // improved performance using binary tree.
     final static int DUALCODE_COMPOSING_LIMIT = 16; // Jeremy '12,5,30 changed from 7 to 16 because of improved
                                                             // performance using binary tree.
-    final static int DUALCODE_NO_CHECK_LIMIT = 2; // Jeremy '12,5,30 changed from 5 to 3 for phonetic correct
-                                                          // valid code display.
     private final static int BETWEEN_SEARCH_WAY_BACK_LEVELS = 5; // Jeremy '15,6,30
     // for keyToChar
     final static String DAYI_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
@@ -207,11 +205,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private static boolean databaseOnHold = false;
     // 本次鎖定期間是否已提示過「資料庫載入中」,避免每次查詢都跳 Toast
     private static volatile boolean holdNoticeShown = false;
-    static boolean codeDualMapped = false;
-    /**
-     * Black list cache stored code without valid return. Jeremy '12,6,3
-     */
-    static java.util.Map<String, Boolean> blackListCache = null;
     final LIMEPreferenceManager mLIMEPref;
     private final Context mContext;
     // Cache for Related Score
@@ -254,24 +247,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         mLIMEPref = new LIMEPreferenceManager(mContext);
 
-        // Bounded LRU — invalid codes accumulate forever on an unbounded map
-        blackListCache = java.util.Collections.synchronizedMap(
-                new java.util.LinkedHashMap<String, Boolean>(Lime.LIMEDB_CACHE_SIZE, 0.75f, true) {
-                    @Override
-                    protected boolean removeEldestEntry(java.util.Map.Entry<String, Boolean> eldest) {
-                        return size() > Lime.LIMEDB_CACHE_SIZE;
-                    }
-                });
-
         // Jeremy '12,4,7 open DB connection in constructor
         // 不強制重開:db 是整個程序共用的 static 連線,重開會先關掉它,讓其他執行緒進行中的查詢 crash
         // (換掉資料庫檔案的流程會自己呼叫 openDBConnection(true))
         openDBConnection(false);
 
-    }
-
-    public static boolean isCodeDualMapped() {
-        return codeDualMapped;
     }
 
     public void setFinish(boolean value) {
@@ -669,8 +649,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         // mLIMEPref.setParameter("im_loading", false);
         // mLIMEPref.setParameter("im_loading_table", "");
 
-        if (blackListCache != null)
-            blackListCache.clear();// Jeremy '12, 6,3 clear black list cache after mapping file updated
     }
 
     /**
@@ -983,11 +961,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 if (code.length() > 0 && word.length() > 0) {
 
                     cv.put(FIELD_CODE, code);
-                    removeFromBlackList(code); // remove from black list if it listed. Jeremy 12,6, 4
                     if (table.equals("phonetic")) {
                         String noToneCode = code.replaceAll("[ 3467]", "");
                         cv.put(FIELD_NO_TONE_CODE, noToneCode);// Jeremy '12,6,1, add missing space
-                        removeFromBlackList(noToneCode); // remove from black list if it listed. Jeremy 12,6, 4
                     }
                     cv.put(FIELD_WORD, word);
                     cv.put(FIELD_SCORE, (score == -1) ? 1 : score);
@@ -1228,23 +1204,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return queryEngine.preProcessingRemappingCode(code);
     }
 
-
-    /**
-     * Jeremy '12,6,4 check black list on code , code + wildcard and reduced code
-     * with wildcard
-     */
-    private void removeFromBlackList(String code) {
-        if (blackListCache.get(cacheKey(code)) != null)
-            blackListCache.remove(cacheKey(code));
-
-        for (int i = DUALCODE_NO_CHECK_LIMIT - 1; i <= code.length(); i++) {
-            String codeToCheck = code.substring(0, i) + "%";
-            if (blackListCache.get(cacheKey(codeToCheck)) != null)
-                blackListCache.remove(cacheKey(codeToCheck));
-
-        }
-
-    }
 
 
     /**

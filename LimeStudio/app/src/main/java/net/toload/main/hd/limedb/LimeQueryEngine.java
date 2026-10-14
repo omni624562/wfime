@@ -27,13 +27,10 @@ package net.toload.main.hd.limedb;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import android.util.Pair;
-import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -50,7 +47,6 @@ class LimeQueryEngine {
     // 以下欄位/快取只有熱路徑查詢方法使用,自 LimeDB 隨方法移入
     private final HashMap<String, HashMap<String, String>> keysDefMap = new HashMap<>();
     private final HashMap<String, HashMap<String, String>> keysReMap = new HashMap<>();
-    private final HashMap<String, HashMap<String, String>> keysDualMap = new HashMap<>();
     private String lastCode = "";
     private String lastValidDualCodeList = "";
     // Jeremy '11,6,16 keep the soft/physical keyboard flag from getmapping()
@@ -99,7 +95,6 @@ class LimeQueryEngine {
 
             if (!code.equals(lastCode)) {
                 // unsynchronized cache. do the preprocessing again.
-                // preProcessingForExtraQueryConditions(preProcessingRemappingCode(code));
                 getMappingByCode(code, false);
             }
             // String dualCodeList = lastValidDualCodeList;
@@ -244,13 +239,6 @@ class LimeQueryEngine {
         code = preProcessingRemappingCode(code);
         code = code.toLowerCase(Locale.US); // Jeremy '12,4,1 moved from SearchService.getMappingByCode();
         // Step.2 Build extra getMappingByCode conditions. (e.g. dualcode remap)
-        Pair<String, String> extraConditions = preProcessingForExtraQueryConditions(code);
-        String extraSelectClause = "";
-        String extraExactMatchClause = "";
-        if (extraConditions != null) {
-            extraSelectClause = extraConditions.first;
-            extraExactMatchClause = extraConditions.second;
-        }
         // Jeremy '11,6,11 separated suggestions sorting option for physical keyboard
 
         try {
@@ -294,16 +282,14 @@ class LimeQueryEngine {
                     String limitClause = LimeDB.INITIAL_RESULT_LIMIT;
                     // 候選列已沒有「捲到底載入更多」,精確碼的字要一次全部查出來;否則注音 ㄧˋ
                     // 這類同音字多的碼只看得到前 15 個。精確碼不超過上限時照舊
-                    int exactCount = countExactMatches(codeCol, code, extraExactMatchClause);
+                    int exactCount = countExactMatches(codeCol, code);
                     if (exactCount > Integer.parseInt(limitClause))
                         limitClause = String.valueOf(exactCount);
 
                     // Jeremy '15, 6, 1 between search clause without using related column for
                     // better sorting order.
-                    // if(betweenSearch){
-                    selectClause = expandBetweenSearchClause(codeCol, code) + extraSelectClause;
-                    String exactMatchCondition = " (" + codeCol + " ='" + escapedCode + "' " + extraExactMatchClause
-                            + ") ";
+                    selectClause = expandBetweenSearchClause(codeCol, code);
+                    String exactMatchCondition = " (" + codeCol + " ='" + escapedCode + "') ";
                     sortClause = "( exactmatch = 1 and ( score > 0 or  basescore >0) and length(word)=1) desc, exactmatch desc,"
                             + " (length(" + codeCol + ") >= " + codeLen + " ) desc, "
                             + "(length(" + codeCol + ") <= " + ((codeLen > 5) ? 5 : codeLen) + " )*length(" + codeCol
@@ -323,23 +309,6 @@ class LimeQueryEngine {
 
                     if (LimeDB.DEBUG)
                         Log.i(LimeDB.TAG, "getMappingByCode() between search select string:" + selectString);
-                    /*
-                     * }
-                     * else{
-                     * selectClause = codeCol + " = '" + escapedCode + "' " + extraSelectClause;
-                     * if (sort)
-                     * sortClause = FIELD_SCORE + " DESC, +" + FIELD_BASESCORE + " DESC, " +
-                     * "_id ASC";
-                     * else
-                     * sortClause = "_id ASC";
-                     * cursor = db.query(tablename, null, selectClause, null, null, null,
-                     * sortClause, limitClause);
-                     * if (DEBUG)
-                     * Log.i(TAG, "getMappingByCode(): code = '" + code + "' selectClause=" +
-                     * selectClause);
-                     *
-                     * }
-                     */
 
                     // Jeremy '11,8,5 limit initial getMappingByCode to limited records
                     // Jeremy '11,6,15 Using getMappingByCode with preprocessed code and extra
@@ -367,9 +336,9 @@ class LimeQueryEngine {
         return result;
     }
 
-    private int countExactMatches(String codeCol, String code, String extraExactMatchClause) {
-        try (Cursor c = LimeDB.db.rawQuery("select count(*) from " + db.tablename + " where word is not null and ("
-                + codeCol + " = ? " + extraExactMatchClause + ")", new String[]{code})) {
+    private int countExactMatches(String codeCol, String code) {
+        try (Cursor c = LimeDB.db.rawQuery("select count(*) from " + db.tablename + " where word is not null and "
+                + codeCol + " = ?", new String[]{code})) {
             return c.moveToFirst() ? c.getInt(0) : 0;
         }
     }
@@ -478,440 +447,6 @@ class LimeQueryEngine {
             return newcode;
         } else
             return "";
-    }
-
-    // Jeremy '12,4,5 add db parameter because db open/closed is handled in
-    // searchservice now.
-    private Pair<String, String> preProcessingForExtraQueryConditions(String code) {
-        if (LimeDB.DEBUG)
-            Log.i(LimeDB.TAG, "preProcessingForExtraQueryConditions(): code = '" + code
-                    + "', isPhysicalKeyboardPressed=" + isPhysicalKeyboardPressed);
-
-        if (code != null) {
-            String keyboardtype = db.mLIMEPref.getPhysicalKeyboardType();
-            String phonetickeyboardtype = db.mLIMEPref.getPhoneticKeyboardType();
-            String dualcode;
-            String dualKey = "";
-            String dualKeyRemap = "";
-            String remaptable = db.tablename;
-            if (isPhysicalKeyboardPressed) {
-                if (db.tablename.equals("phonetic"))
-                    remaptable = db.tablename + keyboardtype + phonetickeyboardtype;
-                else
-                    remaptable = db.tablename + keyboardtype;
-            } else if (db.tablename.equals("phonetic")) {
-                remaptable = db.tablename + phonetickeyboardtype;
-            }
-
-            if (keysDualMap.get(remaptable) == null
-                    || keysDualMap.get(remaptable).size() == 0) {
-                HashMap<String, String> reMap = new HashMap<>();
-                if (LimeDB.DEBUG)
-                    Log.i(LimeDB.TAG, "preProcessingForExtraQueryConditions(): dualKey=" + dualKey + " dualKeyRemap="
-                            + dualKeyRemap);
-                for (int i = 0; i < dualKey.length(); i++) {
-                    String key = dualKey.substring(i, i + 1);
-                    String value = dualKeyRemap.substring(i, i + 1);
-                    reMap.put(key, value);
-                    reMap.put(value, value);
-                }
-                keysDualMap.put(remaptable, reMap);
-            }
-            // do real precessing now
-            if (keysDualMap.get(remaptable) == null
-                    || keysDualMap.get(remaptable).size() == 0) {
-                LimeDB.codeDualMapped = false;
-                dualcode = code;
-            } else {
-                LimeDB.codeDualMapped = true;
-                HashMap<String, String> reMap = keysDualMap.get(remaptable);
-                dualcode = "";
-                // testing if code contains dual mapped characters.
-                for (int i = 0; i < code.length(); i++) {
-                    String c = reMap.get(code.substring(i, i + 1));
-                    if (c != null)
-                        dualcode = dualcode + c;
-                }
-                if (LimeDB.DEBUG)
-                    Log.i(LimeDB.TAG, "preProcessingForExtraQueryConditions(): dualcode=" + dualcode);
-
-            }
-            // Jeremy '11,8,12 if phonetic has tone symbol in the middle do the
-            // expanddualcode
-            if (!dualcode.equalsIgnoreCase(code)
-                    || !code.equalsIgnoreCase(lastCode) // '11,8,18 Jeremy
-                    || (db.tablename.equals("phonetic") && code.matches(".+[ 3467].+"))) {
-                return expandDualCode(code, remaptable);
-            }
-        }
-        return null;
-    }
-
-    private HashSet<String> buildDualCodeList(String code, String keytablename) {
-
-        if (LimeDB.DEBUG)
-            Log.i(LimeDB.TAG, "buildDualCodeList(): code:" + code + ", keytablename=" + keytablename);
-
-        HashMap<String, String> codeDualMap = keysDualMap.get(keytablename);
-        HashSet<String> treeDualCodeList = new HashSet<>();
-
-        if (codeDualMap != null && codeDualMap.size() > 0) {
-
-            // Jeremy '12,6,4
-            SparseArray<List<String>> treemap = new SparseArray<>();
-            for (int i = 0; i < code.length(); i++) {
-                if (LimeDB.DEBUG)
-                    Log.i(LimeDB.TAG, "buildDualCodeList() level : " + i);
-
-                List<String> levelnMap = new LinkedList<>();
-                List<String> lastLevelMap;
-                if (i == 0) {
-                    lastLevelMap = new LinkedList<>();
-                    lastLevelMap.add(code);
-                } else
-                    lastLevelMap = treemap.get(i - 1);
-
-                String c;
-                String n;
-
-                if (lastLevelMap == null || (lastLevelMap.size() == 0)) {
-                    if (LimeDB.DEBUG)
-                        Log.i(LimeDB.TAG, "buildDualCodeList() level : " + i + " ended because last level map is empty");
-                    continue;
-                }
-                if (LimeDB.DEBUG)
-                    Log.i(LimeDB.TAG, "buildDualCodeList() level : " + i + " lastlevelmap size = " + lastLevelMap.size());
-                for (String entry : lastLevelMap) {
-                    if (LimeDB.DEBUG)
-                        Log.i(LimeDB.TAG, "buildDualCodeList() level : " + i + ", entry = " + entry);
-
-                    if (entry.length() == 1)
-                        c = entry;
-                    else
-                        c = entry.substring(i, i + 1);
-
-                    boolean codeMapped = false;
-                    do {
-                        if (LimeDB.DEBUG)
-                            Log.i(LimeDB.TAG, "buildDualCodeList() newCode = '" + entry
-                                    + "' blacklistKey = '" + db.cacheKey(entry.substring(0, i + 1) + "%")
-                                    + "' blacklistValue = "
-                                    + LimeDB.blackListCache.get(db.cacheKey(entry.substring(0, i + 1) + "%")));
-
-                        if (entry.length() == 1 && !levelnMap.contains(entry)) {
-                            if (LimeDB.blackListCache.get(db.cacheKey(entry)) == null)
-                                treeDualCodeList.add(entry);
-                            levelnMap.add(entry);
-                            if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG, "buildDualCodeList() entry.length()==1 new code = '" + entry
-                                        + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = true;
-
-                        } else if ((entry.length() > 1 && !levelnMap.contains(entry))
-                                && LimeDB.blackListCache.get(db.cacheKey(entry.substring(0, i + 1) + "%")) == null) {
-                            if (LimeDB.blackListCache.get(db.cacheKey(entry)) == null)
-                                treeDualCodeList.add(entry);
-                            levelnMap.add(entry);
-                            if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG, "buildDualCodeList() new code = '" + entry
-                                        + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = true;
-
-                        } else if (codeDualMap.get(c) != null && !codeDualMap.get(c).equals(c)) {
-                            n = codeDualMap.get(c);
-                            String newCode;
-
-                            if (entry.length() == 1)
-                                newCode = n;
-                            else if (i == 0)
-                                newCode = n + entry.substring(1);
-                            else if (i == entry.length() - 1)
-                                newCode = entry.substring(0, entry.length() - 1) + n;
-                            else
-                                newCode = entry.substring(0, i) + n
-                                        + entry.substring(i + 1);
-                            if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG, "buildDualCodeList() newCode = '" + newCode
-                                        + "' blacklistKey = '" + db.cacheKey(newCode)
-                                        + "' blacklistValue = " + LimeDB.blackListCache.get(db.cacheKey(newCode))
-                                        + "' blacklistKey = '" + db.cacheKey(newCode.substring(0, i + 1) + "%")
-                                        + "' blacklistValue = "
-                                        + LimeDB.blackListCache.get(db.cacheKey(newCode.substring(0, i + 1) + "%")));
-
-                            if (newCode.length() == 1 && !levelnMap.contains(newCode)) {
-                                if (LimeDB.blackListCache.get(db.cacheKey(newCode)) == null)
-                                    treeDualCodeList.add(newCode);
-                                levelnMap.add(newCode);
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG,
-                                            "buildDualCodeList() newCode.length()==1 treeDualCodeList new code = '"
-                                                    + newCode
-                                                    + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-                                codeMapped = true;
-                            } else if ((newCode.length() > 1 && !levelnMap.contains(newCode))
-                                    && LimeDB.blackListCache.get(db.cacheKey(newCode.substring(0, i + 1) + "%")) == null) {
-                                levelnMap.add(newCode);
-
-                                if (LimeDB.blackListCache.get(db.cacheKey(newCode)) == null)
-                                    treeDualCodeList.add(newCode);
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG, "buildDualCodeList() treeDualCodeList new code = '" + newCode
-                                            + ", c = " + c
-                                            + ", n = " + n
-                                            + "' added. treeDualCodeList.size = " + treeDualCodeList.size());
-
-                                codeMapped = true;
-
-                            } else if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG,
-                                        "buildDualCodeList()  blacklisted code = '" + newCode.substring(0, i + 1) + "%"
-                                                + "'");
-
-                            c = n;
-                        } else {
-                            if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG, "buildDualCodeList() level : " + i
-                                        + " ended. treeDualCodeList.size = " + treeDualCodeList.size());
-                            codeMapped = false;
-                        }
-
-                    } while (codeMapped);
-                    treemap.put(i, levelnMap);
-
-                }
-            }
-
-            // Jeremy '11,8,12 added for continuous typing.
-            if (db.tablename.equals("phonetic")) {
-                HashSet<String> tempList = new HashSet<>(treeDualCodeList);
-                for (String iterator_code : tempList) {
-                    if (iterator_code.matches(".+[ 3467].+")) { // regular expression mathes tone in the middle
-                        String newCode = iterator_code.replaceAll("[3467 ]", "");
-                        // Jeremy '12,6,3 look-up the blacklist cache before add to the list.
-                        if (LimeDB.DEBUG)
-                            Log.i(LimeDB.TAG, "buildDualCodeList(): processing no tone code :" + newCode);
-                        if (newCode.length() > 0
-                                && !treeDualCodeList.contains(newCode)
-                                && !checkBlackList(db.cacheKey(newCode), false)) {
-                            treeDualCodeList.add(newCode);
-                            if (LimeDB.DEBUG)
-                                Log.i(LimeDB.TAG, "buildDualCodeList(): no tone code added:" + newCode);
-
-                        }
-                    }
-                }
-            }
-
-        }
-
-        if (LimeDB.DEBUG)
-            Log.i(LimeDB.TAG, "buildDualCodeList(): treeDualCodeList.size()=" + treeDualCodeList.size());
-        return treeDualCodeList;
-
-    }
-
-    /**
-     * Jeremy '12,6,4 check black list on code , code + wildcard and reduced code
-     * with wildcard
-     *
-     * @param code blacklist query code
-     * @return true if the cod is black listed
-     */
-    private boolean checkBlackList(String code, Boolean wildCardOnly) {
-        Boolean isBlacklisted = false;
-        if (code.length() < LimeDB.DUALCODE_NO_CHECK_LIMIT) { // code too short, add anyway
-            isBlacklisted = false;
-            if (LimeDB.DEBUG)
-                Log.i(LimeDB.TAG, "buildDualCodeList(): code too short add without check code=" + code);
-        } else if (!wildCardOnly && LimeDB.blackListCache.get(db.cacheKey(code)) != null) { // the code is blacklisted
-            isBlacklisted = true;
-            if (LimeDB.DEBUG)
-                Log.i(LimeDB.TAG, "buildDualCodeList(): black listed code:" + code);
-            /*
-             * }else if(blackListCache.get(cacheKey(code+"%")) != null){ //the code with
-             * wildcard is blacklisted
-             * if(DEBUG)
-             * Log.i(TAG, "buildDualCodeList(): check black list code:"+ code
-             * +
-             * ", blackListCache.get(cacheKey(codeToCheck+%))="+blackListCache.get(cacheKey(
-             * code+"%")));
-             * isBlacklisted = true;
-             * if(DEBUG)
-             * Log.i(TAG, "buildDualCodeList(): black listed code:"+ code+"%");
-             */
-        } else {
-            for (int i = LimeDB.DUALCODE_NO_CHECK_LIMIT - 1; i <= code.length(); i++) {
-                String codeToCheck = code.substring(0, i) + "%";
-                if (LimeDB.blackListCache.get(db.cacheKey(codeToCheck)) != null) {
-                    isBlacklisted = true;
-                    if (LimeDB.DEBUG)
-                        Log.i(LimeDB.TAG, "buildDualCodeList(): black listed code:" + codeToCheck);
-                    break;
-                }
-
-            }
-
-        }
-        return isBlacklisted;
-    }
-
-    private Pair<String, String> expandDualCode(String code, String keytablename) {
-
-        if (LimeDB.DEBUG)
-            Log.i(LimeDB.TAG, "expandDualCode() code=" + code + ", keytablename = " + keytablename);
-
-        HashSet<String> dualCodeList = buildDualCodeList(code, keytablename);
-        String selectClause = "";
-        String exactMatchClause = "";
-        String validDualCodeList = "";
-
-        if (dualCodeList != null) {
-            final boolean NOCheckOnExpand = code.length() < LimeDB.DUALCODE_NO_CHECK_LIMIT;
-            final boolean searchNoToneCode = db.tablename.equals("phonetic");
-
-            for (String dualcode : dualCodeList) {
-                if (LimeDB.DEBUG)
-                    Log.i(LimeDB.TAG, "expandDualCode(): processing dual code = '" + dualcode + "'" + ". result = "
-                            + selectClause);
-
-                String noToneCode = dualcode;
-                String codeCol = LimeDB.FIELD_CODE;
-                String[] col = { codeCol };
-
-                if (db.tablename.equals("phonetic")) {
-                    final boolean tonePresent = dualcode.matches(".+[3467 ].*"); // Tone symbols present in any
-                                                                                 // locoation except the first character
-                    final boolean toneNotLast = dualcode.matches(".+[3467 ].+"); // Tone symbols present in any
-                                                                                 // locoation except the first and last
-                                                                                 // character
-
-                    if (searchNoToneCode) { // noToneCode (phonetic combination without tones) is present
-                        if (tonePresent) {
-                            // LD phrase if tone symbols present but not in last character or in last
-                            // character but the length > 4 (phonetic combinations never has length >4)
-                            if (toneNotLast || (dualcode.length() > 4))
-                                noToneCode = dualcode.replaceAll("[3467 ]", "");
-
-                        } else { // no tone symbols present, check noToneCode column
-                            codeCol = LimeDB.FIELD_NO_TONE_CODE;
-                        }
-                    } else if (tonePresent && (toneNotLast || (dualcode.length() > 4))) // LD phrase and no noToneCode
-                                                                                        // column present
-                        noToneCode = dualcode.replaceAll("[3467 ]", "");
-                }
-                // do escape code for codes
-                String queryCode = dualcode.trim().replace("'", "''");
-                String queryNoToneCode = noToneCode.trim().replace("'", "''");
-
-                if (queryCode.length() == 0)
-                    continue;
-
-                if (NOCheckOnExpand) {
-                    if (!dualcode.equals(code)) {
-                        // result = result + " OR " + codeCol + "= '" + queryCode + "'";
-                        selectClause += " or (" + expandBetweenSearchClause(codeCol, dualcode) + ") ";
-                        exactMatchClause += " or " + codeCol + " ='" + queryCode + "' ";
-                    }
-                } else {
-                    // Jeremy '11,8, 26 move valid code list building to buildqueryresult to avoid
-                    // repeat query.
-                    Cursor cursor = null;
-                    try {
-                        String selectValidCodeClause = codeCol + " = '" + queryCode + "'";
-                        if (!dualcode.equals(noToneCode)) { // code with tones. should strip tone symbols and add to the
-                                                            // select condition.
-                            selectValidCodeClause = LimeDB.FIELD_CODE + " = '" + queryCode + "' OR " + LimeDB.FIELD_NO_TONE_CODE
-                                    + " = '" + queryNoToneCode + "'";
-                        }
-
-                        if (LimeDB.DEBUG)
-                            Log.i(LimeDB.TAG, "expandDualCode() selectClause for exactmatch = " + selectValidCodeClause);
-
-                        cursor = LimeDB.db.query(db.tablename, col, selectValidCodeClause, null, null, null, null, "1");
-                        if (cursor != null) {
-                            if (cursor.moveToFirst()) { // fist entry exist, the code is valid.
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG, "expandDualCode()  code = '" + dualcode + "' is valid code");
-                                if (validDualCodeList.equals(""))
-                                    validDualCodeList = dualcode;
-                                else
-                                    validDualCodeList = validDualCodeList + "|" + dualcode;
-                                if (!dualcode.equals(code)) {
-                                    // result = result + " OR " + codeCol + "= '" + queryCode + "'";
-                                    selectClause += " or (" + expandBetweenSearchClause(codeCol, dualcode) + ") ";
-                                    exactMatchClause += " or (" + codeCol + " ='" + queryCode + "') ";
-                                }
-                            } else { // the code is not valid, keep it in the black list cache. Jeremy '12,6,3
-
-                                char[] charray = dualcode.toCharArray();
-                                charray[queryCode.length() - 1]++;
-                                String nextcode = new String(charray);
-                                nextcode = nextcode.replace("'", "''");
-
-                                selectValidCodeClause = codeCol + " > '" + queryCode + "' AND " + codeCol + " < '"
-                                        + nextcode + "'";
-
-                                if (!dualcode.equals(noToneCode)) { // code with tones. should strip tone symbols and
-                                                                    // add to the select condition.
-                                    charray = queryNoToneCode.toCharArray();
-                                    charray[noToneCode.length() - 1]++;
-                                    String nextNoToneCode = new String(charray);
-                                    nextNoToneCode = nextNoToneCode.replace("'", "''");
-                                    selectValidCodeClause = "(" + codeCol + " > '" + queryCode + "' AND " + codeCol
-                                            + " < '" + nextcode + "') "
-                                            + "OR (" + codeCol + " > '" + queryNoToneCode + "' AND " + codeCol + " < '"
-                                            + nextNoToneCode + "')";
-
-                                }
-                                cursor.close();
-                                if (LimeDB.DEBUG)
-                                    Log.i(LimeDB.TAG, "expandDualCode() dualcode = '" + dualcode + "' noToneCode = '"
-                                            + noToneCode + "' selectValidCodeClause for no exact match = "
-                                            + selectValidCodeClause);
-
-                                cursor = LimeDB.db.query(db.tablename, col, selectValidCodeClause,
-                                        null, null, null, null, "1");
-
-                                if (cursor == null || !cursor.moveToFirst()) { // code* returns no valid records add the
-                                                                               // code with wildcard to blacklist
-                                    LimeDB.blackListCache.put(db.cacheKey(dualcode + "%"), true);
-                                    if (LimeDB.DEBUG)
-                                        Log.i(LimeDB.TAG,
-                                                " expandDualCode() blackList wildcard code added, code = " + dualcode + "%"
-                                                        + ", cachekey = :" + db.cacheKey(dualcode + "%")
-                                                        + ", black list size = " + LimeDB.blackListCache.size()
-                                                        + ", blackListCache.get() = "
-                                                        + LimeDB.blackListCache.get(db.cacheKey(dualcode + "%")));
-
-                                } else { // only add the code to black list
-                                    LimeDB.blackListCache.put(db.cacheKey(dualcode), true);
-                                    if (LimeDB.DEBUG)
-                                        Log.i(LimeDB.TAG, " expandDualCode() blackList code added, code = " + dualcode);
-                                }
-
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (cursor != null)
-                            cursor.close();
-                    }
-
-                }
-            }
-
-            if (validDualCodeList.equals(""))
-                lastValidDualCodeList = null;
-            else
-                lastValidDualCodeList = validDualCodeList;
-
-        }
-
-        if (LimeDB.DEBUG)
-            Log.i(LimeDB.TAG, "expandDualCode(): result:" + selectClause + " validDualCodeList:" + validDualCodeList);
-        return new Pair<>(selectClause, exactMatchClause);
-
     }
 
     /**
