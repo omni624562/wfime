@@ -36,7 +36,6 @@ public class Mapping {
     public static final int RECORD_ENGLISH_SUGGESTION = 5;
     public static final int RECORD_RUNTIME_BUILT_PHRASE = 6;
     public static final int RECORD_CHINESE_PUNCTUATION_SYMBOL = 7;
-    public static final int RECORD_HAS_MORE_RECORDS_MARK = 8;
     public static final int RECORD_EXACT_MATCH_TO_WORD = 9;
     public static final int RECORD_COMPLETION_SUGGESTION_WORD = 11;
     public static final int RECORD_EMOJI_WORD = 12;
@@ -167,10 +166,6 @@ public class Mapping {
 
     public void setChinesePunctuationSymbolRecord() {
         this.recordType = RECORD_CHINESE_PUNCTUATION_SYMBOL;
-    }
-
-    public void setHasMoreRecordsMarkRecord() {
-        this.recordType = RECORD_HAS_MORE_RECORDS_MARK;
     }
 
     // Identify exactly or partially match to the word queried ( reverse query codes by word)

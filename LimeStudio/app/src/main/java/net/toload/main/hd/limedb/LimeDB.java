@@ -94,8 +94,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // Jeremy '11,8,5
     // TODO: should set INITIAL_RESULT_LIMIT according to screen size.
     final static String INITIAL_RESULT_LIMIT = "15";
-    final static String FINAL_RESULT_LIMIT = "210";
-    private final static int INITIAL_RELATED_LIMIT = 5;
     final static int COMPOSING_CODE_LENGTH_LIMIT = 16; // Jeremy '12,5,30 changed from 12 to 16 because of
                                                                // improved performance using binary tree.
     final static int DUALCODE_COMPOSING_LIMIT = 16; // Jeremy '12,5,30 changed from 7 to 16 because of improved
@@ -1220,9 +1218,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * Retrieve matched records
      */
-    public List<Mapping> getMappingByCode(String code, boolean softKeyboard, boolean getAllRecords) {
+    public List<Mapping> getMappingByCode(String code, boolean softKeyboard) {
         // 重構二期:本體移至 LimeQueryEngine
-        return queryEngine.getMappingByCode(code, softKeyboard, getAllRecords);
+        return queryEngine.getMappingByCode(code, softKeyboard);
     }
 
     public String preProcessingRemappingCode(String code) {
@@ -1277,9 +1275,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * Get dictionary database contents
      */
-    public List<Mapping> getRelatedPhrase(String pword, boolean getAllRecords) {
+    public List<Mapping> getRelatedPhrase(String pword) {
         if (DEBUG)
-            Log.i(TAG, "getRelatedPhrase(), " + getAllRecords);
+            Log.i(TAG, "getRelatedPhrase()");
 
         List<Mapping> result = new LinkedList<>();
 
@@ -1308,9 +1306,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 // to do 2 stage query.
                 // Jeremy '14,12,38 Add query on word length > 1 to include last character into
                 // query
-                String limitClause;
-
-                limitClause = (getAllRecords) ? FINAL_RESULT_LIMIT : INITIAL_RESULT_LIMIT;
+                String limitClause = INITIAL_RESULT_LIMIT;
 
                 if (pword.length() > 1) {
 
@@ -1365,13 +1361,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 result.add(munit);
                                 rsize++;
                             } while (cursor.moveToNext());
-                            // Removed "..." indicator - now using horizontal scroll in CandidateView
-                            // Mapping temp = new Mapping();
-                            // temp.setCode("has_more_records");
-                            // temp.setWord("...");
-                            // temp.setHasMoreRecordsMarkRecord();
-                            // if ((!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT)))
-                            // result.add(temp);
                         }
                     } finally {
                         cursor.close();

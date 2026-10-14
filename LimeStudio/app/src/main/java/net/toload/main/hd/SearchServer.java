@@ -199,7 +199,7 @@ public class SearchServer {
                         String key = finalKeys.substring(i, i + 1);
                         try {
                             // bypass run-time suggestion for prefetch queries
-                            getMappingByCode(key, true, false, true);
+                            getMappingByCode(key, true, true);
                         } catch (Exception e) {
                             Log.e(TAG, "Error in prefetch: " + e.getMessage());
                         }
@@ -213,19 +213,18 @@ public class SearchServer {
         });
     }
 
-    public List<Mapping> getRelatedPhrase(String word, boolean getAllRecords) {
+    public List<Mapping> getRelatedPhrase(String word) {
         Map<String, List<Mapping>> localCache = relatedcache;
         if (localCache == null)
-            return dbadapter.getRelatedPhrase(word, getAllRecords);
+            return dbadapter.getRelatedPhrase(word);
 
         // 開關狀態影響查詢結果,須納入快取 key 避免切換設定後吃到舊結果
-        String key = word + "\0" + getAllRecords
-                + "\0" + mLIMEPref.getSimiliarEnable() + mLIMEPref.getLearnRelatedWord();
+        String key = word + "\0" + mLIMEPref.getSimiliarEnable() + mLIMEPref.getLearnRelatedWord();
         List<Mapping> cached = localCache.get(key);
         if (cached != null)
             return cached;
 
-        List<Mapping> result = dbadapter.getRelatedPhrase(word, getAllRecords);
+        List<Mapping> result = dbadapter.getRelatedPhrase(word);
         if (result != null)
             localCache.put(key, result);
         return result;
@@ -274,9 +273,9 @@ public class SearchServer {
         dbadapter.deleteRelatedPhrase(pword, cword);
     }
 
-    public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords)
+    public List<Mapping> getMappingByCode(String code, boolean softkeyboard)
             {
-        return getMappingByCode(code, softkeyboard, getAllRecords, false);
+        return getMappingByCode(code, softkeyboard, false);
     }
 
         public List<Mapping> emojiConvert(String code, int type) {
@@ -302,8 +301,7 @@ public class SearchServer {
         return null;
     }
 
-    public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean getAllRecords,
-            boolean prefetchCache)
+    public List<Mapping> getMappingByCode(String code, boolean softkeyboard, boolean prefetchCache)
             {
         if (DEBUG || dumpRunTimeSuggestion)
             Log.i(TAG, "getMappingByCode(): code=" + code);
@@ -327,10 +325,6 @@ public class SearchServer {
             if (!prefetchCache && isPhysicalKeyboardPressed == softkeyboard)
                 isPhysicalKeyboardPressed = !softkeyboard;
 
-            // Jeremy '11,9, 3 remove cached keyname when request full records
-            if (getAllRecords && keynamecache.get(cacheKey(code)) != null)
-                keynamecache.remove(cacheKey(code));
-
             int size = code.length();
 
             // boolean hasMore = false;
@@ -348,7 +342,7 @@ public class SearchServer {
 
                 if (loopCacheTemp == null) {
                     try {
-                        loopCacheTemp = dbadapter.getMappingByCode(currentLoopCode, !isPhysicalKeyboardPressed, getAllRecords);
+                        loopCacheTemp = dbadapter.getMappingByCode(currentLoopCode, !isPhysicalKeyboardPressed);
                         if (loopCacheTemp != null) {
                             cache.put(loopCacheKey, loopCacheTemp);
                         }
@@ -439,7 +433,7 @@ public class SearchServer {
         } else if (!tablename.startsWith("dayi")
                 && lastCommittedChar != null && lastCommittedChar.length() > 0 && result.size() > 1) {
             try {
-                List<Mapping> related = getRelatedPhrase(lastCommittedChar, false);
+                List<Mapping> related = getRelatedPhrase(lastCommittedChar);
                 if (related != null && !related.isEmpty()) {
                     final java.util.HashSet<String> relatedChars = new java.util.HashSet<>();
                     for (Mapping m : related) {
@@ -1230,7 +1224,7 @@ public class SearchServer {
             }
             if (code.length() == 1)// prefetch if code length ==1
                 try {
-                    getMappingByCode(code, !isPhysicalKeyboardPressed, false, true);
+                    getMappingByCode(code, !isPhysicalKeyboardPressed, true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

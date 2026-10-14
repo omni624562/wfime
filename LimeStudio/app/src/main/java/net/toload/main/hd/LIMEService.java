@@ -3055,7 +3055,7 @@ public class LIMEService extends InputMethodService implements
 
                     try {
                         list.addAll(
-                                SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed, false));
+                                SearchSrv.getMappingByCode(finalKeyString, !finalHasPhysicalKeyPressed));
                     } catch (Exception e) {
                         e.printStackTrace();
                         notifyDbQueryError();
@@ -3435,7 +3435,7 @@ public class LIMEService extends InputMethodService implements
                         try {
                             if (!committedCandidate.isEmojiRecord()
                                     && !committedCandidate.isChinesePunctuationSymbolRecord()) {
-                                list.addAll(SearchSrv.getRelatedPhrase(committedCandidate.getWord(), false));
+                                list.addAll(SearchSrv.getRelatedPhrase(committedCandidate.getWord()));
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

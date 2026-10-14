@@ -54,7 +54,7 @@ public class SearchServerDayiCandidateTest {
     // 候選字(不含原碼那一筆)
     private List<String> words(String code) {
         List<String> words = new ArrayList<>();
-        for (Mapping m : searchServer.getMappingByCode(code, true, false))
+        for (Mapping m : searchServer.getMappingByCode(code, true))
             if (!m.isComposingCodeRecord()) words.add(m.getWord());
         return words;
     }
@@ -128,7 +128,7 @@ public class SearchServerDayiCandidateTest {
 
     @Test
     public void threeCodeRecordsAfterExactMatches() {
-        List<Mapping> list = searchServer.getMappingByCode("nh1", true, false);
+        List<Mapping> list = searchServer.getMappingByCode("nh1", true);
         List<Boolean> exact = new ArrayList<>();
         for (Mapping m : list)
             if (!m.isComposingCodeRecord()) exact.add(m.isExactMatchToCodeRecord());

@@ -100,7 +100,7 @@ class LimeQueryEngine {
             if (!code.equals(lastCode)) {
                 // unsynchronized cache. do the preprocessing again.
                 // preProcessingForExtraQueryConditions(preProcessingRemappingCode(code));
-                getMappingByCode(code, false, false);
+                getMappingByCode(code, false);
             }
             // String dualCodeList = lastValidDualCodeList;
             if (lastValidDualCodeList != null) {
@@ -212,7 +212,7 @@ class LimeQueryEngine {
     /**
      * Retrieve matched records
      */
-    synchronized List<Mapping> getMappingByCode(String code, boolean softKeyboard, boolean getAllRecords) {
+    synchronized List<Mapping> getMappingByCode(String code, boolean softKeyboard) {
 
         String codeorig = code;
 
@@ -220,7 +220,7 @@ class LimeQueryEngine {
         if (LimeDB.DEBUG || LimeDB.probePerformance) {
             startTime = System.currentTimeMillis();
             Log.i(LimeDB.TAG,
-                    "getMappingByCode(): code='" + code + ", table=" + db.tablename + ", getAllRecords=" + getAllRecords);
+                    "getMappingByCode(): code='" + code + ", table=" + db.tablename);
         }
 
         // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
@@ -291,7 +291,7 @@ class LimeQueryEngine {
                     String escapedCode = code.replace("'", "''");
                     int codeLen = code.length();
 
-                    String limitClause = (getAllRecords) ? LimeDB.FINAL_RESULT_LIMIT : LimeDB.INITIAL_RESULT_LIMIT;
+                    String limitClause = LimeDB.INITIAL_RESULT_LIMIT;
                     // 候選列已沒有「捲到底載入更多」,精確碼的字要一次全部查出來;否則注音 ㄧˋ
                     // 這類同音字多的碼只看得到前 15 個。精確碼不超過上限時照舊
                     int exactCount = countExactMatches(codeCol, code, extraExactMatchClause);
@@ -346,7 +346,7 @@ class LimeQueryEngine {
                     // getMappingByCode conditions.
 
                     if (cursor != null) {
-                        result = buildQueryResult(code, codeorig, cursor, getAllRecords);
+                        result = buildQueryResult(code, codeorig, cursor);
                     }
 
                 } catch (SQLiteException e) {
@@ -919,8 +919,7 @@ class LimeQueryEngine {
      */
     // 原為 LimeDB 的 synchronized 方法;本方法不做 DB I/O(僅讀取已開啟的 Cursor),
     // 且外層 getMappingByCode 的 rawQuery 原本就在鎖外執行,故不再以 synchronized (db) 包覆
-    private List<Mapping> buildQueryResult(String query_code, String codeorig, Cursor cursor,
-            Boolean getAllRecords) {
+    private List<Mapping> buildQueryResult(String query_code, String codeorig, Cursor cursor) {
 
         long startTime = 0;
         if (LimeDB.DEBUG || LimeDB.probePerformance) {
@@ -1041,43 +1040,6 @@ class LimeQueryEngine {
                 }
             }
 
-            // Jeremy '11,6,1 The related field may have only one word and thus no "|"
-            // inside
-            // Jeremy '11,6,11 allow multiple relatedlist from different codes.
-            // Jeremy '15,6,3 not used in between search mode
-            // ---------------------------------------
-            /*
-             * if (!betweenSearch) {
-             * int scount = 0;
-             * for (Entry<String, String> entry : relatedMap.entrySet()) {
-             * String relatedlist = entry.getValue();
-             * if (ssize > 0 && relatedlist != null && scount <= ssize) {
-             * String templist[] = relatedlist.split("\\|");
-             *
-             * for (String unit : templist) {
-             * if (scount > ssize) {
-             * break;
-             * }
-             * if (duplicateCheck.add(unit)) {
-             * Mapping munit = new Mapping();
-             * munit.setCode(entry.getKey());
-             * munit.setWord(unit);
-             * munit.setPartialMatchToCodeRecord();
-             * munit.setScore(0);
-             * //Jeremy '11,6,18 skip if word is empty
-             * if (munit.getWord() == null || munit.getWord().trim().equals(""))
-             * continue;
-             * relatedresult.add(munit);
-             * scount++;
-             * // Jeremy '11, 8, 5 break if limit number exceeds
-             * if (!getAllRecords && scount == INITIAL_RELATED_LIMIT) break;
-             * }
-             * }
-             * }
-             * }
-             * }
-             */
-            // ----------------------------------------------------------------------------------------------------
         }
 
         // Add full shaped punctuation symbol to the third place , and .
@@ -1102,14 +1064,6 @@ class LimeQueryEngine {
                     result.add(temp);
             }
         }
-
-        // Removed "..." indicator - now using horizontal scroll in CandidateView
-        // Mapping hasMore = new Mapping();
-        // hasMore.setCode("has_more_records");
-        // hasMore.setWord("...");
-        // hasMore.setHasMoreRecordsMarkRecord();
-        // if (!getAllRecords && rsize == Integer.parseInt(INITIAL_RESULT_LIMIT))
-        // result.add(hasMore);
 
         if (LimeDB.DEBUG || LimeDB.probePerformance)
             Log.i(LimeDB.TAG, "buildQueryResult():query_code:" + query_code + " query_code.length:" + query_code.length()
