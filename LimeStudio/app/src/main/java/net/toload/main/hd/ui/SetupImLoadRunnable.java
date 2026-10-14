@@ -124,18 +124,6 @@ public class SetupImLoadRunnable implements Runnable {
 
                 try {
                     // Load backuptable records
-                    /*
-                     * Cursor cursorsource = datasource.rawQuery("select * from " + imtype);
-                     * List<Word> clist = Word.getList(cursorsource);
-                     * cursorsource.close();
-                     * 
-                     * HashMap<String, Word> wordcheck = new HashMap<String, Word>();
-                     * for(Word w : clist){
-                     * String key = w.getCode() + w.getWord();
-                     * wordcheck.put(key, w);
-                     * }
-                     * handler.updateProgress(20);
-                     */
                     Cursor cursorbackup = datasource.listBackupRecords(imtype);
                     List<Word> backuplist = Word.getList(cursorbackup);
                     cursorbackup.close();
@@ -158,8 +146,6 @@ public class SetupImLoadRunnable implements Runnable {
                         }
 
                     }
-
-                    // wordcheck.clear();
 
                 } catch (Exception e) {
                     e.printStackTrace();
