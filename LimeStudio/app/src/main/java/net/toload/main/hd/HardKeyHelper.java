@@ -28,17 +28,6 @@ public class HardKeyHelper {
         // If user use the physical keyboard then not fixed the candidate view
         service.mFixedCandidateViewOn = false;
 
-        // hide softkeyboard. Jeremy '12,5,8
-        // Should not hide inputView or the candidateView cannot be shown in first
-        // stroke. Jeremy '15,6,1
-        /*
-         * if (mInputView != null && mInputView.isShown() &&
-         * mLIMEPref.getAutoHideSoftKeyboard()) {
-         * mInputView.closing();
-         * requestHideSelf(0);
-         * }
-         */
-
         if (DEBUG)
             Log.i(TAG, "translateKeyDown() LIMEMetaKeyKeyListener.getMetaState(mMetaState) = "
                     + Integer.toHexString(LIMEMetaKeyKeyListener.getMetaState(service.mMetaState))

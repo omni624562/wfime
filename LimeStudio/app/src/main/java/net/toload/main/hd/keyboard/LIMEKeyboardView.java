@@ -93,9 +93,6 @@ public class LIMEKeyboardView extends LIMEKeyboardBaseView {
 		}
 	}
 
-	/*
-	 *
-	 */
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent me) {
 		if (DEBUG)

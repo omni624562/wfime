@@ -957,13 +957,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 // For characters, use large font. For labels like "Done", use small font.
                 int labelSize;
 
-                /*
-                 * if (DEBUG)
-                 * Log.i(TAG, "onBufferDraw():" + label
-                 * + " keySizeScale = " + mKeyboard.getKeySizeScale() + " "
-                 * + " labelSizeScale = " + key.getLabelSizeScale());
-                 */
-
                 float keySizeScale = mKeyboard.getKeySizeScale();
                 float labelSizeScale = key.getLabelSizeScale();
 
@@ -1098,13 +1091,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                         // if (subLabel.length() > 2) // draw sub keys as portrait keys in two rows.
                         // paint.setTextSize(subLabelSize * 2 / 3); //123 EN in landscape is usually to
                         // wide.
-                        /*
-                         * if (hasSecondSubLabel) {
-                         * canvas.drawText(subLabel, centerX - subLabelWidth * 2, baseline, paint);
-                         * paint.setColor(keyColor);
-                         * canvas.drawText(secondSubLabel, centerX - subLabelWidth, baseline, paint);
-                         * } else
-                         */
                         canvas.drawText(subLabel, centerX - subLabelWidth, baseline, paint);
 
                         paint.setTextSize(labelSize);

@@ -535,19 +535,6 @@ class LimeQueryEngine {
 
 
 
-                // related list always null in between search mode. Jeremy
-                // '15,6,3----------------
-                /*
-                 * if ( relatedlist != null && relatedMap.get(code) == null) {
-                 * relatedMap.put(code, relatedlist);
-                 * if (DEBUG)
-                 * Log.i(TAG, "buildQueryResult() build relatedmap on code = '" + code +
-                 * "' relatedlist = " + relatedlist);
-                 *
-                 * }
-                 */
-                // -----------------------------------------------------------------------------------------------
-
                 if (duplicateCheck.add(m.getWord())) {
                     result.add(m);
 

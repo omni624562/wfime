@@ -1836,16 +1836,6 @@ public class LIMEService extends InputMethodService implements
                 } else // Jeremy '12',7,1 bug fixed on english mode enter not functioning in chrome
                     break;
 
-                /*
-                 * case MY_KEYCODE_ESC:
-                 * //Jeremy '11,9,7 treat esc as back key
-                 * //Jeremy '11,8,14
-                 * clearComposing();
-                 * InputConnection ic=getCurrentInputConnection();
-                 * if(ic!=null) ic.commitText("", 0);
-                 * return true;
-                 */
-
             case KeyEvent.KEYCODE_SPACE:
                 spaceKeyPress = true;
                 hasQuickSwitch = mLIMEPref.getSwitchEnglishModeHotKey();
@@ -4244,14 +4234,6 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    /*
-     * public boolean isWordSeparator(int code) {
-     * //Jeremy '11,5,31
-     * String separators = getResources().getString(R.string.word_separators);
-     * return separators.contains(String.valueOf((char) code));
-     * 
-     * }
-     */
     // Delegates to CandidateController
     public boolean pickHighlightedCandidate() {
         return mCandidateController.pickHighlightedCandidate();
@@ -4424,17 +4406,6 @@ public class LIMEService extends InputMethodService implements
             mAudioManager.playSoundEffect(sound, FX_VOLUME);
         }
     }
-    /*
-     * public boolean isValidTime(Date target) {
-     * Calendar srcCal = Calendar.getInstance();
-     * srcCal.setTime(new Date());
-     * Calendar destCal = Calendar.getInstance();
-     * destCal.setTime(target);
-     * 
-     * return srcCal.getTimeInMillis() - destCal.getTimeInMillis() < 1800000;
-     * 
-     * }
-     */
 
     /**
      * Last method to execute when key release
@@ -4533,20 +4504,6 @@ public class LIMEService extends InputMethodService implements
         super.onDestroy();
     }
 
-    /*
-     * @Override
-     * public void onUpdateCursor(Rect newCursor) {
-     * if(DEBUG)
-     * Log.i(TAG, "onUpdateCursor(): Top:"
-     * + newCursor.top + ". Right:" + newCursor.right
-     * + ". bottom:" + newCursor.bottom + ". left:" + newCursor.left );
-     * 
-     * 
-     * if(mCandidateView!=null)
-     * mCandidateView.onUpdateCursor(newCursor);
-     * super.onUpdateCursor(newCursor);
-     * }
-     */
     @Override
     public void onCancel() {
         if (DEBUG)

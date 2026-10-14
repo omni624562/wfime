@@ -230,10 +230,6 @@ public class SearchServer {
         return result;
     }
 
-    /*
-     * return longest common substring with recursive method.
-     */
-
     // Add by jeremy '10, 4,1
     // 字根反查結果(例如「日=ㄖˋ」);沒開反查或查無資料時回傳 null
     public String getCodeListStringFromWord(final String word) {
@@ -260,11 +256,6 @@ public class SearchServer {
         }
         return key;
     }
-
-    /*
-     * Get mapping list from cache or from db if it's not in cache. Separated from
-     * getMappingByCode() Jeremy '15,6,8
-     */
 
     /*
      * Jeremy '15,7,12 synchronized the method called from LIMEService only
@@ -1405,16 +1396,6 @@ public class SearchServer {
 
     }
 
-    /*
-     * public boolean isImKeys(char c) {
-     * if (imKeysMap.get(tablename) == null || imKeysMap.size() == 0) {
-     * //if(dbadapter == null){dbadapter = new LimeDB(ctx);}
-     * imKeysMap.put(tablename, dbadapter.getImInfo(tablename, "imkeys"));
-     * }
-     * String imkeys = imKeysMap.get(tablename);
-     * return !(imkeys == null || imkeys.equals("")) && (imkeys.indexOf(c) >= 0);
-     * }
-     */
     public String getSelkey() {
         if (DEBUG)
             Log.i(TAG, "getSelkey():hasNumber:" + hasNumberMapping + "hasSymbol:" + hasSymbolMapping);

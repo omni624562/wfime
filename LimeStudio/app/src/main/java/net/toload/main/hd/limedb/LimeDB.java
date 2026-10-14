@@ -265,48 +265,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         this.filename = filename;
     }
 
-    /*
-     * 
-     * private void checkLengthColumn(String table){
-     * if (!getImInfo(table, "lengthcolumns").equals("present")) {
-     * if (!checkDBConnection()) {
-     * checkCodeColumnPending = true;
-     * return;
-     * }
-     * Toast.makeText(mContext, mContext.getText(R.string.l3_database_upgrade),
-     * Toast.LENGTH_SHORT).show();
-     * 
-     * 
-     * Log.i(TAG,
-     * "checkLengthColumn(); create code length columns and index on table:" +
-     * table);
-     * long startTime = System.currentTimeMillis();
-     * holdDBConnection();
-     * db.execSQL("alter table " + table + " add 'codelen'");
-     * db.execSQL("alter table " + table + " add 'wordlen'");
-     * db.execSQL("create index " + table + "_idx_code_len on " + table +
-     * " (codelen)");
-     * db.execSQL("create index " + table + "_idx_word_len on " + table +
-     * " (wordlen)");
-     * if (table.equals("phonetic")) {
-     * db.execSQL("alter table " + table + " add 'code3rlen'");
-     * db.execSQL("create index " + table + "_idx_code3r_len on " + table +
-     * " (code3rlen)");
-     * db.execSQL("update " + table +
-     * " set codelen=length(code), code3rlen=length(code3r), wordlen=length(word)");
-     * } else {
-     * db.execSQL("update " + table +
-     * " set codelen=length(code), wordlen=length(word)");
-     * }
-     * Log.i(TAG,
-     * "checkLengthColumn() create code length columns and index on table:" + table
-     * + ". Elapsed time = " + (System.currentTimeMillis() - startTime));
-     * unHoldDBConnection();
-     * setImInfo(table, "lengthcolumns", "present");
-     * }
-     * 
-     * }
-     */
     public String getTablename() {
         return this.tablename;
     }
@@ -333,7 +291,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
     public void setTablename(String tablename) {
         this.tablename = tablename;
-        // checkLengthColumn(tablename);
         if (DEBUG) {
             Log.i(TAG, "settTableName(), tablename:" + tablename + " this.tablename:"
                     + this.tablename);
@@ -859,32 +816,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 e.printStackTrace();
             }
         }
-        /*
-         * if (!mLIMEPref.getCandidateSuggestionPunctutation()){
-         * 
-         * // Remove Punctutation
-         * String chinesesymbols[] = ChineseSymbol.chineseSymbols.split("|");
-         * for(String s: chinesesymbols){
-         * cword = cword.replaceAll(s, "");
-         * if(cword == null || cword.isEmpty()){
-         * return -1;
-         * }
-         * }
-         * 
-         * String englishsymbols[] =
-         * {"!","@","#","$","%","^","&","*","(",")","{","}","[","]","\\","/","?",".",",
-         * ","<",">",";",":","'"};
-         * for(String s: englishsymbols){
-         * cword = cword.replace(s, "");
-         * cword = cword.replace(s, "");
-         * cword = cword.replace(s, "");
-         * if(cword == null || cword.isEmpty()){
-         * return -1;
-         * }
-         * }
-         * 
-         * }
-         */
 
         int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
 
@@ -1062,12 +993,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     /**
      * Jeremy '12,6,7 for phrase learning to get code from word
-     */
-    /*
-     * public List<Mapping> getMappingFromWord(Mapping mapping, String table) {
-     * String keyword = mapping.getWord();
-     * return getMappingFromWord(keyword, table);
-     * }
      */
     public List<Mapping> getMappingByWord(String keyword, String table) {
 
@@ -1873,17 +1798,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                 }
 
                             } else {
-                                /*
-                                 * if (code.length() > 1) {
-                                 * int len = code.length();
-                                 * if (len > 5)
-                                 * len = 5; //Jeremy '12,6,12 track code bakcward for 5 levels.
-                                 * for (int k = 1; k < len; k++) {
-                                 * String subCode = code.substring(0, code.length() - k);
-                                 * codeList.add(subCode);
-                                 * }
-                                 * }
-                                 */
                                 count++;
                                 ContentValues cv = new ContentValues();
                                 cv.put(FIELD_CODE, code);
@@ -2019,21 +1933,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         loadingMappingThread.start();
         reportProgressThread.start();
     }
-
-    /*
-     * public ContentValues getInsertItem(String code, String word) {
-     * try {
-     * ContentValues cv = new ContentValues();
-     * cv.put(FIELD_CODE, code);
-     * cv.put(FIELD_WORD, word);
-     * cv.put(FIELD_SCORE, 0);
-     * return cv;
-     * } catch (Exception e) {
-     * e.printStackTrace();
-     * }
-     * return null;
-     * }
-     */
 
     /**
      * Identify the delimiter of the source file
@@ -2689,13 +2588,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             // String value = "";
             int ssize = mLIMEPref.getSimilarCodeCandidates();
             char[] sourcechars = word.toCharArray();
-            /*
-             * stemmer = new Stemmer();
-             * for(char c: sourcechars){
-             * stemmer.add(c);
-             * }
-             * stemmer.stem();
-             */
             // 參數化:word 為使用者輸入,不可串接進 SQL(FTS MATCH 的前綴查詢以 ? 綁定)
             String selectString = "SELECT word FROM dictionary WHERE word MATCH ? AND word <> ?"
                     + " ORDER BY word ASC LIMIT " + ssize + ";";
