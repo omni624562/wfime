@@ -2249,26 +2249,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return " ";
     }
 
-    /* */
-
     /**
      * Check if the specific mapping exists in current table
-     *//*
-        * public Mapping isMappingExist(String code, String word) {
-        * if (!checkDBConnection()) return null;
-        * Mapping munit = null;
-        * try {
-        * munit = isMappingExistOnDB(db, code, word);
-        * } catch (Exception e) {
-        * e.printStackTrace();
-        * 
-        * }
-        * 
-        * 
-        * return munit;
-        * 
-        * }
-        */
+     */
     private Mapping isMappingExistOnDB(SQLiteDatabase db, String table, String code, String word)
             {
         if (DEBUG)
