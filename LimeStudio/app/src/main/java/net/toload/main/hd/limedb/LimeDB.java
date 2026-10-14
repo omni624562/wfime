@@ -2899,14 +2899,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     /**
-     * Jeremy '11,9,8 moved from searchService
-     */
-    public String hanConvert(String input, int hanOption) {
-        checkHanDB();
-        return hanConverter.convert(input, hanOption);
-    }
-
-    /**
      * Jeremy '11,9,8 get basescore of word store in hanconverter
      */
     public int getBaseScore(String input) {

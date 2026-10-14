@@ -146,10 +146,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("reverse_lookup_notify", true);
     }
 
-    public boolean getHanConvertNotify() {
-        return sp.getBoolean("han_convert_notify", false);
-    }
-
     public boolean getPersistentLanguageMode() {
         return sp.getBoolean("persistent_language_mode", false);
     }
@@ -194,17 +190,6 @@ public class LIMEPreferenceManager {
     public boolean getDisablePhysicalSelkey() {
 
         return sp.getBoolean("disable_physical_selkey", false);
-    }
-
-    public Integer getHanCovertOption() {
-
-        return Integer.parseInt(sp.getString("han_convert_option", "0"));
-    }
-
-    public void setHanCovertOption(int value) {
-
-        sp.edit().putString("han_convert_option", String.valueOf(value)).apply();
-
     }
 
     public Integer getSelkeyOption() {

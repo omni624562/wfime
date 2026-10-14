@@ -2,8 +2,6 @@
 <resources>
     <!-- chinese_punctuation 是中文標點符號資料，刻意不翻譯（沿用預設值）；*_values / *_codes 陣列為程式內部值，不可翻譯 -->
     <string name="ime_setting">LIME-HD Settings</string>
-    <string name="input_method">Switch system input method</string>
-    <string name="lime_setting_preference">Preferences</string>
     <string name="keyboard">Keyboard</string>
     <string name="mapping">Mapping table</string>
     <string name="keyboard_list">LIME input method switching</string>
@@ -23,9 +21,6 @@
     <string name="enable_english_dictionary_physical_keyboard">English dictionary for physical keyboard</string>
     <string name="enable_english_dictionary_physical_keyboard_summary">Show English suggestions when typing English on a physical keyboard</string>
     <string name="reverse_lookup_notify">Show reverse lookup notifications</string>
-    <string name="han_convert_ts">Traditional to Simplified</string>
-    <string name="han_convert_st">Simplified to Traditional</string>
-    <string name="han_convert_option_list">Traditional/Simplified Chinese conversion</string>
     <string name="selkey_option_list">Selection key preference</string>
     <string name="similiar_list">Number of suggestions</string>
     <string name="vibrate_on_keypress">Vibrate on keypress</string>
@@ -92,7 +87,6 @@
     <string name="hide_software_keyboard_typing_with_physical">Auto-hide on-screen keyboard</string>
     <string name="hide_software_keyboard_typing_with_physical_summary">Hide the on-screen keyboard when typing on a physical keyboard. S-PEN users should leave this off</string>
     <string name="split_keyboard">Split keyboard</string>
-    <string name="merge_keyboard">Merge keyboard</string>
     <string name="show_arrow_keys">Show arrow keys</string>
     <string name="font_size">Font size</string>
     <string name="keyboard_size">Keyboard size</string>
@@ -111,11 +105,6 @@
     <string name="enable_phonetic_summary_off">The Chuyin keyboard does not appear when switching input methods</string>
     <string name="enable_phonetic_summary_disabled">Load the Chuyin mapping table above first</string>
 
-    <string-array name="han_convert_options">
-        <item>None</item>
-        <item>Traditional to Simplified</item>
-        <item>Simplified to Traditional</item>
-    </string-array>
     <string-array name="emoji_display_position_title">
         <item>After candidate 2</item>
         <item>After candidate 3</item>

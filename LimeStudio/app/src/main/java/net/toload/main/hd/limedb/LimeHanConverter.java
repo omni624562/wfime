@@ -116,46 +116,4 @@ public class LimeHanConverter extends SQLiteOpenHelper {
         return score;
     }
 
-    public String convert(String input, Integer hanConvertOption) {
-        String output = input;
-        // Log.i("LimeHanConverter.convert()","hanConvertOption:"+hanConvertOption);
-        if (input != null && !input.equals("") && hanConvertOption != 0) {
-            String tablename = "";
-            Cursor cursor = null;
-            if (hanConvertOption == 1) { // TC to SC
-                tablename = "TCSC";
-            } else if (hanConvertOption == 2) {// SC to TC
-                tablename = "SCTC";
-            }
-            try {
-                SQLiteDatabase db = this.getReadableDatabase();
-
-                output = "";
-                for (int i = 0; i < input.length(); i++) {
-
-                    cursor = db.query(tablename, null, FIELD_CODE + " = ?",
-                            new String[] { String.valueOf(input.charAt(i)) }, null, null, null, null);
-
-                    if (cursor.moveToFirst()) {
-                        // int codeColumn = cursor.getColumnIndex(FIELD_CODE);
-                        int wordColumn = cursor.getColumnIndex(FIELD_WORD);
-                        String word = cursor.getString(wordColumn);
-                        output += word;
-
-                    } else
-                        output += input.substring(i, i + 1);
-
-                }
-
-                if (cursor != null) {
-                    // cursor.deactivate();
-                    cursor.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        return output;
-    }
 }

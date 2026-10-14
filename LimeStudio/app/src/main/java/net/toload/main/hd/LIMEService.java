@@ -42,7 +42,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.KeyCharacterMap;
@@ -54,14 +53,12 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,11 +109,6 @@ public class LIMEService extends InputMethodService implements
     // show candidate view in short time.
     static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
     private static final long SHIFT_LOCK_TIMEOUT = 500; // Jeremy '24,1,7: Double-tap timeout for caps lock
-    private static final int POS_SETTINGS = 0;
-    private static final int POS_HANCONVERT = 1; // Jeremy '11,9,17
-    private static final int POS_KEYBOARD = 2;
-    private static final int POS_METHOD = 3;
-    private static final int POS_SPLIT_KEYBOARD = 4;
     private static final KeyboardTheme[] KEYBOARD_THEMES = {
             new KeyboardTheme("Material3", 0, R.style.LIMETheme_Material3),
     };
@@ -267,7 +259,6 @@ public class LIMEService extends InputMethodService implements
 
     // Helper classes for better code organization
     private IMSwitchHelper mIMSwitchHelper;
-    private OptionsDialogHelper mOptionsDialogHelper;
 
     public LIMEService() {
 
@@ -351,7 +342,6 @@ public class LIMEService extends InputMethodService implements
 
         // Initialize helper classes
         mIMSwitchHelper = new IMSwitchHelper(mLIMEPref, getResources());
-        mOptionsDialogHelper = new OptionsDialogHelper(mLIMEPref, getResources());
 
         buildActivatedIMList();
 
@@ -2317,33 +2307,8 @@ public class LIMEService extends InputMethodService implements
                             Log.i(TAG, "commitTyped() committed Length="
                                     + firstMatchedLength);
 
-                        // Do hanConvert before commit
-                        // '10, 4, 17 Jeremy
-                        if (mLIMEPref.getHanCovertOption() == 0) {
-                            if (ic != null)
-                                ic.commitText(wordToCommit, firstMatchedLength);
-                        } else {
-                            if (mLIMEPref.getHanConvertNotify()) {
-
-                                Calendar now = Calendar.getInstance();
-
-                                long nowvalue = now.getTimeInMillis();
-                                long storevalue = mLIMEPref.getParameterLong("han_notify_interval", 0);
-
-                                // 1 minute idle time
-                                if (nowvalue - storevalue > 60000) {
-                                    if (mLIMEPref.getHanCovertOption() == 1) {
-                                        Toast.makeText(this, R.string.han_convert_ts, Toast.LENGTH_SHORT).show();
-                                    } else if (mLIMEPref.getHanCovertOption() == 2) {
-                                        Toast.makeText(this, R.string.han_convert_st, Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-
-                                mLIMEPref.setParameter("han_notify_interval", now.getTimeInMillis());
-                            }
-                            if (ic != null)
-                                ic.commitText(SearchSrv.hanConvert(wordToCommit), firstMatchedLength);
-                        }
+                        if (ic != null)
+                            ic.commitText(wordToCommit, firstMatchedLength);
 
                         if (wordToCommit != null && wordToCommit.length() > 0) {
                             String lastChar = wordToCommit.substring(wordToCommit.length() - 1);
@@ -2773,122 +2738,6 @@ public class LIMEService extends InputMethodService implements
      * Add by Jeremy '10, 3, 24 for options menu in soft keyboard
      */
 
-    private void handleOptions() {
-        if (DEBUG)
-            Log.i(TAG, "handleOptions()");
-        MaterialAlertDialogBuilder builder;
-
-        // Wrap the service context with the app theme to satisfy
-        // MaterialAlertDialogBuilder requirements
-        // Jeremy '24,1,7: Fix for crash "The style on this component requires your app
-        // theme to be Theme.AppCompat"
-        ContextThemeWrapper themedContext = new ContextThemeWrapper(this, R.style.AppTheme);
-        builder = new MaterialAlertDialogBuilder(themedContext);
-
-        builder.setCancelable(true);
-        builder.setIcon(R.drawable.sym_keyboard_done_white);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setTitle(getResources().getString(R.string.ime_name));
-
-        CharSequence itemSettings = getString(R.string.lime_setting_preference);
-        CharSequence hanConvert = getString(R.string.han_convert_option_list);
-
-        CharSequence itemSwitchIM = getString(R.string.keyboard_list);
-        CharSequence itemSwitchSytemIM = getString(R.string.input_method);
-
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        int displayWidth = dm.widthPixels;
-        int displayHeight = dm.heightPixels;
-        final boolean isLandScape = displayWidth > displayHeight;
-
-        CharSequence itemSplitKeyboard = getString(R.string.split_keyboard);
-        if ((mSplitKeyboard == LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY && isLandScape)
-                || mSplitKeyboard == LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS)
-            itemSplitKeyboard = getString(R.string.merge_keyboard);
-
-        CharSequence[] options;
-
-
-        final boolean hasSplitOption;
-
-        // Jeremy '12,5,27 do not show split/merge keyboard option if in landscape mode
-        // and show arrow keys is on
-        if (isLandScape && mShowArrowKeys > 0) {
-            hasSplitOption = false;
-            options = new CharSequence[] { itemSettings, hanConvert, itemSwitchIM, itemSwitchSytemIM };
-        } else {
-            hasSplitOption = true;
-            options = new CharSequence[] { itemSettings, hanConvert, itemSwitchIM, itemSwitchSytemIM,
-                    itemSplitKeyboard };
-
-        }
-
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface di, int position) {
-                di.dismiss();
-                switch (position) {
-
-                    case POS_SETTINGS:
-                        launchSettings();
-                        break;
-                    case POS_HANCONVERT: // Jeremy '11,9,17
-                        showHanConvertPicker();
-                        break;
-                    case POS_KEYBOARD:
-                        showIMPicker();
-                        break;
-                    case POS_METHOD:
-                        ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).showInputMethodPicker();
-                        break;
-                    case POS_SPLIT_KEYBOARD: // Jeremy '12,5,27 new option to split keyboard; '12,6,9 add orientation
-                                             // consideration on split keyboard
-                        if (hasSplitOption) {
-                            if (mSplitKeyboard == LIMEKeyboard.SPLIT_KEYBOARD_NEVER) {
-                                if (isLandScape)
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
-                                else
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS);
-                            } else if (mSplitKeyboard == LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS) {
-                                if (isLandScape)
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_NEVER);
-                                else
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY);
-                            } else {// LIMEKeyboard.SPLIT_KEYBOARD_LANDSCAPD_ONLY
-                                if (isLandScape)
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_NEVER);
-                                else
-                                    mLIMEPref.setSplitKeyboard(LIMEKeyboard.SPLIT_KEYBOARD_ALWAYS);
-                            }
-
-                            handleClose();
-                            mKeyboardSwitcher.resetKeyboards(true);
-                            break;
-                        }
-
-                }
-            }
-        });
-
-        mOptionsDialog = builder.create();
-        Window window = mOptionsDialog.getWindow();
-        assert window != null;
-        WindowManager.LayoutParams lp = window.getAttributes();
-        lp.token = mInputView.getWindowToken();
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-        window.setAttributes(lp);
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        mOptionsDialog.show();
-    }
-
-    private void launchSettings() {
-        handleClose();
-        Intent intent = new Intent();
-        intent.setClass(LIMEService.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
     /**
      * Display the active IM name in the composing-text popup (字根區) for 1.5 seconds.
      * The composing popup is more prominent and natural than Toast (which hides behind
@@ -3001,46 +2850,6 @@ public class LIMEService extends InputMethodService implements
 
         if (DEBUG)
             Log.i(TAG, "buildActivatedIMList(): delegated to helper, activeIM=" + activeIM);
-    }
-
-    /**
-     * Add by Jeremy '11,9,17 for han convert (tranditional <-> simplifed) options
-     */
-    private void showHanConvertPicker() {
-        MaterialAlertDialogBuilder builder;
-
-        builder = new MaterialAlertDialogBuilder(this);
-
-        builder.setCancelable(true);
-        builder.setIcon(R.drawable.sym_keyboard_done_white);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setTitle(getResources().getString(R.string.han_convert_option_list));
-        CharSequence[] items = getResources().getStringArray(R.array.han_convert_options);
-        builder.setSingleChoiceItems(items, mLIMEPref.getHanCovertOption(),
-                new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface di, int position) {
-                        di.dismiss();
-                        handleHanConvertSelection(position);
-                    }
-                });
-
-        mOptionsDialog = builder.create();
-        Window window = mOptionsDialog.getWindow();
-        if (!(window == null)) {
-            WindowManager.LayoutParams lp = window.getAttributes();
-            lp.token = mCandidateViewStandAlone.getWindowToken(); // Jeremy 12,5,4 it's always there
-            lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-            window.setAttributes(lp);
-            window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
-        }
-        mOptionsDialog.show();
-    }
-
-    private void handleHanConvertSelection(int position) {
-        mLIMEPref.setHanCovertOption(position);
-
     }
 
     /**
@@ -4557,7 +4366,7 @@ public class LIMEService extends InputMethodService implements
     }
 
     public void swipeUp() {
-        // handleOptions(); // Disabled to prevent accidental options menu triggers when sliding up from the space key or typing
+        // 往上滑不做事:原本會開選項選單,常被從空白鍵往上滑誤觸
     }
 
     /**

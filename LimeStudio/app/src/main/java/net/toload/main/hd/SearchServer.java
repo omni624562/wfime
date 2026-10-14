@@ -141,10 +141,6 @@ public class SearchServer {
             dbadapter.clearRelatedScoreCache();
     }
 
-    public String hanConvert(String input) {
-        return dbadapter.hanConvert(input, mLIMEPref.getHanCovertOption());
-    }
-
     public String getTablename() {
         return tablename;
     }

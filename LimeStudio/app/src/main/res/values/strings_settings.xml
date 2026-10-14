@@ -28,9 +28,7 @@
     <string name="more_cand" translatable="false">Click for more candidates.</string>
 
     <!-- Title for Latin keyboard  -->
-    <string name="ime_name" translatable="false">LIME-HD</string>
     <string name="ime_setting">LIME-HD 設定</string>
-    <string name="input_method">系統輸入法切換</string>
 
     <!-- Symbols that are commonly considered word separators in this language -->
 
@@ -41,7 +39,6 @@
 
 
     <!-- TAB -->
-    <string name="lime_setting_preference">喜好設定</string>
 
 
 
@@ -73,9 +70,6 @@
 
     <string name="reverse_lookup_notify">啟用字根反查跳出提示</string>
 
-    <string name="han_convert_ts">繁轉簡</string>
-    <string name="han_convert_st">簡轉繁</string>
-    <string name="han_convert_option_list">中文簡/繁體字碼轉換</string>
     <string name="selkey_option_list">設定選字鍵預選順序</string>
 
 
@@ -165,11 +159,6 @@
     <!-- popular web domains for the locale - most popular, displayed on the keyboard -->
 
     <!-- Han Converter Options -->
-    <string-array name="han_convert_options">
-        <item>無</item>
-        <item>繁轉簡</item>
-        <item>簡轉繁</item>
-    </string-array>
 
     <string-array name="emoji_display_position_title">
         <item>第 2 候選字後顯示</item>
@@ -284,7 +273,6 @@
 
     <string name="split_keyboard">分離鍵盤</string>
 
-    <string name="merge_keyboard">合併鍵盤</string>
 
 
     <string name="show_arrow_keys">顯示方向鍵</string>
