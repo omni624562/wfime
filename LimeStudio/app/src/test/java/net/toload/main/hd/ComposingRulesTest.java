@@ -1,0 +1,77 @@
+package net.toload.main.hd;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+/**
+ * 選字後組字的處理:還沒打完時切掉已上字的碼,剩下的碼再查一次候選。純邏輯,不需要 Android。
+ */
+public class ComposingRulesTest {
+
+    @Test
+    public void finishedWhenComposingNotLongerThanCode() {
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("d", "d", 1);
+        assertFalse(r.notFinished);
+        assertFalse(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void finishedWhenCodeIsNull() {
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("nh1", null, 0);
+        assertFalse(r.notFinished);
+        assertFalse(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void dayiContinuousTyping_KeepsRemainingCode() {
+        // 大易連打 nh1dfu:選了 詹(nh1)之後,剩下 dfu 再查一次
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("nh1dfu", "nh1", 3);
+        assertTrue(r.notFinished);
+        assertEquals("dfu", r.remaining);
+        assertTrue(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void chuyinRemainingStartingWithSpace_DropsOneSpace() {
+        // 注音連打 su3 u4:選了 你(su3)之後剩「 u4」,去掉開頭的空白
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("su3 u4", "su3", 3);
+        assertTrue(r.notFinished);
+        assertEquals("u4", r.remaining);
+        assertTrue(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void remainingIsExactlyOneSpace_KeptAndNoQuery() {
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("su3 ", "su3", 3);
+        assertTrue(r.notFinished);
+        assertEquals(" ", r.remaining);
+        assertFalse(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void onlyOneLeadingSpaceIsDropped() {
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("a  b", "a", 1);
+        assertEquals(" b", r.remaining);
+        assertTrue(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void committedLengthBeyondComposing_RemainingEmpty() {
+        // 實際上字用掉的碼比組字還長:切到空,不再查詢
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("ab", "a", 5);
+        assertTrue(r.notFinished);
+        assertEquals("", r.remaining);
+        assertFalse(r.shouldUpdateCandidates);
+    }
+
+    @Test
+    public void realCodeLengthDiffersFromCandidateCode() {
+        // 注音的碼帶聲調、實際上字用掉的碼長可能和候選的碼長不同:切的長度以實際碼長為準
+        ComposingRules.AfterCommit r = ComposingRules.afterCommit("su3u4", "su3", 2);
+        assertTrue(r.notFinished);
+        assertEquals("3u4", r.remaining);
+    }
+}

@@ -2299,9 +2299,10 @@ public class LIMEService extends InputMethodService implements
                         if (DEBUG)
                             Log.i(TAG, "commitTyped(): committedCodeLength = " + committedCodeLength);
 
-                        if (selectedCandidate.getCode() != null && mComposing.length() > selectedCandidate.getCode().length()) {
-                            composingNotFinish = true;
-                        }
+                        // 選字後組字還沒打完時,剩下的碼與要不要再查候選(規則見 ComposingRules)
+                        ComposingRules.AfterCommit afterCommit = ComposingRules.afterCommit(
+                                mComposing, selectedCandidate.getCode(), committedCodeLength);
+                        composingNotFinish = afterCommit.notFinished;
 
                         boolean shouldUpdateCandidates = false;
                         if (composingNotFinish) {
@@ -2319,22 +2320,11 @@ public class LIMEService extends InputMethodService implements
                                             "'. just committed code=" + selectedCandidate.getCode());
                                 SearchSrv.addLDPhrase(selectedCandidate, false);
                             }
-                            mComposing = mComposing.delete(0, committedCodeLength);
+                            mComposing.setLength(0);
+                            mComposing.append(afterCommit.remaining);
                             if (DEBUG)
-                                Log.i(TAG, "commitTyped(): trimmed mComposing = '" + mComposing + "', " +
-                                        "+ mComposing.length = " + mComposing.length());
-
-                            if (!mComposing.toString().equals(" ")) {
-                                if (mComposing.toString().startsWith(" "))
-                                    mComposing = mComposing.deleteCharAt(0);
-                                if (DEBUG)
-                                    Log.i(TAG, "commitTyped(): new mComposing:'" + mComposing + "'");
-                                if (mComposing.length() > 0) { // Jeremy '12,7,11 only fetch remaining composing when
-                                                               // length >0
-                                    // if (ic != null && mPredictionOn)
-                                    shouldUpdateCandidates = true;
-                                }
-                            }
+                                Log.i(TAG, "commitTyped(): new mComposing:'" + mComposing + "'");
+                            shouldUpdateCandidates = afterCommit.shouldUpdateCandidates;
                         } else {
 
                             if (LDComposingBuffer.length() > 0) {// &&
