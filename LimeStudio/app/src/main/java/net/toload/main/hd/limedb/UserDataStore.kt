@@ -5,15 +5,20 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
 import android.util.Log
+import androidx.core.database.sqlite.transaction
 import java.io.File
 
 /**
  * 使用者資料的正本 user.db（學過的字碼分數、關聯字、備忘錄），和字庫 lime.db 分開存。
  *
- * D1-1 只負責建立 user.db 並在第一次啟動時把 lime.db 裡現有的使用者資料複製過來，
- * lime.db 一筆不動。原始字庫每一列的 score 都是 0，所以 score > 0 的列就是使用者資料。
- * 先寫到 user.db.tmp，整批在交易中複製、筆數自我檢查通過才改名成 user.db；
- * 中途失敗就刪掉 tmp，下次啟動再來。
+ * 第一次啟動時把 lime.db 裡現有的使用者資料複製過來，lime.db 一筆不動。原始字庫每一列的
+ * score 都是 0，所以 score > 0 的列就是使用者資料。先寫到 user.db.tmp，整批在交易中複製、
+ * 筆數自我檢查通過才改名成 user.db；中途失敗就刪掉 tmp，下次啟動再來。
+ *
+ * 搬過之後，LimeDB 每次寫入學習資料都會呼叫這裡的 sync*：從 lime.db 讀出那幾筆的現況
+ * 寫進 user.db（雙寫，查詢仍走 lime.db）。還沒搬過就略過，之後搬遷時會一起複製。
+ * 同步失敗時標記 dirty，下次啟動從 lime.db 重新複製學習資料（備忘錄不動）。
+ * 備忘錄搬過之後只存在 user.db。
  */
 class UserDataStore(context: Context) {
 
@@ -24,6 +29,27 @@ class UserDataStore(context: Context) {
 
         // 有學習分數的輸入法表；*_user 是舊版重新匯入輸入法時留下的學習備份表
         private val IM_TABLES = listOf("dayi", "phonetic", "custom")
+
+        // 搬遷與所有讀寫共用同一把鎖，避免搬遷途中的寫入被漏掉
+        private val LOCK = Any()
+        private var shared: UserDataStore? = null
+
+        /** 整個程序共用一個 user.db 連線。 */
+        @JvmStatic
+        fun get(context: Context): UserDataStore = synchronized(LOCK) {
+            val path = context.getDatabasePath(FILE_NAME).path
+            shared?.takeIf { it.target.path == path } ?: UserDataStore(context).also {
+                shared?.close()
+                shared = it
+            }
+        }
+
+        /** 測試用：每個測試的資料目錄不同，關掉上一個測試留下的共用連線。 */
+        @JvmStatic
+        fun resetSharedForTest() = synchronized(LOCK) {
+            shared?.close()
+            shared = null
+        }
 
         /** 建立 user.db 的資料表（全新檔案才會呼叫）。 */
         @JvmStatic
@@ -53,63 +79,110 @@ class UserDataStore(context: Context) {
     )
 
     private val target: File = context.getDatabasePath(FILE_NAME)
+    private var conn: SQLiteDatabase? = null
 
     /** user.db 已經存在而且搬遷完成。 */
-    fun isMigrated(): Boolean {
-        if (!target.exists()) return false
-        return try {
-            SQLiteDatabase.openDatabase(target.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
-                db.rawQuery("SELECT value FROM meta WHERE key = 'migrated_at'", null).use { it.moveToFirst() }
-            }
+    fun isMigrated(): Boolean = synchronized(LOCK) { openIfMigrated() != null }
+
+    // 搬遷完成（有 migrated_at）才開；開好的連線一直沿用
+    private fun openIfMigrated(): SQLiteDatabase? {
+        conn?.let { if (it.isOpen) return it }
+        conn = null
+        if (!target.exists()) return null
+        val db = try {
+            SQLiteDatabase.openDatabase(target.path, null, SQLiteDatabase.OPEN_READWRITE)
         } catch (e: Exception) {
-            false
+            return null
         }
+        if (!hasMeta(db, "migrated_at")) {
+            db.close()
+            return null
+        }
+        conn = db
+        return db
+    }
+
+    private fun close() {
+        conn?.close()
+        conn = null
     }
 
     /**
      * 還沒搬過就從 lime.db 複製使用者資料到 user.db；已搬過、資料庫鎖定中（匯入字庫）
-     * 或失敗時回傳 null。lime.db 只讀不寫。
+     * 或失敗時回傳 null。已搬過但上次同步失敗（dirty）時，從 lime.db 重新複製學習資料。
+     * lime.db 只讀不寫。
      */
     fun migrateIfNeeded(limeDb: LimeDB): Counts? {
-        if (isMigrated()) return null
-        if (!limeDb.checkDBConnection()) return null
-        val src = LimeDB.db ?: return null
-
-        val tmp = File(target.path + ".tmp")
-        deleteDbFiles(tmp)
-        val startedAt = System.currentTimeMillis()
-        var out: SQLiteDatabase? = null
-        return try {
-            out = SQLiteDatabase.openOrCreateDatabase(tmp, null)
-            createSchema(out)
-            out.beginTransaction()
-            val counts: Counts
-            try {
-                counts = copyAll(src, out)
-                writeMeta(out, "schema_version", SCHEMA_VERSION.toString())
-                writeMeta(out, "source_db_version", src.version.toString())
-                writeMeta(out, "migrated_at", System.currentTimeMillis().toString())
-                out.setTransactionSuccessful()
-            } finally {
-                out.endTransaction()
+        return synchronized(LOCK) {
+            val existing = openIfMigrated()
+            if (existing != null) {
+                if (hasMeta(existing, "dirty") && limeDb.checkDBConnection()) {
+                    LimeDB.db?.let { resyncLearned(it, existing) }
+                }
+                return null
             }
-            out.close()
-            out = null
-            deleteDbFiles(target)
-            if (!tmp.renameTo(target)) throw IllegalStateException("rename user.db.tmp failed")
+            if (!limeDb.checkDBConnection()) return null
+            val src = LimeDB.db ?: return null
+            close()
+
+            val tmp = File(target.path + ".tmp")
             deleteDbFiles(tmp)
-            Log.i(TAG, "migrated: mapping=${counts.mapping} related=${counts.related} memo=${counts.memo} " +
-                    "in ${System.currentTimeMillis() - startedAt} ms")
-            counts
-        } catch (e: Exception) {
-            Log.e(TAG, "migration failed, will retry next start", e)
-            out?.close()
-            deleteDbFiles(tmp)
-            null
+            val startedAt = System.currentTimeMillis()
+            var out: SQLiteDatabase? = null
+            return try {
+                out = SQLiteDatabase.openOrCreateDatabase(tmp, null)
+                createSchema(out)
+                out.beginTransaction()
+                val counts: Counts
+                try {
+                    counts = copyAll(src, out)
+                    writeMeta(out, "schema_version", SCHEMA_VERSION.toString())
+                    writeMeta(out, "source_db_version", src.version.toString())
+                    writeMeta(out, "migrated_at", System.currentTimeMillis().toString())
+                    out.setTransactionSuccessful()
+                } finally {
+                    out.endTransaction()
+                }
+                out.close()
+                out = null
+                deleteDbFiles(target)
+                if (!tmp.renameTo(target)) throw IllegalStateException("rename user.db.tmp failed")
+                deleteDbFiles(tmp)
+                Log.i(TAG, "migrated: mapping=${counts.mapping} related=${counts.related} memo=${counts.memo} " +
+                        "in ${System.currentTimeMillis() - startedAt} ms")
+                counts
+            } catch (e: Exception) {
+                Log.e(TAG, "migration failed, will retry next start", e)
+                out?.close()
+                deleteDbFiles(tmp)
+                null
+            }
         }
     }
 
     private fun copyAll(src: SQLiteDatabase, out: SQLiteDatabase): Counts {
+        val mapping = copyAllMapping(src, out)
+        val related = copyAllRelated(src, out)
+        var memoCount = 0
+        if (hasTable(src, "memo")) {
+            src.rawQuery("SELECT _id, content, pinned, created_at FROM memo", null).use { c ->
+                while (c.moveToNext()) {
+                    val cv = ContentValues()
+                    cv.put("_id", c.getLong(0))
+                    cv.put("content", c.getString(1))
+                    cv.put("pinned", c.getInt(2))
+                    if (c.isNull(3)) cv.putNull("created_at") else cv.put("created_at", c.getLong(3))
+                    out.insertOrThrow("memo", null, cv)
+                    memoCount++
+                }
+            }
+        }
+        check(count(out, "memo") == memoCount) { "memo ${count(out, "memo")} != $memoCount" }
+        return Counts(mapping, related, memoCount)
+    }
+
+    // 學過的字碼複製到空的 learned_mapping；回傳筆數（已自我檢查）
+    private fun copyAllMapping(src: SQLiteDatabase, out: SQLiteDatabase): Int {
         val mappingKeys = HashSet<String>()
         // 預先編譯、每列重複使用，不要每一列都重新編譯 SQL
         val insertMapping = out.compileStatement(
@@ -124,6 +197,14 @@ class UserDataStore(context: Context) {
         }
         insertMapping.close()
         raiseMapping.close()
+        // 自我檢查：寫進去的筆數要和來源（去重後）一致
+        val n = count(out, "learned_mapping")
+        check(n == mappingKeys.size) { "mapping $n != ${mappingKeys.size}" }
+        return n
+    }
+
+    // 學過的關聯字複製到空的 learned_related；回傳筆數（已自我檢查）
+    private fun copyAllRelated(src: SQLiteDatabase, out: SQLiteDatabase): Int {
         val relatedKeys = HashSet<String>()
         val insertRelated = out.compileStatement(
             "INSERT OR IGNORE INTO learned_related (pword, cword, score) VALUES (?, ?, ?)"
@@ -154,27 +235,9 @@ class UserDataStore(context: Context) {
         }
         insertRelated.close()
         raiseRelated.close()
-        var memoCount = 0
-        if (hasTable(src, "memo")) {
-            src.rawQuery("SELECT _id, content, pinned, created_at FROM memo", null).use { c ->
-                while (c.moveToNext()) {
-                    val cv = ContentValues()
-                    cv.put("_id", c.getLong(0))
-                    cv.put("content", c.getString(1))
-                    cv.put("pinned", c.getInt(2))
-                    if (c.isNull(3)) cv.putNull("created_at") else cv.put("created_at", c.getLong(3))
-                    out.insertOrThrow("memo", null, cv)
-                    memoCount++
-                }
-            }
-        }
-
-        // 自我檢查：寫進去的筆數要和來源（去重後）一致
-        val counts = Counts(count(out, "learned_mapping"), count(out, "learned_related"), count(out, "memo"))
-        check(counts.mapping == mappingKeys.size) { "mapping ${counts.mapping} != ${mappingKeys.size}" }
-        check(counts.related == relatedKeys.size) { "related ${counts.related} != ${relatedKeys.size}" }
-        check(counts.memo == memoCount) { "memo ${counts.memo} != $memoCount" }
-        return counts
+        val n = count(out, "learned_related")
+        check(n == relatedKeys.size) { "related $n != ${relatedKeys.size}" }
+        return n
     }
 
     // 同一個 (im, code, word) 在主表重複、或主表和舊備份表都有時，保留較高的分數
@@ -209,11 +272,237 @@ class UserDataStore(context: Context) {
         }
     }
 
+    // 上次同步失敗：學習資料整批以 lime.db 為準重抄，備忘錄不動
+    private fun resyncLearned(src: SQLiteDatabase, out: SQLiteDatabase) {
+        try {
+            out.transaction {
+                delete("learned_mapping", null, null)
+                delete("learned_related", null, null)
+                val mapping = copyAllMapping(src, this)
+                val related = copyAllRelated(src, this)
+                delete("meta", "key = 'dirty'", null)
+                Log.i(TAG, "resynced after dirty: mapping=$mapping related=$related")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "resync failed, will retry next start", e)
+        }
+    }
+
+    // ---- 雙寫：LimeDB 寫完 lime.db 後呼叫，把那幾筆的現況抄進 user.db ----
+
+    // 還沒搬過就略過（之後搬遷會從 lime.db 一起複製）；失敗就標記 dirty
+    private fun write(what: String, block: (src: SQLiteDatabase, out: SQLiteDatabase) -> Unit) {
+        synchronized(LOCK) {
+            val src = LimeDB.db ?: return
+            val out = openIfMigrated() ?: return
+            try {
+                block(src, out)
+            } catch (e: Exception) {
+                Log.e(TAG, "$what failed, mark dirty", e)
+                try {
+                    writeMeta(out, "dirty", "1")
+                } catch (e2: Exception) {
+                    Log.e(TAG, "mark dirty failed", e2)
+                }
+            }
+        }
+    }
+
+    /** 選字加分：這個字在該輸入法所有字碼的分數（LimeDB.addScore 依字更新）。 */
+    fun syncMappingWord(im: String?, word: String?) {
+        if (im == null || im !in IM_TABLES || word.isNullOrEmpty()) return
+        write("syncMappingWord") { src, out -> upsertMapping(src, out, im, "word = ?", arrayOf(word)) }
+    }
+
+    /** 新增或更新單一字碼（LimeDB.addOrUpdateMappingRecord）。 */
+    fun syncMapping(im: String?, code: String?, word: String?) {
+        if (im == null || im !in IM_TABLES || code.isNullOrEmpty() || word.isNullOrEmpty()) return
+        write("syncMapping") { src, out -> upsertMapping(src, out, im, "code = ? AND word = ?", arrayOf(code, word)) }
+    }
+
+    // 抄 lime.db 的現況（選字加分可能用到快取裡較舊的分數而變低，所以不能只取較高分）；
+    // 和搬遷一樣，主表和舊備份表 *_user 都有時取較高分，兩邊都是 0 就從 user.db 刪掉
+    private fun upsertMapping(src: SQLiteDatabase, out: SQLiteDatabase, im: String, where: String, args: Array<String>) {
+        if (!hasTable(src, im)) return
+        val code3r = if (hasColumn(src, im, "code3r")) "code3r" else "NULL"
+        val backup = im + "_user"
+        val hasBackup = hasTable(src, backup)
+        val rows = ArrayList<Array<String?>>()
+        src.rawQuery(
+            "SELECT code, $code3r, word, MAX(score) FROM $im WHERE $where AND code IS NOT NULL AND word IS NOT NULL " +
+                    "GROUP BY code, word",
+            args
+        ).use { c ->
+            while (c.moveToNext()) rows.add(arrayOf(c.getString(0), c.getString(1), c.getString(2), c.getString(3)))
+        }
+        for (r in rows) {
+            val code = r[0]!!
+            val word = r[2]!!
+            var score = r[3]?.toInt() ?: 0
+            var code3rValue = r[1]
+            if (hasBackup) {
+                val backupCode3r = if (hasColumn(src, backup, "code3r")) "code3r" else "NULL"
+                src.rawQuery(
+                    "SELECT MAX(score), $backupCode3r FROM $backup WHERE code = ? AND word = ? AND score > 0",
+                    arrayOf(code, word)
+                ).use { c ->
+                    if (c.moveToFirst() && !c.isNull(0) && c.getInt(0) > score) {
+                        if (score <= 0) code3rValue = c.getString(1)
+                        score = c.getInt(0)
+                    }
+                }
+            }
+            if (score > 0) {
+                val cv = ContentValues()
+                cv.put("im", im)
+                cv.put("code", code)
+                if (code3rValue == null) cv.putNull("code3r") else cv.put("code3r", code3rValue)
+                cv.put("word", word)
+                cv.put("score", score)
+                out.insertWithOnConflict("learned_mapping", null, cv, SQLiteDatabase.CONFLICT_IGNORE)
+                out.execSQL(
+                    "UPDATE learned_mapping SET score = ? WHERE im = ? AND code = ? AND word = ?",
+                    arrayOf<Any>(score, im, code, word)
+                )
+            } else {
+                out.delete("learned_mapping", "im = ? AND code = ? AND word = ?", arrayOf(im, code, word))
+            }
+        }
+    }
+
+    /** 關聯字的 pword/cword（刪除前先查，刪完才能同步）。 */
+    fun relatedPair(id: Long): Array<String>? {
+        return synchronized(LOCK) {
+            val src = LimeDB.db ?: return null
+            try {
+                src.rawQuery("SELECT pword, cword FROM related WHERE _id = ?", arrayOf(id.toString())).use { c ->
+                    if (c.moveToFirst() && !c.isNull(0) && !c.isNull(1)) arrayOf(c.getString(0), c.getString(1)) else null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    /** 關聯字加分（LimeDB.addScore 依 id 更新）。 */
+    fun syncRelatedById(id: Long) {
+        val pair = relatedPair(id) ?: return
+        syncRelated(pair[0], pair[1])
+    }
+
+    /** 這組關聯字在 lime.db 的現況：使用次數 > 0 就寫入，否則從 user.db 刪掉。 */
+    fun syncRelated(pword: String?, cword: String?) {
+        if (pword.isNullOrEmpty() || cword.isNullOrEmpty()) return
+        write("syncRelated") { src, out ->
+            val score = src.rawQuery(
+                "SELECT MAX(score) FROM related WHERE pword = ? AND cword = ? AND score > 0",
+                arrayOf(pword, cword)
+            ).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getInt(0) else 0 }
+            if (score > 0) {
+                val cv = ContentValues()
+                cv.put("pword", pword)
+                cv.put("cword", cword)
+                cv.put("score", score)
+                out.insertWithOnConflict("learned_related", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            } else {
+                out.delete("learned_related", "pword = ? AND cword = ?", arrayOf(pword, cword))
+            }
+        }
+    }
+
+    /** 關聯字整批變動（清除自建關聯字、匯入關聯字庫）：整張以 lime.db 為準重抄。 */
+    fun resyncAllRelated() {
+        write("resyncAllRelated") { src, out ->
+            out.beginTransaction()
+            try {
+                out.delete("learned_related", null, null)
+                copyAllRelated(src, out)
+                out.setTransactionSuccessful()
+            } finally {
+                out.endTransaction()
+            }
+        }
+    }
+
+    /** 重設輸入法且不保留學習紀錄：清掉該輸入法學過的字碼。 */
+    fun clearIm(im: String?) {
+        if (im == null || im !in IM_TABLES) return
+        write("clearIm") { _, out -> out.delete("learned_mapping", "im = ?", arrayOf(im)) }
+    }
+
+    // ---- 備忘錄：搬過之後只存在 user.db；還沒搬過（或搬不動）回傳 null，由 LimeDB 照舊寫 lime.db ----
+
+    private fun memoDb(limeDb: LimeDB): SQLiteDatabase? {
+        openIfMigrated()?.let { return it }
+        migrateIfNeeded(limeDb)
+        return openIfMigrated()
+    }
+
+    fun insertMemo(limeDb: LimeDB, content: String, pinned: Int): Long? {
+        return synchronized(LOCK) {
+            val db = memoDb(limeDb) ?: return null
+            val cv = ContentValues()
+            cv.put("content", content)
+            cv.put("pinned", pinned)
+            cv.put("created_at", System.currentTimeMillis())
+            db.insert("memo", null, cv)
+        }
+    }
+
+    fun getMemos(limeDb: LimeDB): List<MemoObj>? {
+        return synchronized(LOCK) {
+            val db = memoDb(limeDb) ?: return null
+            val list = ArrayList<MemoObj>()
+            try {
+                db.query(
+                    "memo", arrayOf("_id", "content", "pinned", "created_at"), null, null, null, null,
+                    "pinned DESC, created_at DESC"
+                ).use { c ->
+                    while (c.moveToNext()) list.add(MemoObj(c.getInt(0), c.getString(1), c.getInt(2), c.getLong(3)))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "getMemos error", e)
+            }
+            list
+        }
+    }
+
+    fun deleteMemo(limeDb: LimeDB, id: Int): Int? {
+        return synchronized(LOCK) {
+            val db = memoDb(limeDb) ?: return null
+            db.delete("memo", "_id = ?", arrayOf(id.toString()))
+        }
+    }
+
+    fun updateMemoPin(limeDb: LimeDB, id: Int, pinned: Int): Int? {
+        return synchronized(LOCK) {
+            val db = memoDb(limeDb) ?: return null
+            val cv = ContentValues()
+            cv.put("pinned", pinned)
+            db.update("memo", cv, "_id = ?", arrayOf(id.toString()))
+        }
+    }
+
+    fun updateMemoContent(limeDb: LimeDB, id: Int, content: String): Int? {
+        return synchronized(LOCK) {
+            val db = memoDb(limeDb) ?: return null
+            val cv = ContentValues()
+            cv.put("content", content)
+            db.update("memo", cv, "_id = ?", arrayOf(id.toString()))
+        }
+    }
+
     private fun writeMeta(db: SQLiteDatabase, key: String, value: String) {
         val cv = ContentValues()
         cv.put("key", key)
         cv.put("value", value)
         db.insertWithOnConflict("meta", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    private fun hasMeta(db: SQLiteDatabase, key: String): Boolean = try {
+        db.rawQuery("SELECT 1 FROM meta WHERE key = ?", arrayOf(key)).use { it.moveToFirst() }
+    } catch (e: Exception) {
+        false
     }
 
     private fun count(db: SQLiteDatabase, table: String): Int =

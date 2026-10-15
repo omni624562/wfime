@@ -285,6 +285,9 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (backuplearning) {
                 datasource.backupUserRecords(imtable);
+            } else {
+                // 不保留學習紀錄:user.db 裡這個輸入法學過的字碼也一起清掉
+                net.toload.main.hd.limedb.UserDataStore.get(this).clearIm(imtable);
             }
             DBServer dbSrv = new DBServer(this);
             dbSrv.resetMapping(imtable);

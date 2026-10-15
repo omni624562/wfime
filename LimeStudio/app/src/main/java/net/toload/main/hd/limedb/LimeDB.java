@@ -636,6 +636,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             db.endTransaction();
         }
         relatedscore.clear();
+        userStore().resyncAllRelated();
+    }
+
+    // 使用者資料正本 user.db:學習資料寫完 lime.db 後同步過去
+    private UserDataStore userStore() {
+        return UserDataStore.get(mContext);
     }
 
     /**
@@ -701,6 +707,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public synchronized void removeOrResetUserRelated(long id, boolean builtIn) {
         if (!checkDBConnection())
             return;
+        String[] pair = userStore().relatedPair(id);
         try {
             if (builtIn) {
                 ContentValues cv = new ContentValues();
@@ -716,6 +723,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             e.printStackTrace();
         }
         relatedscore.remove(String.valueOf(id));
+        if (pair != null)
+            userStore().syncRelated(pair[0], pair[1]);
     }
 
     /**
@@ -743,6 +752,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             e.printStackTrace();
         }
         relatedscore.remove(String.valueOf(item.getId()));
+        userStore().syncRelated(item.getPword(), item.getCword());
     }
 
     /**
@@ -859,6 +869,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        userStore().syncRelated(pword, cword);
 
         return score;
 
@@ -913,6 +924,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     Log.i(TAG, "addOrUpdateMappingRecord(): mapping exist, update score on existing record; score:"
                             + score);
             }
+            userStore().syncMapping(table, code, word);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -955,6 +967,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     ContentValues cv = new ContentValues();
                     cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
                     db.update(Lime.DB_RELATED, cv, FIELD_ID + " = " + srcunit.getId(), null);
+                    userStore().syncRelatedById(Long.parseLong(srcunit.getId()));
 
                     // Log.i("TAG RELATED B", srcunit.getId() + " : Related ADD Score :" + score);
 
@@ -983,6 +996,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     // Jeremy 11',7,29 update according to word instead of ID, may have multiple
                     // records mathing word but with diff code/id
                     db.update(tablename, cv, FIELD_WORD + " = ?", new String[] { srcunit.getWord() });
+                    userStore().syncMappingWord(tablename, srcunit.getWord());
                 }
             }
         } catch (Exception e) {
@@ -1286,6 +1300,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         db.execSQL("detach database sourceDB");
         restoreLearnedRelated(learned);
         unHoldDBConnection();
+        userStore().resyncAllRelated();
         return true;
     }
 
@@ -1411,6 +1426,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         if (!checkDBConnection())
             return;
         db.delete(Lime.DB_RELATED, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?", new String[] { pword, cword });
+        userStore().syncRelated(pword, cword);
     }
 
     public int backupUserRecords(final String table) {
@@ -2894,7 +2910,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
+    // 備忘錄搬到 user.db 之後只存那裡;還沒搬過才寫 lime.db(之後搬遷會一起複製)
     public long insertMemo(String content, int pinned) {
+        Long stored = userStore().insertMemo(this, content, pinned);
+        if (stored != null)
+            return stored;
         if (!checkDBConnection())
             return -1;
         ContentValues cv = new ContentValues();
@@ -2905,6 +2925,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     public List<MemoObj> getMemos() {
+        List<MemoObj> stored = userStore().getMemos(this);
+        if (stored != null)
+            return stored;
         List<MemoObj> list = new ArrayList<>();
         if (!checkDBConnection())
             return list;
@@ -2934,12 +2957,18 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     public int deleteMemo(int id) {
+        Integer stored = userStore().deleteMemo(this, id);
+        if (stored != null)
+            return stored;
         if (!checkDBConnection())
             return -1;
         return db.delete("memo", "_id = ?", new String[]{String.valueOf(id)});
     }
 
     public int updateMemoPin(int id, int pinned) {
+        Integer stored = userStore().updateMemoPin(this, id, pinned);
+        if (stored != null)
+            return stored;
         if (!checkDBConnection())
             return -1;
         ContentValues cv = new ContentValues();
@@ -2948,6 +2977,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     public int updateMemoContent(int id, String content) {
+        Integer stored = userStore().updateMemoContent(this, id, content);
+        if (stored != null)
+            return stored;
         if (!checkDBConnection())
             return -1;
         ContentValues cv = new ContentValues();
