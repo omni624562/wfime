@@ -297,6 +297,10 @@ public class LIMEService extends InputMethodService implements
         // Initialize Global Package Name for paths
 
         SearchSrv = new SearchServer(this);
+        // 第一次啟動時把使用者資料複製到 user.db(只讀 lime.db、不改);已搬過或資料庫鎖定中會直接略過
+        new Thread(() -> new net.toload.main.hd.limedb.UserDataStore(getApplicationContext())
+                .migrateIfNeeded(new net.toload.main.hd.limedb.LimeDB(getApplicationContext())),
+                "UserDataMigration").start();
         mEnglishOnly = false;
         mEnglishFlagShift = false;
 
