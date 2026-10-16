@@ -549,7 +549,9 @@ public class SetupImLoadDialog extends DialogFragment {
                         handler.updateProgress(
                                 activity.getResources().getString(R.string.setup_im_restore_learning_data));
                         handler.updateProgress(0);
-                        boolean check = datasource.checkBackuptable(imtype);
+                        // 先從 user.db 套回;user.db 還沒搬過才用舊的 table_user 備份表
+                        boolean check = datasource.restoreLearnedFromUserData(imtype) < 0
+                                && datasource.checkBackuptable(imtype);
                         handler.updateProgress(5);
 
                         if (check) {

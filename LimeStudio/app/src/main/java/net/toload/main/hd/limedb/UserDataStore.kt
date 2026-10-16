@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteStatement
 import android.util.Log
 import androidx.core.database.sqlite.transaction
+import net.toload.main.hd.data.Word
 import java.io.File
 
 /**
@@ -421,6 +422,44 @@ class UserDataStore(context: Context) {
             } finally {
                 out.endTransaction()
             }
+        }
+    }
+
+    /** 匯入字庫後：匯入檔自帶分數（score > 0）的列收進 user.db，同一組取較高分。 */
+    fun absorbIm(im: String?) {
+        if (im == null || im !in IM_TABLES) return
+        write("absorbIm") { src, out ->
+            out.transaction {
+                val insert = compileStatement(
+                    "INSERT OR IGNORE INTO learned_mapping (im, code, code3r, word, score) VALUES (?, ?, ?, ?, ?)"
+                )
+                val raise = compileStatement(
+                    "UPDATE learned_mapping SET score = MAX(score, ?) WHERE im = ? AND code = ? AND word = ?"
+                )
+                copyMapping(src, im, im, HashSet(), insert, raise)
+                insert.close()
+                raise.close()
+            }
+        }
+    }
+
+    /** 這個輸入法學過的字碼（匯入字庫後套回 lime.db 用）；還沒搬過回傳 null。 */
+    fun learnedMapping(im: String?): List<Word>? {
+        return synchronized(LOCK) {
+            val out = openIfMigrated() ?: return null
+            val list = ArrayList<Word>()
+            if (im == null || im !in IM_TABLES) return list
+            out.rawQuery("SELECT code, code3r, word, score FROM learned_mapping WHERE im = ?", arrayOf(im)).use { c ->
+                while (c.moveToNext()) {
+                    val w = Word()
+                    w.code = c.getString(0)
+                    w.setCode3r(c.getString(1))
+                    w.word = c.getString(2)
+                    w.score = c.getInt(3)
+                    list.add(w)
+                }
+            }
+            list
         }
     }
 

@@ -1347,6 +1347,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
         db.execSQL("detach database sourceDB");
         unHoldDBConnection();
+        userStore().absorbIm(validatedImType);
         return true;
     }
 
@@ -1414,6 +1415,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             unHoldDBConnection();
         }
 
+        userStore().absorbIm(validatedImType);
         return countMapping(validatedImType);
     }
 
@@ -1478,6 +1480,47 @@ public class LimeDB extends LimeSQLiteOpenHelper {
             }
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * 匯入字庫後把 user.db 裡這個輸入法學過的字碼套回:字庫已有的列取較高分,沒有的整列補上。
+     * 回傳套回筆數;user.db 還沒搬過回傳 -1(呼叫端改用舊的 table_user 備份表)。
+     */
+    public synchronized int restoreLearnedFromUserData(String imtype) {
+        if (!checkDBConnection())
+            return -1;
+        String table = validateTableName(imtype);
+        List<Word> learned = userStore().learnedMapping(table);
+        if (learned == null)
+            return -1;
+        db.beginTransaction();
+        try {
+            for (Word w : learned) {
+                db.execSQL("UPDATE " + table + " SET " + FIELD_SCORE + " = MAX(" + FIELD_SCORE + ", ?) WHERE "
+                        + FIELD_CODE + " = ? AND " + FIELD_WORD + " = ?",
+                        new Object[] { w.getScore(), w.getCode(), w.getWord() });
+                if (!isMappingExist(table, w.getCode(), w.getWord())) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(FIELD_CODE, w.getCode());
+                    if (table.equals("phonetic"))
+                        cv.put(FIELD_NO_TONE_CODE, w.getCode().replaceAll("[ 3467]", ""));
+                    cv.put(FIELD_WORD, w.getWord());
+                    cv.put(FIELD_SCORE, w.getScore());
+                    db.insert(table, null, cv);
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        return learned.size();
+    }
+
+    private boolean isMappingExist(String table, String code, String word) {
+        try (Cursor c = db.rawQuery("SELECT 1 FROM " + table + " WHERE " + FIELD_CODE + " = ? AND "
+                + FIELD_WORD + " = ? LIMIT 1", new String[] { code, word })) {
+            return c.moveToFirst();
         }
     }
 
@@ -1856,6 +1899,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     unHoldDBConnection();
 
                 }
+                // 文字檔可能自帶分數:收進 user.db
+                userStore().absorbIm(table);
 
                 // TODO: do phrase table learning here.
                 // Fill IM information into the IM Table

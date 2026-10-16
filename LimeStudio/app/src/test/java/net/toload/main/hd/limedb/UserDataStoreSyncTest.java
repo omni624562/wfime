@@ -212,6 +212,94 @@ public class UserDataStoreSyncTest {
         assertTrue(userMapping().contains("phonetic|u4|u|意|6|"));
     }
 
+    // 用 lime.db 同結構建一份來源字庫檔(只有一張表),rows 為 {code, code3r, word, score}
+    private File sourceDb(String name, String srcTable, String likeTable, String[][] rows) {
+        File src = new File(context.getCacheDir(), name);
+        src.delete();
+        db.execSQL("ATTACH DATABASE ? AS s", new Object[]{src.getPath()});
+        db.execSQL("CREATE TABLE s." + srcTable + " AS SELECT * FROM main." + likeTable + " WHERE 0");
+        for (String[] r : rows)
+            db.execSQL("INSERT INTO s." + srcTable + " (code, code3r, word, score) VALUES (?, ?, ?, ?)",
+                    new Object[]{r[0], r[1], r[2], Integer.parseInt(r[3])});
+        db.execSQL("DETACH DATABASE s");
+        return src;
+    }
+
+    private List<String> limeLearned(String table) {
+        return rows(db, "SELECT code, code3r, word, score FROM " + table + " WHERE score > 0 ORDER BY code, word");
+    }
+
+    @Test
+    public void importDictionaryThenRestoreFromUserDb() {
+        insert("dayi", "nh12", null, "詹智", 2);              // 自己學的新詞
+        assertNotNull(store.migrateIfNeeded(limeDb));
+        // 換一份新字庫:原本的字都在但分數 0,新詞沒有;另有一筆字庫自帶分數
+        File src = sourceDb("dayi_new.db", "dayi", "dayi", new String[][]{
+                {"d", null, "日", "0"}, {"d", null, "曰", "0"}, {"ujn", null, "前", "0"}, {"x", null, "新", "5"}});
+        assertTrue(limeDb.importDb(src.getPath(), "dayi") > 0);
+        assertEquals(Collections.singletonList("x|null|新|5|"), limeLearned("dayi"));
+        assertTrue(userMapping().contains("dayi|x|null|新|5|"));   // 字庫自帶分數收進 user.db
+
+        assertEquals(4, limeDb.restoreLearnedFromUserData("dayi"));
+        // 已有的列套回分數、沒有的(新學詞、舊備份表的字)整列補上
+        assertEquals(java.util.Arrays.asList("a1|null|信|7|", "d|null|曰|3|", "nh12|null|詹智|2|", "x|null|新|5|"),
+                limeLearned("dayi"));
+        assertEquals(1, rows(db, "SELECT 1 FROM dayi WHERE code = 'd' AND word = '曰'").size()); // 不重複插入
+        assertMirrorsLime();
+    }
+
+    @Test
+    public void restoreKeepsHigherDictionaryScoreAndFillsCode3r() {
+        insert("phonetic", "u4", "u", "意", 3);
+        insert("phonetic", "u4", "u", "義", 1);
+        assertNotNull(store.migrateIfNeeded(limeDb));
+        File src = sourceDb("phonetic_new.db", "phonetic", "phonetic", new String[][]{{"u4", "u", "義", "6"}});
+        assertTrue(limeDb.importDb(src.getPath(), "phonetic") > 0);
+        assertEquals(2, limeDb.restoreLearnedFromUserData("phonetic"));
+        // 字庫分數較高的不降回去;補回的列算出 code3r
+        assertEquals(java.util.Arrays.asList("u4|u|意|3|", "u4|u|義|6|"), limeLearned("phonetic"));
+        assertMirrorsLime();
+    }
+
+    @Test
+    public void customDbImportAbsorbsScores() {
+        db.execSQL("DROP TABLE IF EXISTS custom");
+        db.execSQL("CREATE TABLE custom AS SELECT * FROM dayi WHERE 0");
+        assertNotNull(store.migrateIfNeeded(limeDb));
+        File src = sourceDb("custom_new.db", "custom", "custom", new String[][]{{"ab", null, "甲", "4"}});
+        db.execSQL("ATTACH DATABASE ? AS s", new Object[]{src.getPath()});
+        db.execSQL("CREATE TABLE s.im AS SELECT * FROM main.im WHERE 0");
+        db.execSQL("DETACH DATABASE s");
+        assertTrue(limeDb.importBackupDb(src, "custom"));
+        assertTrue(userMapping().contains("custom|ab|null|甲|4|"));
+    }
+
+    @Test
+    public void textFileImportAbsorbsScores() throws Exception {
+        assertNotNull(store.migrateIfNeeded(limeDb));
+        File txt = new File(context.getCacheDir(), "dayi_new.lime");
+        try (java.io.Writer w = new java.io.OutputStreamWriter(new java.io.FileOutputStream(txt),
+                java.nio.charset.StandardCharsets.UTF_8)) {
+            w.write("d|曰|0|0\nx|新|5|0\n");
+        }
+        limeDb.setFilename(txt);
+        limeDb.loadFileV2("dayi", new net.toload.main.hd.global.LIMEProgressListener() {
+            @Override
+            public void onProgress(long a, long b, String s) {
+            }
+        });
+        // 載入在背景執行緒:等 user.db 收到匯入檔自帶的分數
+        long until = System.currentTimeMillis() + 15000;
+        while (!userMapping().contains("dayi|x|null|新|5|") && System.currentTimeMillis() < until)
+            Thread.sleep(100);
+        assertTrue(userMapping().contains("dayi|x|null|新|5|"));
+    }
+
+    @Test
+    public void restoreBeforeMigrationFallsBack() {
+        assertEquals(-1, limeDb.restoreLearnedFromUserData("dayi"));
+    }
+
     @Test
     public void backupTableHigherScoreIsKept() {
         insert("dayi", "a1", null, "信", 0);                  // 主表有、沒學過;舊備份表是 7 分
