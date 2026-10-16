@@ -3557,6 +3557,11 @@ public class LIMEService extends InputMethodService implements
                 clearSuggestions(); // Clears internal lists
                 hasCandidatesShown = false; // Reset flag
                 mLastSuggestionsCode = null; // 候選清單已不是任何組字碼的結果
+                // 連打途中把剩下的碼刪光:這次連打中斷,之後打的字不再接到前面的詞後面
+                if (LDComposingBuffer.length() > 0) {
+                    LDComposingBuffer = "";
+                    SearchSrv.addLDPhrase(null, true);
+                }
             } else {
                 // Composing still has text
                 // Just update CandidateView composing text
