@@ -445,13 +445,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
-            if (attr == R.styleable.LIMEKeyboardBaseView_keyBackground) {
-                mPainter.mKeyBackground = a.getDrawable(attr);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_actionKeyBackground) {
-                mPainter.mActionKeyBackground = a.getDrawable(attr);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_functionalKeyBackground) {
-                mPainter.mFunctionalKeyBackground = a.getDrawable(attr);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keyHysteresisDistance) {
+            // 畫鍵用的樣式（背景、字級、顏色、陰影）由 KeyPainter 解讀
+            if (mPainter.applyStyleAttribute(a, attr))
+                continue;
+            if (attr == R.styleable.LIMEKeyboardBaseView_keyHysteresisDistance) {
                 mKeyHysteresisDistance = a.getDimensionPixelOffset(attr, 0);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_verticalCorrection) {
                 mVerticalCorrection = a.getDimensionPixelOffset(attr, 0);
@@ -461,53 +458,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                 mPreviewOffset = a.getDimensionPixelOffset(attr, 0);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_keyPreviewHeight) {
                 mPreviewHeight = a.getDimensionPixelSize(attr, 80);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextSize) {
-                mPainter.mKeyTextSize = a.getDimensionPixelSize(attr, 18);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_functionKeyTextColorNormal) {
-                mPainter.mFunctionKeyTextColorNormal = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_functionKeyTextColorPressed) {
-                mPainter.mFunctionKeyTextColorPressed = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextColorNormal) {
-                mPainter.mKeyTextColorNormal = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextColorPressed) {
-                mPainter.mKeyTextColorPressed = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keySubLabelTextColorNormal) {
-                mPainter.mKeySubLabelTextColorNormal = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keySubLabelTextColorPressed) {
-                mPainter.mKeySubLabelTextColorPressed = a.getColor(attr, 0xFF000000);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_labelTextSize) {
-                mPainter.mLabelTextSize = a.getDimensionPixelSize(attr, 14);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_smallLabelTextSize) { // Jeremy '11,8,11
-                mPainter.mSmallLabelTextSize = a.getDimensionPixelSize(attr, 14);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_subLabelTextSize) { // Jeremy '11,8,11
-                mPainter.mSubLabelTextSize = a.getDimensionPixelSize(attr, 14);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_popupLayout) {
                 mPopupLayout = a.getResourceId(attr, 0);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_popupHint) {
-                mPainter.mPopupHint = a.getDrawable(attr);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_shadowColor) {
-                mPainter.mShadowColor = a.getColor(attr, 0);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_shadowRadius) {
-                mPainter.mShadowRadius = a.getFloat(attr, 0f);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_spacePreviewTopPadding) { // Jeremy 15,7,13
                 mSpacePreviewTopPadding = a.getDimensionPixelSize(attr, 10);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_previewTopPadding) { // Jeremy 15,7,13
                 mPreviewTopPadding = a.getDimensionPixelSize(attr, 0);
             } else if (attr == R.styleable.LIMEKeyboardBaseView_backgroundDimAmount) {
                 mBackgroundDimAmount = a.getFloat(attr, 0.5f);
-            } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextStyle) {
-                int textStyle = a.getInt(attr, 0);
-                switch (textStyle) {
-                    case 0:
-                        mPainter.mKeyTextStyle = Typeface.DEFAULT;
-                        break;
-                    case 1:
-                        mPainter.mKeyTextStyle = Typeface.DEFAULT_BOLD;
-                        break;
-                    default:
-                        mPainter.mKeyTextStyle = Typeface.defaultFromStyle(textStyle);
-                        break;
-                }
             }
         }
 
@@ -553,14 +511,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         mMiniKeyboardPopup.setAnimationStyle(R.style.MiniKeyboardAnimation);
 
-        mPainter.mPaint = new Paint();
-        mPainter.mPaint.setAntiAlias(true);
-        mPainter.mPaint.setTextSize(keyTextSize);
-        mPainter.mPaint.setTextAlign(Align.CENTER);
-        mPainter.mPaint.setAlpha(255);
-
-        mPainter.mPadding = new Rect(0, 0, 0, 0);
-        mPainter.mKeyBackground.getPadding(mPainter.mPadding);
+        mPainter.finishStyle(keyTextSize);
 
         mSwipeThreshold = (int) (500 * res.getDisplayMetrics().density);
         // TODO: Refer frameworks/base/core/res/res/values/config.xml

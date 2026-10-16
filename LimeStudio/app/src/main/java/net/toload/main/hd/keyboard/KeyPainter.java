@@ -1,5 +1,6 @@
 package net.toload.main.hd.keyboard;
 
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -8,6 +9,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key;
+
+import net.toload.main.hd.R;
 
 import java.util.HashMap;
 
@@ -51,6 +54,74 @@ final class KeyPainter {
     // size as map key.
     final HashMap<Integer, Integer> mTextHeightCache = new HashMap<>();
     final HashMap<Integer, Integer> mTextWidthCache = new HashMap<>();
+
+    /**
+     * 解讀鍵盤主題裡畫鍵用的一個樣式屬性（背景、字級、顏色、陰影、圖示）；
+     * 是畫鍵用的屬性就回傳 true。從 LIMEKeyboardBaseView 建構子原樣搬出，新舊鍵盤共用。
+     */
+    boolean applyStyleAttribute(TypedArray a, int attr) {
+        if (attr == R.styleable.LIMEKeyboardBaseView_keyBackground) {
+            mKeyBackground = a.getDrawable(attr);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_actionKeyBackground) {
+            mActionKeyBackground = a.getDrawable(attr);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_functionalKeyBackground) {
+            mFunctionalKeyBackground = a.getDrawable(attr);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextSize) {
+            mKeyTextSize = a.getDimensionPixelSize(attr, 18);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_functionKeyTextColorNormal) {
+            mFunctionKeyTextColorNormal = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_functionKeyTextColorPressed) {
+            mFunctionKeyTextColorPressed = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextColorNormal) {
+            mKeyTextColorNormal = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextColorPressed) {
+            mKeyTextColorPressed = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keySubLabelTextColorNormal) {
+            mKeySubLabelTextColorNormal = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keySubLabelTextColorPressed) {
+            mKeySubLabelTextColorPressed = a.getColor(attr, 0xFF000000);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_labelTextSize) {
+            mLabelTextSize = a.getDimensionPixelSize(attr, 14);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_smallLabelTextSize) { // Jeremy '11,8,11
+            mSmallLabelTextSize = a.getDimensionPixelSize(attr, 14);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_subLabelTextSize) { // Jeremy '11,8,11
+            mSubLabelTextSize = a.getDimensionPixelSize(attr, 14);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_popupHint) {
+            mPopupHint = a.getDrawable(attr);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_shadowColor) {
+            mShadowColor = a.getColor(attr, 0);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_shadowRadius) {
+            mShadowRadius = a.getFloat(attr, 0f);
+        } else if (attr == R.styleable.LIMEKeyboardBaseView_keyTextStyle) {
+            int textStyle = a.getInt(attr, 0);
+            switch (textStyle) {
+                case 0:
+                    mKeyTextStyle = Typeface.DEFAULT;
+                    break;
+                case 1:
+                    mKeyTextStyle = Typeface.DEFAULT_BOLD;
+                    break;
+                default:
+                    mKeyTextStyle = Typeface.defaultFromStyle(textStyle);
+                    break;
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    /** 樣式屬性讀完後建立畫筆與鍵背景內距。 */
+    void finishStyle(int keyTextSize) {
+        mPaint = new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setTextSize(keyTextSize);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setAlpha(255);
+
+        mPadding = new Rect(0, 0, 0, 0);
+        mKeyBackground.getPadding(mPadding);
+    }
 
     /** 在 canvas 上畫一個鍵；(kbdPaddingLeft, kbdPaddingTop) 是鍵盤內距。 */
     void drawKey(Canvas canvas, Key key, LIMEBaseKeyboard keyboard, int kbdPaddingLeft, int kbdPaddingTop,
