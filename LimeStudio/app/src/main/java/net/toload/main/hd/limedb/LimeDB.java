@@ -242,6 +242,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private final RelatedStore related = new RelatedStore(this);
     // 字碼表匯入與學習資料備份表,見 MappingImporter
     private final MappingImporter importer = new MappingImporter(this);
+    // 學習(選字加分、新增字碼、從 user.db 套回),見 LearningStore
+    private final LearningStore learning = new LearningStore(this);
 
     /*
      * Initialize LIME database, Context and LIMEPreferenceManager
@@ -698,129 +700,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         addOrUpdateMappingRecord(this.tablename, code, word, -1);
     }
 
-    /**
-     * Add new mapping into current table
-     */
-    // Jeremy '11, 7, 31 add new phrase mapping into current table (for LD phrase
-    // learning).
     public synchronized void addOrUpdateMappingRecord(String table, String code, String word, int score) {
-        // String code = preProcessingRemappingCode(raw_code); //Jeremy '12,6,4 the code
-        // is build from mapping.getcode() should not do remap again.
-        if (DEBUG)
-            Log.i(TAG, "addOrUpdateMappingRecord(), code = '" + code + "'. word=" + word + ", score =" + score);
-        // Jeremy '12,4,17 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return;
-
-        try {
-            // 表名來自呼叫端(例如還原學習紀錄時的輸入法代碼),會串進 SQL,先驗證
-            table = validateTableName(table);
-            Mapping munit = isMappingExistOnDB(db, table, code, word);
-            ContentValues cv = new ContentValues();
-
-            if (munit == null) {
-                if (code.length() > 0 && word.length() > 0) {
-
-                    cv.put(FIELD_CODE, code);
-                    if (table.equals("phonetic")) {
-                        String noToneCode = code.replaceAll("[ 3467]", "");
-                        cv.put(FIELD_NO_TONE_CODE, noToneCode);// Jeremy '12,6,1, add missing space
-                    }
-                    cv.put(FIELD_WORD, word);
-                    cv.put(FIELD_SCORE, (score == -1) ? 1 : score);
-                    db.insert(table, null, cv);
-
-                    if (DEBUG)
-                        Log.i(TAG, "addOrUpdateMappingRecord(): mapping does not exist, new record inserted");
-                }
-
-            } else {// the item exist in preload related database.
-
-                int newScore = (score == -1) ? munit.getScore() + 1 : score;
-                cv.put(FIELD_SCORE, newScore);
-                db.update(table, cv, FIELD_ID + " = " + munit.getId(), null);
-                if (DEBUG)
-                    Log.i(TAG, "addOrUpdateMappingRecord(): mapping exist, update score on existing record; score:"
-                            + score);
-            }
-            userStore().syncMapping(table, code, word);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        learning.addOrUpdateMappingRecord(table, code, word, score);
     }
 
-    /**
-     * Add score to the mapping item
-     */
     public synchronized void addScore(Mapping srcunit) {
-
-        // Jeremy '12,4,17 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return;
-
-        // Jeremy '11,7,31 even selected from realted list, udpate the corresponding
-        // score in im table.
-        // Jeremy '11,6,12 Id=null denotes selection from related list in im table
-        // Jeremy '11,9,8 query highest score first. Erase relatedlist if new score is
-        // not highest.
-        try {
-
-            if (srcunit != null && srcunit.getWord() != null &&
-                    !srcunit.getWord().trim().equals("")) {
-
-                if (DEBUG)
-                    Log.i(TAG, "addScore(): addScore on word:" + srcunit.getWord());
-
-                if (srcunit.isRelatedPhraseRecord()) {
-
-                    int score;
-                    if (relatedscore.get(srcunit.getId()) == null) {
-                        score = srcunit.getScore() + 1;
-                        relatedscore.put(srcunit.getId(), score);
-                    } else {
-                        score = relatedscore.get(srcunit.getId()) + 1;
-                        relatedscore.put(srcunit.getId(), score);
-                    }
-
-                    ContentValues cv = new ContentValues();
-                    cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
-                    db.update(Lime.DB_RELATED, cv, FIELD_ID + " = " + srcunit.getId(), null);
-                    userStore().syncRelatedById(Long.parseLong(srcunit.getId()));
-
-                    // Log.i("TAG RELATED B", srcunit.getId() + " : Related ADD Score :" + score);
-
-                } else {
-                    int newScore = srcunit.getScore() + 1;
-                    if (srcunit.getCode() != null && !srcunit.getCode().trim().equals("")) {
-                        try {
-                            Cursor maxCursor = db.rawQuery("SELECT MAX(" + FIELD_SCORE + ") FROM " + tablename 
-                                    + " WHERE " + FIELD_CODE + " = ?", new String[] { srcunit.getCode() });
-                            if (maxCursor != null) {
-                                if (maxCursor.moveToFirst()) {
-                                    int maxScore = maxCursor.getInt(0);
-                                    if (maxScore >= newScore) {
-                                        newScore = maxScore + 1;
-                                    }
-                                }
-                                maxCursor.close();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    ContentValues cv = new ContentValues();
-                    cv.put(FIELD_SCORE, newScore);
-                    // Jeremy 11',7,29 update according to word instead of ID, may have multiple
-                    // records mathing word but with diff code/id
-                    db.update(tablename, cv, FIELD_WORD + " = ?", new String[] { srcunit.getWord() });
-                    userStore().syncMappingWord(tablename, srcunit.getWord());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        learning.addScore(srcunit);
     }
     // Add by jeremy '10, 4, 1. For reverse lookup
 
@@ -1043,86 +928,16 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
-    /**
-     * 匯入字庫後把 user.db 裡這個輸入法學過的字碼套回:字庫已有的列取較高分,沒有的整列補上。
-     * 回傳套回筆數;user.db 還沒搬過回傳 -1(呼叫端改用舊的 table_user 備份表)。
-     */
     public synchronized int restoreLearnedFromUserData(String imtype) {
-        if (!checkDBConnection())
-            return -1;
-        String table = validateTableName(imtype);
-        List<Word> learned = userStore().learnedMapping(table);
-        if (learned == null)
-            return -1;
-        db.beginTransaction();
-        try {
-            for (Word w : learned) {
-                db.execSQL("UPDATE " + table + " SET " + FIELD_SCORE + " = MAX(" + FIELD_SCORE + ", ?) WHERE "
-                        + FIELD_CODE + " = ? AND " + FIELD_WORD + " = ?",
-                        new Object[] { w.getScore(), w.getCode(), w.getWord() });
-                if (!isMappingExist(table, w.getCode(), w.getWord())) {
-                    ContentValues cv = new ContentValues();
-                    cv.put(FIELD_CODE, w.getCode());
-                    if (table.equals("phonetic"))
-                        cv.put(FIELD_NO_TONE_CODE, w.getCode().replaceAll("[ 3467]", ""));
-                    cv.put(FIELD_WORD, w.getWord());
-                    cv.put(FIELD_SCORE, w.getScore());
-                    db.insert(table, null, cv);
-                }
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-        return learned.size();
+        return learning.restoreLearnedFromUserData(imtype);
     }
 
-    /**
-     * 匯入「我的資料」後套回:已載入的輸入法(表裡有字)套回字碼,關聯字全部套回
-     * (已有的取較高分,沒有的補上,補上的是自建關聯字)。還沒載入的輸入法之後匯入時再套回。
-     */
     public synchronized void restoreAllFromUserData() {
-        if (!checkDBConnection())
-            return;
-        for (String im : new String[] { Lime.DB_TABLE_DAYI, Lime.DB_TABLE_PHONETIC, Lime.DB_TABLE_CUSTOM }) {
-            if (countMapping(im) > 0)
-                restoreLearnedFromUserData(im);
-        }
-        List<String[]> learned = userStore().learnedRelated();
-        if (learned == null)
-            return;
-        int added = 0;
-        db.beginTransaction();
-        try {
-            for (String[] r : learned) {
-                db.execSQL("UPDATE " + Lime.DB_RELATED + " SET " + FIELD_DIC_score + " = MAX(" + FIELD_DIC_score
-                        + ", ?) WHERE " + FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?",
-                        new Object[] { Integer.parseInt(r[2]), r[0], r[1] });
-                if (isRelatedPhraseExistOnDB(db, r[0], r[1]) == null) {
-                    ContentValues cv = new ContentValues();
-                    cv.put(Lime.DB_RELATED_COLUMN_PWORD, r[0]);
-                    cv.put(Lime.DB_RELATED_COLUMN_CWORD, r[1]);
-                    cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, Integer.parseInt(r[2]));
-                    db.insert(Lime.DB_RELATED, null, cv);
-                    added++;
-                }
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-        relatedscore.clear();
-        if (added > 0) {
-            int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
-            mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal + added));
-        }
+        learning.restoreAllFromUserData();
     }
 
     private boolean isMappingExist(String table, String code, String word) {
-        try (Cursor c = db.rawQuery("SELECT 1 FROM " + table + " WHERE " + FIELD_CODE + " = ? AND "
-                + FIELD_WORD + " = ? LIMIT 1", new String[] { code, word })) {
-            return c.moveToFirst();
-        }
+        return learning.isMappingExist(table, code, word);
     }
 
     public Cursor listBackupRecords(String table) {
@@ -1158,7 +973,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * Check if the specific mapping exists in current table
      */
-    private Mapping isMappingExistOnDB(SQLiteDatabase db, String table, String code, String word)
+    Mapping isMappingExistOnDB(SQLiteDatabase db, String table, String code, String word)
             {
         if (DEBUG)
             Log.i(TAG, "isMappingExistOnDB(), code = '" + code + "'");
@@ -1369,7 +1184,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return related.isRelatedPhraseExist(pword, cword);
     }
 
-    private Mapping isRelatedPhraseExistOnDB(SQLiteDatabase db, String pword, String cword) {
+    Mapping isRelatedPhraseExistOnDB(SQLiteDatabase db, String pword, String cword) {
         return related.isRelatedPhraseExistOnDB(db, pword, cword);
     }
 
