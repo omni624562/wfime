@@ -628,6 +628,15 @@ fun KeyboardSettingsSection(
                 checked = uiState.numberRowInEnglish,
                 onCheckedChange = { viewModel.setNumberRowInEnglish(it) }
             )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
+            SwitchPreference(
+                title = stringResource(R.string.experimental_compose_keyboard),
+                summary = stringResource(R.string.experimental_compose_keyboard_summary),
+                checked = uiState.experimentalComposeKeyboard,
+                onCheckedChange = { viewModel.setExperimentalComposeKeyboard(it) }
+            )
         }
 
         // Group 3: 鍵盤互動與回饋

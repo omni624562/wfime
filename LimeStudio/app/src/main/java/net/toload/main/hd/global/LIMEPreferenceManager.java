@@ -106,6 +106,11 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("auto_backup_user_data", true);
     }
 
+    // 新版鍵盤(Compose 繪製,實驗中;預設關)
+    public boolean getExperimentalComposeKeyboard() {
+        return sp.getBoolean("experimental_compose_keyboard", false);
+    }
+
     // 自動備份剛還原 user.db、還沒套回 lime.db(設定檔不在備份範圍,所以只會是這台機器寫的)
     public boolean getUserDataRestored() {
         return sp.getBoolean("user_data_restored", false);
