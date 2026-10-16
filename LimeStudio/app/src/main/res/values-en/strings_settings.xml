@@ -32,6 +32,14 @@
     <string name="related_manager_entry_summary">View, delete or clear learned related phrases</string>
     <string name="related_import_entry">Import related phrases</string>
     <string name="related_import_entry_summary">Import the default dictionary or a .limedb related phrase file. Learned related phrases are kept</string>
+    <string name="user_data_export_entry">Export my data</string>
+    <string name="user_data_export_entry_summary">Save learned words, related phrases, memos and smart selection records to one file to import on a new phone</string>
+    <string name="user_data_import_entry">Import my data</string>
+    <string name="user_data_import_entry_summary">Merge an exported data file. Your current data is kept</string>
+    <string name="user_data_export_done">Exported. Words: %1$d, related phrases: %2$d, memos: %3$d</string>
+    <string name="user_data_export_failed">Export failed</string>
+    <string name="user_data_import_done">Imported. New words: %1$d, new related phrases: %2$d, new memos: %3$d</string>
+    <string name="user_data_import_failed">Import failed: not a WFIME data file, or the file is damaged</string>
     <string name="related_manager_title">User related phrases</string>
     <plurals name="related_manager_count">
         <item quantity="one">%1$d entry</item>

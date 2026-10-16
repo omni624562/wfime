@@ -247,29 +247,9 @@ public class SmartSelectionManager {
             }
         }
 
-        JSONObject root = new JSONObject();
+        JSONObject root;
         try {
-            for (Map.Entry<String, Map<String, CandidateStats>> entry : snapshot.entrySet()) {
-                String code = entry.getKey();
-                JSONObject wordsObj = new JSONObject();
-                for (Map.Entry<String, CandidateStats> wordEntry : entry.getValue().entrySet()) {
-                    String word = wordEntry.getKey();
-                    CandidateStats stats = wordEntry.getValue();
-
-                    JSONObject statsObj = new JSONObject();
-                    statsObj.put("count", stats.count);
-                    statsObj.put("last", stats.last);
-
-                    JSONObject prevObj = new JSONObject();
-                    for (Map.Entry<String, Integer> prevEntry : stats.prev.entrySet()) {
-                        prevObj.put(prevEntry.getKey(), prevEntry.getValue());
-                    }
-                    statsObj.put("prev", prevObj);
-
-                    wordsObj.put(word, statsObj);
-                }
-                root.put(code, wordsObj);
-            }
+            root = toJson(snapshot);
         } catch (JSONException e) {
             Log.e(TAG, "Error building JSON to save", e);
             return;
@@ -297,6 +277,89 @@ public class SmartSelectionManager {
                 }
             }
         }
+    }
+
+    private static JSONObject toJson(Map<String, Map<String, CandidateStats>> map) throws JSONException {
+        JSONObject root = new JSONObject();
+        for (Map.Entry<String, Map<String, CandidateStats>> entry : map.entrySet()) {
+            String code = entry.getKey();
+            JSONObject wordsObj = new JSONObject();
+            for (Map.Entry<String, CandidateStats> wordEntry : entry.getValue().entrySet()) {
+                String word = wordEntry.getKey();
+                CandidateStats stats = wordEntry.getValue();
+
+                JSONObject statsObj = new JSONObject();
+                statsObj.put("count", stats.count);
+                statsObj.put("last", stats.last);
+
+                JSONObject prevObj = new JSONObject();
+                for (Map.Entry<String, Integer> prevEntry : stats.prev.entrySet()) {
+                    prevObj.put(prevEntry.getKey(), prevEntry.getValue());
+                }
+                statsObj.put("prev", prevObj);
+
+                wordsObj.put(word, statsObj);
+            }
+            root.put(code, wordsObj);
+        }
+        return root;
+    }
+
+    /** 匯出「我的資料」用:目前記憶體裡的紀錄(含尚未寫檔的部分)轉成 JSON。 */
+    public synchronized String exportJson() throws JSONException {
+        return toJson(statsMap).toString();
+    }
+
+    /**
+     * 匯入「我的資料」用:合併另一台的紀錄。同一組字取較大的次數與較晚的時間,
+     * 所以重複匯入同一個檔不會累加。回傳合併的筆數。
+     */
+    public synchronized int mergeJson(String json) throws JSONException {
+        JSONObject root = new JSONObject(json);
+        int merged = 0;
+        Iterator<String> codes = root.keys();
+        while (codes.hasNext()) {
+            String code = codes.next();
+            JSONObject wordsObj = root.optJSONObject(code);
+            if (wordsObj == null) continue;
+            Map<String, CandidateStats> wordStats = statsMap.get(code);
+            if (wordStats == null) {
+                wordStats = new HashMap<>();
+                statsMap.put(code, wordStats);
+            }
+            Iterator<String> words = wordsObj.keys();
+            while (words.hasNext()) {
+                String word = words.next();
+                JSONObject statsObj = wordsObj.optJSONObject(word);
+                if (statsObj == null) continue;
+                CandidateStats stats = wordStats.get(word);
+                if (stats == null) {
+                    stats = new CandidateStats(0, 0);
+                    wordStats.put(word, stats);
+                    totalEntries++;
+                }
+                stats.count = Math.max(stats.count, statsObj.optInt("count", 0));
+                stats.last = Math.max(stats.last, statsObj.optLong("last", 0));
+                JSONObject prevObj = statsObj.optJSONObject("prev");
+                if (prevObj != null) {
+                    Iterator<String> prevs = prevObj.keys();
+                    while (prevs.hasNext()) {
+                        String prevChar = prevs.next();
+                        int prevCount = prevObj.optInt(prevChar, 0);
+                        Integer old = stats.prev.get(prevChar);
+                        stats.prev.put(prevChar, old == null ? prevCount : Math.max(old, prevCount));
+                    }
+                }
+                merged++;
+            }
+            if (wordStats.isEmpty())
+                statsMap.remove(code);
+        }
+        if (totalEntries > MAX_TOTAL_ENTRIES)
+            trimToCap();
+        isDirty = true;
+        flush();
+        return merged;
     }
 
     private synchronized void loadData() {

@@ -463,6 +463,87 @@ class UserDataStore(context: Context) {
         }
     }
 
+    /** 學過的關聯字（匯入我的資料後套回 lime.db 用）；還沒搬過回傳 null。 */
+    fun learnedRelated(): List<Array<String>>? {
+        return synchronized(LOCK) {
+            val out = openIfMigrated() ?: return null
+            val list = ArrayList<Array<String>>()
+            out.rawQuery("SELECT pword, cword, score FROM learned_related", null).use { c ->
+                while (c.moveToNext()) list.add(arrayOf(c.getString(0), c.getString(1), c.getInt(2).toString()))
+            }
+            list
+        }
+    }
+
+    /** 匯出：把 user.db 的一致快照寫到 dest（不能已存在）。還沒搬過會先搬；失敗回傳 false。 */
+    fun exportTo(limeDb: LimeDB, dest: File): Boolean {
+        return synchronized(LOCK) {
+            memoDb(limeDb) ?: return false
+            // 所有寫入都在這把鎖裡、各自已提交，鎖住時整個檔案就是一致的快照
+            target.copyTo(dest, overwrite = true)
+            true
+        }
+    }
+
+    /**
+     * 匯入：把另一份 user.db 合併進來。同一組字碼、關聯字取較高分，沒有的補上；
+     * 備忘錄內容與建立時間都相同的視為同一則，不重複加入。檔案不對或版本較新回傳 null。
+     */
+    fun mergeFrom(limeDb: LimeDB, src: File): Counts? {
+        return synchronized(LOCK) {
+            if (!isValidUserDb(src)) return null
+            val out = memoDb(limeDb) ?: return null
+            val before = Counts(count(out, "learned_mapping"), count(out, "learned_related"), count(out, "memo"))
+            out.execSQL("ATTACH DATABASE ? AS src", arrayOf<Any>(src.path))
+            try {
+                out.transaction {
+                    execSQL(
+                        "INSERT OR IGNORE INTO learned_mapping (im, code, code3r, word, score) " +
+                                "SELECT im, code, code3r, word, score FROM src.learned_mapping WHERE score > 0"
+                    )
+                    execSQL(
+                        "UPDATE learned_mapping SET score = MAX(score, (SELECT s.score FROM src.learned_mapping s " +
+                                "WHERE s.im = learned_mapping.im AND s.code = learned_mapping.code " +
+                                "AND s.word = learned_mapping.word)) WHERE EXISTS (SELECT 1 FROM src.learned_mapping s " +
+                                "WHERE s.im = learned_mapping.im AND s.code = learned_mapping.code AND s.word = learned_mapping.word)"
+                    )
+                    execSQL(
+                        "INSERT OR IGNORE INTO learned_related (pword, cword, score) " +
+                                "SELECT pword, cword, score FROM src.learned_related WHERE score > 0"
+                    )
+                    execSQL(
+                        "UPDATE learned_related SET score = MAX(score, (SELECT s.score FROM src.learned_related s " +
+                                "WHERE s.pword = learned_related.pword AND s.cword = learned_related.cword)) " +
+                                "WHERE EXISTS (SELECT 1 FROM src.learned_related s " +
+                                "WHERE s.pword = learned_related.pword AND s.cword = learned_related.cword)"
+                    )
+                    execSQL(
+                        "INSERT INTO memo (content, pinned, created_at) SELECT content, pinned, created_at FROM src.memo s " +
+                                "WHERE NOT EXISTS (SELECT 1 FROM memo m WHERE m.content = s.content " +
+                                "AND m.created_at IS s.created_at)"
+                    )
+                }
+            } finally {
+                out.execSQL("DETACH DATABASE src")
+            }
+            Counts(
+                count(out, "learned_mapping") - before.mapping,
+                count(out, "learned_related") - before.related,
+                count(out, "memo") - before.memo
+            )
+        }
+    }
+
+    // 是搬遷完成、版本不比這一版新的 user.db
+    private fun isValidUserDb(file: File): Boolean = try {
+        SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            hasMeta(db, "migrated_at") && db.version in 1..SCHEMA_VERSION &&
+                    hasTable(db, "learned_mapping") && hasTable(db, "learned_related") && hasTable(db, "memo")
+        }
+    } catch (e: Exception) {
+        false
+    }
+
     /** 重設輸入法且不保留學習紀錄：清掉該輸入法學過的字碼。 */
     fun clearIm(im: String?) {
         if (im == null || im !in IM_TABLES) return

@@ -83,6 +83,14 @@
     <string name="related_manager_entry_summary">檢視、刪除或清空已學習的關聯字</string>
     <string name="related_import_entry">匯入關聯字庫</string>
     <string name="related_import_entry_summary">導入預設字庫或 .limedb 關聯字檔,已學習的關聯字會保留</string>
+    <string name="user_data_export_entry">匯出我的資料</string>
+    <string name="user_data_export_entry_summary">學過的字、關聯字、備忘錄、智慧選字紀錄存成一個檔案，換手機時再匯入</string>
+    <string name="user_data_import_entry">匯入我的資料</string>
+    <string name="user_data_import_entry_summary">合併匯出的資料檔，目前的資料會保留</string>
+    <string name="user_data_export_done">已匯出：字碼 %1$d 筆、關聯字 %2$d 筆、備忘錄 %3$d 則</string>
+    <string name="user_data_export_failed">匯出失敗</string>
+    <string name="user_data_import_done">已匯入：新增字碼 %1$d 筆、關聯字 %2$d 筆、備忘錄 %3$d 則</string>
+    <string name="user_data_import_failed">匯入失敗：不是麥田輸入法的資料檔，或檔案已損壞</string>
     <string name="related_manager_title">自建關聯字管理</string>
     <plurals name="related_manager_count">
         <item quantity="other">共 %1$d 筆</item>

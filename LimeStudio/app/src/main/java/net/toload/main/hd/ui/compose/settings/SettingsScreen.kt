@@ -45,6 +45,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.toload.main.hd.limedb.UserDataBackup
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -320,6 +328,53 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+/**
+ * 匯出／匯入「我的資料」：透過系統檔案選擇器存成或讀入單一 zip 檔，在背景執行緒處理
+ */
+@Composable
+private fun UserDataBackupPreferences() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { UserDataBackup.exportData(context, it) }
+            }
+            val msg = if (r != null) context.getString(R.string.user_data_export_done, r.mapping, r.related, r.memo)
+            else context.getString(R.string.user_data_export_failed)
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+        }
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { UserDataBackup.importData(context, it) }
+            }
+            val msg = if (r != null) context.getString(R.string.user_data_import_done, r.mapping, r.related, r.memo)
+            else context.getString(R.string.user_data_import_failed)
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+        }
+    }
+    ClickablePreference(
+        title = stringResource(R.string.user_data_export_entry),
+        summary = stringResource(R.string.user_data_export_entry_summary),
+        onClick = {
+            val date = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
+            exportLauncher.launch("wfime-userdata-$date.zip")
+        }
+    )
+    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+    ClickablePreference(
+        title = stringResource(R.string.user_data_import_entry),
+        summary = stringResource(R.string.user_data_import_entry_summary),
+        onClick = { importLauncher.launch(arrayOf("application/zip", "application/octet-stream")) }
+    )
 }
 
 /**
@@ -986,6 +1041,10 @@ fun MappingSettingsSection(
                 summary = stringResource(R.string.related_import_entry_summary),
                 onClick = { mainActivity?.importRelated() }
             )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
+            UserDataBackupPreferences()
 
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 

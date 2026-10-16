@@ -1517,6 +1517,47 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return learned.size();
     }
 
+    /**
+     * 匯入「我的資料」後套回:已載入的輸入法(表裡有字)套回字碼,關聯字全部套回
+     * (已有的取較高分,沒有的補上,補上的是自建關聯字)。還沒載入的輸入法之後匯入時再套回。
+     */
+    public synchronized void restoreAllFromUserData() {
+        if (!checkDBConnection())
+            return;
+        for (String im : new String[] { Lime.DB_TABLE_DAYI, Lime.DB_TABLE_PHONETIC, Lime.DB_TABLE_CUSTOM }) {
+            if (countMapping(im) > 0)
+                restoreLearnedFromUserData(im);
+        }
+        List<String[]> learned = userStore().learnedRelated();
+        if (learned == null)
+            return;
+        int added = 0;
+        db.beginTransaction();
+        try {
+            for (String[] r : learned) {
+                db.execSQL("UPDATE " + Lime.DB_RELATED + " SET " + FIELD_DIC_score + " = MAX(" + FIELD_DIC_score
+                        + ", ?) WHERE " + FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?",
+                        new Object[] { Integer.parseInt(r[2]), r[0], r[1] });
+                if (isRelatedPhraseExistOnDB(db, r[0], r[1]) == null) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(Lime.DB_RELATED_COLUMN_PWORD, r[0]);
+                    cv.put(Lime.DB_RELATED_COLUMN_CWORD, r[1]);
+                    cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, Integer.parseInt(r[2]));
+                    db.insert(Lime.DB_RELATED, null, cv);
+                    added++;
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        relatedscore.clear();
+        if (added > 0) {
+            int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
+            mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal + added));
+        }
+    }
+
     private boolean isMappingExist(String table, String code, String word) {
         try (Cursor c = db.rawQuery("SELECT 1 FROM " + table + " WHERE " + FIELD_CODE + " = ? AND "
                 + FIELD_WORD + " = ? LIMIT 1", new String[] { code, word })) {
