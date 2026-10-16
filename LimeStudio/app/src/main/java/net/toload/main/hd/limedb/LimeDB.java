@@ -190,7 +190,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      * @return The validated table name (trimmed and lowercased)
      * @throws IllegalArgumentException if the table name is invalid
      */
-    private static String validateTableName(String tableName) {
+    static String validateTableName(String tableName) {
         if (!isValidTableName(tableName)) {
             throw new IllegalArgumentException("Invalid table name: " + tableName);
         }
@@ -206,31 +206,31 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // 本次鎖定期間是否已提示過「資料庫載入中」,避免每次查詢都跳 Toast
     private static volatile boolean holdNoticeShown = false;
     final LIMEPreferenceManager mLIMEPref;
-    private final Context mContext;
+    final Context mContext;
     // Cache for Related Score
     // Bounded LRU — the IME process is long-lived (foreground service), so an
     // unbounded map would grow monotonically. Evicted entries are recomputed from
     // the USERSCORE column via isRelatedPhraseExistOnDB(), so eviction is lossless.
-    private final java.util.Map<String, Integer> relatedscore = java.util.Collections.synchronizedMap(
+    final java.util.Map<String, Integer> relatedscore = java.util.Collections.synchronizedMap(
             new java.util.LinkedHashMap<String, Integer>(Lime.LIMEDB_CACHE_SIZE, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(java.util.Map.Entry<String, Integer> eldest) {
                     return size() > Lime.LIMEDB_CACHE_SIZE;
                 }
             });
-    private File filename = null;
+    File filename = null;
     String tablename = "custom";
-    private int count = 0;
+    int count = 0;
     // Jeremy '15,5,23 for new progress listener progress status update
-    private int progressPercentageDone = 0;
-    private String progressStatus;
+    int progressPercentageDone = 0;
+    String progressStatus;
     // private Map<String, String> codeDualMap = new HashMap<String, String>();
     // private int ncount = 0;
-    private boolean finish = false;
+    boolean finish = false;
     // private boolean relatedfinish = false;
     // Db loading loadingMappingThread.
-    private Thread loadingMappingThread = null;
-    private boolean threadAborted = false;
+    Thread loadingMappingThread = null;
+    boolean threadAborted = false;
     // Han and Emoji Databases
     private LimeHanConverter hanConverter;
     private EmojiConverter emojiConverter;
@@ -238,6 +238,10 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private final LimeQueryEngine queryEngine = new LimeQueryEngine(this);
     // 輸入法資訊(im 表)與鍵盤設定(keyboard 表),見 ImInfoStore
     private final ImInfoStore imInfo = new ImInfoStore(this);
+    // 關聯字(related 表)的查詢、學習與管理,見 RelatedStore
+    private final RelatedStore related = new RelatedStore(this);
+    // 字碼表匯入與學習資料備份表,見 MappingImporter
+    private final MappingImporter importer = new MappingImporter(this);
 
     /*
      * Initialize LIME database, Context and LIMEPreferenceManager
@@ -610,39 +614,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
-    /**
-     * 清除所有自建關聯字:純自建列(basescore 空)刪除、內建列(basescore>0)使用次數歸零。
-     * 不動 cword IS NULL 的頻率計數列(見 addOrUpdateRelatedPhraseRecord)與內建字典本體。
-     */
     public synchronized void clearUserLearnedRelated() {
-        if (!checkDBConnection())
-            return;
-        mLIMEPref.setTotalUserdictRecords("0");
-        try {
-            db.beginTransaction();
-            ContentValues cv = new ContentValues();
-            cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, 0);
-            db.update(Lime.DB_RELATED, cv,
-                    FIELD_DIC_score + " > 0 AND " + Lime.DB_RELATED_COLUMN_BASESCORE + " > 0 AND "
-                            + FIELD_DIC_cword + " IS NOT NULL",
-                    null);
-            db.delete(Lime.DB_RELATED,
-                    FIELD_DIC_score + " > 0 AND (" + Lime.DB_RELATED_COLUMN_BASESCORE + " IS NULL OR "
-                            + Lime.DB_RELATED_COLUMN_BASESCORE + " <= 0) AND "
-                            + FIELD_DIC_cword + " IS NOT NULL",
-                    null);
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            db.endTransaction();
-        }
-        relatedscore.clear();
-        userStore().resyncAllRelated();
+        related.clearUserLearnedRelated();
     }
 
     // 使用者資料正本 user.db:學習資料寫完 lime.db 後同步過去
-    private UserDataStore userStore() {
+    UserDataStore userStore() {
         return UserDataStore.get(mContext);
     }
 
@@ -653,108 +630,20 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         relatedscore.clear();
     }
 
-    /**
-     * 自建關聯字管理:列出使用者學習過的關聯字(score>0),依使用次數排序。
-     * filter 為空時列出全部;否則以 pword/cword LIKE 過濾(% _ \ 跳脫為字面值)。
-     */
     public List<Related> getUserLearnedRelated(String filter, int limit) {
-        List<Related> result = new ArrayList<>();
-        if (!checkDBConnection())
-            return result;
-        String selection = FIELD_DIC_score + " > 0 AND " + FIELD_DIC_cword + " IS NOT NULL";
-        String[] selectionArgs = null;
-        if (filter != null && !filter.trim().isEmpty()) {
-            String pattern = "%" + filter.trim()
-                    .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
-            selection += " AND (" + FIELD_DIC_pword + " LIKE ? ESCAPE '\\' OR "
-                    + FIELD_DIC_cword + " LIKE ? ESCAPE '\\')";
-            selectionArgs = new String[] { pattern, pattern };
-        }
-        try {
-            Cursor cursor = db.query(Lime.DB_RELATED, null, selection, selectionArgs, null, null,
-                    FIELD_DIC_score + " DESC, " + FIELD_DIC_pword + " ASC", String.valueOf(limit));
-            if (cursor != null)
-                result = Related.getList(cursor); // getList() 會關閉 cursor
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
+        return related.getUserLearnedRelated(filter, limit);
     }
 
-    /**
-     * 自建關聯字管理:自建關聯字總數(score>0,排除頻率計數列)
-     */
     public int countUserLearnedRelated() {
-        if (!checkDBConnection())
-            return 0;
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery("SELECT COUNT(*) FROM " + Lime.DB_RELATED + " WHERE "
-                    + FIELD_DIC_score + " > 0 AND " + FIELD_DIC_cword + " IS NOT NULL", null);
-            if (cursor.moveToFirst())
-                return cursor.getInt(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return 0;
+        return related.countUserLearnedRelated();
     }
 
-    /**
-     * 自建關聯字管理:刪除單筆。內建列(builtIn)只把使用次數歸零保留字典資料;
-     * 純自建列直接刪除並遞減自建字數統計。
-     */
     public synchronized void removeOrResetUserRelated(long id, boolean builtIn) {
-        if (!checkDBConnection())
-            return;
-        String[] pair = userStore().relatedPair(id);
-        try {
-            if (builtIn) {
-                ContentValues cv = new ContentValues();
-                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, 0);
-                db.update(Lime.DB_RELATED, cv, FIELD_ID + " = ?", new String[] { String.valueOf(id) });
-            } else {
-                db.delete(Lime.DB_RELATED, FIELD_ID + " = ?", new String[] { String.valueOf(id) });
-                int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
-                if (dictotal > 0)
-                    mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal - 1));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        relatedscore.remove(String.valueOf(id));
-        if (pair != null)
-            userStore().syncRelated(pair[0], pair[1]);
+        related.removeOrResetUserRelated(id, builtIn);
     }
 
-    /**
-     * 自建關聯字管理:復原剛刪除的單筆(Snackbar 復原用)。
-     * 內建列還原使用次數;純自建列重新插入(basescore 留空以維持自建判別)。
-     */
     public synchronized void restoreUserRelated(Related item) {
-        if (item == null || !checkDBConnection())
-            return;
-        try {
-            ContentValues cv = new ContentValues();
-            if (item.getBasescore() > 0) {
-                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, item.getUserscore());
-                db.update(Lime.DB_RELATED, cv, FIELD_ID + " = ?",
-                        new String[] { String.valueOf(item.getId()) });
-            } else {
-                cv.put(Lime.DB_RELATED_COLUMN_PWORD, item.getPword());
-                cv.put(Lime.DB_RELATED_COLUMN_CWORD, item.getCword());
-                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, item.getUserscore());
-                db.insert(Lime.DB_RELATED, null, cv);
-                int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
-                mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal + 1));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        relatedscore.remove(String.valueOf(item.getId()));
-        userStore().syncRelated(item.getPword(), item.getCword());
+        related.restoreUserRelated(item);
     }
 
     /**
@@ -802,79 +691,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      */
 
     public synchronized int addOrUpdateRelatedPhraseRecord(String pword, String cword) {
-
-        // Jeremy '12,4,17 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return -1;
-
-        // Jeremy '11,6,12
-        // Return if not learing related words and cword is not null (recording word
-        // frequency in IM relatedlist field)
-        if (!mLIMEPref.getLearnRelatedWord() && cword != null)
-            return -1;
-
-        // Remove all the chinese symbols from the related words
-        if (mLIMEPref.getLearnRelatedWord() && cword != null) {
-            try {
-                // Remove Punctutation
-                String[] chinesesymbols = ChineseSymbol.chineseSymbols.split("\\|");
-                for (String s : chinesesymbols) {
-                    cword = cword.replace(s, "");
-                    if (cword.isEmpty()) {
-                        return -1;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        int dictotal = Integer.parseInt(mLIMEPref.getTotalUserdictRecords());
-
-        if (DEBUG)
-            Log.i(TAG,
-                    "addOrUpdateRelatedPhraseRecord(): pword:" + pword + " cword:" + cword + "dictotoal:" + dictotal);
-
-        int score = 1;
-
-        ContentValues cv = new ContentValues();
-        try {
-            Mapping munit = this.isRelatedPhraseExistOnDB(db, pword, cword);
-
-            if (munit == null) {
-                cv.put(Lime.DB_RELATED_COLUMN_PWORD, pword);
-                cv.put(Lime.DB_RELATED_COLUMN_CWORD, cword);
-                // cv.put(Lime.DB_RELATED_COLUMN_SCORE, score); leave this field null so as we
-                // can distinguish records learned from user. Jeremy '15,6,3
-                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
-                db.insert(Lime.DB_RELATED, null, cv);
-                dictotal++;
-                mLIMEPref.setTotalUserdictRecords(String.valueOf(dictotal));
-                if (DEBUG)
-                    Log.i(TAG, "addOrUpdateRelatedPhraseRecord(): new record, dictotal:" + dictotal);
-            } else {// the item exist in preload related database.
-                if (relatedscore.get(munit.getId()) == null) {
-                    score = munit.getScore() + 1;
-                    relatedscore.put(munit.getId(), score);
-                } else {
-                    score = relatedscore.get(munit.getId()) + 1;
-                    relatedscore.put(munit.getId(), score);
-                }
-                cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
-                db.update(Lime.DB_RELATED, cv, FIELD_ID + " = " + munit.getId(), null);
-
-                // Log.i("TAG RELATED A", munit.getId() + " : Related ADD Score :" + score);
-
-                if (DEBUG)
-                    Log.i(TAG, "addOrUpdateRelatedPhraseRecord():update score on existing record; score:" + score);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        userStore().syncRelated(pword, cword);
-
-        return score;
-
+        return related.addOrUpdateRelatedPhraseRecord(pword, cword);
     }
 
     public synchronized void addOrUpdateMappingRecord(String code, String word) {
@@ -1172,291 +989,32 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      *         }
      */
 
-    /**
-     * Get dictionary database contents
-     */
     public List<Mapping> getRelatedPhrase(String pword) {
-        if (DEBUG)
-            Log.i(TAG, "getRelatedPhrase()");
-
-        List<Mapping> result = new LinkedList<>();
-
-        // 兩開關獨立運作:「啟用關聯字典」顯示內建字典列(basescore>0),
-        // 「啟動自建關聯字」顯示使用者學習過的列(score>0),各自可單獨開啟
-        final boolean dictionaryEnabled = mLIMEPref.getSimiliarEnable();
-        final boolean userLearnedEnabled = mLIMEPref.getLearnRelatedWord();
-
-        if (dictionaryEnabled || userLearnedEnabled) {
-
-            String originFilter = "";
-            if (!dictionaryEnabled)
-                originFilter = " and " + Lime.DB_RELATED_COLUMN_USERSCORE + " > 0";
-            else if (!userLearnedEnabled)
-                originFilter = " and " + Lime.DB_RELATED_COLUMN_BASESCORE + " > 0";
-
-            if (pword != null && !pword.trim().equals("")) {
-
-                Cursor cursor;
-
-                // Jeremy '11,8.23 remove group by condition to avoid sorting ordr
-                // Jeremy '11,8,1 add group by cword to remove duplicate items.
-                // Jeremy '11,6,12, Add constraint on cword is not null (cword =null is for
-                // recoding im related list selected count).
-                // Jeremy '12,12,21 Add limitClause to limit candidates in only 1 page first.
-                // to do 2 stage query.
-                // Jeremy '14,12,38 Add query on word length > 1 to include last character into
-                // query
-                String limitClause = INITIAL_RESULT_LIMIT;
-
-                if (pword.length() > 1) {
-
-                    String last = pword.substring(pword.length() - 1);
-
-                    String selectString = "SELECT " + FIELD_ID + ", " + FIELD_DIC_pword + ", " + FIELD_DIC_cword + ", "
-                            + Lime.DB_RELATED_COLUMN_BASESCORE + ", " + Lime.DB_RELATED_COLUMN_USERSCORE
-                            + ", length(" + FIELD_DIC_pword + ") as len FROM " + Lime.DB_RELATED + " where ("
-                            + FIELD_DIC_pword + " = ?"
-                            + " or " + FIELD_DIC_pword + " = ?"
-                            + " and " + FIELD_DIC_cword + " is not null"
-                            + ")" + originFilter
-                            + " order by len desc, " + Lime.DB_RELATED_COLUMN_USERSCORE + " desc, "
-                            + Lime.DB_RELATED_COLUMN_BASESCORE + " desc ";
-
-                    selectString += " limit " + limitClause;
-
-                    if (DEBUG)
-                        Log.i(TAG, "getRelatedPhrase() selectString = " + selectString);
-
-                    try {
-                        cursor = db.rawQuery(selectString, new String[] { pword, last });
-                    } catch (SQLiteException sqe) {
-                        if (DEBUG)
-                            sqe.getStackTrace();
-
-                        cursor = null;
-                    }
-
-                } else {
-                    cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
-                            + " and " + FIELD_DIC_cword + " is not null " + originFilter, new String[] { pword }, null, null,
-                            Lime.DB_RELATED_COLUMN_USERSCORE + " DESC, "
-                                    + Lime.DB_RELATED_COLUMN_BASESCORE + " DESC",
-                            limitClause);
-                }
-                if (cursor != null) {
-                    try {
-                        if (cursor.moveToFirst()) {
-
-                            int rsize = 0;
-                            do {
-                                Mapping munit = new Mapping();
-                                munit.setId(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_ID)));
-                                munit.setPword(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_PWORD)));
-                                munit.setCode("");
-                                munit.setWord(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_CWORD)));
-                                munit.setScore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_USERSCORE)));
-                                munit.setBasescore(
-                                        cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_BASESCORE)));
-                                munit.setRelatedPhraseRecord();
-                                result.add(munit);
-                                rsize++;
-                            } while (cursor.moveToNext());
-                        }
-                    } finally {
-                        cursor.close();
-                    }
-                }
-            }
-        }
-        return result;
+        return related.getRelatedPhrase(pword);
     }
 
     public boolean importBackupRelatedDb(File sourcedbfile) {
-        if (!checkDBConnection())
-            return false;
-
-        // 匯入會整張取代 related:先保存學習過(score>0)的關聯字,匯入後套回
-        List<ContentValues> learned = new ArrayList<>();
-        try (Cursor cursor = db.query(Lime.DB_RELATED,
-                new String[] { FIELD_DIC_pword, FIELD_DIC_cword, FIELD_DIC_score, Lime.DB_RELATED_COLUMN_BASESCORE },
-                FIELD_DIC_score + " > 0", null, null, null, null)) {
-            while (cursor.moveToNext()) {
-                ContentValues cv = new ContentValues();
-                cv.put(FIELD_DIC_pword, cursor.getString(0));
-                cv.put(FIELD_DIC_cword, cursor.getString(1));
-                cv.put(FIELD_DIC_score, cursor.getInt(2));
-                if (!cursor.isNull(3))
-                    cv.put(Lime.DB_RELATED_COLUMN_BASESCORE, cursor.getInt(3));
-                learned.add(cv);
-            }
-        }
-
-        // Reset IM Info
-        deleteAll(Lime.DB_RELATED);
-
-        holdDBConnection();
-
-        // Load data from DB File
-        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile.getAbsolutePath() });
-        db.execSQL("insert into " + Lime.DB_RELATED + " select * from sourceDB." + Lime.DB_RELATED);
-        db.execSQL("detach database sourceDB");
-        restoreLearnedRelated(learned);
-        unHoldDBConnection();
-        userStore().resyncAllRelated();
-        return true;
+        return related.importBackupRelatedDb(sourcedbfile);
     }
 
-    // 新字庫已有同一組 pword/cword 者只套回 score,沒有者整列補回
     private void restoreLearnedRelated(List<ContentValues> learned) {
-        db.beginTransaction();
-        try {
-            for (ContentValues cv : learned) {
-                String pword = cv.getAsString(FIELD_DIC_pword);
-                String cword = cv.getAsString(FIELD_DIC_cword);
-                ContentValues score = new ContentValues();
-                score.put(FIELD_DIC_score, cv.getAsInteger(FIELD_DIC_score));
-                int updated = (cword == null)
-                        ? db.update(Lime.DB_RELATED, score, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " IS NULL",
-                                new String[] { pword })
-                        : db.update(Lime.DB_RELATED, score, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?",
-                                new String[] { pword, cword });
-                if (updated == 0)
-                    db.insert(Lime.DB_RELATED, null, cv);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        related.restoreLearnedRelated(learned);
     }
 
     public boolean importBackupDb(File sourcedbfile, String imtype) {
-        if (!checkDBConnection())
-            return false;
-
-        String validatedImType = validateTableName(imtype);
-        // Reset IM Info
-        deleteAll(validatedImType);
-        db.execSQL("delete from " + Lime.DB_IM + " where " + Lime.DB_IM_COLUMN_CODE + "=?",
-                new Object[] { validatedImType });
-
-        holdDBConnection();
-
-        // Load data from DB File
-        db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile.getAbsolutePath() });
-        db.execSQL("insert into " + validatedImType + " select * from sourceDB." + Lime.DB_TABLE_CUSTOM);
-        db.execSQL("update sourceDB." + Lime.DB_IM + " set " + Lime.DB_IM_COLUMN_CODE + "=?",
-                new Object[] { validatedImType });
-        db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM);
-        db.execSQL("detach database sourceDB");
-        unHoldDBConnection();
-        userStore().absorbIm(validatedImType);
-        return true;
+        return importer.importBackupDb(sourcedbfile, imtype);
     }
 
     public int importDb(String sourcedbfile, String imtype) {
-        if (!checkDBConnection())
-            return -1;
-
-        String validatedImType = validateTableName(imtype);
-        deleteAll(validatedImType);
-        holdDBConnection();
-        try {
-            db.execSQL("attach database ? as sourceDB", new Object[] { sourcedbfile });
-
-            // Identify source table name - it might match imtype or be a generic 'phonetic' or 'dayi'
-            String sourceTable = null;
-            String[] possibleSourceTables = {validatedImType, "phonetic", "dayi", Lime.DB_TABLE_CUSTOM};
-
-            for (String table : possibleSourceTables) {
-                Cursor cursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name=?",
-                        new String[] { table });
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        sourceTable = cursor.getString(0);
-                    }
-                    cursor.close();
-                }
-                if (sourceTable != null) break;
-            }
-
-            if (sourceTable == null) {
-                Log.e(TAG, "importDb: No valid source table found in " + sourcedbfile);
-                db.execSQL("detach database sourceDB");
-                return -1;
-            }
-
-            Log.d(TAG, "importDb: Importing from source table '" + sourceTable + "' to '" + validatedImType + "'");
-            db.execSQL("insert into " + validatedImType + " select * from sourceDB." + sourceTable);
-
-            // Update IM info if present in source
-            Cursor imCursor = db.rawQuery("SELECT name FROM sourceDB.sqlite_master WHERE type='table' AND name=?",
-                    new String[] { Lime.DB_IM });
-            if (imCursor != null) {
-                if (imCursor.moveToFirst()) {
-                    db.execSQL("delete from " + Lime.DB_IM + " where code = ?", new Object[] { validatedImType });
-                    // We need to ensure we only insert the relevant IM info if there are multiple
-                    db.execSQL("insert into " + Lime.DB_IM + " select * from sourceDB." + Lime.DB_IM + " where code = ?",
-                            new Object[] { sourceTable });
-                    // Update the code in our DB to match the requested imtype if it was different in source
-                    db.execSQL("update " + Lime.DB_IM + " set code = ? where code = ?",
-                            new Object[] { validatedImType, sourceTable });
-                }
-                imCursor.close();
-            }
-
-            db.execSQL("detach database sourceDB");
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                db.execSQL("detach database sourceDB");
-            } catch (Exception ex) {
-                // ignore
-            }
-            return -1;
-        } finally {
-            unHoldDBConnection();
-        }
-
-        userStore().absorbIm(validatedImType);
-        return countMapping(validatedImType);
+        return importer.importDb(sourcedbfile, imtype);
     }
 
-    /*
-     * Backup learned user scores and phrases from the specified table to the backup
-     * table.
-     * Jeremy '15,5,21
-     */
     public void deleteRelatedPhrase(String pword, String cword) {
-        if (!checkDBConnection())
-            return;
-        db.delete(Lime.DB_RELATED, FIELD_DIC_pword + " = ? AND " + FIELD_DIC_cword + " = ?", new String[] { pword, cword });
-        userStore().syncRelated(pword, cword);
+        related.deleteRelatedPhrase(pword, cword);
     }
 
     public int backupUserRecords(final String table) {
-        if (!checkDBConnection())
-            return -1;
-        String backupTableName = table + "_user";
-
-        String selectString = "select * from " + table +
-                " where " + FIELD_WORD + " is not null and " +
-                FIELD_SCORE + " >0 order by " + FIELD_SCORE + " desc";
-        Cursor cursor = db.rawQuery(selectString, null);
-
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.close();
-            try {
-                // 不用 DROP TABLE IF EXISTS:表不存在時該語句被判為唯讀並進入 statement cache,
-                // 同程序內表存在後再執行會沿用唯讀旗標而被派到 WAL 唯讀連線,導致 drop 失敗
-                if (hasTable(backupTableName))
-                    db.execSQL("drop table " + backupTableName);
-            } catch (Exception e) {
-                Log.i(TAG, "Remove the table " + backupTableName);
-            }
-            db.execSQL("create table " + backupTableName + " as " + selectString);
-        }
-
-        return countMapping(backupTableName);
+        return importer.backupUserRecords(table);
     }
 
         public boolean checkBackuptable(String table) {
@@ -1567,13 +1125,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
     }
 
-    /**
-     * 讀取學習資料備份表(table + "_user")的所有記錄;表名經 validateTableName 驗證。
-     */
     public Cursor listBackupRecords(String table) {
-        if (!checkDBConnection())
-            return null;
-        return db.query(validateTableName(table + "_user"), null, null, null, null, null, null);
+        return importer.listBackupRecords(table);
     }
 
     /**
@@ -1594,487 +1147,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return exists;
     }
 
-    /**
-     * Jeremy '11,9,8 loadFile() with basescore got from hanconverter
-     */
     public synchronized void loadFileV2(final String table, final LIMEProgressListener progressListener) {
-
-        if (DEBUG)
-            Log.i(TAG, "loadFileV2()");
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection()) {
-            progressListener.onError(-1, "Database is not avaiable. Please try to do it later");
-            return;
-        }
-
-        finish = false;
-        progressPercentageDone = 0;
-        count = 0;
-        if (loadingMappingThread != null) {
-            // threadAborted = true;
-            while (loadingMappingThread.isAlive()) {
-                Log.d(TAG, "loadFile():waiting for last loading loadingMappingThread stopped...");
-                SystemClock.sleep(1000);
-            }
-            loadingMappingThread = null;
-        }
-
-        loadingMappingThread = new Thread() {
-
-            public void run() {
-
-                String delimiter_symbol = "";
-
-                // Reset Database Table
-                // SQLiteDatabase db = getSqliteDb(false);
-                if (DEBUG)
-                    Log.i(TAG, "loadFileV2 loadingMappingThread starting...");
-
-                try {
-                    if (countMapping(table) > 0)
-                        db.delete(table, null, null);
-
-                    if (table.equals("phonetic")) {
-                        if (DEBUG)
-                            Log.i(TAG, "loadfile(), build code3r index.");
-                        db.execSQL("CREATE INDEX IF NOT EXISTS phonetic_idx_code3r ON phonetic(code3r)");
-
-                    }
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-
-                }
-
-                resetImInfo(table);
-                boolean isCinFormat = false;
-
-                String imname = "";
-                String line;
-                String endkey = "";
-                String selkey = "";
-                String spacestyle = "";
-                String imkeys = "";
-                String imkeynames = "";
-
-                // Check if source file is .cin format
-                if (filename.getName().toLowerCase(Locale.US).endsWith(".cin")) {
-                    isCinFormat = true;
-                }
-
-                // Base on first 100 line to identify the Delimiter
-                try {
-                    // Prepare Source File
-                    FileReader fr = new FileReader(filename);
-                    BufferedReader buf = new BufferedReader(fr);
-                    int i = 0;
-                    List<String> templist = new ArrayList<>();
-                    while ((line = buf.readLine()) != null
-                            && !isCinFormat) {
-                        templist.add(line);
-                        if (i >= 100) {
-                            break;
-                        } else {
-                            i++;
-                        }
-                    }
-                    delimiter_symbol = identifyDelimiter(templist);
-                    templist.clear();
-                    buf.close();
-                    fr.close();
-                } catch (Exception ignored) {
-                    progressListener.onError(-1, "Source file reading error.");
-                }
-
-                // HashSet<String> codeList = new HashSet<>();
-
-                // db = getSqliteDb(false);
-
-                // Jeremy '12,4,10 db will locked after beginTrasaction();
-                // mLIMEPref.holdDatabaseCoonection(true);
-                // Jeremy '15,5,23 new database on hold mechanism.
-                holdDBConnection();
-                db.beginTransaction();
-
-                try {
-                    // Prepare Source File
-                    progressStatus = mContext.getResources().getText(R.string.setup_load_migrate_import).toString();
-                    long fileLength = filename.length();
-                    long processedLength = 0;
-                    FileReader fr = new FileReader(filename);
-                    BufferedReader buf = new BufferedReader(fr);
-                    boolean firstline = true;
-                    boolean inChardefBlock = false;
-                    boolean inKeynameBlock = false;
-                    // String precode = "";
-
-                    while ((line = buf.readLine()) != null && !threadAborted) {
-                        processedLength += line.getBytes().length + 2; // +2 for the eol mark.
-                        progressPercentageDone = (int) ((float) processedLength / (float) fileLength * 100);
-
-                        // Log.i(TAG, line + " / " + delimiter_symbol.equals(" ") + " / " +
-                        // line.indexOf(delimiter_symbol));
-                        // if(DEBUG)
-                        // Log.i(TAG, "loadFile():loadFile()"+ progressPercentageDone +"% processed"
-                        // + ". processedLength:" + processedLength + ". fileLength:" + fileLength + ",
-                        // threadAborted=" + threadAborted);
-                        if (progressPercentageDone > 99)
-                            progressPercentageDone = 99;
-
-                        if (delimiter_symbol.equals(" ") && line.indexOf(delimiter_symbol) == -1) {
-                            continue;
-                        }
-
-                        if (delimiter_symbol.equals(" ")) {
-                            line = line.replaceAll("     ", " ");
-                            line = line.replaceAll("    ", " ");
-                            line = line.replaceAll("   ", " ");
-                            line = line.replaceAll("  ", " ");
-                        }
-
-                        if (line.length() < 3) {
-                            continue;
-                        }
-
-                        /*
-                         * If source is cin format start from the tag %chardef
-                         * begin until %chardef end
-                         */
-                        if (isCinFormat) {
-                            if (!(inChardefBlock || inKeynameBlock)) {
-                                // Modified by Jeremy '10, 3, 28. Some .cin have
-                                // double space between $chardef and begin or
-                                // end
-                                if (line != null
-                                        && line.trim().toLowerCase(Locale.US).startsWith("%chardef")
-                                        && line.trim().toLowerCase(Locale.US).endsWith("begin")) {
-                                    inChardefBlock = true;
-                                }
-                                if (line != null
-                                        && line.trim().toLowerCase(Locale.US).startsWith("%keyname")
-                                        && line.trim().toLowerCase(Locale.US).endsWith("begin")) {
-                                    inKeynameBlock = true;
-                                }
-                                // Add by Jeremy '10, 3 , 27
-                                // use %cname as mapping_version of .cin
-                                // Jeremy '11,6,5 add selkey, endkey and spacestyle support
-                                if (!(line.trim().toLowerCase(Locale.US).startsWith("%cname")
-                                        || line.trim().toLowerCase(Locale.US).startsWith("%selkey")
-                                        || line.trim().toLowerCase(Locale.US).startsWith("%endkey")
-                                        || line.trim().toLowerCase(Locale.US).startsWith("%spacestyle"))) {
-                                    continue;
-                                }
-                            }
-                            if (line != null
-                                    && line.trim().toLowerCase(Locale.US).startsWith("%keyname")
-                                    && line.trim().toLowerCase(Locale.US).endsWith("end")) {
-                                inKeynameBlock = false;
-                                continue;
-                            }
-                            if (line != null
-                                    && line.trim().toLowerCase(Locale.US).startsWith("%chardef")
-                                    && line.trim().toLowerCase(Locale.US).endsWith("end")) {
-                                break;
-                            }
-                        }
-
-                        // Check if file contain BOM MARK at file header
-                        if (firstline) {
-                            byte[] srcstring = line.getBytes();
-                            if (srcstring.length > 3) {
-                                if (srcstring[0] == -17 && srcstring[1] == -69
-                                        && srcstring[2] == -65) {
-                                    byte[] tempstring = new byte[srcstring.length - 3];
-                                    // int a = 0;
-                                    System.arraycopy(srcstring, 3, tempstring, 0, srcstring.length - 3);
-                                    line = new String(tempstring);
-                                }
-                            }
-                            firstline = false;
-                        } else if (line == null || line.trim().equals("") || line.length() < 3) {
-                            continue;
-                        }
-
-                        try {
-
-                            int source_score = 0, source_basescore = 0;
-                            String code = null, word = null;
-                            if (isCinFormat) {
-                                if (line.contains("\t")) {
-                                    try {
-                                        code = line.split("\t")[0];
-                                        word = line.split("\t")[1];
-                                    } catch (Exception e) {
-                                        continue;
-                                    }
-                                    try {
-                                        // Simply ignore error and try to load score and basescore values
-                                        source_score = Integer.parseInt(line.split("\t")[2]);
-                                        source_basescore = Integer.parseInt(line.split("\t")[3]);
-                                    } catch (Exception ignored) {
-                                    }
-                                } else if (line.contains(" ")) {
-                                    try {
-                                        code = line.split(" ")[0];
-                                        word = line.split(" ")[1];
-                                    } catch (Exception e) {
-                                        continue;
-                                    }
-                                    try {
-                                        // Simply ignore error and try to load score and basescore values
-                                        source_score = Integer.parseInt(line.split(" ")[2]);
-                                        source_basescore = Integer.parseInt(line.split(" ")[3]);
-                                    } catch (Exception ignored) {
-                                    }
-                                }
-                            } else {
-                                if (delimiter_symbol.equals("|")) {
-                                    try {
-                                        code = line.split("\\|")[0];
-                                        word = line.split("\\|")[1];
-                                    } catch (Exception e) {
-                                        continue;
-                                    }
-                                    try {
-                                        // Simply ignore error and try to load score and basescore values
-                                        source_score = Integer.parseInt(line.split("\\|")[2]);
-                                        source_basescore = Integer.parseInt(line.split("\\|")[3]);
-                                    } catch (Exception ignored) {
-                                    }
-                                } else {
-                                    try {
-                                        code = line.split(delimiter_symbol)[0];
-                                        word = line.split(delimiter_symbol)[1];
-                                    } catch (Exception e) {
-                                        continue;
-                                    }
-                                    try {
-                                        // Simply ignore error and try to load score and basescore values
-                                        source_score = Integer.parseInt(line.split(delimiter_symbol)[2]);
-                                        source_basescore = Integer.parseInt(line.split(delimiter_symbol)[3]);
-                                    } catch (Exception ignored) {
-                                    }
-                                }
-
-                            }
-                            if (code == null || code.trim().equals("")) {
-                                continue;
-                            } else {
-                                code = code.trim();
-                            }
-                            if (word == null || word.trim().equals("")) {
-                                continue;
-                            } else {
-                                word = word.trim();
-                            }
-                            if (code.toLowerCase(Locale.US).contains("@version@")) {
-                                imname = word.trim();
-                                continue;
-                            } else if (code.toLowerCase(Locale.US).contains("%cname")) {
-                                imname = word.trim();
-                                continue;
-                            } else if (code.toLowerCase(Locale.US).contains("%selkey")) {
-                                selkey = word.trim();
-                                if (DEBUG)
-                                    Log.i(TAG, "loadfile(): selkey:" + selkey);
-                                continue;
-                            } else if (code.toLowerCase(Locale.US).contains("%endkey")) {
-                                endkey = word.trim();
-                                if (DEBUG)
-                                    Log.i(TAG, "loadfile(): endkey:" + endkey);
-                                continue;
-                            } else if (code.toLowerCase(Locale.US).contains("%spacestyle")) {
-                                spacestyle = word.trim();
-                                continue;
-                            } else {
-                                code = code.toLowerCase(Locale.US);
-                            }
-
-                            if (inKeynameBlock) { // Jeremy '11,6,5 preserve keyname blocks here.
-                                imkeys = imkeys + code.toLowerCase(Locale.US).trim();
-                                String c = word.trim();
-                                if (!c.equals("")) {
-                                    if (imkeynames.equals(""))
-                                        imkeynames = c;
-                                    else
-                                        imkeynames = imkeynames + "|" + c;
-                                }
-
-                            } else {
-                                count++;
-                                ContentValues cv = new ContentValues();
-                                cv.put(FIELD_CODE, code);
-
-                                if (table.equals("phonetic")) {
-                                    cv.put(FIELD_NO_TONE_CODE, code.replaceAll("[3467 ]", ""));
-                                }
-                                cv.put(FIELD_WORD, word);
-                                cv.put(FIELD_SCORE, source_score);
-                                if (source_basescore == 0) {
-                                    source_basescore = getBaseScore(word);
-                                }
-                                cv.put(FIELD_BASESCORE, source_basescore);
-                                // if(DEBUG) Log.i(TAG, "loadfilev2():code="+code+", word="+word+",
-                                // basescore="+basescore);
-                                db.insert(table, null, cv);
-                            }
-
-                        } catch (StringIndexOutOfBoundsException ignored) {
-                        }
-                    }
-
-                    buf.close();
-                    fr.close();
-
-                    db.setTransactionSuccessful();
-                } catch (Exception e) {
-
-                    Log.i(TAG, "Error : " + e);
-                    setImInfo(table, "amount", "0");
-                    setImInfo(table, "source", "Failed!!!");
-                    e.printStackTrace();
-                    progressListener.onError(-1, "Table file import failed!");
-                } finally {
-                    if (DEBUG)
-                        Log.i(TAG, "loadfile(): main import loop final section");
-                    db.endTransaction();
-                    // mLIMEPref.holdDatabaseCoonection(false); // Jeremy '12,4,10 reset
-                    // mapping_loading status
-                    unHoldDBConnection();
-
-                }
-                // 文字檔可能自帶分數:收進 user.db
-                userStore().absorbIm(table);
-
-                // TODO: do phrase table learning here.
-                // Fill IM information into the IM Table
-                if (!threadAborted) {
-                    if (!threadAborted)
-                        progressPercentageDone = 100;
-                    finish = true;
-
-                    setImInfo(table, "source", filename.getName());
-                    if (imname == null || imname.isEmpty()) {
-                        setImInfo(table, "name", filename.getName());
-                    } else {
-                        setImInfo(table, "name", imname);
-                    }
-                    setImInfo(table, "amount", String.valueOf(count));
-                    setImInfo(table, "import", new Date().toString()); // Jeremy '12,4,21 toLocaleString() is deprecated
-
-                    if (DEBUG)
-                        Log.i("limedb:loadfile()", "Fianlly section: source:"
-                                + getImInfo(table, "source") + " amount:" + getImInfo(table, "amount"));
-
-                    // If user download from LIME Default IM SET then fill in related information
-                    if (filename.getName().equals("phonetic.lime") || filename.getName().equals("phonetic_adv.lime")) {
-                        setImInfo("phonetic", "selkey", "123456789");
-                        setImInfo("phonetic", "endkey", "3467'[]\\=<>?:\"{}|~!@#$%^&*()_+");
-                        setImInfo("phonetic", "imkeys",
-                                ",-./0123456789;abcdefghijklmnopqrstuvwxyz'[]\\=<>?:\"{}|~!@#$%^&*()_+");
-                        setImInfo("phonetic", "imkeynames",
-                                "ㄝ|ㄦ|ㄡ|ㄥ|ㄢ|ㄅ|ㄉ|ˇ|ˋ|ㄓ|ˊ|˙|ㄚ|ㄞ|ㄤ|ㄇ|ㄖ|ㄏ|ㄎ|ㄍ|ㄑ|ㄕ|ㄘ|ㄛ|ㄨ|ㄜ|ㄠ|ㄩ|ㄙ|ㄟ|ㄣ|ㄆ|ㄐ|ㄋ|ㄔ|ㄧ|ㄒ|ㄊ|ㄌ|ㄗ|ㄈ|、|「|」|＼|＝|，|。|？|：|；|『|』|│|～|！|＠|＃|＄|％|︿|＆|＊|（|）|－|＋");
-                    }
-                    if (true) {
-                        if (!selkey.equals(""))
-                            setImInfo(table, "selkey", selkey);
-                        if (!endkey.equals(""))
-                            setImInfo(table, "endkey", endkey);
-                        if (!spacestyle.equals(""))
-                            setImInfo(table, "spacestyle", spacestyle);
-                        if (!imkeys.equals(""))
-                            setImInfo(table, "imkeys", imkeys);
-                        if (!imkeynames.equals(""))
-                            setImInfo(table, "imkeynames", imkeynames);
-                    }
-                    if (DEBUG)
-                        Log.i(TAG, "loadfilev2():update IM info: imkeys:" + imkeys + " imkeynames:" + imkeynames);
-
-                    // Prepare and Setup the Keyboard of the IM
-
-                    // If there is no keyboard assigned for current input method then use default
-                    // keyboard layout
-                    // String keyboard = getImInfo(table, "keyboard");
-                    // if(keyboard == null || keyboard.equals("")){
-                    // setImInfo(table, "keyboard", "lime");
-                    // '11,5,23 by Jeremy: Preset keyboard info. by tablename
-                    KeyboardObj kobj = getKeyboardObj(table);
-                    if (table.equals("phonetic")) {
-                        kobj = getKeyboardObj("phonetic");
-                    } else if (table.startsWith("dayi")) {
-                        kobj = getKeyboardObj("dayi");
-                    } else if (kobj == null) { // Jeremy '12,5,21 chose english with number keyboard if the optione is
-                                               // on for default keyboard.
-                        if (mLIMEPref.getParameterBoolean("number_row_in_english", true)) {
-                            kobj = getKeyboardObj("limenum");
-                        } else {
-                            kobj = getKeyboardObj("lime");
-                        }
-                    }
-                    setIMKeyboard(table, kobj.getDescription(), kobj.getCode());
-                }
-
-                // finishing
-
-            }
-        };
-
-        Thread reportProgressThread = new Thread() {
-            public void run() {
-
-                long interval = progressListener.progressInterval();
-                while (loadingMappingThread.isAlive()) {
-                    SystemClock.sleep(interval);
-                    progressListener.onProgress(progressPercentageDone, 0, progressStatus);
-                }
-                progressPercentageDone = 100;
-                progressListener.onPostExecute(true, null, 0);
-
-            }
-
-        };
-
-        threadAborted = false;
-        loadingMappingThread.start();
-        reportProgressThread.start();
+        importer.loadFileV2(table, progressListener);
     }
 
-    /**
-     * Identify the delimiter of the source file
-     *
-     * @param src text format table string
-     */
     public String identifyDelimiter(List<String> src) {
-
-        int commaCount = 0;
-        int tabCount = 0;
-        int pipeCount = 0;
-        int spaceCount = 0;
-
-        for (String line : src) {
-            if (line.contains("\t")) {
-                tabCount++;
-            }
-            if (line.contains(",")) {
-                commaCount++;
-            }
-            if (line.contains("|")) {
-                pipeCount++;
-            }
-            if (line.contains(" ")) {
-                spaceCount++;
-            }
-        }
-        if (commaCount >= tabCount && commaCount >= pipeCount && commaCount >= spaceCount) {
-            return ",";
-        } else if (tabCount >= commaCount && tabCount >= pipeCount && tabCount >= spaceCount) {
-            return "\t";
-        } else if (pipeCount >= tabCount && pipeCount >= commaCount && pipeCount >= spaceCount) {
-            return "|";
-        } else if (spaceCount >= tabCount && spaceCount >= commaCount && spaceCount >= pipeCount) {
-            return " ";
-        }
-
-        return " ";
+        return importer.identifyDelimiter(src);
     }
 
     /**
@@ -2287,73 +1365,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return false;
     }
 
-    /**
-     * Check if usesr dictionary record exists
-     */
     public Mapping isRelatedPhraseExist(String pword, String cword) {
-
-        long startTime = 0;
-        if (DEBUG || probePerformance) {
-            startTime = System.currentTimeMillis();
-            Log.i(TAG, "isRelatedPhraseExist(): pword='" + pword + ", cword=" + cword);
-        }
-        if (!checkDBConnection())
-            return null;
-        Mapping munit = null;
-
-        // SQLiteDatabase db = this.getSqliteDb(true);
-        try {
-            munit = isRelatedPhraseExistOnDB(db, pword, cword);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-        if (DEBUG || probePerformance) {
-
-            Log.i(TAG, "isRelatedPhraseExist(): time elapsed = " + (System.currentTimeMillis() - startTime));
-        }
-
-        return munit;
+        return related.isRelatedPhraseExist(pword, cword);
     }
 
-    /**
-     * Jeremy '12/4/16 core of isUserDictExist()
-     */
     private Mapping isRelatedPhraseExistOnDB(SQLiteDatabase db, String pword, String cword) {
-
-        Mapping munit = null;
-        if (pword != null && !pword.trim().equals("")) {
-            Cursor cursor;
-
-            if (cword == null || cword.trim().equals("")) {
-                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
-                        + " AND " + FIELD_DIC_cword + " IS NULL", new String[]{pword}, null, null, null, null);
-            } else {
-                cursor = db.query(Lime.DB_RELATED, null, FIELD_DIC_pword + " = ?"
-                        + " AND " + FIELD_DIC_cword + " = ?", new String[]{pword, cword}, null, null, null, null);
-            }
-
-            if (cursor != null) {
-                try {
-                    if (cursor.moveToFirst()) {
-                        munit = new Mapping();
-                        munit.setId(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_ID)));
-                        munit.setPword(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_PWORD)));
-                        munit.setWord(cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_CWORD)));
-                        munit.setBasescore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_BASESCORE)));
-                        munit.setScore(cursor.getInt(cursor.getColumnIndexOrThrow(Lime.DB_RELATED_COLUMN_USERSCORE)));
-                        munit.setRelatedPhraseRecord();
-
-                    }
-                } finally {
-                    cursor.close();
-                }
-            }
-
-        }
-        return munit;
+        return related.isRelatedPhraseExistOnDB(db, pword, cword);
     }
 
     public synchronized void resetImInfo(String im) {
