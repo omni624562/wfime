@@ -238,7 +238,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
     private final ArrayList<PointerTracker> mPointerTrackers = new ArrayList<>();
 
     // TODO: Let the PointerTracker class manage this pointer queue
-    private final PointerQueue mPointerQueue = new PointerQueue();
 
     private final boolean mHasDistinctMultitouch;
     private int mOldPointerCount = 1;
@@ -298,10 +297,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
                                    // larger screen
 
     private final UIHandler mHandler = new UIHandler(this);
+    private final PointerDispatcher mPointerDispatcher = new PointerDispatcher(mHandler, this::getPointerTracker);
 
     // private LIMEPreferenceManager mLIMEPref;
 
-    static class UIHandler extends Handler {
+    static class UIHandler extends Handler implements KeyTimers {
         private static final int MSG_POPUP_PREVIEW = 1;
         private static final int MSG_DISMISS_PREVIEW = 2;
         private static final int MSG_REPEAT_KEY = 3;
@@ -341,6 +341,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             }
         }
 
+        @Override
         public void startKeyRepeatTimer(long delay, int keyIndex, PointerTracker tracker) {
             if (DEBUG)
                 Log.i(TAG, "UIHandler.startKeyRepeatTimer() delay=" + delay + "keyIndex= " + keyIndex);
@@ -348,6 +349,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             sendMessageDelayed(obtainMessage(MSG_REPEAT_KEY, keyIndex, 0, tracker), delay);
         }
 
+        @Override
         public void cancelKeyRepeatTimer() {
             if (DEBUG)
                 Log.i(TAG, "UIHandler.cancelKeyRepeatTimer()");
@@ -355,12 +357,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             removeMessages(MSG_REPEAT_KEY);
         }
 
+        @Override
         public boolean isInKeyRepeat() {
             if (DEBUG)
                 Log.i(TAG, "UIHandler.isInKeyRepeat(): " + mInKeyRepeat);
             return mInKeyRepeat;
         }
 
+        @Override
         public void startLongPressTimer(long delay, int keyIndex, PointerTracker tracker) {
             if (DEBUG)
                 Log.i(TAG, "UIHandler.startLongPressTimer() delay=" + delay + "keyIndex= " + keyIndex);
@@ -368,12 +372,14 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             sendMessageDelayed(obtainMessage(MSG_LONGPRESS_KEY, keyIndex, 0, tracker), delay);
         }
 
+        @Override
         public void cancelLongPressTimer() {
             if (DEBUG)
                 Log.i(TAG, "UIHandler.cancelLongPressTimer()");
             removeMessages(MSG_LONGPRESS_KEY);
         }
 
+        @Override
         public void cancelKeyTimers() {
             cancelKeyRepeatTimer();
             cancelLongPressTimer();
@@ -1264,7 +1270,7 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             mMiniKeyboardTrackerId = tracker.mPointerId;
             // Mark this tracker "already processed" and remove it from the pointer queue
             tracker.setAlreadyProcessed();
-            mPointerQueue.remove(tracker);
+            mPointerDispatcher.queue().remove(tracker);
             // The processed tracker will never deliver this key's release event,
             // so un-press it here — otherwise the key stays stuck drawing with
             // pressed colors (near-invisible label) after the popup closes.
@@ -1510,7 +1516,11 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
 
         // Create pointer trackers until we can get 'id+1'-th tracker, if needed.
         for (int i = pointers.size(); i <= id; i++) {
-            final PointerTracker tracker = new PointerTracker(i, mHandler, mKeyDetector, this, getResources());
+            final Resources res = getResources();
+            final PointerTracker tracker = new PointerTracker(i, mHandler, mKeyDetector, this,
+                    res.getInteger(R.integer.config_delay_before_key_repeat_start),
+                    res.getInteger(R.integer.config_long_press_key_timeout),
+                    res.getInteger(R.integer.config_multi_tap_key_timeout));
             if (keys != null)
                 tracker.setKeyboard(keys, mKeyHysteresisDistance);
             if (listener != null)
@@ -1519,41 +1529,6 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
         }
 
         return pointers.get(id);
-    }
-
-    private void onDownEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if (DEBUG)
-            Log.i(TAG, "onDownEvent() eventTime = " + eventTime);
-        if (tracker.isOnModifierKey(x, y)) {
-            // Before processing a down event of modifier key, all pointers already being
-            // tracked
-            // should be released.
-            mPointerQueue.releaseAllPointersExcept(null, eventTime);
-        }
-        tracker.onDownEvent(x, y, eventTime);
-        mPointerQueue.add(tracker);
-    }
-
-    private void onUpEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if (DEBUG)
-            Log.i(TAG, "onUpEvent() eventTime = " + eventTime);
-
-        if (tracker.isModifier()) {
-            // Before processing an up event of modifier key, all pointers already being
-            // tracked
-            // should be released.
-            mPointerQueue.releaseAllPointersExcept(tracker, eventTime);
-        } else {
-            int index = mPointerQueue.lastIndexOf(tracker);
-            if (index >= 0) {
-                mPointerQueue.releaseAllPointersOlderThan(tracker, eventTime);
-            } else {
-                Log.w(TAG, "onUpEvent: corresponding down event not found for pointer "
-                        + tracker.mPointerId);
-            }
-        }
-        tracker.onUpEvent(x, y, eventTime);
-        mPointerQueue.remove(tracker);
     }
 
     @Override
@@ -1618,77 +1593,17 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             return true;
         }
 
-        if (mHandler.isInKeyRepeat()) {
-            // It will keep being in the key repeating mode while the key is being pressed.
-            if (action == MotionEvent.ACTION_MOVE) {
-                return true;
-            }
-            final PointerTracker tracker = getPointerTracker(id);
-            // Key repeating timer will be canceled if 2 or more keys are in action, and
-            // current
-            // event (UP or DOWN) is non-modifier key.
-            if (pointerCount > 1 && !tracker.isModifier()) {
-                mHandler.cancelKeyRepeatTimer();
-            }
-            // Up event will pass through.
+        // 多指協調（哪個手指先送鍵、修飾鍵、單點面板轉換）見 PointerDispatcher
+        final int[] pointerIds = new int[pointerCount];
+        final int[] pointerXs = new int[pointerCount];
+        final int[] pointerYs = new int[pointerCount];
+        for (int i = 0; i < pointerCount; i++) {
+            pointerIds[i] = me.getPointerId(i);
+            pointerXs[i] = (int) me.getX(i);
+            pointerYs[i] = (int) me.getY(i);
         }
-
-        // TODO: cleanup this code into a multi-touch to single-touch event converter
-        // class?
-        // Translate mutli-touch event to single-touch events on the device that has no
-        // distinct
-        // multi-touch panel.
-        if (!mHasDistinctMultitouch) {
-            // Use only main (id=0) pointer tracker.
-            PointerTracker tracker = getPointerTracker(0);
-            if (pointerCount == 1 && oldPointerCount == 2) {
-                // Multi-touch to single touch transition.
-                // Send a down event for the latest pointer.
-                tracker.onDownEvent(x, y, eventTime);
-            } else if (pointerCount == 2 && oldPointerCount == 1) {
-                // Single-touch to multi-touch transition.
-                // Send an up event for the last pointer.
-                tracker.onUpEvent(tracker.getLastX(), tracker.getLastY(), eventTime);
-            } else if (pointerCount == 1 && oldPointerCount == 1) {
-                tracker.onTouchEvent(action, x, y, eventTime);
-            } else {
-                Log.w(TAG, "Unknown touch panel behavior: pointer count is " + pointerCount
-                        + " (old " + oldPointerCount + ")");
-            }
-            return true;
-        }
-
-        if (action == MotionEvent.ACTION_MOVE) {
-            for (int i = 0; i < pointerCount; i++) {
-                PointerTracker tracker = getPointerTracker(me.getPointerId(i));
-                tracker.onMoveEvent((int) me.getX(i), (int) me.getY(i), eventTime);
-            }
-        } else {
-            PointerTracker tracker = getPointerTracker(id);
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    onDownEvent(tracker, x, y, eventTime);
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_POINTER_UP:
-                    onUpEvent(tracker, x, y, eventTime);
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                    onCancelEvent(tracker, x, y, eventTime);
-                    break;
-            }
-        }
-
-        return true;
-    }
-
-    private void onCancelEvent(PointerTracker tracker, int x, int y, long eventTime) {
-        if (DEBUG)
-            Log.i(TAG, "onCancelEvent() eventTime = " + eventTime);
-
-        tracker.onCancelEvent(x, y, eventTime);
-        mPointerQueue.remove(tracker);
+        return mPointerDispatcher.dispatch(action, pointerCount, oldPointerCount, mHasDistinctMultitouch,
+                id, x, y, eventTime, pointerIds, pointerXs, pointerYs);
     }
 
     protected void swipeRight() {

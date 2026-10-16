@@ -31,7 +31,6 @@ import android.view.MotionEvent;
 import net.toload.main.hd.R;
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key;
 import net.toload.main.hd.keyboard.LIMEKeyboardBaseView.OnKeyboardActionListener;
-import net.toload.main.hd.keyboard.LIMEKeyboardBaseView.UIHandler;
 
 public class PointerTracker {
     private static final String TAG = "PointerTracker";
@@ -46,7 +45,7 @@ public class PointerTracker {
     private final int mLongPressKeyTimeout;
     private final int mMultiTapKeyTimeout;
     private final UIProxy mProxy;
-    private final UIHandler mHandler;
+    private final KeyTimers mHandler;
     private final KeyDetector mKeyDetector;
     // private final LIMEKeyboardSwitcher mKeyboardSwitcher;
     private final boolean mHasDistinctMultitouch;
@@ -75,8 +74,17 @@ public class PointerTracker {
     // pressed key
     private int mPreviousKey = NOT_A_KEY;
 
-    public PointerTracker(int id, UIHandler handler, KeyDetector keyDetector, UIProxy proxy,
+    public PointerTracker(int id, KeyTimers handler, KeyDetector keyDetector, UIProxy proxy,
             Resources res) {
+        this(id, handler, keyDetector, proxy,
+                res.getInteger(R.integer.config_delay_before_key_repeat_start),
+                res.getInteger(R.integer.config_long_press_key_timeout),
+                res.getInteger(R.integer.config_multi_tap_key_timeout));
+    }
+
+    // 時間常數直接傳入、不讀 Resources：觸控判斷不依賴 Android 資源，可以直接測試
+    public PointerTracker(int id, KeyTimers handler, KeyDetector keyDetector, UIProxy proxy,
+            int delayBeforeKeyRepeatStart, int longPressKeyTimeout, int multiTapKeyTimeout) {
         if (proxy == null || handler == null || keyDetector == null)
             throw new NullPointerException();
         mPointerId = id;
@@ -86,9 +94,9 @@ public class PointerTracker {
         // mKeyboardSwitcher = null;//LIMEKeyboardSwitcher.getInstance();
         mKeyState = new KeyState(keyDetector);
         mHasDistinctMultitouch = proxy.hasDistinctMultitouch();
-        mDelayBeforeKeyRepeatStart = res.getInteger(R.integer.config_delay_before_key_repeat_start);
-        mLongPressKeyTimeout = res.getInteger(R.integer.config_long_press_key_timeout);
-        mMultiTapKeyTimeout = res.getInteger(R.integer.config_multi_tap_key_timeout);
+        mDelayBeforeKeyRepeatStart = delayBeforeKeyRepeatStart;
+        mLongPressKeyTimeout = longPressKeyTimeout;
+        mMultiTapKeyTimeout = multiTapKeyTimeout;
         resetMultiTap();
     }
 
