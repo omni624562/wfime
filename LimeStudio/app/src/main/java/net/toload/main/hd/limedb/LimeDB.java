@@ -236,6 +236,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     private EmojiConverter emojiConverter;
     // 重構二期:打字熱路徑查詢引擎,見 LimeQueryEngine
     private final LimeQueryEngine queryEngine = new LimeQueryEngine(this);
+    // 輸入法資訊(im 表)與鍵盤設定(keyboard 表),見 ImInfoStore
+    private final ImInfoStore imInfo = new ImInfoStore(this);
 
     /*
      * Initialize LIME database, Context and LIMEPreferenceManager
@@ -2354,329 +2356,61 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return munit;
     }
 
-    /**
-     *
-     */
     public synchronized void resetImInfo(String im) {
-        // Jeremy '12,5,1
-        if (!checkDBConnection())
-            return;
-        db.execSQL("DELETE FROM im WHERE code=?", new Object[] { im });
-
+        imInfo.resetImInfo(im);
     }
 
-    /**
-     *
-     */
     public String getImInfo(String im, String field) {
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return "";
-
-        String iminfo = "";
-        try {
-            // String value = "";
-            String selectString = "SELECT * FROM im WHERE code=? AND title=?";
-
-            Cursor cursor = db.rawQuery(selectString, new String[] { im, field });
-
-            if (cursor != null) {
-                if (cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    int descCol = cursor.getColumnIndex("desc");
-                    iminfo = cursor.getString(descCol);
-                }
-                cursor.close();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return iminfo;
+        return imInfo.getImInfo(im, field);
     }
 
-    /**
-     *
-     */
     public synchronized void removeImInfo(String im, String field) {
-        if (DEBUG)
-            Log.i(TAG, "removeImInfo()");
-        if (!checkDBConnection())
-            return;
-        try {
-            removeImInfoOnDB(db, im, field);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        imInfo.removeImInfo(im, field);
     }
 
-    /**
-     * Jeremy '12,6,7 for working with OnUpgrade() before db is created
-     */
     private void removeImInfoOnDB(SQLiteDatabase dbin, String im, String field) {
-        if (DEBUG)
-            Log.i(TAG, "removeImInfoOnDB()");
-        dbin.execSQL("DELETE FROM im WHERE code=? AND title=?", new Object[] { im, field });
-
+        imInfo.removeImInfoOnDB(dbin, im, field);
     }
 
-    /**
-     *
-     */
     public synchronized void setImInfo(String im, String field, String value) {
-        // Jeremy '12,4,17 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return;
-
-        ContentValues cv = new ContentValues();
-        cv.put("code", im);
-        cv.put("title", field);
-        cv.put("desc", value);
-
-        removeImInfo(im, field);
-
-        db.insert("im", null, cv);
-
+        imInfo.setImInfo(im, field, value);
     }
 
     public List<Im> getImList(String code) {
-
-        if (!checkDBConnection())
-            return null;
-
-        List<Im> result = null;
-        try {
-            // SQLiteDatabase db = this.getSqliteDb(true);
-            Cursor cursor = db.query("im", null, Lime.DB_IM_COLUMN_CODE + " = ?", new String[] { code }, null, null,
-                    "code ASC", null);
-            result = Im.getList(cursor);
-            cursor.close();
-        } catch (Exception e) {
-            Log.i(TAG, "getIm(): Cannot get IM : " + e);
-        }
-        return result;
+        return imInfo.getImList(code);
     }
 
     public List<ImObj> getImList() {
-        if (DEBUG)
-            Log.i(TAG, "getIMList()");
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return null;
-
-        List<ImObj> result = new LinkedList<>();
-        try {
-            // SQLiteDatabase db = this.getSqliteDb(true);
-            Cursor cursor = db.query("im", null, null, null, null, null, "code ASC", null);
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    do {
-                        String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
-                        if (title.equals("keyboard")) {
-                            ImObj kobj = new ImObj();
-                            kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
-                            String kb = cursor.getString(cursor.getColumnIndexOrThrow("keyboard"));
-                            if (kb != null) {
-                                if (kb.contains("dayi")) {
-                                    kb = "dayi";
-                                } else if (kb.contains("phonetic") || kb.contains("hsu") || kb.contains("et26") || kb.contains("et41")) {
-                                    kb = "phonetic";
-                                }
-                            }
-                            kobj.setKeyboard(kb);
-                            result.add(kobj);
-                        }
-                    } while (cursor.moveToNext());
-                }
-
-                cursor.close();
-            }
-
-        } catch (Exception e) {
-            Log.i(TAG, "getImList(): Cannot get IM List : " + e);
-        }
-        return result;
+        return imInfo.getImList();
     }
 
     public KeyboardObj getKeyboardObj(String keyboard) {
-
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return null;
-
-        if (keyboard == null || keyboard.equals(""))
-            return null;
-        KeyboardObj kobj = null;
-
-        try {
-            Cursor cursor = db.query("keyboard", null, FIELD_CODE + " = ?", new String[]{keyboard}, null, null,
-                    null, null);
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    kobj = new KeyboardObj();
-                    kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
-                    kobj.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
-                    kobj.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("desc")));
-                    kobj.setType(cursor.getString(cursor.getColumnIndexOrThrow("type")));
-                    kobj.setImage(cursor.getString(cursor.getColumnIndexOrThrow("image")));
-                    kobj.setImkb(cursor.getString(cursor.getColumnIndexOrThrow("imkb")));
-                    kobj.setImshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("imshiftkb")));
-                    kobj.setEngkb(cursor.getString(cursor.getColumnIndexOrThrow("engkb")));
-                    kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("engshiftkb")));
-                    kobj.setSymbolkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolkb")));
-                    kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolshiftkb")));
-                    kobj.setDefaultkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultkb")));
-                    kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultshiftkb")));
-                    kobj.setExtendedkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedkb")));
-                    kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedshiftkb")));
-                }
-
-                cursor.close();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return kobj;
+        return imInfo.getKeyboardObj(keyboard);
     }
 
     public String getKeyboardInfo(String keyboardCode, String field) {
-        if (DEBUG)
-            Log.i(TAG, "getKeyboardInfo()");
-        if (!checkDBConnection())
-            return null;
-        String info = null;
-        try {
-            info = getKeyboardInfoOnDB(db, keyboardCode, field);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return info;
-
+        return imInfo.getKeyboardInfo(keyboardCode, field);
     }
 
-    /**
-     * Jeremy '12,6,7 for working with OnUpgrade() before db is created
-     */
     private String getKeyboardInfoOnDB(SQLiteDatabase dbin, String keyboardCode, String field) {
-        if (DEBUG)
-            Log.i(TAG, "getKeyboardInfoOnDB()");
-
-        String info = null;
-
-        Cursor cursor = dbin.query("keyboard", null, FIELD_CODE + " = '" + keyboardCode + "'", null, null, null, null,
-                null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                info = cursor.getString(cursor.getColumnIndexOrThrow(field));
-            }
-            cursor.close();
-        }
-        if (DEBUG)
-            Log.i(TAG, "getKeyboardInfoOnDB() info = " + info);
-
-        return info;
+        return imInfo.getKeyboardInfoOnDB(dbin, keyboardCode, field);
     }
 
     public List<KeyboardObj> getKeyboardList() {
-
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return null;
-
-        List<KeyboardObj> result = new LinkedList<>();
-        try {
-            // SQLiteDatabase db = this.getSqliteDb(true);
-            Cursor cursor = db.query("keyboard", null, null, null, null, null, "name ASC", null);
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    do {
-                        KeyboardObj kobj = new KeyboardObj();
-                        kobj.setCode(cursor.getString(cursor.getColumnIndexOrThrow("code")));
-                        kobj.setName(cursor.getString(cursor.getColumnIndexOrThrow("name")));
-                        kobj.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("desc")));
-                        kobj.setType(cursor.getString(cursor.getColumnIndexOrThrow("type")));
-                        kobj.setImage(cursor.getString(cursor.getColumnIndexOrThrow("image")));
-                        kobj.setImkb(cursor.getString(cursor.getColumnIndexOrThrow("imkb")));
-                        kobj.setImshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("imshiftkb")));
-                        kobj.setEngkb(cursor.getString(cursor.getColumnIndexOrThrow("engkb")));
-                        kobj.setEngshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("engshiftkb")));
-                        kobj.setSymbolkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolkb")));
-                        kobj.setSymbolshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("symbolshiftkb")));
-                        kobj.setDefaultkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultkb")));
-                        kobj.setDefaultshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("defaultshiftkb")));
-                        kobj.setExtendedkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedkb")));
-                        kobj.setExtendedshiftkb(cursor.getString(cursor.getColumnIndexOrThrow("extendedshiftkb")));
-                        result.add(kobj);
-                    } while (cursor.moveToNext());
-                }
-
-                cursor.close();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
+        return imInfo.getKeyboardList();
     }
 
     public synchronized void setIMKeyboard(String im, String value,
             String keyboard) {
-        if (DEBUG)
-            Log.i(TAG, "setIMKeyboard() im=" + im + " value= " + value + " keyboard= " + keyboard);
-        if (!checkDBConnection())
-            return;
-        try {
-            setIMKeyboardOnDB(db, im, value, keyboard);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        imInfo.setIMKeyboard(im, value, keyboard);
     }
 
-    /**
-     * Jeremy '12,6,7 for working with OnUpgrade() before db is created
-     */
     private void setIMKeyboardOnDB(SQLiteDatabase dbin, String im, String value, String keyboard) {
-        if (DEBUG)
-            Log.i(TAG, "setIMKeyboardOnDB()");
-        ContentValues cv = new ContentValues();
-        cv.put("code", im);
-        cv.put("title", "keyboard");
-        cv.put("desc", value);
-        cv.put("keyboard", keyboard);
-
-        removeImInfoOnDB(dbin, im, "keyboard");
-
-        dbin.insert("im", null, cv);
+        imInfo.setIMKeyboardOnDB(dbin, im, value, keyboard);
     }
 
     public String getKeyboardCode(String im) {
-        // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
-        if (!checkDBConnection())
-            return "";
-
-        Cursor cursor = null;
-        try {
-            String selectString = "SELECT * FROM im WHERE code=? AND title='keyboard'";
-            // SQLiteDatabase db = this.getSqliteDb(true);
-
-            cursor = db.rawQuery(selectString, new String[] { im });
-
-            if (cursor != null && cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                int descCol = cursor.getColumnIndex("keyboard");
-
-                return cursor.getString(descCol);
-            }
-
-        } catch (Exception ignored) {
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return "";
+        return imInfo.getKeyboardCode(im);
     }
 
     public List<String> getEnglishSuggestions(String word) {
@@ -2824,59 +2558,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     public List<Keyboard> getKeyboard() {
-        List<Keyboard> result = new ArrayList<>();
-        if (!checkDBConnection())
-            return result;
-
-        // Filter to only show Dayi English and Phonetic keyboards
-        String selection = Lime.DB_KEYBOARD_COLUMN_CODE + " = ? OR " + Lime.DB_KEYBOARD_COLUMN_CODE + " = ?";
-        String[] selectionArgs = { "dayi", "phonetic" };
-        Cursor cursor = db.query(Lime.DB_KEYBOARD, null, selection, selectionArgs,
-                null, null, Lime.DB_KEYBOARD_COLUMN_NAME + " ASC");
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Keyboard r = Keyboard.get(cursor);
-            result.add(r);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return result;
+        return imInfo.getKeyboard();
     }
 
     public List<Im> getIm(String code, String type) {
-
-        List<Im> result = new ArrayList<>();
-        if (!checkDBConnection())
-            return result;
-
-        Cursor cursor;
-        String query = null;
-        if (code != null && code.length() > 1) {
-            query = Lime.DB_IM_COLUMN_CODE + "='" + code + "'";
-        }
-        if (type != null && type.length() > 1) {
-            if (query != null) {
-                query += " AND ";
-            } else {
-                query = "";
-            }
-
-            query += " " + Lime.DB_IM_COLUMN_TITLE + "='" + type + "'";
-        }
-
-        cursor = db.query(Lime.DB_IM,
-                null, query,
-                null, null, null, Lime.DB_IM_COLUMN_DESC + " ASC");
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Im r = Im.get(cursor);
-            result.add(r);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return result;
+        return imInfo.getIm(code, type);
     }
 
     public Word getWord(String code, long id) {
@@ -2898,30 +2584,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     }
 
     public Keyboard getImKeyboard(String code) {
-        if (!checkDBConnection())
-            return null;
-
-        Cursor cursor = db.query(Lime.DB_IM, null,
-                Lime.DB_IM_COLUMN_CODE + " = ? AND " + Lime.DB_IM_COLUMN_TITLE + " = ?",
-                new String[]{code, Lime.IM_TYPE_KEYBOARD}, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            String keyboardCode = cursor.getString(cursor.getColumnIndexOrThrow(Lime.DB_IM_COLUMN_KEYBOARD));
-            cursor.close();
-
-            // Get the full keyboard object
-            List<Keyboard> keyboards = getKeyboard();
-            for (Keyboard kb : keyboards) {
-                if (kb.getCode().equals(keyboardCode)) {
-                    return kb;
-                }
-            }
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-        return null;
+        return imInfo.getImKeyboard(code);
     }
 
     public Related getRelated(long id) {
