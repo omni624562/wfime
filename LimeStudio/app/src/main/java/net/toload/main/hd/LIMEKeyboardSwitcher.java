@@ -36,7 +36,7 @@ import net.toload.main.hd.data.ImObj;
 import net.toload.main.hd.data.KeyboardObj;
 import net.toload.main.hd.global.LIMEPreferenceManager;
 import net.toload.main.hd.keyboard.LIMEKeyboard;
-import net.toload.main.hd.keyboard.LIMEKeyboardView;
+import net.toload.main.hd.keyboard.ImeKeyboardView;
 
 public class LIMEKeyboardSwitcher {
 
@@ -65,7 +65,7 @@ public class LIMEKeyboardSwitcher {
     private final Map<KeyboardId, LIMEKeyboard> mKeyboards;
     private final LIMEPreferenceManager mLIMEPref;
     private final boolean mIsAlphabet = false;
-    LIMEKeyboardView mInputView;
+    ImeKeyboardView mInputView;
     LIMEService mService;
     Context mThemedContext;
     private int mMode = KEYBOARDMODE_NORMAL;
@@ -212,7 +212,7 @@ public class LIMEKeyboardSwitcher {
         return "";
     }
 
-    public void setInputView(LIMEKeyboardView inputView) {
+    public void setInputView(ImeKeyboardView inputView) {
         mInputView = inputView;
     }
 

@@ -80,6 +80,7 @@ import net.toload.main.hd.global.RootMapper;
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard;
 import net.toload.main.hd.keyboard.LIMEKeyboard;
 import net.toload.main.hd.keyboard.LIMEKeyboardBaseView;
+import net.toload.main.hd.keyboard.ImeKeyboardView;
 import net.toload.main.hd.keyboard.LIMEKeyboardView;
 import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
 
@@ -133,7 +134,7 @@ public class LIMEService extends InputMethodService implements
     LIMEKeyboardSwitcher mKeyboardSwitcher;
     // Keep keydown event
     KeyEvent mKeydownEvent = null;
-    LIMEKeyboardView mInputView = null;
+    ImeKeyboardView mInputView = null;
 
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
@@ -611,15 +612,15 @@ public class LIMEService extends InputMethodService implements
         } else {
             if (mInputView != null) {
                 Log.d("KBD_DEBUG", "Adding keyboard view to container.");
-                if (mInputView.getParent() != null)
-                    ((android.view.ViewGroup) mInputView.getParent()).removeView(mInputView);
-                mInputView.setVisibility(View.VISIBLE);
+                if (mInputView.asView().getParent() != null)
+                    ((android.view.ViewGroup) mInputView.asView().getParent()).removeView(mInputView.asView());
+                mInputView.asView().setVisibility(View.VISIBLE);
                 try {
                     android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
                             android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                             android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
                     lp.gravity = android.view.Gravity.BOTTOM;
-                    mInputViewContainer.addView(mInputView, lp);
+                    mInputViewContainer.addView(mInputView.asView(), lp);
                 } catch (Exception e) {
                     Log.e("KBD_DEBUG", "FAILED to add mInputView to container: " + e.getMessage(), e);
                 }
@@ -708,7 +709,8 @@ public class LIMEService extends InputMethodService implements
             if (mComposingPopup != null) {
                 mComposingPopup.updateComposingText(text);
                 View anchor = mInputViewContainer != null ? mInputViewContainer
-                        : (mCandidateInInputView != null ? mCandidateInInputView : mInputView);
+                        : (mCandidateInInputView != null ? mCandidateInInputView
+                                : (mInputView != null ? mInputView.asView() : null));
                 if (anchor != null && text != null && !text.isEmpty()) {
                     mComposingPopup.show(anchor, 16, 12); // Use 12dp vertical margin for better spacing
                 }
@@ -794,7 +796,7 @@ public class LIMEService extends InputMethodService implements
             // FIRST: Hide other views to prevent overlap
             if (mInputView != null) {
                 if (DEBUG) Log.d("EMOJI_DEBUG", "Hiding mInputView");
-                mInputView.setVisibility(View.GONE);
+                mInputView.asView().setVisibility(View.GONE);
             }
 
             // Hide candidate view BEFORE showing emoji picker
@@ -883,7 +885,7 @@ public class LIMEService extends InputMethodService implements
                 }
             } else if (mInputView != null && !physKeyConnected) {
                 if (DEBUG) Log.d("EMOJI_DEBUG", "Showing virtual keyboard again");
-                mInputView.setVisibility(View.VISIBLE);
+                mInputView.asView().setVisibility(View.VISIBLE);
             }
         } else {
             if (DEBUG) Log.d("EMOJI_DEBUG", "Emoji picker already closed or NULL");
@@ -939,7 +941,7 @@ public class LIMEService extends InputMethodService implements
             // FIRST: Hide other views to prevent overlap
             if (mInputView != null) {
                 Log.d("MEMO_DEBUG", "Hiding mInputView");
-                mInputView.setVisibility(View.GONE);
+                mInputView.asView().setVisibility(View.GONE);
             }
 
             // Hide candidate view BEFORE showing memo panel
@@ -1000,7 +1002,7 @@ public class LIMEService extends InputMethodService implements
                 }
             } else if (mInputView != null && !physKeyConnected) {
                 Log.d("MEMO_DEBUG", "Showing virtual keyboard again");
-                mInputView.setVisibility(View.VISIBLE);
+                mInputView.asView().setVisibility(View.VISIBLE);
             }
         }
     }
@@ -4306,7 +4308,7 @@ public class LIMEService extends InputMethodService implements
                 Window window = dialog.getWindow();
                 if (window != null) {
                     WindowManager.LayoutParams lp = window.getAttributes();
-                    lp.token = mInputView != null ? mInputView.getWindowToken() : null;
+                    lp.token = mInputView != null ? mInputView.asView().getWindowToken() : null;
                     lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
                     window.setAttributes(lp);
                     window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
@@ -4501,9 +4503,9 @@ public class LIMEService extends InputMethodService implements
         if (mInputView == null)
             return;
         if (DEBUG)
-            Log.i(TAG, "updateInputViewShown(): mInputView.isShown(): " + mInputView.isShown());
+            Log.i(TAG, "updateInputViewShown(): mInputView.asView().isShown(): " + mInputView.asView().isShown());
         super.updateInputViewShown();
-        if (!mInputView.isShown() && !hasPhysicalKeyPressed)
+        if (!mInputView.asView().isShown() && !hasPhysicalKeyPressed)
             hideCandidateView();
     }
 

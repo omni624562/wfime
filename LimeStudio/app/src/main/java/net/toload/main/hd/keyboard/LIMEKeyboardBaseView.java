@@ -72,7 +72,7 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 @SuppressLint("UseSparseArrays")
-public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy {
+public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy, ImeKeyboardView {
     private static final String TAG = "LIMEKeyboardBaseView";
     private static final boolean DEBUG = false;
 
@@ -1740,5 +1740,10 @@ public class LIMEKeyboardBaseView extends View implements PointerTracker.UIProxy
             return true;
         }
         return false;
+    }
+
+    @Override
+    public View asView() {
+        return this;
     }
 }
