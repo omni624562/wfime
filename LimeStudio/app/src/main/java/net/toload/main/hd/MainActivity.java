@@ -113,6 +113,10 @@ public class MainActivity extends AppCompatActivity {
         // initial imlist
         initialImList();
 
+        // 自動備份剛還原時，先把學習資料套回（輸入法服務還沒啟動前就開設定的情況）
+        new Thread(() -> net.toload.main.hd.limedb.UserDataBackup.applyRestoredIfNeeded(getApplicationContext()),
+                "UserDataRestore").start();
+
 
 
         // Handle Import Text from other application

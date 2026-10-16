@@ -216,6 +216,30 @@ public class UserDataBackupTest {
         assertEquals(2, new UserDataStore(context).learnedMapping("dayi").size());
     }
 
+    // 模擬自動備份還原:新手機裝好時 user.db 已經是舊手機的檔
+    private void restoredByAndroidBackup() throws Exception {
+        assertNotNull(new UserDataStore(context).migrateIfNeeded(limeDb));
+        File userDb = context.getDatabasePath(UserDataStore.FILE_NAME);
+        File copy = new File(context.getCacheDir(), "restored_user.db");
+        java.nio.file.Files.copy(userDb.toPath(), copy.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        newPhone();
+        java.nio.file.Files.copy(copy.toPath(), userDb.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @Test
+    public void restoredUserDbIsAppliedOnceWhenFlagged() throws Exception {
+        List<String> learnedBefore = limeLearned();
+        restoredByAndroidBackup();
+        net.toload.main.hd.global.LIMEPreferenceManager pref = new net.toload.main.hd.global.LIMEPreferenceManager(context);
+        UserDataBackup.applyRestoredIfNeeded(context);                 // 沒有還原標記:不動
+        assertTrue(limeLearned().isEmpty());
+        pref.setUserDataRestored(true);                                // 備份代理還原完成時留下的標記
+        UserDataBackup.applyRestoredIfNeeded(context);
+        assertEquals(learnedBefore, limeLearned());
+        assertFalse(pref.getUserDataRestored());
+        assertEquals(1, limeDb.getMemos().size());
+    }
+
     private static byte[] zip(String[] names, byte[][] data) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (ZipOutputStream z = new ZipOutputStream(out)) {

@@ -40,6 +40,8 @@
     <string name="user_data_export_failed">Export failed</string>
     <string name="user_data_import_done">Imported. New words: %1$d, new related phrases: %2$d, new memos: %3$d</string>
     <string name="user_data_import_failed">Import failed: not a WFIME data file, or the file is damaged</string>
+    <string name="auto_backup_user_data">Back up to Google account</string>
+    <string name="auto_backup_user_data_summary">Learned words, related phrases, memos and smart selection records are saved with Android backup and restored on a new phone. Encrypted with your screen lock; dictionaries are not backed up</string>
     <string name="related_manager_title">User related phrases</string>
     <plurals name="related_manager_count">
         <item quantity="one">%1$d entry</item>

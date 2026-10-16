@@ -298,9 +298,11 @@ public class LIMEService extends InputMethodService implements
 
         SearchSrv = new SearchServer(this);
         // 第一次啟動時把使用者資料複製到 user.db(只讀 lime.db、不改);已搬過或資料庫鎖定中會直接略過
-        new Thread(() -> net.toload.main.hd.limedb.UserDataStore.get(getApplicationContext())
-                .migrateIfNeeded(new net.toload.main.hd.limedb.LimeDB(getApplicationContext())),
-                "UserDataMigration").start();
+        new Thread(() -> {
+            net.toload.main.hd.limedb.UserDataStore.get(getApplicationContext())
+                    .migrateIfNeeded(new net.toload.main.hd.limedb.LimeDB(getApplicationContext()));
+            net.toload.main.hd.limedb.UserDataBackup.applyRestoredIfNeeded(getApplicationContext());
+        }, "UserDataMigration").start();
         mEnglishOnly = false;
         mEnglishFlagShift = false;
 

@@ -45,6 +45,10 @@ class UserDataStore(context: Context) {
             }
         }
 
+        /** 在 user.db 的鎖裡執行（自動備份讀檔時用，避免讀到寫一半的檔）。 */
+        @JvmStatic
+        fun <T> runLocked(block: () -> T): T = synchronized(LOCK) { block() }
+
         /** 測試用：每個測試的資料目錄不同，關掉上一個測試留下的共用連線。 */
         @JvmStatic
         fun resetSharedForTest() = synchronized(LOCK) {

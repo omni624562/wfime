@@ -101,6 +101,22 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("learn_phrase", true);
     }
 
+    // 自動備份我的資料到 Google 帳號(預設開)
+    public boolean getAutoBackupUserData() {
+        return sp.getBoolean("auto_backup_user_data", true);
+    }
+
+    // 自動備份剛還原 user.db、還沒套回 lime.db(設定檔不在備份範圍,所以只會是這台機器寫的)
+    public boolean getUserDataRestored() {
+        return sp.getBoolean("user_data_restored", false);
+    }
+
+    // 用 commit:還原完成後系統可能馬上結束程序,非同步寫入會遺失標記
+    @android.annotation.SuppressLint("ApplySharedPref")
+    public void setUserDataRestored(boolean value) {
+        sp.edit().putBoolean("user_data_restored", value).commit();
+    }
+
     public boolean getEnglishPrediction() {
         return sp.getBoolean("english_dictionary_enable", true);
     }

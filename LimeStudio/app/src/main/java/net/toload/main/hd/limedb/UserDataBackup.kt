@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import net.toload.main.hd.DBServer
+import net.toload.main.hd.global.LIMEPreferenceManager
 import net.toload.main.hd.global.SmartSelectionManager
 import org.json.JSONObject
 import java.io.File
@@ -102,6 +103,22 @@ object UserDataBackup {
         } finally {
             dir.deleteRecursively()
         }
+    }
+
+    /**
+     * 自動備份還原後第一次啟動：把還原回來的關聯字與已載入輸入法的字碼套回 lime.db。
+     * 還沒載入的輸入法，之後下載並勾選還原學習紀錄時會套回。
+     */
+    @JvmStatic
+    fun applyRestoredIfNeeded(context: Context) {
+        val pref = LIMEPreferenceManager(context)
+        if (!pref.userDataRestored) return
+        val limeDb = LimeDB(context)
+        if (!UserDataStore.get(context).isMigrated()) return
+        limeDb.restoreAllFromUserData()
+        DBServer.resetCache()
+        pref.setUserDataRestored(false)
+        Log.i(TAG, "applied restored user data")
     }
 
     private fun copyLimited(input: InputStream, dest: File) {

@@ -91,6 +91,8 @@
     <string name="user_data_export_failed">匯出失敗</string>
     <string name="user_data_import_done">已匯入：新增字碼 %1$d 筆、關聯字 %2$d 筆、備忘錄 %3$d 則</string>
     <string name="user_data_import_failed">匯入失敗：不是麥田輸入法的資料檔，或檔案已損壞</string>
+    <string name="auto_backup_user_data">自動備份到 Google 帳號</string>
+    <string name="auto_backup_user_data_summary">學過的字、關聯字、備忘錄、智慧選字紀錄隨 Android 備份存到 Google 帳號，換手機時自動還原；以裝置螢幕鎖加密，字庫不備份</string>
     <string name="related_manager_title">自建關聯字管理</string>
     <plurals name="related_manager_count">
         <item quantity="other">共 %1$d 筆</item>

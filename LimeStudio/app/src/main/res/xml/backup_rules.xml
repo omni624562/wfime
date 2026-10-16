@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 以下的自動備份：只備份使用者資料（user.db、智慧選字紀錄），大字庫 lime.db 與設定不備份 -->
+<full-backup-content>
+    <include domain="database" path="user.db" />
+    <include domain="file" path="dayi_smart_sel.json" />
+</full-backup-content>

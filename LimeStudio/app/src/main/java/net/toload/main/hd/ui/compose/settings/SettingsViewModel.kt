@@ -74,6 +74,7 @@ data class SettingsUiState(
     val englishDictionaryPhysicalKeyboard: Boolean = false,
     val candidateSuggestion: Boolean = true,
     val learnPhrase: Boolean = true,
+    val autoBackupUserData: Boolean = true,
     val learningSwitch: Boolean = true,
     val physicalKeyboardSort: Boolean = true,
     val acceptNumberIndex: Boolean = false,
@@ -182,6 +183,7 @@ class SettingsViewModel(
                     englishDictionaryPhysicalKeyboard = preferenceManager.getParameterBoolean("english_dictionary_physical_keyboard", false),
                     candidateSuggestion = preferenceManager.getParameterBoolean("candidate_suggestion", true),
                     learnPhrase = preferenceManager.getParameterBoolean("learn_phrase", true),
+                    autoBackupUserData = preferenceManager.getParameterBoolean("auto_backup_user_data", true),
                     learningSwitch = preferenceManager.getParameterBoolean("learning_switch", true),
                     physicalKeyboardSort = preferenceManager.getParameterBoolean("physical_keyboard_sort", true),
                     acceptNumberIndex = preferenceManager.getParameterBoolean("accept_number_index", false),
@@ -321,6 +323,11 @@ class SettingsViewModel(
     fun setCandidateSuggestion(value: Boolean) {
         preferenceManager.setParameter("candidate_suggestion", value)
         _uiState.update { it.copy(candidateSuggestion = value) }
+    }
+
+    fun setAutoBackupUserData(value: Boolean) {
+        preferenceManager.setParameter("auto_backup_user_data", value)
+        _uiState.update { it.copy(autoBackupUserData = value) }
     }
 
     fun setLearnPhrase(value: Boolean) {

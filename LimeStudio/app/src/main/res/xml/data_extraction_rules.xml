@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 以上的自動備份與換機搬移：只帶使用者資料（user.db、智慧選字紀錄）；
+     雲端備份只在能以裝置鎖端對端加密時進行 -->
+<data-extraction-rules>
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
+        <include domain="database" path="user.db" />
+        <include domain="file" path="dayi_smart_sel.json" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="user.db" />
+        <include domain="file" path="dayi_smart_sel.json" />
+    </device-transfer>
+</data-extraction-rules>

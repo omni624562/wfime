@@ -1049,6 +1049,15 @@ fun MappingSettingsSection(
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
 
             SwitchPreference(
+                title = stringResource(R.string.auto_backup_user_data),
+                summary = stringResource(R.string.auto_backup_user_data_summary),
+                checked = uiState.autoBackupUserData,
+                onCheckedChange = { viewModel.setAutoBackupUserData(it) }
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+
+            SwitchPreference(
                 title = stringResource(R.string.learn_phrase),
                 summary = stringResource(R.string.learn_phrase_summary),
                 checked = uiState.learnPhrase,
