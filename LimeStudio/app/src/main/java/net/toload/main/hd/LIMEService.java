@@ -117,7 +117,9 @@ public class LIMEService extends InputMethodService implements
     };
     private java.util.concurrent.ExecutorService queryExecutor =
             java.util.concurrent.Executors.newSingleThreadExecutor();
-    private volatile java.util.concurrent.Future<?> queryFuture;
+    // 候選、關聯字、英文預測查詢共用:新查詢自動取消上一個,只有最新查詢的結果在主執行緒套用
+    private final LatestQueryRunner mQueryRunner = new LatestQueryRunner(
+            kotlinx.coroutines.ExecutorsKt.from(queryExecutor), kotlinx.coroutines.Dispatchers.getMain());
     final android.os.Handler mMainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     // 連打模式:目前候選列(mCandidateList)對應的組字碼;與 setSuggestions 同步於主執行緒更新
     private volatile String mLastSuggestionsCode = null;
@@ -2999,8 +3001,7 @@ public class LIMEService extends InputMethodService implements
             final String finalKeyString = keyString;
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
             final int querySeq = mQueryTracker.startQuery();
-            if (queryFuture != null) queryFuture.cancel(true);
-            queryFuture = queryExecutor.submit(() -> {
+            mQueryRunner.submit(() -> {
 
                     try {
                         list.addAll(
@@ -3028,7 +3029,7 @@ public class LIMEService extends InputMethodService implements
                         }
                     }
                     // Exit early if a newer query has already been started
-                    if (Thread.currentThread().isInterrupted()) return;
+                    if (Thread.currentThread().isInterrupted()) return null;
 
                     // Setup selection keys
                     String selkey = null;
@@ -3138,11 +3139,12 @@ public class LIMEService extends InputMethodService implements
 
                     mQueryTracker.publish(new CandidateQueryTracker.Pending(querySeq, finalKeyString, list,
                             finalHasPhysicalKeyPressed, selkey));
+                    final Runnable applyList;
                     if (list.size() > 0) {
                         // 與 setSuggestions 同在主執行緒原子更新:記錄這批候選對應的
                         // 組字碼,供連打模式判斷 mCandidateList 是否仍是當前碼的結果
                         final String finalSelkey = selkey;
-                        mMainHandler.post(() -> {
+                        applyList = () -> {
                             // 結果排到主執行緒時組字可能已經變了(例如快速按刪除清空組字、又重打同一個碼),
                             // 只套用最新一次查詢的結果(已被 ensureCandidatesCurrent() 套用過也再套一次,
                             // 蓋掉之後才到的關聯字清單,順序跟原本一樣)
@@ -3151,34 +3153,48 @@ public class LIMEService extends InputMethodService implements
                             setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
                             if (mQueryTracker.takeAutoCommit(querySeq))
                                 commitTyped(getCurrentInputConnection());
-                        });
+                        };
                         if (DEBUG)
                             Log.i(TAG, "updateCandidates(): display selkey:" + selkey
                                     + ", list.size:" + list.size()
                                     + ", mComposing = " + mComposing);
                     } else {
-                        mMainHandler.post(() -> {
+                        applyList = () -> {
                             if (!mQueryTracker.acceptResult(querySeq, finalKeyString, mComposing)) return;
                             mLastSuggestionsCode = null;
                             clearSuggestions();
                             mQueryTracker.takeAutoCommit(querySeq); // 查無結果:清掉等待中的自動上字,不上字
-                        });
+                        };
                     }
 
-                    // Show composing window if keyToKeyname got different string. Revised by Jeremy
-                    // '11,6,4
-                    if (SearchSrv.getTablename() != null) {
-                        String keynameString = SearchSrv.keyToKeyname(finalKeyString); // .toLowerCase(Locale.US));
-                                                                                       // moved to LimeDB
+                    // 以下在主執行緒、而且這次查詢仍是最新的時候才執行:先顯示候選,再查字根
+                    return (Runnable) () -> {
+                        applyList.run();
+                        updateComposingRoots(finalKeyString, finalHasPhysicalKeyPressed);
+                    };
+            }, applyResult -> {
+                if (applyResult != null) applyResult.run();
+            });
+
+        } else
+            // Jermy '11,8,14
+            clearSuggestions();
+    }
+
+    /**
+     * 組字的字根顯示(候選列旁的字根、浮窗)。字根要查資料庫,排在候選清單顯示之後另外查,
+     * 不拖慢候選出現;之後的新查詢會取代它。
+     */
+    private void updateComposingRoots(final String finalKeyString, final boolean finalHasPhysicalKeyPressed) {
+        // Show composing window if keyToKeyname got different string. Revised by Jeremy
+        // '11,6,4
+        if (SearchSrv.getTablename() == null)
+            return;
+        mQueryRunner.submit(() -> SearchSrv.keyToKeyname(finalKeyString), // .toLowerCase(Locale.US)); moved to LimeDB
+                keynameString -> {
                         if (mCandidateView != null
                                 && !keynameString.toUpperCase(Locale.US).equals(finalKeyString.toUpperCase(Locale.US))
                                 && !keynameString.trim().equals("")) {
-                            try {
-                                Thread.sleep(0);
-                            } catch (InterruptedException ignored) {
-                                return; // terminate thread here, since it is interrupted and more recent
-                                        // getMappingByCode will update the suggestions.
-                            }
                             // DB keynames are the authoritative root display;
                             // feed the candidate-bar slot on both views.
                             updateComposingRootsDisplay(keynameString, finalKeyString);
@@ -3189,12 +3205,7 @@ public class LIMEService extends InputMethodService implements
                         } else {
                             updateComposingRootsDisplay("", finalKeyString);
                         }
-                    }
-            });
-
-        } else
-            // Jermy '11,8,14
-            clearSuggestions();
+                });
     }
 
     /*
@@ -3254,8 +3265,7 @@ public class LIMEService extends InputMethodService implements
                         tempEnglishList.clear();
 
                         final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
-                        if (queryFuture != null) queryFuture.cancel(true);
-                        queryFuture = queryExecutor.submit(() -> {
+                        mQueryRunner.submit(() -> {
                                 final Mapping self = new Mapping();
                                 self.setWord(tempEnglishWord.toString());
                                 self.setComposingCodeRecord();
@@ -3269,7 +3279,7 @@ public class LIMEService extends InputMethodService implements
                                 try {
                                     Thread.sleep(0);
                                 } catch (InterruptedException ignored) {
-                                    return; // terminate thread here, since it is interrupted and more recent
+                                    return null; // terminate thread here, since it is interrupted and more recent
                                             // getMappingByCode will update the suggestions.
                                 }
 
@@ -3286,7 +3296,7 @@ public class LIMEService extends InputMethodService implements
                                     try {
                                         Thread.sleep(0);
                                     } catch (InterruptedException ignored) {
-                                        return; // terminate thread here, since it is interrupted and more recent
+                                        return null; // terminate thread here, since it is interrupted and more recent
                                                 // getMappingByCode will update the suggestions.
                                     }
 
@@ -3320,16 +3330,18 @@ public class LIMEService extends InputMethodService implements
                                         }
                                     }
 
-                                    // Log.i("EMOJIbefore:", tempEnglishList.size() + "");
-                                    tempEnglishList.addAll(list);
-                                    setSuggestions(list, finalHasPhysicalKeyPressed, selkey);
-
-                                    // Log.i("EMOJIafter:", tempEnglishList.size() + "");
-
+                                    final String finalSelkey = selkey;
+                                    // 以下在主執行緒、而且這次查詢仍是最新的時候才執行
+                                    return (Runnable) () -> {
+                                        tempEnglishList.addAll(list);
+                                        setSuggestions(list, finalHasPhysicalKeyPressed, finalSelkey);
+                                    };
                                 } else {
                                     // Jermy '11,8,14
-                                    clearSuggestions();
+                                    return (Runnable) this::clearSuggestions;
                                 }
+                        }, applyResult -> {
+                            if (applyResult != null) applyResult.run();
                         });
                     }
 
@@ -3366,8 +3378,7 @@ public class LIMEService extends InputMethodService implements
                 && !committedCandidate.getWord().equals("")) {
 
             final boolean finalHasPhysicalKeyPressed = hasPhysicalKeyPressed;
-            if (queryFuture != null) queryFuture.cancel(true);
-            queryFuture = queryExecutor.submit(() -> {
+            mQueryRunner.submit(() -> {
 
                     LinkedList<Mapping> list = new LinkedList<>();
                     // Jeremy '11,8,9 Insert completion suggestions from application
@@ -3387,7 +3398,7 @@ public class LIMEService extends InputMethodService implements
                         }
 
                         // Exit early if a newer query has already been started
-                        if (Thread.currentThread().isInterrupted()) return;
+                        if (Thread.currentThread().isInterrupted()) return null;
 
                         if (list.size() > 0) {
 
@@ -3397,13 +3408,21 @@ public class LIMEService extends InputMethodService implements
                                 selkey = "";
                             }
 
-                            setSuggestions(list, finalHasPhysicalKeyPressed && !isFullscreenMode(), selkey);
+                            final String finalSelkey = selkey;
+                            // 以下在主執行緒、而且這次查詢仍是最新的時候才執行
+                            return (Runnable) () -> setSuggestions(list,
+                                    finalHasPhysicalKeyPressed && !isFullscreenMode(), finalSelkey);
                         } else {
-                            committedCandidate = null;
-                            // Jermy '11,8,14
-                            clearSuggestions();
+                            return (Runnable) () -> {
+                                committedCandidate = null;
+                                // Jermy '11,8,14
+                                clearSuggestions();
+                            };
                         }
                     }
+                    return null;
+            }, applyResult -> {
+                if (applyResult != null) applyResult.run();
             });
         }
 
@@ -4224,16 +4243,8 @@ public class LIMEService extends InputMethodService implements
             return true;
         CandidateQueryTracker.Pending pending = mQueryTracker.latestPending();
         if (pending == null) {
-            java.util.concurrent.Future<?> future = queryFuture;
-            if (future != null) {
-                try {
-                    future.get(80, java.util.concurrent.TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (Exception ignored) {
-                    // 逾時、已取消或查詢失敗:下面判斷結果還沒到
-                }
-            }
+            // 逾時、已取消或查詢失敗:下面判斷結果還沒到
+            mQueryRunner.awaitWork(80);
             pending = mQueryTracker.latestPending();
         }
         if (pending == null) {
@@ -4406,10 +4417,7 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "onDestroy()");
 
         // Cancel pending query and shut down the executor
-        if (queryFuture != null) {
-            queryFuture.cancel(true);
-            queryFuture = null;
-        }
+        mQueryRunner.shutdown();
         queryExecutor.shutdownNow();
 
         // Persist pending smart selection learning data before the service dies
