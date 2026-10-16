@@ -296,6 +296,40 @@ public class UserDataStoreSyncTest {
     }
 
     @Test
+    public void snapshotFromD11IsUpgradedOnce() {
+        assertNotNull(store.migrateIfNeeded(limeDb));
+        // 模擬 D1-1 版留下的 user.db:沒有雙寫標記;之後的學習、刪除、備忘錄都只進了 lime.db
+        File f = context.getDatabasePath(UserDataStore.FILE_NAME);
+        UserDataStore.resetSharedForTest();
+        SQLiteDatabase u = SQLiteDatabase.openDatabase(f.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        assertEquals(1, rows(u, "SELECT 1 FROM meta WHERE key = 'dual_write'").size()); // 新搬遷直接標記
+        u.delete("meta", "key = 'dual_write'", null);
+        u.close();
+        insert("dayi", "x", null, "新", 2);
+        db.execSQL("DELETE FROM related WHERE pword = '我'");
+        ContentValues memo = new ContentValues();
+        memo.put("content", "D1-1 期間寫的");
+        memo.put("pinned", 0);
+        memo.put("created_at", 1710000000000L);
+        db.insert("memo", null, memo);
+
+        store = UserDataStore.get(context);
+        store.migrateIfNeeded(limeDb);
+        assertMirrorsLime();
+        List<String> memos = new ArrayList<>();
+        for (MemoObj m : limeDb.getMemos()) memos.add(m.getContent());
+        assertEquals(Arrays.asList("D1-1 期間寫的", "舊備忘"), memos);
+
+        // 標記過就不再重抄:之後只在 user.db 的備忘錄要留著
+        limeDb.insertMemo("只在 user.db", 0);
+        store.migrateIfNeeded(limeDb);
+        assertEquals(3, limeDb.getMemos().size());
+        insert("dayi", "y", null, "另", 3);                  // 直接寫 lime.db、沒經過同步
+        store.migrateIfNeeded(limeDb);
+        assertTrue(!userMapping().contains("dayi|y|null|另|3|"));
+    }
+
+    @Test
     public void restoreBeforeMigrationFallsBack() {
         assertEquals(-1, limeDb.restoreLearnedFromUserData("dayi"));
     }

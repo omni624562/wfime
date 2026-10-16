@@ -117,7 +117,9 @@ class UserDataStore(context: Context) {
         return synchronized(LOCK) {
             val existing = openIfMigrated()
             if (existing != null) {
-                if (hasMeta(existing, "dirty") && limeDb.checkDBConnection()) {
+                if (!hasMeta(existing, "dual_write") && limeDb.checkDBConnection()) {
+                    LimeDB.db?.let { upgradeFromSnapshot(it, existing) }
+                } else if (hasMeta(existing, "dirty") && limeDb.checkDBConnection()) {
                     LimeDB.db?.let { resyncLearned(it, existing) }
                 }
                 return null
@@ -140,6 +142,7 @@ class UserDataStore(context: Context) {
                     writeMeta(out, "schema_version", SCHEMA_VERSION.toString())
                     writeMeta(out, "source_db_version", src.version.toString())
                     writeMeta(out, "migrated_at", System.currentTimeMillis().toString())
+                    writeMeta(out, "dual_write", "1")
                     out.setTransactionSuccessful()
                 } finally {
                     out.endTransaction()
@@ -286,6 +289,44 @@ class UserDataStore(context: Context) {
             }
         } catch (e: Exception) {
             Log.e(TAG, "resync failed, will retry next start", e)
+        }
+    }
+
+    // D1-1 版只在搬遷當下複製一次，之後的學習、刪除、備忘錄都只寫 lime.db：
+    // 學習資料整批以 lime.db 為準重抄；備忘錄只補上 user.db 沒有的（不刪，避免弄丟）。之後標記為雙寫版
+    private fun upgradeFromSnapshot(src: SQLiteDatabase, out: SQLiteDatabase) {
+        try {
+            out.transaction {
+                delete("learned_mapping", null, null)
+                delete("learned_related", null, null)
+                val mapping = copyAllMapping(src, this)
+                val related = copyAllRelated(src, this)
+                var memo = 0
+                if (hasTable(src, "memo")) {
+                    src.rawQuery("SELECT content, pinned, created_at FROM memo", null).use { c ->
+                        while (c.moveToNext()) {
+                            val createdAt: Long? = if (c.isNull(2)) null else c.getLong(2)
+                            val exists = rawQuery(
+                                "SELECT 1 FROM memo WHERE content = ? AND created_at IS ?",
+                                arrayOf(c.getString(0), createdAt?.toString())
+                            ).use { it.moveToFirst() }
+                            if (!exists) {
+                                val cv = ContentValues()
+                                cv.put("content", c.getString(0))
+                                cv.put("pinned", c.getInt(1))
+                                if (createdAt == null) cv.putNull("created_at") else cv.put("created_at", createdAt)
+                                insertOrThrow("memo", null, cv)
+                                memo++
+                            }
+                        }
+                    }
+                }
+                delete("meta", "key = 'dirty'", null)
+                writeMeta(this, "dual_write", "1")
+                Log.i(TAG, "upgraded snapshot: mapping=$mapping related=$related memo+=$memo")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "upgrade failed, will retry next start", e)
         }
     }
 
