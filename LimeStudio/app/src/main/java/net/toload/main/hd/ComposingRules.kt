@@ -32,4 +32,14 @@ object ComposingRules {
         if (remaining.startsWith(" ")) remaining = remaining.substring(1)
         return AfterCommit(true, remaining, remaining.isNotEmpty())
     }
+
+    /**
+     * 大易連打模式：新鍵接不上目前的碼時原本會先自動上字。已打的全是英文字母、有 3 碼以上，
+     * 新鍵也是字母時不自動上字，讓英文單字（例如 book）繼續組成，可以點選或按空白送出。
+     */
+    @JvmStatic
+    fun keepComposingEnglishWord(composing: CharSequence, nextKey: Int): Boolean =
+        composing.length >= 3 && composing.all { isAsciiLetter(it.code) } && isAsciiLetter(nextKey)
+
+    private fun isAsciiLetter(c: Int): Boolean = c in 'a'.code..'z'.code || c in 'A'.code..'Z'.code
 }

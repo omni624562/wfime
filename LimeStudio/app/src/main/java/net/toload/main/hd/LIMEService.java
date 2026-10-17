@@ -4132,7 +4132,9 @@ public class LIMEService extends InputMethodService implements
                         && activeIM != null && activeIM.startsWith("dayi")
                         && mComposing != null && mComposing.length() > 0) {
                     String probe = mComposing.toString() + (char) primaryCode;
-                    if (!SearchSrv.canExtendCode(probe)) {
+                    // 純字母已 3 碼以上：不自動上字，讓英文單字繼續組成
+                    if (!SearchSrv.canExtendCode(probe)
+                            && !ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)) {
                         autoCommitComposing();
                         if (!SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {
                             // 新鍵本身不是任何碼的起點:直接上屏該字元,不開新組字

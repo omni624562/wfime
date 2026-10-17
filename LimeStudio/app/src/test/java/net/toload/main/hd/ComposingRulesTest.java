@@ -74,4 +74,30 @@ public class ComposingRulesTest {
         assertTrue(r.notFinished);
         assertEquals("3u4", r.remaining);
     }
+
+    // ---- 大易連打模式：英文單字不自動上字 ----
+
+    @Test
+    public void englishWordKeepsComposingFromFourthLetter() {
+        // book：boo 之後打 k 接不上大易碼，仍繼續組字
+        assertTrue(ComposingRules.keepComposingEnglishWord("boo", 'k'));
+        assertTrue(ComposingRules.keepComposingEnglishWord("book", 's'));
+        assertTrue(ComposingRules.keepComposingEnglishWord("Boo", 'K'));
+    }
+
+    @Test
+    public void shortCodesStillAutoCommit() {
+        // 不到 3 碼照舊自動上字
+        assertFalse(ComposingRules.keepComposingEnglishWord("bo", 'k'));
+        assertFalse(ComposingRules.keepComposingEnglishWord("", 'k'));
+    }
+
+    @Test
+    public void codesWithDigitsOrSymbolsStillAutoCommit() {
+        // 含數字或符號的字根（例如 nh1、i2.）照舊自動上字；新鍵不是字母也照舊
+        assertFalse(ComposingRules.keepComposingEnglishWord("nh1", 'k'));
+        assertFalse(ComposingRules.keepComposingEnglishWord("i2.", 'k'));
+        assertFalse(ComposingRules.keepComposingEnglishWord("boo", '1'));
+        assertFalse(ComposingRules.keepComposingEnglishWord("boo", ','));
+    }
 }
