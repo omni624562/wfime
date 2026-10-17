@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 長按小鍵盤（「.」鍵的標點面板）與滑動手勢（左滑刪字、下滑收鍵盤）。
+ * 長按小鍵盤（「.」鍵的標點面板）與滑動手勢（左滑刪字、下滑收鍵盤），新舊鍵盤都要一樣。
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 34)
@@ -166,6 +166,25 @@ public class KeyboardPopupSwipeTest {
 
         List<String> right = fling(view, 50, 200, 1000, 210);
         assertTrue(right.toString(), right.contains("swipeRight"));
+    }
+
+    ImeKeyboardView composeKeyboard() {
+        return new ComposeKeyboardView(context);
+    }
+
+    @Test
+    public void composeKeyboardLongPressPopup() {
+        longPressDotOpensPopupAndPopupKeySends(composeKeyboard());
+    }
+
+    @Test
+    public void composeKeyboardBackClosesPopup() {
+        backClosesPopup(composeKeyboard());
+    }
+
+    @Test
+    public void composeKeyboardSwipes() {
+        swipes(composeKeyboard());
     }
 
     @Test

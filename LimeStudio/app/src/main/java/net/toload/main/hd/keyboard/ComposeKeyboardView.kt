@@ -42,13 +42,16 @@ import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key
  *
  * 鍵盤模型（LIMEBaseKeyboard）、觸控判斷（PointerDispatcher、PointerTracker）、畫鍵（KeyPainter）
  * 與舊鍵盤共用：鍵先畫進一張點陣圖（同舊鍵盤），再由 Compose 的 Canvas 貼上，外觀與舊鍵盤相同。
- * 尚未支援：長按小鍵盤、滑動手勢（A4-4）、TalkBack（A4-5）。
+ * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用。尚未支援：TalkBack（A4-5）。
  */
 class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardView, PointerTracker.UIProxy {
 
     @JvmField internal val painter = KeyPainter()
     @JvmField internal var keyHysteresisDistance = 0f
     @JvmField internal var verticalCorrection = 0f
+    private var popupLayout = 0
+    private var previewLayout = 0
+    private var backgroundDimAmount = 0f
 
     private var keyboard: LIMEBaseKeyboard? = null
     private var keys: Array<Key>? = null
@@ -81,10 +84,29 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     private var recomposer: Recomposer? = null
     private var recomposeScope: CoroutineScope? = null
     private val composeView = ComposeView(context)
+    private val miniPopup: MiniKeyboardPopup
+    private val swipeGestures: SwipeGestures
 
     init {
         readStyles()
         painter.finishStyle(0)
+        miniPopup = MiniKeyboardPopup(context, object : MiniKeyboardPopup.Host {
+            override fun view(): View = this@ComposeKeyboardView
+            override fun getKeyboard(): LIMEBaseKeyboard? = this@ComposeKeyboardView.keyboard
+            override fun getOnKeyboardActionListener(): LIMEKeyboardBaseView.OnKeyboardActionListener? =
+                this@ComposeKeyboardView.listener
+            override fun isShifted(): Boolean = this@ComposeKeyboardView.isShifted()
+            // 同舊鍵盤：主題有按鍵預覽版面就算開啟
+            override fun isPreviewEnabled(): Boolean = previewLayout != 0
+            override fun invalidateAllKeys() = this@ComposeKeyboardView.invalidateAllKeys()
+        }, popupLayout)
+        swipeGestures = SwipeGestures(context, object : SwipeGestures.Host {
+            override fun view(): View = this@ComposeKeyboardView
+            override fun swipeLeft() { listener?.swipeLeft() }
+            override fun swipeRight() { listener?.swipeRight() }
+            override fun swipeUp() { listener?.swipeUp() }
+            override fun swipeDown() { listener?.swipeDown() }
+        })
 
         composeView.setViewTreeLifecycleOwner(lifecycleOwner)
         composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
@@ -122,6 +144,9 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
                     keyHysteresisDistance = a.getDimensionPixelOffset(attr, 0).toFloat()
                 R.styleable.LIMEKeyboardBaseView_verticalCorrection ->
                     verticalCorrection = a.getDimensionPixelOffset(attr, 0).toFloat()
+                R.styleable.LIMEKeyboardBaseView_popupLayout -> popupLayout = a.getResourceId(attr, 0)
+                R.styleable.LIMEKeyboardBaseView_keyPreviewLayout -> previewLayout = a.getResourceId(attr, 0)
+                R.styleable.LIMEKeyboardBaseView_backgroundDimAmount -> backgroundDimAmount = a.getFloat(attr, 0.5f)
             }
         }
         a.recycle()
@@ -142,6 +167,7 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         requestLayout()
         invalidateAllKeys()
         computeProximityThreshold()
+        miniPopup.clearCache()
         painter.mLabelSplitCache.clear()
     }
 
@@ -165,11 +191,13 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
 
     override fun closing() {
         timers.cancelKeyTimers()
+        miniPopup.dismissPopupKeyboard()
         buffer = null
         bufferCanvas = null
+        miniPopup.clearCache()
     }
 
-    override fun handleBack(): Boolean = false
+    override fun handleBack(): Boolean = miniPopup.handleBack()
 
     override fun asView(): View = this
 
@@ -178,7 +206,10 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     override fun invalidateKey(key: Key?) {
         if (key == null) return
         val canvas = bufferCanvas
-        if (canvas != null && !redrawAll) {
+        if (miniPopup.isMiniKeyboardOn()) {
+            // 小鍵盤開著時整張重畫（含壓暗層，同舊鍵盤）
+            redrawAll = true
+        } else if (canvas != null && !redrawAll) {
             // 只重畫這一鍵的區域（同舊鍵盤的髒矩形重繪）
             canvas.save()
             canvas.clipRect(key.x + paddingLeft, key.y + paddingTop,
@@ -223,6 +254,11 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
             canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR)
             for (key in keys ?: emptyArray()) {
                 painter.drawKey(canvas, key, kb, paddingLeft, paddingTop, ::adjustCase)
+            }
+            // 小鍵盤開著時蓋一層壓暗
+            if (miniPopup.isMiniKeyboardOn()) {
+                painter.mPaint.color = (backgroundDimAmount * 0xFF).toInt() shl 24
+                canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), painter.mPaint)
             }
             redrawAll = false
         }
@@ -324,13 +360,22 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         return dispatchPointers(me)
     }
 
-    /** 同 LIMEKeyboardBaseView.onTouchEvent（不含滑動手勢與長按小鍵盤）。 */
+    /** 同 LIMEKeyboardBaseView.onTouchEvent。 */
     private fun dispatchPointers(me: MotionEvent): Boolean {
         val action = me.actionMasked
         val pointerCount = me.pointerCount
         val oldCount = oldPointerCount
         oldPointerCount = pointerCount
         if (!distinctMultitouch && pointerCount > 1 && oldCount > 1) return true
+
+        // 滑動手勢（小鍵盤開著時不判斷）
+        swipeGestures.addMovement(me)
+        if (!miniPopup.isMiniKeyboardOn() && swipeGestures.onTouchEvent(me)) {
+            timers.cancelKeyTimers()
+            return true
+        }
+        // 只有一個鍵的小鍵盤開著時，觸控轉給小鍵盤
+        if (miniPopup.forwardTouchEvent(me)) return true
 
         val index = me.actionIndex
         val ids = IntArray(pointerCount) { me.getPointerId(it) }
@@ -353,8 +398,9 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         return trackers[id]
     }
 
-    /** 長按：同 LIMEKeyboardView.onLongPress 的特殊鍵（長按小鍵盤待 A4-4）。 */
+    /** 長按：同 LIMEKeyboardBaseView.openPopupIfRequired 與 LIMEKeyboardView.onLongPress。 */
     private fun onLongPress(keyIndex: Int, tracker: PointerTracker) {
+        if (!miniPopup.hasPopupLayout()) return
         val key = tracker.getKey(keyIndex) ?: return
         val code = key.codes[0]
         val handled = when {
@@ -371,9 +417,10 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
                 listener?.onKey(LIMEKeyboardView.KEYCODE_SYMBOL_KEYBOARD, null, 0, 0)
                 true
             }
-            else -> false
+            else -> miniPopup.open(key)
         }
         if (handled) {
+            miniPopup.setTrackerId(tracker.mPointerId)
             // 這個手指之後不會送出放開，在這裡收起按下狀態（同舊鍵盤）
             tracker.setAlreadyProcessed()
             dispatcher.queue().remove(tracker)
