@@ -14,7 +14,7 @@
     <string name="number_row_in_english">Number row on English keyboard</string>
     <string name="number_row_in_english_summary">Show a number row on the English keyboard (5-row keyboard)</string>
     <string name="experimental_compose_keyboard">New keyboard (experimental)</string>
-    <string name="experimental_compose_keyboard_summary">Draw the on-screen keyboard with Jetpack Compose; looks and types the same. TalkBack is not supported yet</string>
+    <string name="experimental_compose_keyboard_summary">Draw the on-screen keyboard with Jetpack Compose; looks and types the same, and TalkBack can read each key</string>
     <string name="im">Input method</string>
     <string name="enable_english_dictionary">English dictionary</string>
     <string name="enable_english_dictionary_summary">Show English suggestions in English input mode</string>

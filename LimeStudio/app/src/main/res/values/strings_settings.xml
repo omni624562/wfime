@@ -57,7 +57,7 @@
     <string name="number_row_in_english">數字列英文鍵盤</string>
     <string name="number_row_in_english_summary">在英文鍵盤顯示數字列(5列鍵盤)</string>
     <string name="experimental_compose_keyboard">新版鍵盤(實驗中)</string>
-    <string name="experimental_compose_keyboard_summary">改用 Jetpack Compose 繪製螢幕鍵盤，外觀與打字相同；TalkBack 尚未支援</string>
+    <string name="experimental_compose_keyboard_summary">改用 Jetpack Compose 繪製螢幕鍵盤，外觀與打字相同，並支援 TalkBack 念出按鍵</string>
 
 
 

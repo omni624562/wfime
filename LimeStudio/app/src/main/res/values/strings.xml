@@ -201,4 +201,17 @@
     <string name="candidate_related_delete_title">刪除關聯字</string>
     <string name="candidate_related_delete_message">要從關聯字移除「%1$s → %2$s」嗎?</string>
     <string name="candidate_related_delete_confirm">刪除</string>
+
+    <!-- 螢幕鍵盤的 TalkBack 鍵名（新版鍵盤） -->
+    <string name="key_a11y_space">空白鍵</string>
+    <string name="key_a11y_enter">換行</string>
+    <string name="key_a11y_delete">刪除</string>
+    <string name="key_a11y_shift">Shift</string>
+    <string name="key_a11y_shift_on">Shift，已開啟</string>
+    <string name="key_a11y_symbols">符號鍵盤</string>
+    <string name="key_a11y_letters">返回文字鍵盤</string>
+    <string name="key_a11y_more_symbols">更多符號</string>
+    <string name="key_a11y_switch_im">切換輸入法</string>
+    <string name="key_a11y_to_english">切換到英文</string>
+    <string name="key_a11y_to_chinese">切換到中文</string>
 </resources>

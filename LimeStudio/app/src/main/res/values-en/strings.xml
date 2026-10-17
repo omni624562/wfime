@@ -121,4 +121,17 @@
     <string name="candidate_related_delete_title">Delete related phrase</string>
     <string name="candidate_related_delete_message">Remove \"%1$s → %2$s\" from related phrases?</string>
     <string name="candidate_related_delete_confirm">Delete</string>
+
+    <!-- TalkBack key names on the on-screen keyboard (new keyboard) -->
+    <string name="key_a11y_space">Space</string>
+    <string name="key_a11y_enter">Enter</string>
+    <string name="key_a11y_delete">Delete</string>
+    <string name="key_a11y_shift">Shift</string>
+    <string name="key_a11y_shift_on">Shift, on</string>
+    <string name="key_a11y_symbols">Symbols</string>
+    <string name="key_a11y_letters">Back to letters</string>
+    <string name="key_a11y_more_symbols">More symbols</string>
+    <string name="key_a11y_switch_im">Switch input method</string>
+    <string name="key_a11y_to_english">Switch to English</string>
+    <string name="key_a11y_to_chinese">Switch to Chinese</string>
 </resources>

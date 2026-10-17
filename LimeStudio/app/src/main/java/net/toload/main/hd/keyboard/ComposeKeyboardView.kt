@@ -17,15 +17,26 @@ import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -42,7 +53,8 @@ import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key
  *
  * 鍵盤模型（LIMEBaseKeyboard）、觸控判斷（PointerDispatcher、PointerTracker）、畫鍵（KeyPainter）
  * 與舊鍵盤共用：鍵先畫進一張點陣圖（同舊鍵盤），再由 Compose 的 Canvas 貼上，外觀與舊鍵盤相同。
- * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用。尚未支援：TalkBack（A4-5）。
+ * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用。
+ * TalkBack：每個鍵在畫面上的位置放一個無障礙節點，說出鍵名，點兩下（或抬起輸入）送出該鍵（A4-5）。
  */
 class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardView, PointerTracker.UIProxy {
 
@@ -75,6 +87,10 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     private var bufferCanvas: Canvas? = null
     private var redrawAll = true
     private var frame by mutableIntStateOf(0)
+
+    // TalkBack 用：目前的鍵與 Shift 狀態（換鍵盤或 Shift 時才重組無障礙節點）
+    private var a11yKeys by mutableStateOf<List<Key>>(emptyList())
+    private var a11yVersion by mutableIntStateOf(0)
 
     private val lifecycleOwner = ComposeLifecycleOwner().apply {
         performRestore(null)
@@ -111,10 +127,32 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         composeView.setViewTreeLifecycleOwner(lifecycleOwner)
         composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
         composeView.setContent {
-            Canvas(Modifier.fillMaxSize()) {
-                @Suppress("UNUSED_EXPRESSION") frame
-                val bitmap = drawBuffer()
-                if (bitmap != null) drawImage(bitmap.asImageBitmap())
+            Box(Modifier.fillMaxSize()) {
+                Canvas(Modifier.fillMaxSize()) {
+                    @Suppress("UNUSED_EXPRESSION") frame
+                    val bitmap = drawBuffer()
+                    if (bitmap != null) drawImage(bitmap.asImageBitmap())
+                }
+                @Suppress("UNUSED_EXPRESSION") a11yVersion
+                for (key in a11yKeys) {
+                    val description = keyDescription(key)
+                    Box(
+                        Modifier
+                            .offset { IntOffset(key.x + paddingLeft, key.y + paddingTop) }
+                            .layout { measurable, _ ->
+                                val placeable = measurable.measure(Constraints.fixed(key.width, key.height))
+                                layout(key.width, key.height) { placeable.place(0, 0) }
+                            }
+                            .semantics {
+                                contentDescription = description
+                                role = Role.Button
+                                onClick {
+                                    typeKeyForAccessibility(key)
+                                    true
+                                }
+                            }
+                    )
+                }
             }
         }
         addView(composeView)
@@ -168,6 +206,8 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         invalidateAllKeys()
         computeProximityThreshold()
         miniPopup.clearCache()
+        a11yKeys = keys?.toList() ?: emptyList()
+        a11yVersion++
         painter.mLabelSplitCache.clear()
     }
 
@@ -176,6 +216,7 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     override fun setShifted(shifted: Boolean): Boolean {
         if (keyboard?.setShifted(shifted) == true) {
             invalidateAllKeys()
+            a11yVersion++
             return true
         }
         return false
@@ -222,6 +263,48 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     }
 
     override fun showPreview(keyIndex: Int, tracker: PointerTracker?) {}
+
+    // ---- TalkBack ----
+
+    /** TalkBack 念出的鍵名：功能鍵用固定名稱，其他鍵念鍵上的字（多行標籤以空白隔開）。 */
+    fun keyDescription(key: Key): String {
+        val label = key.label?.toString()?.replace('\n', ' ')?.trim().orEmpty()
+        val res = resources
+        return when (key.codes[0]) {
+            LIMEBaseKeyboard.KEYCODE_SPACE -> res.getString(R.string.key_a11y_space)
+            LIMEBaseKeyboard.KEYCODE_DELETE -> res.getString(R.string.key_a11y_delete)
+            LIMEBaseKeyboard.KEYCODE_SHIFT ->
+                res.getString(if (isShifted()) R.string.key_a11y_shift_on else R.string.key_a11y_shift)
+            LIMEBaseKeyboard.KEYCODE_MODE_CHANGE ->
+                res.getString(if (label == "ABC") R.string.key_a11y_letters else R.string.key_a11y_symbols)
+            KEYCODE_MORE_SYMBOLS -> res.getString(R.string.key_a11y_more_symbols)
+            KEYCODE_NEXT_INPUT_METHOD -> res.getString(R.string.key_a11y_switch_im)
+            KEYCODE_TO_ENGLISH -> res.getString(R.string.key_a11y_to_english)
+            KEYCODE_TO_CHINESE -> res.getString(R.string.key_a11y_to_chinese)
+            LIMEBaseKeyboard.KEYCODE_ENTER, LIMEBaseKeyboard.KEYCODE_DONE ->
+                label.ifEmpty { res.getString(R.string.key_a11y_enter) }
+            else -> when {
+                label.isNotEmpty() -> label
+                key.text != null -> key.text.toString()
+                key.codes[0] > 0 -> String(Character.toChars(key.codes[0]))
+                else -> ""
+            }
+        }
+    }
+
+    /** TalkBack 點兩下：與手指點一下送出的事件相同（PointerTracker 的按下、送鍵、放開）。 */
+    private fun typeKeyForAccessibility(key: Key) {
+        val l = listener ?: return
+        val code = key.codes[0]
+        l.onPress(code)
+        if (key.text != null) {
+            l.onText(key.text)
+            l.onRelease(0)
+        } else {
+            l.onKey(code, key.codes, LIMEKeyboardBaseView.NOT_A_TOUCH_COORDINATE, LIMEKeyboardBaseView.NOT_A_TOUCH_COORDINATE)
+            l.onRelease(code)
+        }
+    }
 
     // ---- 畫鍵 ----
 
@@ -344,6 +427,8 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = true
 
+    // TalkBack 不經過這裡：每個鍵有自己的無障礙節點與點擊動作（見 setContent），所以不需要 performClick
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(me: MotionEvent): Boolean {
         val kb = keyboard as? LIMEKeyboard ?: return true
         // 同 LIMEKeyboardView：按下時重設空白鍵拖曳；放開時空白鍵拖曳換輸入法
@@ -474,5 +559,11 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     private companion object {
         const val MSG_REPEAT_KEY = 3
         const val MSG_LONGPRESS_KEY = 4
+
+        // LIMEService 的功能鍵碼（鍵盤 XML 裡的 codes）
+        const val KEYCODE_TO_ENGLISH = -9
+        const val KEYCODE_TO_CHINESE = -10
+        const val KEYCODE_MORE_SYMBOLS = -15
+        const val KEYCODE_NEXT_INPUT_METHOD = -16
     }
 }
