@@ -302,7 +302,7 @@ class LimeQueryEngine {
                     String selectString = "select _id, code, code3r, word, score, basescore, " + exactMatchCondition
                             + " as exactmatch  ";
 
-                    selectString += " from " + db.tablename + " where word is not null and " + selectClause + " order by "
+                    selectString += " from " + LimeDB.validateTableName(db.tablename) + " where word is not null and " + selectClause + " order by "
                             + sortClause
                             + " limit " + limitClause;
                     cursor = LimeDB.db.rawQuery(selectString, null);
@@ -337,7 +337,7 @@ class LimeQueryEngine {
     }
 
     private int countExactMatches(String codeCol, String code) {
-        try (Cursor c = LimeDB.db.rawQuery("select count(*) from " + db.tablename + " where word is not null and "
+        try (Cursor c = LimeDB.db.rawQuery("select count(*) from " + LimeDB.validateTableName(db.tablename) + " where word is not null and "
                 + codeCol + " = ?", new String[]{code})) {
             return c.moveToFirst() ? c.getInt(0) : 0;
         }

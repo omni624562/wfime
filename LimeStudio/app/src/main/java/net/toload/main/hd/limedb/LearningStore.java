@@ -146,7 +146,7 @@ final class LearningStore {
                     int newScore = srcunit.getScore() + 1;
                     if (srcunit.getCode() != null && !srcunit.getCode().trim().equals("")) {
                         try {
-                            Cursor maxCursor = LimeDB.db.rawQuery("SELECT MAX(" + LimeDB.FIELD_SCORE + ") FROM " + owner.tablename 
+                            Cursor maxCursor = LimeDB.db.rawQuery("SELECT MAX(" + LimeDB.FIELD_SCORE + ") FROM " + LimeDB.validateTableName(owner.tablename) 
                                     + " WHERE " + LimeDB.FIELD_CODE + " = ?", new String[] { srcunit.getCode() });
                             if (maxCursor != null) {
                                 if (maxCursor.moveToFirst()) {

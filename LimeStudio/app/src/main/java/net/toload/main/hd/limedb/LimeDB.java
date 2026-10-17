@@ -668,7 +668,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         Cursor cursor = null;
         try {
-            cursor = db.rawQuery("SELECT * FROM " + table, null);
+            cursor = db.rawQuery("SELECT * FROM " + validateTableName(table), null);
             if (cursor == null)
                 return 0;
             int total = cursor.getCount();
@@ -910,7 +910,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         }
 
         try {
-            Cursor cursor = db.rawQuery("select COUNT(*) as total from " + backupTableName, null);
+            Cursor cursor = db.rawQuery("select COUNT(*) as total from " + validateTableName(backupTableName), null);
 
             cursor.moveToFirst();
 
