@@ -355,6 +355,7 @@ public class UserDataStoreSyncTest {
         long builtIn = Long.parseLong(rows(db, "SELECT _id FROM related WHERE pword='日' AND cword='本'").get(0).replace("|", ""));
         limeDb.addScore(relatedUnit(builtIn));               // 從關聯字清單選字
         assertMirrorsLime();
+        assertEquals(Arrays.asList("你|好|1|", "我|們|1|", "日|期|1|", "日|本|4|"), userRelated());
 
         // 自建關聯字管理:內建歸零、自建刪除,復原後回來
         long own = Long.parseLong(rows(db, "SELECT _id FROM related WHERE pword='我' AND cword='們'").get(0).replace("|", ""));

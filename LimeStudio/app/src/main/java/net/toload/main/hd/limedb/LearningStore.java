@@ -90,7 +90,7 @@ final class LearningStore {
 
                 int newScore = (score == -1) ? munit.getScore() + 1 : score;
                 cv.put(LimeDB.FIELD_SCORE, newScore);
-                LimeDB.db.update(table, cv, LimeDB.FIELD_ID + " = " + munit.getId(), null);
+                LimeDB.db.update(table, cv, LimeDB.FIELD_ID + " = ?", new String[] { munit.getId() });
                 if (DEBUG)
                     Log.i(TAG, "addOrUpdateMappingRecord(): mapping exist, update score on existing record; score:"
                             + score);
@@ -137,7 +137,7 @@ final class LearningStore {
 
                     ContentValues cv = new ContentValues();
                     cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
-                    LimeDB.db.update(Lime.DB_RELATED, cv, LimeDB.FIELD_ID + " = " + srcunit.getId(), null);
+                    LimeDB.db.update(Lime.DB_RELATED, cv, LimeDB.FIELD_ID + " = ?", new String[] { srcunit.getId() });
                     owner.userStore().syncRelatedById(Long.parseLong(srcunit.getId()));
 
                     // Log.i("TAG RELATED B", srcunit.getId() + " : Related ADD Score :" + score);

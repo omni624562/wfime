@@ -260,8 +260,11 @@ final class ImInfoStore {
             Log.i(TAG, "getKeyboardInfoOnDB()");
 
         String info = null;
+        // 綁定參數不能是 null；舊寫法的 code = 'null' 本來就查不到
+        if (keyboardCode == null)
+            return null;
 
-        Cursor cursor = dbin.query("keyboard", null, LimeDB.FIELD_CODE + " = '" + keyboardCode + "'", null, null, null, null,
+        Cursor cursor = dbin.query("keyboard", null, LimeDB.FIELD_CODE + " = ?", new String[] { keyboardCode }, null, null, null,
                 null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {

@@ -245,7 +245,7 @@ final class RelatedStore {
                     owner.relatedscore.put(munit.getId(), score);
                 }
                 cv.put(Lime.DB_RELATED_COLUMN_USERSCORE, score);
-                LimeDB.db.update(Lime.DB_RELATED, cv, LimeDB.FIELD_ID + " = " + munit.getId(), null);
+                LimeDB.db.update(Lime.DB_RELATED, cv, LimeDB.FIELD_ID + " = ?", new String[] { munit.getId() });
 
                 // Log.i("TAG RELATED A", munit.getId() + " : Related ADD Score :" + score);
 
