@@ -3141,11 +3141,11 @@ public class LIMEService extends InputMethodService implements
                             list.addFirst(rawEnglish);
                             // 連打切分:長碼串能切成合法碼序列時,注入還原的中文詞候選
                             // (最多 3 個:記住的切分/詞庫+智慧選字/其他切法)。
-                            // 碼串含數字/符號(不可能是英文單字)→ 中文放最前,空白鍵直接上字;
-                            // 純字母(可能是英文,如 sorry)→ 英文維持第一,中文接在後面
+                            // 字母、數字、符號混合的字根碼 → 中文放最前,空白鍵直接上字;
+                            // 純字母(可能是英文,如 sorry)或純數字(如 123456789)→ 原始碼維持第一,中文接在後面
                             List<Mapping> segmentedList = SearchSrv.getSegmentedPhraseMappings(finalKeyString);
                             if (segmentedList != null && !segmentedList.isEmpty()) {
-                                int pos = finalKeyString.matches(".*[^A-Za-z].*") ? 0 : 1;
+                                int pos = ComposingRules.rawCodeFirst(finalKeyString) ? 1 : 0;
                                 for (Mapping segmented : segmentedList)
                                     list.add(pos++, segmented);
                             }
@@ -4132,9 +4132,10 @@ public class LIMEService extends InputMethodService implements
                         && activeIM != null && activeIM.startsWith("dayi")
                         && mComposing != null && mComposing.length() > 0) {
                     String probe = mComposing.toString() + (char) primaryCode;
-                    // 純字母已 3 碼以上：不自動上字，讓英文單字繼續組成
+                    // 純字母或純數字已 3 碼以上：不自動上字，讓英文單字或數字串繼續組成
                     if (!SearchSrv.canExtendCode(probe)
-                            && !ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)) {
+                            && !ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)
+                            && !ComposingRules.keepComposingNumber(mComposing, primaryCode)) {
                         autoCommitComposing();
                         if (!SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {
                             // 新鍵本身不是任何碼的起點:直接上屏該字元,不開新組字

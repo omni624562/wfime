@@ -100,4 +100,30 @@ public class ComposingRulesTest {
         assertFalse(ComposingRules.keepComposingEnglishWord("boo", '1'));
         assertFalse(ComposingRules.keepComposingEnglishWord("boo", ','));
     }
+
+    // ---- 大易連打模式：數字串不自動上字 ----
+
+    @Test
+    public void numberKeepsComposingFromFourthDigit() {
+        // 123456789：123 之後再打數字仍繼續組字
+        assertTrue(ComposingRules.keepComposingNumber("123", '4'));
+        assertTrue(ComposingRules.keepComposingNumber("12345678", '9'));
+    }
+
+    @Test
+    public void shortOrMixedNumbersStillAutoCommit() {
+        assertFalse(ComposingRules.keepComposingNumber("12", '3'));
+        assertFalse(ComposingRules.keepComposingNumber("nh1", '2'));
+        assertFalse(ComposingRules.keepComposingNumber("123", 'a'));
+        assertFalse(ComposingRules.keepComposingNumber("abc", '1'));
+    }
+
+    @Test
+    public void rawCodeFirstOnlyForPureLettersOrPureDigits() {
+        assertTrue(ComposingRules.rawCodeFirst("sorry"));
+        assertTrue(ComposingRules.rawCodeFirst("123456789"));
+        assertFalse(ComposingRules.rawCodeFirst("nh1dfu"));
+        assertFalse(ComposingRules.rawCodeFirst("i2.ab"));
+        assertFalse(ComposingRules.rawCodeFirst(""));
+    }
 }

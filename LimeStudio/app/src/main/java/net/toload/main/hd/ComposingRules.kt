@@ -41,5 +41,24 @@ object ComposingRules {
     fun keepComposingEnglishWord(composing: CharSequence, nextKey: Int): Boolean =
         composing.length >= 3 && composing.all { isAsciiLetter(it.code) } && isAsciiLetter(nextKey)
 
+    /**
+     * 大易連打模式：已打的全是數字、有 3 碼以上，新鍵也是數字時不自動上字，
+     * 讓數字串（例如 123456789）繼續組成。
+     */
+    @JvmStatic
+    fun keepComposingNumber(composing: CharSequence, nextKey: Int): Boolean =
+        composing.length >= 3 && composing.all { isAsciiDigit(it.code) } && isAsciiDigit(nextKey)
+
+    /**
+     * 大易長碼串（沒有對應的字、改由連打切分出中文）時，原始碼要不要排在中文前面：
+     * 純英文字母（可能是英文單字，如 sorry）或純數字（如 123456789）排最前，空白鍵送出原始碼；
+     * 字母、數字、符號混在一起的字根碼（如 nh1dfu）中文排最前。
+     */
+    @JvmStatic
+    fun rawCodeFirst(code: String): Boolean =
+        code.isNotEmpty() && (code.all { isAsciiLetter(it.code) } || code.all { isAsciiDigit(it.code) })
+
     private fun isAsciiLetter(c: Int): Boolean = c in 'a'.code..'z'.code || c in 'A'.code..'Z'.code
+
+    private fun isAsciiDigit(c: Int): Boolean = c in '0'.code..'9'.code
 }
