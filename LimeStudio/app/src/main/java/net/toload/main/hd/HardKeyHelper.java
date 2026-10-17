@@ -25,9 +25,6 @@ public class HardKeyHelper {
 
         service.hasPhysicalKeyPressed = true;
 
-        // If user use the physical keyboard then not fixed the candidate view
-        service.mFixedCandidateViewOn = false;
-
         if (DEBUG)
             Log.i(TAG, "translateKeyDown() LIMEMetaKeyKeyListener.getMetaState(mMetaState) = "
                     + Integer.toHexString(LIMEMetaKeyKeyListener.getMetaState(service.mMetaState))
