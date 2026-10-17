@@ -506,6 +506,16 @@ public class LIMEService extends InputMethodService implements
         return mInputViewContainer;
     }
 
+    /**
+     * 把鍵盤外框交給輸入法視窗。鍵盤收起時視窗若重建過（例如深淺色切換），外框還掛在舊的框上，
+     * 直接 setInputView() 會丟 IllegalStateException，所以先拆下來（同 onCreateInputView 的做法）。
+     */
+    private void attachInputViewContainer() {
+        if (mInputViewContainer.getParent() != null)
+            ((android.view.ViewGroup) mInputViewContainer.getParent()).removeView(mInputViewContainer);
+        setInputView(mInputViewContainer);
+    }
+
     private void ensureComposeLifecycleOwner() {
         if (mComposeLifecycleOwner == null) {
             mComposeLifecycleOwner = new net.toload.main.hd.ComposeLifecycleOwner();
@@ -1284,10 +1294,10 @@ public class LIMEService extends InputMethodService implements
                     if (DEBUG)
                         Log.i(TAG, "Fixed candidateView in on, return nInputViewContainer ");
                     Log.d("KBD_DEBUG", "Setting input view to container (fixed mode)");
-                    setInputView(mInputViewContainer);
+                    attachInputViewContainer();
                 } else {
                     Log.d("KBD_DEBUG", "Setting input view to container (normal mode)");
-                    setInputView(mInputViewContainer);
+                    attachInputViewContainer();
                     if (DEBUG)
                         Log.i(TAG, "Fixed candidateView in off, return mInputView ");
                 }
@@ -1295,7 +1305,7 @@ public class LIMEService extends InputMethodService implements
                 if (mInputViewContainer.getChildCount() == 0) {
                     Log.d("KBD_DEBUG", "No config change, but container is empty, rebuilding");
                     updateInputViewContainer();
-                    setInputView(mInputViewContainer);
+                    attachInputViewContainer();
                 } else {
                     Log.d("KBD_DEBUG", "No config change, container already populated");
                 }
