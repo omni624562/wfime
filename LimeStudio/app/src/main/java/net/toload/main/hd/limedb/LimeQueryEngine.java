@@ -276,8 +276,10 @@ class LimeQueryEngine {
 
                     String selectClause;
                     String sortClause;
-                    String escapedCode = code.replace("'", "''");
                     int codeLen = code.length();
+                    // 組字碼一律用綁定參數；順序同 SQL 裡 ? 出現的順序（先 exactmatch，再 where 條件）
+                    java.util.List<String> args = new java.util.ArrayList<>();
+                    args.add(code);
 
                     String limitClause = LimeDB.INITIAL_RESULT_LIMIT;
                     // 候選列已沒有「捲到底載入更多」,精確碼的字要一次全部查出來;否則注音 ㄧˋ
@@ -288,8 +290,8 @@ class LimeQueryEngine {
 
                     // Jeremy '15, 6, 1 between search clause without using related column for
                     // better sorting order.
-                    selectClause = expandBetweenSearchClause(codeCol, code);
-                    String exactMatchCondition = " (" + codeCol + " ='" + escapedCode + "') ";
+                    selectClause = expandBetweenSearchClause(codeCol, code, args);
+                    String exactMatchCondition = " (" + codeCol + " = ?) ";
                     sortClause = "( exactmatch = 1 and ( score > 0 or  basescore >0) and length(word)=1) desc, exactmatch desc,"
                             + " (length(" + codeCol + ") >= " + codeLen + " ) desc, "
                             + "(length(" + codeCol + ") <= " + ((codeLen > 5) ? 5 : codeLen) + " )*length(" + codeCol
@@ -305,7 +307,7 @@ class LimeQueryEngine {
                     selectString += " from " + LimeDB.validateTableName(db.tablename) + " where word is not null and " + selectClause + " order by "
                             + sortClause
                             + " limit " + limitClause;
-                    cursor = LimeDB.db.rawQuery(selectString, null);
+                    cursor = LimeDB.db.rawQuery(selectString, args.toArray(new String[0]));
 
                     if (LimeDB.DEBUG)
                         Log.i(LimeDB.TAG, "getMappingByCode() between search select string:" + selectString);
@@ -347,7 +349,8 @@ class LimeQueryEngine {
      * Jeremy '15,5,1 expand the search clause to include cod = abc, ab, c
      * descending
      */
-    private String expandBetweenSearchClause(String searchColumn, String code) {
+    /** 前綴與範圍條件；條件裡的碼用 ?，值依序加進 args。 */
+    private String expandBetweenSearchClause(String searchColumn, String code, java.util.List<String> args) {
 
         StringBuilder selectClause = new StringBuilder();
 
@@ -356,17 +359,18 @@ class LimeQueryEngine {
 
         if (len > 1) {
             for (int j = 0; j < end - 1; j++) {
-                selectClause.append(searchColumn).append("= '")
-                        .append(code.substring(0, j + 1).replace("'", "''")).append("' or ");
+                selectClause.append(searchColumn).append("= ? or ");
+                args.add(code.substring(0, j + 1));
             }
         }
         // if(fuzzySearch) code = (len>2) ? code.substring(0,2) : code;
         char[] chArray = code.toCharArray();
         chArray[code.length() - 1]++;
         String nextCode = new String(chArray);
-        selectClause.append(" (").append(searchColumn).append(" >= '")
-                .append(code.replace("'", "''")).append("' and ").append(searchColumn)
-                .append(" <'").append(nextCode.replace("'", "''")).append("') ");
+        selectClause.append(" (").append(searchColumn).append(" >= ? and ").append(searchColumn)
+                .append(" < ?) ");
+        args.add(code);
+        args.add(nextCode);
         if (LimeDB.DEBUG)
             Log.i(LimeDB.TAG, "expandBetweenSearchClause() selectClause: " + selectClause);
         return selectClause.toString();
