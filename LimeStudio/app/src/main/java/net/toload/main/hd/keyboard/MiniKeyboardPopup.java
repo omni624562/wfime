@@ -16,7 +16,7 @@ import java.util.WeakHashMap;
 
 /**
  * 長按小鍵盤（例如「.」鍵的標點面板）：建立、定位、顯示、轉送觸控與關閉。
- * 從 LIMEKeyboardBaseView 原樣搬出，新舊鍵盤共用（藍圖 A4-4）；小鍵盤本身仍是 LIMEKeyboardBaseView。
+ * 從 LIMEKeyboardBaseView 原樣搬出（藍圖 A4-4）；小鍵盤本身是小鍵盤模式的 ComposeKeyboardView（A4-7②）。
  */
 final class MiniKeyboardPopup {
 
@@ -41,7 +41,7 @@ final class MiniKeyboardPopup {
     private final int mPopupLayout;
 
     private final PopupWindow mMiniKeyboardPopup;
-    private LIMEKeyboardBaseView mMiniKeyboard;
+    private ComposeKeyboardView mMiniKeyboard;
     private final WeakHashMap<Key, View> mMiniKeyboardCache = new WeakHashMap<>();
     private int mMiniKeyboardOriginX;
     private int mMiniKeyboardOriginY;
@@ -112,7 +112,7 @@ final class MiniKeyboardPopup {
         if (container == null)
             throw new NullPointerException();
 
-        LIMEKeyboardBaseView miniKeyboard = (LIMEKeyboardBaseView) container.findViewById(R.id.LIMEPopupKeyboard);
+        ComposeKeyboardView miniKeyboard = (ComposeKeyboardView) container.findViewById(R.id.LIMEPopupKeyboard);
         miniKeyboard.setOnKeyboardActionListener(new LIMEKeyboardBaseView.OnKeyboardActionListener() {
             public void onKey(int primaryCode, int[] keyCodes, int x, int y) {
                 mHost.getOnKeyboardActionListener().onKey(primaryCode, keyCodes, x, y);
@@ -149,10 +149,8 @@ final class MiniKeyboardPopup {
                 mHost.getOnKeyboardActionListener().onRelease(primaryCode);
             }
         });
-        // Override default ProximityKeyDetector.
-        miniKeyboard.mKeyDetector = new MiniKeyboardKeyDetector(mMiniKeyboardSlideAllowance);
-        // Remove gesture detector on mini-keyboarda
-        miniKeyboard.mSwipeGestures = null;
+        // 換成小鍵盤的鍵偵測、關掉滑動手勢（原本直接改 mKeyDetector、把 mSwipeGestures 設 null）
+        miniKeyboard.setupAsMiniKeyboard(mMiniKeyboardSlideAllowance);
 
         LIMEBaseKeyboard keyboard;
         if (popupKey.popupCharacters != null) {
@@ -166,10 +164,9 @@ final class MiniKeyboardPopup {
         }
         // mini keyboard in fling mode override with fling correction. Jeremy '12,5,27
         if (!isLargeScreen || keyboard.getKeys().size() == 1)
-            miniKeyboard.mVerticalCorrection = host.getResources()
+            miniKeyboard.verticalCorrection = host.getResources()
                     .getDimension(R.dimen.mini_keyboard_fling_vertical_correction);
         miniKeyboard.setKeyboard(keyboard);
-        miniKeyboard.setPopupParent(host);
 
         container.measure(View.MeasureSpec.makeMeasureSpec(host.getWidth(), View.MeasureSpec.AT_MOST),
                 View.MeasureSpec.makeMeasureSpec(host.getHeight(), View.MeasureSpec.AT_MOST));
@@ -211,7 +208,7 @@ final class MiniKeyboardPopup {
             container = inflateMiniKeyboardContainer(popupKey);
             mMiniKeyboardCache.put(popupKey, container);
         }
-        mMiniKeyboard = (LIMEKeyboardBaseView) container.findViewById(R.id.LIMEPopupKeyboard);
+        mMiniKeyboard = (ComposeKeyboardView) container.findViewById(R.id.LIMEPopupKeyboard);
         if (mWindowOffset == null) {
             mWindowOffset = new int[2];
             host.getLocationInWindow(mWindowOffset);
@@ -257,10 +254,7 @@ final class MiniKeyboardPopup {
         }
         mMiniKeyboardOriginX = adjustedX + container.getPaddingLeft() - mWindowOffset[0];
         mMiniKeyboardOriginY = y + container.getPaddingTop() - mWindowOffset[1];
-        mMiniKeyboard.setPopupOffset(adjustedX, y);
         mMiniKeyboard.setShifted(mHost.isShifted());
-        // Mini keyboard needs no pop-up key preview displayed.
-        mMiniKeyboard.setPreviewEnabled(isLargeScreen && miniKeys.size() > 1); // no fling on large screen
         mMiniKeyboardPopup.setContentView(container);
         mMiniKeyboardPopup.setWidth(container.getMeasuredWidth());
         mMiniKeyboardPopup.setHeight(container.getMeasuredHeight());

@@ -112,7 +112,7 @@ public class KeyboardPopupSwipeTest {
         assertTrue(popup.isShowing());
 
         // 點小鍵盤的第一個鍵：送出該鍵並關閉小鍵盤
-        LIMEKeyboardBaseView mini = popup.getContentView().findViewById(R.id.LIMEPopupKeyboard);
+        ComposeKeyboardView mini = popup.getContentView().findViewById(R.id.LIMEPopupKeyboard);
         Key first = mini.getKeyboard().getKeys().get(0);
         r.events.clear();
         long t = SystemClock.uptimeMillis();

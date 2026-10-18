@@ -55,7 +55,8 @@ import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key
  *
  * 鍵盤模型（LIMEBaseKeyboard）、觸控判斷（PointerDispatcher、PointerTracker）、畫鍵（KeyPainter）
  * 與舊鍵盤共用：鍵先畫進一張點陣圖（同舊鍵盤），再由 Compose 的 Canvas 貼上，外觀與舊鍵盤相同。
- * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用。
+ * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用；長按開出的小鍵盤本身
+ * 也是這個類別（keyboard_popup.xml，A4-7②），由 setupAsMiniKeyboard 切成小鍵盤模式。
  * TalkBack：每個鍵在畫面上的位置放一個無障礙節點，說出鍵名，點兩下（或抬起輸入）送出該鍵（A4-5）。
  */
 class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -70,7 +71,9 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
 
     private var keyboard: LIMEBaseKeyboard? = null
     private var keys: Array<Key>? = null
-    private val keyDetector: KeyDetector = ProximityKeyDetector()
+    private var keyDetector: KeyDetector = ProximityKeyDetector()
+    // 長按開出的小鍵盤（setupAsMiniKeyboard）：沒有滑動手勢、不往下延伸蓋導覽列、長按只開小鍵盤
+    private var isMiniKeyboard = false
     private var listener: LIMEKeyboardBaseView.OnKeyboardActionListener? = null
     private val trackers = ArrayList<PointerTracker>()
     private val timers = Timers()
@@ -107,7 +110,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
     private val swipeGestures: SwipeGestures
 
     init {
-        readStyles()
+        readStyles(attrs)
         painter.finishStyle(0)
         miniPopup = MiniKeyboardPopup(context, object : MiniKeyboardPopup.Host {
             override fun view(): View = this@ComposeKeyboardView
@@ -163,8 +166,15 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
 
     // 刻意沿用舊鍵盤的 LIMEKeyboardBaseView 樣式屬性，兩個鍵盤讀同一套主題
     @SuppressLint("CustomViewStyleable")
-    private fun readStyles() {
-        // 樣式解讀與舊鍵盤相同：主題的 LIMEKeyboardBaseView 樣式，再疊上舊 input.xml（A4-7 已刪）原本的 style="?attr/LIMEKeyboardLayout"
+    private fun readStyles(attrs: AttributeSet?) {
+        if (attrs != null && attrs.styleAttribute != 0) {
+            // 版面指定了樣式（小鍵盤 keyboard_popup.xml 的 ?attr/LIMEPopupKeyboardLayout）：同舊 LIMEKeyboardBaseView 建構子，
+            // 版面屬性 > 版面樣式 > 主題的 LIMEKeyboardBaseView 樣式；背景與內距已由 View 建構子從同一個樣式讀到
+            applyStyle(context.obtainStyledAttributes(attrs, R.styleable.LIMEKeyboardBaseView,
+                R.attr.LIMEKeyboardBaseView, R.style.LIMEBaseKeyboard))
+            return
+        }
+        // 主鍵盤：主題的 LIMEKeyboardBaseView 樣式，再疊上舊 input.xml（A4-7 已刪）原本的 style="?attr/LIMEKeyboardLayout"
         applyStyle(context.obtainStyledAttributes(null, R.styleable.LIMEKeyboardBaseView,
             R.attr.LIMEKeyboardBaseView, R.style.LIMEBaseKeyboard))
         val layoutStyle = TypedValue()
@@ -242,6 +252,17 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     override fun handleBack(): Boolean = miniPopup.handleBack()
+
+    /**
+     * 當長按開出的小鍵盤用（MiniKeyboardPopup 呼叫，要在 setKeyboard 之前）：換成小鍵盤的鍵偵測
+     * （MiniKeyboardKeyDetector）、關掉滑動手勢、不往下延伸蓋導覽列
+     * （同舊鍵盤把 mKeyDetector 換掉、mSwipeGestures 設 null）。
+     */
+    fun setupAsMiniKeyboard(slideAllowance: Float) {
+        keyDetector = MiniKeyboardKeyDetector(slideAllowance)
+        isMiniKeyboard = true
+        bottomInset = 0
+    }
 
     override fun asView(): View = this
 
@@ -396,6 +417,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        if (isMiniKeyboard) return super.onApplyWindowInsets(insets)
         val navBarBottom = insets.getInsets(WindowInsets.Type.navigationBars()).bottom
         val gestureBottom = insets.getInsets(WindowInsets.Type.systemGestures()).bottom
         bottomInset = maxOf(navBarBottom, gestureBottom)
@@ -433,7 +455,9 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
     // TalkBack 不經過這裡：每個鍵有自己的無障礙節點與點擊動作（見 setContent），所以不需要 performClick
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(me: MotionEvent): Boolean {
-        val kb = keyboard as? LIMEKeyboard ?: return true
+        if (keyboard == null) return true
+        // 小鍵盤是 LIMEBaseKeyboard，沒有空白鍵拖曳
+        val kb = keyboard as? LIMEKeyboard ?: return dispatchPointers(me)
         // 同 LIMEKeyboardView：按下時重設空白鍵拖曳；放開時空白鍵拖曳換輸入法
         if (me.action == MotionEvent.ACTION_DOWN) kb.keyReleased()
         if (me.action == MotionEvent.ACTION_UP) {
@@ -456,9 +480,9 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
         oldPointerCount = pointerCount
         if (!distinctMultitouch && pointerCount > 1 && oldCount > 1) return true
 
-        // 滑動手勢（小鍵盤開著時不判斷）
-        swipeGestures.addMovement(me)
-        if (!miniPopup.isMiniKeyboardOn() && swipeGestures.onTouchEvent(me)) {
+        // 滑動手勢（小鍵盤開著時不判斷；本身是小鍵盤時沒有滑動手勢）
+        if (!isMiniKeyboard) swipeGestures.addMovement(me)
+        if (!isMiniKeyboard && !miniPopup.isMiniKeyboardOn() && swipeGestures.onTouchEvent(me)) {
             timers.cancelKeyTimers()
             return true
         }
@@ -492,6 +516,8 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
         val key = tracker.getKey(keyIndex) ?: return
         val code = key.codes[0]
         val handled = when {
+            // 小鍵盤長按只開小鍵盤（同舊 LIMEKeyboardBaseView.onLongPress）
+            isMiniKeyboard -> miniPopup.open(key)
             code == LIMEBaseKeyboard.KEYCODE_DONE || code == -9 || code == -16 -> {
                 (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
                 true
