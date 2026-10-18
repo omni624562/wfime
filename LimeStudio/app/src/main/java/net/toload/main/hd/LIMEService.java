@@ -82,7 +82,6 @@ import net.toload.main.hd.keyboard.LIMEKeyboard;
 import net.toload.main.hd.keyboard.LIMEKeyboardBaseView;
 import net.toload.main.hd.keyboard.ComposeKeyboardView;
 import net.toload.main.hd.keyboard.ImeKeyboardView;
-import net.toload.main.hd.keyboard.LIMEKeyboardView;
 import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
 
 
@@ -139,7 +138,6 @@ public class LIMEService extends InputMethodService implements
 
     private CandidateInInputViewContainer mCandidateInInputView = null;// Jeremy'12,5,3
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
-    boolean mComposeKeyboardOn; // 設定「新版鍵盤」:目前的鍵盤是否為 ComposeKeyboardView
     CandidateView mCandidateView = null;
     CandidateView mCandidateViewInInputView = null;
     CandidateView mCandidateViewStandAlone = null;
@@ -1280,8 +1278,7 @@ public class LIMEService extends InputMethodService implements
             // Jeremy '12,5,6 recreate inputView if fixedCandidateView setting is altered
             // Jeremy '15,7,15 recreate inputView if keyboard theme changed
             if (mFixedCandidateViewOn != fixedCandidateMode
-                    || mKeyboardThemeIndex != mLIMEPref.getKeyboardTheme()
-                    || mComposeKeyboardOn != mLIMEPref.getExperimentalComposeKeyboard()) {
+                    || mKeyboardThemeIndex != mLIMEPref.getKeyboardTheme()) {
                 Log.d("KBD_DEBUG", "Config change detected (fixedMode=" + fixedCandidateMode + ", theme=" + mLIMEPref.getKeyboardTheme() + ")");
                 requestHideSelf(0);
                 mInputView.closing();
@@ -2590,11 +2587,11 @@ public class LIMEService extends InputMethodService implements
             keyDownUp(KeyEvent.KEYCODE_DPAD_RIGHT, hasCandidatesShown);
         } else if (primaryCode == LIMEBaseKeyboard.KEYCODE_LEFT) {
             keyDownUp(KeyEvent.KEYCODE_DPAD_LEFT, hasCandidatesShown);
-        } else if (primaryCode == LIMEKeyboardView.KEYCODE_OPTIONS) {
+        } else if (primaryCode == ComposeKeyboardView.KEYCODE_OPTIONS) {
             toggleEmojiVisibility();
-        } else if (primaryCode == LIMEKeyboardView.KEYCODE_SPACE_LONGPRESS) {
+        } else if (primaryCode == ComposeKeyboardView.KEYCODE_SPACE_LONGPRESS) {
             // Disable options menu on space longpress per user request
-        } else if (primaryCode == LIMEKeyboardView.KEYCODE_SYMBOL_KEYBOARD) {
+        } else if (primaryCode == ComposeKeyboardView.KEYCODE_SYMBOL_KEYBOARD) {
             mEnglishOnly = true;
             mKeyboardSwitcher.setKeyboardMode(activeIM, LIMEKeyboardSwitcher.MODE_PHONE, mImeOptions, false, false,
                     false);
@@ -2602,9 +2599,9 @@ public class LIMEService extends InputMethodService implements
             switchKeyboard(primaryCode);
         } else if (primaryCode == KEYCODE_SWITCH_SYMBOL_KEYBOARD && mInputView != null) { // ->switch symbols1 keyboards
             switchKeyboard(primaryCode);
-        } else if (primaryCode == LIMEKeyboardView.KEYCODE_NEXT_IM) {
+        } else if (primaryCode == ComposeKeyboardView.KEYCODE_NEXT_IM) {
             switchToNextActivatedIM(true);
-        } else if (primaryCode == LIMEKeyboardView.KEYCODE_PREV_IM) {
+        } else if (primaryCode == ComposeKeyboardView.KEYCODE_PREV_IM) {
             switchToNextActivatedIM(false);
         } else if (primaryCode == KEYCODE_CYCLE_IM && mInputView != null) { // globe key
             cycleInputMode();
@@ -3819,17 +3816,6 @@ public class LIMEService extends InputMethodService implements
         updateImeNameOnTablet();
     }
 
-    /** 設定「新版鍵盤」開啟時，把版面裡的舊鍵盤換成 ComposeKeyboardView（同位置、同版面參數）。 */
-    private void replaceWithComposeKeyboard(android.view.ViewGroup container) {
-        View old = container.findViewById(R.id.keyboard);
-        android.view.ViewGroup parent = (android.view.ViewGroup) old.getParent();
-        int index = parent.indexOfChild(old);
-        ComposeKeyboardView keyboard = new ComposeKeyboardView(mThemeContext);
-        keyboard.setId(R.id.keyboard);
-        parent.removeViewAt(index);
-        parent.addView(keyboard, index, old.getLayoutParams());
-    }
-
     @SuppressLint("InflateParams")
     private void initialViewAndSwitcher(boolean forceRecreate) {
         if (DEBUG)
@@ -3869,9 +3855,6 @@ public class LIMEService extends InputMethodService implements
 
                 mCandidateInInputView = (CandidateInInputViewContainer) LayoutInflater.from(mThemeContext).inflate(
                         R.layout.inputcandidate, null);
-                mComposeKeyboardOn = mLIMEPref.getExperimentalComposeKeyboard();
-                if (mComposeKeyboardOn)
-                    replaceWithComposeKeyboard(mCandidateInInputView);
                 mInputView = mCandidateInInputView.findViewById(R.id.keyboard);
                 mInputView.setOnKeyboardActionListener(this);
                 hasDistinctMultitouch = mInputView.hasDistinctMultitouch();
@@ -3887,7 +3870,9 @@ public class LIMEService extends InputMethodService implements
 
         } else {
             if (mInputView == null || forceRecreate) {
-                mInputView = (LIMEKeyboardView) LayoutInflater.from(mThemeContext).inflate(R.layout.input, null);
+                ComposeKeyboardView keyboard = new ComposeKeyboardView(mThemeContext);
+                keyboard.setId(R.id.keyboard);
+                mInputView = keyboard;
                 mInputView.setOnKeyboardActionListener(this);
                 mInputView.setHardwareAcceleratedDrawingEnabled(mIsHardwareAcceleratedDrawingEnabled);
 

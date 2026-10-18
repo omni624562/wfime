@@ -49,7 +49,6 @@ data class SettingsUiState(
     val emojiPosition: String = "3",
     val persistentLanguageMode: Boolean = false,
     val numberRowInEnglish: Boolean = true,
-    val experimentalComposeKeyboard: Boolean = true,
     val hideSoftwareKeyboardWithPhysical: Boolean = true,
     val showArrowKey: String = "0",
     val splitKeyboardMode: String = "0",
@@ -159,7 +158,6 @@ class SettingsViewModel(
                     emojiPosition = preferenceManager.getParameterString("enable_emoji_position", "3"),
                     persistentLanguageMode = preferenceManager.getParameterBoolean("persistent_language_mode", false),
                     numberRowInEnglish = preferenceManager.getParameterBoolean("number_row_in_english", true),
-                    experimentalComposeKeyboard = preferenceManager.getParameterBoolean("experimental_compose_keyboard", true),
                     hideSoftwareKeyboardWithPhysical = preferenceManager.getParameterBoolean("hide_software_keyboard_typing_with_physical", true),
                     showArrowKey = preferenceManager.getParameterString("show_arrow_key", "0"),
                     splitKeyboardMode = preferenceManager.getParameterString("split_keyboard_mode", "0"),
@@ -221,11 +219,6 @@ class SettingsViewModel(
     fun setNumberRowInEnglish(value: Boolean) {
         preferenceManager.setParameter("number_row_in_english", value)
         _uiState.update { it.copy(numberRowInEnglish = value) }
-    }
-
-    fun setExperimentalComposeKeyboard(value: Boolean) {
-        preferenceManager.setParameter("experimental_compose_keyboard", value)
-        _uiState.update { it.copy(experimentalComposeKeyboard = value) }
     }
 
     fun setHideSoftwareKeyboardWithPhysical(value: Boolean) {

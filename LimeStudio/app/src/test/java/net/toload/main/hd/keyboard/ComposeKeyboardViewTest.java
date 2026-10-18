@@ -5,10 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.content.res.Resources;
 import android.os.SystemClock;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -24,69 +23,45 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Compose 版鍵盤與舊鍵盤（LIMEKeyboardView）比對：樣式、尺寸、點鍵與長按送出的事件要相同。
+ * Compose 版鍵盤：樣式、尺寸、點鍵與長按送出的事件。
+ * 預期值是舊鍵盤（LIMEKeyboardView，A4-7 移除）的結果，移除前與新舊比對一起跑過、確認相同。
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 34)
 public class ComposeKeyboardViewTest {
 
     private Context context;
-    private LIMEKeyboardView oldView;
     private ComposeKeyboardView newView;
 
     @Before
     public void setup() {
         context = new ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.LIMETheme_Material3);
-        oldView = (LIMEKeyboardView) LayoutInflater.from(context).inflate(R.layout.input, null);
         newView = new ComposeKeyboardView(context);
     }
 
-    private static Object baseField(Object o, String name) throws Exception {
-        Field f = LIMEKeyboardBaseView.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.get(o);
-    }
-
-    /** 同一個資源載入的 Drawable 是不同物件，比對類別、內距與大小。 */
-    private static Object sameDrawable(Object d) {
-        if (!(d instanceof Drawable)) return d;
-        Drawable dr = (Drawable) d;
-        android.graphics.Rect pad = new android.graphics.Rect();
-        dr.getPadding(pad);
-        return dr.getClass().getName() + " " + pad + " " + dr.getIntrinsicWidth() + "x" + dr.getIntrinsicHeight();
-    }
-
     @Test
-    public void sameStyleAsOldKeyboard() throws Exception {
-        int compared = 0;
-        for (Field f : KeyPainter.class.getDeclaredFields()) {
-            if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers()))
-                continue;
-            f.setAccessible(true);
-            Object o = f.get(oldView.mPainter), n = f.get(newView.painter);
-            if (f.getType() == android.graphics.Paint.class) {
-                assertEquals(((android.graphics.Paint) o).getTextSize(), ((android.graphics.Paint) n).getTextSize(), 0f);
-            } else {
-                assertEquals(f.getName(), sameDrawable(o), sameDrawable(n));
-            }
-            compared++;
-        }
-        assertTrue(compared >= 19);
-        assertNotNull(newView.painter.mActionKeyBackground);
-        assertEquals((float) baseField(oldView, "mKeyHysteresisDistance"), newView.keyHysteresisDistance, 0f);
-        assertEquals((float) baseField(oldView, "mVerticalCorrection"), newView.verticalCorrection, 0f);
-        assertEquals(sameDrawable(oldView.getBackground()), sameDrawable(newView.getBackground()));
-        assertEquals(oldView.getPaddingLeft(), newView.getPaddingLeft());
-        assertEquals(oldView.getPaddingTop(), newView.getPaddingTop());
-        assertEquals(oldView.getPaddingRight(), newView.getPaddingRight());
-        assertEquals(oldView.getPaddingBottom(), newView.getPaddingBottom());
+    public void styleFromTheme() {
+        Resources res = context.getResources();
+        KeyPainter p = newView.painter;
+        assertNotNull(p.mKeyBackground);
+        assertNotNull(p.mActionKeyBackground);
+        assertNotNull(p.mFunctionalKeyBackground);
+        assertNotNull(p.mPopupHint);
+        assertNotNull(p.mPaint);
+        assertNotNull(p.mPadding);
+        assertEquals(res.getDimensionPixelSize(R.dimen.key_text_size_material3), p.mKeyTextSize);
+        assertEquals(res.getDimensionPixelOffset(R.dimen.key_hysteresis_distance), newView.keyHysteresisDistance, 0f);
+        assertEquals(res.getDimensionPixelOffset(R.dimen.keyboard_vertical_correction), newView.verticalCorrection, 0f);
+        assertNotNull(newView.getBackground());
+        assertEquals(0, newView.getPaddingLeft());
+        assertEquals(0, newView.getPaddingTop());
+        assertEquals(0, newView.getPaddingRight());
+        assertEquals(0, newView.getPaddingBottom());
     }
 
     private LIMEKeyboard keyboard() {
@@ -94,22 +69,16 @@ public class ComposeKeyboardViewTest {
     }
 
     @Test
-    public void sameSizeAsOldKeyboard() {
-        oldView.setKeyboard(keyboard());
+    public void sizeFollowsKeyboard() {
         newView.setKeyboard(keyboard());
-        int w = View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.AT_MOST);
         int h = View.MeasureSpec.makeMeasureSpec(2000, View.MeasureSpec.AT_MOST);
-        oldView.measure(w, h);
-        newView.measure(w, h);
-        assertTrue(oldView.getMeasuredHeight() > 100);
-        assertEquals(oldView.getMeasuredWidth(), newView.getMeasuredWidth());
-        assertEquals(oldView.getMeasuredHeight(), newView.getMeasuredHeight());
+        newView.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.AT_MOST), h);
+        assertEquals(1080, newView.getMeasuredWidth());
+        assertEquals(newView.getKeyboard().getHeight(), newView.getMeasuredHeight());
+        assertTrue(newView.getMeasuredHeight() > 100);
         // 可用寬度比鍵盤窄時縮到可用寬度
-        w = View.MeasureSpec.makeMeasureSpec(900, View.MeasureSpec.AT_MOST);
-        oldView.measure(w, h);
-        newView.measure(w, h);
-        assertEquals(900, oldView.getMeasuredWidth());
-        assertEquals(oldView.getMeasuredWidth(), newView.getMeasuredWidth());
+        newView.measure(View.MeasureSpec.makeMeasureSpec(900, View.MeasureSpec.AT_MOST), h);
+        assertEquals(900, newView.getMeasuredWidth());
     }
 
     /** 記下鍵盤送出的事件。 */
@@ -154,23 +123,19 @@ public class ComposeKeyboardViewTest {
     }
 
     @Test
-    public void tapSendsSameEventsAsOldKeyboard() {
-        List<String> old = press(oldView, 'a', 50);
-        assertTrue(old.contains("key " + (int) 'a'));
-        assertEquals(old, press(newView, 'a', 50));
+    public void tapSendsPressKeyRelease() {
+        assertEquals(Arrays.asList("press 97", "key 97", "release 97"), press(newView, 'a', 50));
     }
 
     @Test
-    public void longPressSpaceSendsSameEventsAsOldKeyboard() {
-        List<String> old = press(oldView, LIMEKeyboard.KEYCODE_SPACE, 1500);
-        assertTrue(old.toString(), old.contains("key " + LIMEKeyboardView.KEYCODE_SPACE_LONGPRESS));
-        assertEquals(old, press(newView, LIMEKeyboard.KEYCODE_SPACE, 1500));
+    public void longPressSpaceSendsSpaceLongPress() {
+        List<String> e = press(newView, LIMEKeyboard.KEYCODE_SPACE, 1500);
+        assertTrue(e.toString(), e.contains("key " + ComposeKeyboardView.KEYCODE_SPACE_LONGPRESS));
     }
 
     @Test
-    public void holdingDeleteRepeatsLikeOldKeyboard() {
-        List<String> old = press(oldView, LIMEBaseKeyboard.KEYCODE_DELETE, 1500);
-        assertTrue(old.toString(), old.stream().filter(s -> s.equals("key " + LIMEBaseKeyboard.KEYCODE_DELETE)).count() > 3);
-        assertEquals(old, press(newView, LIMEBaseKeyboard.KEYCODE_DELETE, 1500));
+    public void holdingDeleteRepeats() {
+        List<String> e = press(newView, LIMEBaseKeyboard.KEYCODE_DELETE, 1500);
+        assertTrue(e.toString(), e.stream().filter(s -> s.equals("key " + LIMEBaseKeyboard.KEYCODE_DELETE)).count() > 3);
     }
 }

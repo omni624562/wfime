@@ -13,6 +13,7 @@ import android.os.Looper
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.util.AttributeSet
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
@@ -49,14 +50,16 @@ import net.toload.main.hd.R
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key
 
 /**
- * Compose 版螢幕鍵盤（藍圖 A4-3～A4-6）。預設使用；舊的 LIMEKeyboardView 保留一個版本，設定「新版鍵盤」關掉就改用舊鍵盤。
+ * Compose 版螢幕鍵盤（藍圖 A4-3～A4-7）。舊的 LIMEKeyboardView 已移除（A4-7），一律用這個鍵盤；
+ * 版面寫在 inputcandidate.xml（id 為 keyboard）。
  *
  * 鍵盤模型（LIMEBaseKeyboard）、觸控判斷（PointerDispatcher、PointerTracker）、畫鍵（KeyPainter）
  * 與舊鍵盤共用：鍵先畫進一張點陣圖（同舊鍵盤），再由 Compose 的 Canvas 貼上，外觀與舊鍵盤相同。
  * 長按小鍵盤（MiniKeyboardPopup）與滑動手勢（SwipeGestures）也與舊鍵盤共用。
  * TalkBack：每個鍵在畫面上的位置放一個無障礙節點，說出鍵名，點兩下（或抬起輸入）送出該鍵（A4-5）。
  */
-class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardView, PointerTracker.UIProxy {
+class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    FrameLayout(context, attrs), ImeKeyboardView, PointerTracker.UIProxy {
 
     @JvmField internal val painter = KeyPainter()
     @JvmField internal var keyHysteresisDistance = 0f
@@ -161,7 +164,7 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
     // 刻意沿用舊鍵盤的 LIMEKeyboardBaseView 樣式屬性，兩個鍵盤讀同一套主題
     @SuppressLint("CustomViewStyleable")
     private fun readStyles() {
-        // 樣式解讀與舊鍵盤相同：主題的 LIMEKeyboardBaseView 樣式，再疊上 input.xml 的 style="?attr/LIMEKeyboardLayout"
+        // 樣式解讀與舊鍵盤相同：主題的 LIMEKeyboardBaseView 樣式，再疊上舊 input.xml（A4-7 已刪）原本的 style="?attr/LIMEKeyboardLayout"
         applyStyle(context.obtainStyledAttributes(null, R.styleable.LIMEKeyboardBaseView,
             R.attr.LIMEKeyboardBaseView, R.style.LIMEBaseKeyboard))
         val layoutStyle = TypedValue()
@@ -436,7 +439,7 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         if (me.action == MotionEvent.ACTION_UP) {
             val direction = kb.spaceDragDirection
             if (direction != 0) {
-                listener?.onKey(if (direction == 1) LIMEKeyboardView.KEYCODE_NEXT_IM else LIMEKeyboardView.KEYCODE_PREV_IM,
+                listener?.onKey(if (direction == 1) KEYCODE_NEXT_IM else KEYCODE_PREV_IM,
                     null, 0, 0)
                 me.action = MotionEvent.ACTION_CANCEL
                 kb.keyReleased()
@@ -495,11 +498,11 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
             }
             code == LIMEKeyboard.KEYCODE_SPACE
                     && Math.abs((keyboard as LIMEKeyboard).spaceDragDiff) < keyHeight / 5 -> {
-                listener?.onKey(LIMEKeyboardView.KEYCODE_SPACE_LONGPRESS, null, 0, 0)
+                listener?.onKey(KEYCODE_SPACE_LONGPRESS, null, 0, 0)
                 true
             }
             code == LIMEKeyboard.KEYCODE_MODE_CHANGE -> {
-                listener?.onKey(LIMEKeyboardView.KEYCODE_SYMBOL_KEYBOARD, null, 0, 0)
+                listener?.onKey(KEYCODE_SYMBOL_KEYBOARD, null, 0, 0)
                 true
             }
             else -> miniPopup.open(key)
@@ -556,14 +559,21 @@ class ComposeKeyboardView(context: Context) : FrameLayout(context), ImeKeyboardV
         }
     }
 
-    private companion object {
-        const val MSG_REPEAT_KEY = 3
-        const val MSG_LONGPRESS_KEY = 4
+    companion object {
+        // 鍵盤送給 LIMEService 的功能鍵碼（原本定義在舊鍵盤 LIMEKeyboardView）
+        const val KEYCODE_OPTIONS = -100
+        const val KEYCODE_SPACE_LONGPRESS = -102
+        const val KEYCODE_NEXT_IM = -104
+        const val KEYCODE_PREV_IM = -105
+        const val KEYCODE_SYMBOL_KEYBOARD = -106
+
+        private const val MSG_REPEAT_KEY = 3
+        private const val MSG_LONGPRESS_KEY = 4
 
         // LIMEService 的功能鍵碼（鍵盤 XML 裡的 codes）
-        const val KEYCODE_TO_ENGLISH = -9
-        const val KEYCODE_TO_CHINESE = -10
-        const val KEYCODE_MORE_SYMBOLS = -15
-        const val KEYCODE_NEXT_INPUT_METHOD = -16
+        private const val KEYCODE_TO_ENGLISH = -9
+        private const val KEYCODE_TO_CHINESE = -10
+        private const val KEYCODE_MORE_SYMBOLS = -15
+        private const val KEYCODE_NEXT_INPUT_METHOD = -16
     }
 }

@@ -69,13 +69,10 @@
 
     </FrameLayout>
 
-    <net.toload.main.hd.keyboard.LIMEKeyboardView xmlns:android="http://schemas.android.com/apk/res/android"
+    <!-- 螢幕鍵盤（Compose）；樣式由 ComposeKeyboardView 自己讀主題的 ?attr/LIMEKeyboardLayout -->
+    <net.toload.main.hd.keyboard.ComposeKeyboardView
         android:id="@+id/keyboard"
-        style="?attr/LIMEKeyboardLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:keyTextSize="@dimen/key_text_size"
-        android:labelTextSize="@dimen/label_text_size"
-        android:popupLayout="@layout/keyboard_popup" />
+        android:layout_alignParentBottom="true" />
 </net.toload.main.hd.candidate.CandidateInInputViewContainer>

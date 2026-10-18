@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 
 import androidx.core.content.ContextCompat;
 import androidx.test.core.app.ApplicationProvider;
@@ -15,6 +14,7 @@ import net.toload.main.hd.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -33,14 +33,17 @@ public class KeyboardStyleTest {
         return f.get(o);
     }
 
-    private LIMEKeyboardView inflateOld() {
+    // 舊鍵盤 LIMEKeyboardView 與 input.xml 在 A4-7 移除；改直接建 LIMEKeyboardBaseView（長按小鍵盤仍用它），
+    // 套用 input.xml 原本的 style="?attr/LIMEKeyboardLayout"
+    private LIMEKeyboardBaseView inflateOld() {
         Context context = new ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.LIMETheme_Material3);
-        return (LIMEKeyboardView) LayoutInflater.from(context).inflate(R.layout.input, null);
+        return new LIMEKeyboardBaseView(context,
+                Robolectric.buildAttributeSet().setStyleAttribute("?attr/LIMEKeyboardLayout").build());
     }
 
     @Test
     public void paintingStyleGoesToKeyPainter() {
-        LIMEKeyboardView view = inflateOld();
+        LIMEKeyboardBaseView view = inflateOld();
         Context context = view.getContext();
         KeyPainter p = view.mPainter;
         assertNotNull(p.mKeyBackground);
@@ -55,7 +58,7 @@ public class KeyboardStyleTest {
 
     @Test
     public void otherAttributesStillReachTheView() throws Exception {
-        LIMEKeyboardView view = inflateOld();
+        LIMEKeyboardBaseView view = inflateOld();
         float hysteresis = (float) field(view, "mKeyHysteresisDistance");
         assertEquals(view.getContext().getResources().getDimensionPixelOffset(R.dimen.key_hysteresis_distance),
                 hysteresis, 0f);

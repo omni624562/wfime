@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.SystemClock;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 長按小鍵盤（「.」鍵的標點面板）與滑動手勢（左滑刪字、下滑收鍵盤），新舊鍵盤都要一樣。
+ * 長按小鍵盤（「.」鍵的標點面板）與滑動手勢（左滑刪字、下滑收鍵盤）。
+ * 舊鍵盤（LIMEKeyboardView）在 A4-7 移除前，同樣的測試新舊鍵盤都跑過。
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 34)
@@ -60,10 +60,6 @@ public class KeyboardPopupSwipeTest {
         public void swipeRight() { events.add("swipeRight"); }
         public void swipeDown() { events.add("swipeDown"); }
         public void swipeUp() { events.add("swipeUp"); }
-    }
-
-    ImeKeyboardView oldKeyboard() {
-        return (LIMEKeyboardView) LayoutInflater.from(context).inflate(R.layout.input, null);
     }
 
     /** 放進 Activity 畫面並量好尺寸（小鍵盤要有視窗才能顯示）。 */
@@ -185,20 +181,5 @@ public class KeyboardPopupSwipeTest {
     @Test
     public void composeKeyboardSwipes() {
         swipes(composeKeyboard());
-    }
-
-    @Test
-    public void oldKeyboardLongPressPopup() {
-        longPressDotOpensPopupAndPopupKeySends(oldKeyboard());
-    }
-
-    @Test
-    public void oldKeyboardBackClosesPopup() {
-        backClosesPopup(oldKeyboard());
-    }
-
-    @Test
-    public void oldKeyboardSwipes() {
-        swipes(oldKeyboard());
     }
 }
