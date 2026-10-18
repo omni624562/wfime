@@ -22,8 +22,9 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 OUT_JSON = os.path.join(REPO, "LimeStudio", "app", "src", "main", "assets", "emojis.json")
 OUT_DB = os.path.join(REPO, "LimeStudio", "app", "src", "main", "res", "raw", "emoji.db")
 
-EMOJI_TEST_URL = "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt"
-CLDR_RELEASE = "release-48"
+EMOJI_TEST_URL = "https://www.unicode.org/Public/18.0.0/emoji/emoji-test.txt"
+# CLDR 49 正式版還沒發布；Emoji 18.0 的關鍵字目前只在 49 的 beta 版
+CLDR_RELEASE = "release-49-beta3"
 CLDR_BASE = f"https://raw.githubusercontent.com/unicode-org/cldr/{CLDR_RELEASE}/common"
 SOURCES = {
     "emoji-test.txt": EMOJI_TEST_URL,

@@ -29,4 +29,4 @@ python gen_emoji.py --download
 - 每個 tag 最多對應 8 個 emoji（`MAX_EMOJI_PER_TAG`），避免「臉」這類常見 tag 灌爆候選列
 - 排除膚色變體，選擇器以 `hasSkinTone` 標記＋長按選擇呈現
 - 顯示端由 `PaintCompat.hasGlyph` ＋ `androidx.emoji2`（GMS 可下載字型）過濾，資料檔不需要跟裝置字型能力對齊
-- 目前版本：Emoji 17.0（Unicode 17.0）＋ CLDR 48
+- 目前版本：Emoji 18.0（Unicode 18.0）＋ CLDR 49 beta3（49 正式版發布後改用正式版重新產生）

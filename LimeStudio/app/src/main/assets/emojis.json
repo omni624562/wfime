@@ -124,6 +124,17 @@
      ]
     },
     {
+     "char": "🫫",
+     "keywords": [
+      "cracking face",
+      "breaking",
+      "crumbling",
+      "masking",
+      "resilience",
+      "reveal"
+     ]
+    },
+    {
      "char": "😉",
      "keywords": [
       "winking face",
@@ -1533,11 +1544,11 @@
      "char": "❣️",
      "keywords": [
       "heart exclamation",
+      "bang",
       "exclamation",
       "heart",
       "heavy",
-      "mark",
-      "punctuation"
+      "mark"
      ]
     },
     {
@@ -2203,6 +2214,30 @@
       "dislike",
       "down",
       "good"
+     ],
+     "hasSkinTone": true
+    },
+    {
+     "char": "🫹",
+     "keywords": [
+      "leftwards thumb sign",
+      "grip",
+      "left",
+      "neutral",
+      "point",
+      "that"
+     ],
+     "hasSkinTone": true
+    },
+    {
+     "char": "🫺",
+     "keywords": [
+      "rightwards thumb sign",
+      "grip",
+      "neutral",
+      "point",
+      "right",
+      "that"
      ],
      "hasSkinTone": true
     },
@@ -7395,6 +7430,17 @@
      ]
     },
     {
+     "char": "🫌",
+     "keywords": [
+      "monarch butterfly",
+      "caterpillar",
+      "change",
+      "fragile",
+      "hope",
+      "insect"
+     ]
+    },
+    {
      "char": "🐛",
      "keywords": [
       "bug",
@@ -8075,6 +8121,17 @@
       "food",
       "pickle",
       "vegetable"
+     ]
+    },
+    {
+     "char": "🫝",
+     "keywords": [
+      "pickle",
+      "brine",
+      "condiment",
+      "cucumber",
+      "ferment",
+      "gherkin"
      ]
     },
     {
@@ -10211,6 +10268,17 @@
      ]
     },
     {
+     "char": "🛙",
+     "keywords": [
+      "lighthouse",
+      "beacon",
+      "enlightenment",
+      "guidance",
+      "hope",
+      "light"
+     ]
+    },
+    {
      "char": "⚓",
      "keywords": [
       "anchor",
@@ -11201,6 +11269,17 @@
      "keywords": [
       "comet",
       "space"
+     ]
+    },
+    {
+     "char": "🪋",
+     "keywords": [
+      "meteor",
+      "apocalypse",
+      "falling",
+      "fireball",
+      "gravity",
+      "rock"
      ]
     },
     {
@@ -13713,6 +13792,17 @@
      ]
     },
     {
+     "char": "🪌",
+     "keywords": [
+      "eraser",
+      "correction",
+      "delete",
+      "drawing",
+      "erase",
+      "error"
+     ]
+    },
+    {
      "char": "💼",
      "keywords": [
       "briefcase",
@@ -13987,6 +14077,16 @@
       "key",
       "lock",
       "old"
+     ]
+    },
+    {
+     "char": "🪍",
+     "keywords": [
+      "net with handle",
+      "catch",
+      "collect",
+      "mesh",
+      "trap"
      ]
     },
     {
@@ -15855,10 +15955,10 @@
      "keywords": [
       "white exclamation mark",
       "!",
+      "bang",
       "exclamation",
       "mark",
-      "outlined",
-      "punctuation"
+      "outlined"
      ]
     },
     {
@@ -15866,10 +15966,10 @@
      "keywords": [
       "red exclamation mark",
       "!",
+      "bang",
       "exclamation",
       "mark",
-      "punctuation",
-      "red"
+      "punctuation"
      ]
     },
     {
@@ -17721,7 +17821,7 @@
     {
      "char": "🇭🇲",
      "keywords": [
-      "flag: heard & mcdonald islands",
+      "flag: heard island & mcdonald islands",
       "flag"
      ]
     },
@@ -18449,7 +18549,7 @@
     {
      "char": "🇸🇭",
      "keywords": [
-      "flag: st. helena",
+      "flag: st. helena, ascension & tristan da cunha",
       "flag"
      ]
     },
@@ -18575,7 +18675,7 @@
     {
      "char": "🇹🇫",
      "keywords": [
-      "flag: french southern territories",
+      "flag: french southern and antarctic lands",
       "flag"
      ]
     },

@@ -1296,7 +1296,8 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     // (產生器見 tools/emoji/gen_emoji.py)
     // v2: 2026-07 以 Unicode 17.0 + CLDR 48 重建 en/tw 表
     // v3: 2026-07 cn 表改以 CLDR zh 重生(原為 LimeIME 舊資料)
-    private final static int EMOJI_DB_VERSION = 3;
+    // v4: 2026-10 Unicode 18.0 + CLDR 49 beta3 重建(新增 9 個 emoji)
+    private final static int EMOJI_DB_VERSION = 4;
 
     private void checkEmojiDB() {
         if (emojiConverter == null) {
