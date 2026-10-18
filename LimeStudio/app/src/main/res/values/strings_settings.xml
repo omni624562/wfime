@@ -402,9 +402,17 @@
     <string name="shortcut_dayi_quick_select">大易快速選字(實體鍵盤)</string>
     <string name="shortcut_dayi_quick_select_desc">Space 選第 1 個候選;\' [ ] - \\ 選第 2~6 個;Ctrl+1~9 選第 1~9 個</string>
     <string name="shortcut_dayi_punctuation">大易全形標點(實體鍵盤)</string>
-    <string name="shortcut_dayi_punctuation_desc">Shift+, . / 1 ; 輸出 ，。?!:;「=」前綴+標點輸出 、;:</string>
+    <string name="shortcut_dayi_punctuation_desc">Shift+, . / ; 1 輸出 ，。？：！；先按 = 再按 , . \' ; 輸出 ，。、；（= 後按 Shift+; 輸出 ：）</string>
+    <string name="shortcut_symbol_list">全形符號(實體鍵盤)</string>
+    <string name="shortcut_symbol_list_desc">沒在組字時：Ctrl+/ 在候選列列出全形符號（含 「」『』【】（）），用選字鍵選；Ctrl+標點直接輸出全形（例如 Ctrl+, 輸出 ，）</string>
+    <string name="shortcut_long_press_period">長按「.」鍵(螢幕鍵盤)</string>
+    <string name="shortcut_long_press_period_desc">開出全形標點小鍵盤：【〈『「？：．。＠ 】〉』」！；、，</string>
     <string name="shortcut_switch_language">中英切換(實體鍵盤)</string>
-    <string name="shortcut_switch_language_desc">Shift+Space 或 Ctrl+Space</string>
+    <string name="shortcut_switch_language_desc">Ctrl+Space；開啟「快速切換輸入模式1」時 Shift+Space 也可</string>
+    <string name="shortcut_cycle_im">切換大易／注音(實體鍵盤)</string>
+    <string name="shortcut_cycle_im_desc">Ctrl+`（數字 1 左邊的鍵）輪流切換已啟用的輸入法</string>
+    <string name="shortcut_emoji">表情符號(實體鍵盤)</string>
+    <string name="shortcut_emoji_desc">Win（Cmd）+. 開啟或關閉表情符號面板</string>
     <string name="shortcut_candidate_bar">候選列(實體鍵盤)</string>
     <string name="shortcut_candidate_bar_desc">方向鍵移動;PgUp/PgDn 或 ↑↓ 翻頁;Enter 選取</string>
     <string name="settings_group_im_enable">輸入法啟用管理</string>

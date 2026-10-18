@@ -714,7 +714,11 @@ fun KeyboardSettingsSection(
                 stringResource(R.string.shortcut_double_shift) to stringResource(R.string.shortcut_double_shift_desc),
                 stringResource(R.string.shortcut_dayi_quick_select) to stringResource(R.string.shortcut_dayi_quick_select_desc),
                 stringResource(R.string.shortcut_dayi_punctuation) to stringResource(R.string.shortcut_dayi_punctuation_desc),
+                stringResource(R.string.shortcut_symbol_list) to stringResource(R.string.shortcut_symbol_list_desc),
+                stringResource(R.string.shortcut_long_press_period) to stringResource(R.string.shortcut_long_press_period_desc),
                 stringResource(R.string.shortcut_switch_language) to stringResource(R.string.shortcut_switch_language_desc),
+                stringResource(R.string.shortcut_cycle_im) to stringResource(R.string.shortcut_cycle_im_desc),
+                stringResource(R.string.shortcut_emoji) to stringResource(R.string.shortcut_emoji_desc),
                 stringResource(R.string.shortcut_candidate_bar) to stringResource(R.string.shortcut_candidate_bar_desc)
             )
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {

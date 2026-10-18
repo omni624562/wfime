@@ -192,9 +192,17 @@
     <string name="shortcut_dayi_quick_select">Dayi quick select (physical keyboard)</string>
     <string name="shortcut_dayi_quick_select_desc">Space selects candidate 1; \' [ ] - \\ select candidates 2~6; Ctrl+1~9 selects candidates 1~9</string>
     <string name="shortcut_dayi_punctuation">Dayi full-width punctuation (physical keyboard)</string>
-    <string name="shortcut_dayi_punctuation_desc">Shift+, . / 1 ; outputs ，。?!:; — 「=」 prefix + punctuation outputs 、;:</string>
+    <string name="shortcut_dayi_punctuation_desc">Shift+, . / ; 1 outputs ，。？：！ — press = then , . \' ; to output ，。、； (= then Shift+; outputs ：)</string>
+    <string name="shortcut_symbol_list">Full-width symbols (physical keyboard)</string>
+    <string name="shortcut_symbol_list_desc">When not composing: Ctrl+/ lists full-width symbols in the candidate bar (including 「」『』【】（）), pick with the selection keys; Ctrl+punctuation outputs it full-width (e.g. Ctrl+, outputs ，)</string>
+    <string name="shortcut_long_press_period">Long-press the "." key (on-screen keyboard)</string>
+    <string name="shortcut_long_press_period_desc">Opens the full-width punctuation keyboard: 【〈『「？：．。＠ 】〉』」！；、，</string>
     <string name="shortcut_switch_language">Chinese/English switch (physical keyboard)</string>
-    <string name="shortcut_switch_language_desc">Shift+Space or Ctrl+Space</string>
+    <string name="shortcut_switch_language_desc">Ctrl+Space; Shift+Space also works when "Quick input mode switch 1" is on</string>
+    <string name="shortcut_cycle_im">Switch Dayi / Chuyin (physical keyboard)</string>
+    <string name="shortcut_cycle_im_desc">Ctrl+` (the key left of 1) cycles through the enabled input methods</string>
+    <string name="shortcut_emoji">Emoji (physical keyboard)</string>
+    <string name="shortcut_emoji_desc">Win (Cmd)+. opens or closes the emoji panel</string>
     <string name="shortcut_candidate_bar">Candidate bar (physical keyboard)</string>
     <string name="shortcut_candidate_bar_desc">Arrow keys to move; PgUp/PgDn or ↑↓ to page; Enter to select</string>
     <string name="settings_group_im_enable">Input method activation</string>
