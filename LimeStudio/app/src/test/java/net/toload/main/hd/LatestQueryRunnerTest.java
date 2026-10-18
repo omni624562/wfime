@@ -63,7 +63,7 @@ public class LatestQueryRunnerTest {
             result.set(r);
             appliedOn.set(Thread.currentThread());
         }));
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         drainMain();
         assertEquals("A", result.get());
         assertEquals(mainThread.get(), appliedOn.get());
@@ -72,9 +72,11 @@ public class LatestQueryRunnerTest {
     @Test
     public void newerQueryReplacesOlderEvenIfOlderFinishesLater() throws Exception {
         CountDownLatch release = new CountDownLatch(1);
+        CountDownLatch started = new CountDownLatch(1);
         List<String> applied = new CopyOnWriteArrayList<>();
         AtomicBoolean olderFinished = new AtomicBoolean();
         onMain(() -> runner.submit(() -> {
+            started.countDown();
             try {
                 release.await();       // 舊查詢卡住(例如慢的資料庫查詢)
             } catch (InterruptedException e) {
@@ -83,9 +85,11 @@ public class LatestQueryRunnerTest {
             olderFinished.set(true);
             return "old";
         }, applied::add));
+        // 等舊查詢真的在背景執行緒開始才送新查詢；否則電腦忙時舊查詢還沒開始就被取消、根本不會跑
+        assertTrue(started.await(5, TimeUnit.SECONDS));
         onMain(() -> runner.submit(() -> "new", applied::add));
         release.countDown();
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         drainMain();
         assertTrue(olderFinished.get());
         assertEquals(Collections.singletonList("new"), applied);
@@ -104,9 +108,9 @@ public class LatestQueryRunnerTest {
             }
             return "old";
         }, r -> { }));
-        assertTrue(started.await(1, TimeUnit.SECONDS));
+        assertTrue(started.await(5, TimeUnit.SECONDS));
         onMain(() -> runner.submit(() -> "new", r -> { }));
-        assertTrue(runner.awaitWork(2000));
+        assertTrue(runner.awaitWork(5000));
         assertTrue(interrupted.get());
     }
 
@@ -124,7 +128,7 @@ public class LatestQueryRunnerTest {
                 return n;
             }, r -> { }));
         }
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         work.submit(() -> { }).get();
         assertFalse(overlap.get());
         // 被取代的查詢可能在開始前就被取消;有跑的照提交順序
@@ -149,8 +153,8 @@ public class LatestQueryRunnerTest {
             } catch (InterruptedException ignored) {
             }
         });
-        assertTrue(mainBlocked.await(1, TimeUnit.SECONDS));
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(mainBlocked.await(5, TimeUnit.SECONDS));
+        assertTrue(runner.awaitWork(5000));
         runner.cancel();
         unblockMain.countDown();
         drainMain();
@@ -166,7 +170,7 @@ public class LatestQueryRunnerTest {
         }, r -> { }));
         assertFalse(runner.awaitWork(50));
         release.countDown();
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         assertTrue(new LatestQueryRunner(ExecutorsKt.from(work), ExecutorsKt.from(main)).awaitWork(10));
     }
 
@@ -187,7 +191,7 @@ public class LatestQueryRunnerTest {
         List<String> applied = new CopyOnWriteArrayList<>();
         onMain(() -> runner.submit(() -> "B", applied::add));
         onMain(runner::cancel);                    // B 還在排隊就被取消
-        assertTrue(runner.awaitWork(200));
+        assertTrue(runner.awaitWork(5000));
         release.countDown();
         drainMain();
         assertTrue(applied.isEmpty());
@@ -199,10 +203,10 @@ public class LatestQueryRunnerTest {
         onMain(() -> runner.submit(() -> {
             throw new IllegalStateException("db error");
         }, r -> applied.add("bad")));
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         drainMain();
         onMain(() -> runner.submit(() -> "ok", applied::add));
-        assertTrue(runner.awaitWork(1000));
+        assertTrue(runner.awaitWork(5000));
         drainMain();
         assertEquals(Collections.singletonList("ok"), applied);
     }
