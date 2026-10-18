@@ -17,7 +17,7 @@ final class PointerDispatcher {
         PointerTracker getPointerTracker(int id);
     }
 
-    private final LIMEKeyboardBaseView.PointerQueue mPointerQueue = new LIMEKeyboardBaseView.PointerQueue();
+    private final PointerQueue mPointerQueue = new PointerQueue();
     private final KeyTimers mHandler;
     private final TrackerProvider mTrackers;
 
@@ -26,7 +26,7 @@ final class PointerDispatcher {
         mTrackers = trackers;
     }
 
-    LIMEKeyboardBaseView.PointerQueue queue() {
+    PointerQueue queue() {
         return mPointerQueue;
     }
 

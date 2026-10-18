@@ -49,7 +49,7 @@ public class KeyboardPopupSwipeTest {
     }
 
     /** 記下鍵盤送出的事件。 */
-    static class Recorder implements LIMEKeyboardBaseView.OnKeyboardActionListener {
+    static class Recorder implements OnKeyboardActionListener {
         final List<String> events = new ArrayList<>();
         public void onPress(int c) { events.add("press " + c); }
         public void onRelease(int c) { events.add("release " + c); }
@@ -162,6 +162,24 @@ public class KeyboardPopupSwipeTest {
 
         List<String> right = fling(view, 50, 200, 1000, 210);
         assertTrue(right.toString(), right.contains("swipeRight"));
+    }
+
+    /** 小鍵盤點完一個鍵關掉後，主鍵盤的滑動手勢照常（小鍵盤本身也是 ComposeKeyboardView，A4-7②）。 */
+    @Test
+    public void swipeStillWorksAfterPopupKeyTapped() {
+        ImeKeyboardView view = composeKeyboard();
+        longPressDotOpensPopupAndPopupKeySends(view);
+        View v = view.asView();
+        Recorder r = new Recorder();
+        view.setOnKeyboardActionListener(r);
+        long t = SystemClock.uptimeMillis() + 1000;
+        touch(v, MotionEvent.ACTION_DOWN, 1000, 200, t, t);
+        for (int i = 1; i <= 4; i++)
+            touch(v, MotionEvent.ACTION_MOVE, 1000 - 950f * i / 4, 200 + 10f * i / 4, t, t + 10 * i);
+        touch(v, MotionEvent.ACTION_UP, 50, 210, t, t + 40);
+        ShadowLooper.idleMainLooper();
+        assertTrue(r.events.toString(), r.events.contains("swipeLeft"));
+        assertFalse(r.events.toString(), r.events.stream().anyMatch(e -> e.startsWith("key ")));
     }
 
     ImeKeyboardView composeKeyboard() {

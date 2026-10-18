@@ -32,6 +32,9 @@ import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key;
 
 
 abstract class KeyDetector {
+    /** 不是任何鍵（原本是 LIMEKeyboardBaseView.NOT_A_KEY）。 */
+    static final int NOT_A_KEY = -1;
+
     protected LIMEBaseKeyboard mKeyboard;
     protected int mCorrectionX;
     protected int mCorrectionY;
@@ -89,7 +92,7 @@ abstract class KeyDetector {
      */
     public int[] newCodeArray() {
         int[] codes = new int[getMaxNearbyKeys()];
-        Arrays.fill(codes, LIMEKeyboardBaseView.NOT_A_KEY);
+        Arrays.fill(codes, NOT_A_KEY);
         return codes;
     }
 

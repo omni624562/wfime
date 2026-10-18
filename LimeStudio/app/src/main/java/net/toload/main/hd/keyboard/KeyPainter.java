@@ -228,7 +228,7 @@ final class KeyPainter {
             // 沒有副標籤的標籤比按鍵寬時（如英文介面切換鍵的 "Chuyin"）等比例縮小字級，左右各留 5%
             if (!hasSubLabel) {
                 float availableWidth = (drawWidth - padding.left - padding.right) * 0.9f;
-                int fittedSize = LIMEKeyboardBaseView.fitLabelTextSize(labelSize, paint.measureText(label), availableWidth);
+                int fittedSize = fitLabelTextSize(labelSize, paint.measureText(label), availableWidth);
                 if (fittedSize != labelSize) {
                     labelSize = fittedSize;
                     paint.setTextSize(labelSize);
@@ -424,5 +424,15 @@ final class KeyPainter {
 
     private boolean hasPopupKeyboard(Key key) {
         return key.popupResId != 0;
+    }
+
+    /**
+     * （原本在 LIMEKeyboardBaseView，A4-7② 搬來。）標籤在目前字級下的寬度超過可用寬度時，回傳等比例縮小後的字級；放得下就回傳原字級。
+     */
+    static int fitLabelTextSize(int labelSize, float textWidth, float availableWidth) {
+        if (availableWidth > 0 && textWidth > availableWidth) {
+            return (int) (labelSize * availableWidth / textWidth);
+        }
+        return labelSize;
     }
 }

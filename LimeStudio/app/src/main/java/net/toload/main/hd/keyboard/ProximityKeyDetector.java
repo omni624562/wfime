@@ -45,8 +45,8 @@ class ProximityKeyDetector extends KeyDetector {
         final Key[] keys = getKeys();
         final int touchX = getTouchX(x);
         final int touchY = getTouchY(y);
-        int primaryIndex = LIMEKeyboardBaseView.NOT_A_KEY;
-        int closestKey = LIMEKeyboardBaseView.NOT_A_KEY;
+        int primaryIndex = KeyDetector.NOT_A_KEY;
+        int closestKey = KeyDetector.NOT_A_KEY;
         int closestKeyDist = mProximityThresholdSquare + 1;
         int[] distances = mDistances;
         Arrays.fill(distances, Integer.MAX_VALUE);
@@ -87,7 +87,7 @@ class ProximityKeyDetector extends KeyDetector {
                 }
             }
         }
-        if (primaryIndex == LIMEKeyboardBaseView.NOT_A_KEY) {
+        if (primaryIndex == KeyDetector.NOT_A_KEY) {
             primaryIndex = closestKey;
         }
         return primaryIndex;

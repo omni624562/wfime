@@ -33,7 +33,6 @@
     <dimen name="sub_label_text_size">11dp</dimen>
     
     <dimen name="key_preview_height">55dp</dimen>
-    <dimen name="key_preview_text_size_large">24sp</dimen>
     
     <dimen name="candidate_font_size">13sp</dimen>
     

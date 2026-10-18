@@ -49,7 +49,7 @@ class MiniKeyboardKeyDetector extends KeyDetector {
         final Key[] keys = getKeys();
         final int touchX = getTouchX(x);
         final int touchY = getTouchY(y);
-        int closestKeyIndex = LIMEKeyboardBaseView.NOT_A_KEY;
+        int closestKeyIndex = KeyDetector.NOT_A_KEY;
         int closestKeyDist = (y < 0) ? mSlideAllowanceSquareTop : mSlideAllowanceSquare;
         final int keyCount = keys.length;
         for (int i = 0; i < keyCount; i++) {
@@ -60,7 +60,7 @@ class MiniKeyboardKeyDetector extends KeyDetector {
                 closestKeyDist = dist;
             }
         }
-        if (allKeys != null && closestKeyIndex != LIMEKeyboardBaseView.NOT_A_KEY)
+        if (allKeys != null && closestKeyIndex != KeyDetector.NOT_A_KEY)
             allKeys[0] = keys[closestKeyIndex].codes[0];
         return closestKeyIndex;
     }

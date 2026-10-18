@@ -82,7 +82,7 @@ public class ComposeKeyboardViewTest {
     }
 
     /** 記下鍵盤送出的事件。 */
-    private static class Recorder implements LIMEKeyboardBaseView.OnKeyboardActionListener {
+    private static class Recorder implements OnKeyboardActionListener {
         final List<String> events = new ArrayList<>();
         public void onPress(int c) { events.add("press " + c); }
         public void onRelease(int c) { events.add("release " + c); }

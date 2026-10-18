@@ -27,7 +27,7 @@ final class MiniKeyboardPopup {
 
         LIMEBaseKeyboard getKeyboard();
 
-        LIMEKeyboardBaseView.OnKeyboardActionListener getOnKeyboardActionListener();
+        OnKeyboardActionListener getOnKeyboardActionListener();
 
         boolean isShifted();
 
@@ -113,7 +113,7 @@ final class MiniKeyboardPopup {
             throw new NullPointerException();
 
         ComposeKeyboardView miniKeyboard = (ComposeKeyboardView) container.findViewById(R.id.LIMEPopupKeyboard);
-        miniKeyboard.setOnKeyboardActionListener(new LIMEKeyboardBaseView.OnKeyboardActionListener() {
+        miniKeyboard.setOnKeyboardActionListener(new OnKeyboardActionListener() {
             public void onKey(int primaryCode, int[] keyCodes, int x, int y) {
                 mHost.getOnKeyboardActionListener().onKey(primaryCode, keyCodes, x, y);
                 dismissPopupKeyboard();

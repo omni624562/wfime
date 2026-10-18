@@ -1,9 +1,12 @@
 package net.toload.main.hd.keyboard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.view.ContextThemeWrapper;
@@ -11,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.core.content.ContextCompat;
 import androidx.test.core.app.ApplicationProvider;
 
 import net.toload.main.hd.R;
@@ -19,47 +23,29 @@ import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 長按小鍵盤改用 ComposeKeyboardView（A4-7②）：與原本的 LIMEKeyboardBaseView 小鍵盤比對樣式、尺寸、點鍵事件。
- * 舊小鍵盤照原本 keyboard_popup.xml 的屬性與 MiniKeyboardPopup 的設定建立。
+ * 長按小鍵盤（keyboard_popup.xml 的 ComposeKeyboardView，A4-7②）：樣式、尺寸、點鍵事件。
+ * 預期值是原本 LIMEKeyboardBaseView 小鍵盤的結果（A4-7②a 與舊小鍵盤逐項比對過，②b 刪除舊類別前印出）。
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 34)
 public class MiniKeyboardViewTest {
 
     private Context context;
-    private LIMEKeyboardBaseView oldView;
     private ComposeKeyboardView newView;
 
     @Before
     public void setup() {
         context = new ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.LIMETheme_Material3);
-        float allowance = context.getResources().getDimension(R.dimen.mini_keyboard_slide_allowance);
-        oldView = new LIMEKeyboardBaseView(context, Robolectric.buildAttributeSet()
-                .setStyleAttribute("?attr/LIMEPopupKeyboardLayout")
-                .addAttribute(R.attr.keyHysteresisDistance, "0dip")
-                .addAttribute(R.attr.verticalCorrection, "@dimen/mini_keyboard_vertical_correction")
-                .build());
-        oldView.mKeyDetector = new MiniKeyboardKeyDetector(allowance);
-        oldView.mSwipeGestures = null;
         newView = LayoutInflater.from(context).inflate(R.layout.keyboard_popup, null).findViewById(R.id.LIMEPopupKeyboard);
-        newView.setupAsMiniKeyboard(allowance);
-    }
-
-    private static Object baseField(Object o, String name) throws Exception {
-        Field f = LIMEKeyboardBaseView.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.get(o);
+        newView.setupAsMiniKeyboard(context.getResources().getDimension(R.dimen.mini_keyboard_slide_allowance));
     }
 
     private static Object sameDrawable(Object d) {
@@ -71,29 +57,23 @@ public class MiniKeyboardViewTest {
     }
 
     @Test
-    public void sameStyleAsOldMiniKeyboard() throws Exception {
-        int compared = 0;
-        for (Field f : KeyPainter.class.getDeclaredFields()) {
-            if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers()))
-                continue;
-            f.setAccessible(true);
-            Object o = f.get(oldView.mPainter), n = f.get(newView.painter);
-            if (f.getType() == android.graphics.Paint.class) {
-                assertEquals(((android.graphics.Paint) o).getTextSize(), ((android.graphics.Paint) n).getTextSize(), 0f);
-            } else {
-                assertEquals(f.getName(), sameDrawable(o), sameDrawable(n));
-            }
-            compared++;
-        }
-        assertTrue(compared >= 19);
-        assertEquals((float) baseField(oldView, "mKeyHysteresisDistance"), newView.keyHysteresisDistance, 0f);
-        assertEquals((float) baseField(oldView, "mVerticalCorrection"), newView.verticalCorrection, 0f);
+    public void styleFromPopupLayout() {
+        Resources res = context.getResources();
+        KeyPainter p = newView.painter;
+        assertNotNull(p.mKeyBackground);
+        // 小鍵盤樣式沒有動作鍵／功能鍵底（同原本小鍵盤）
+        assertNull(p.mActionKeyBackground);
+        assertNull(p.mFunctionalKeyBackground);
+        assertEquals(res.getDimensionPixelSize(R.dimen.key_text_size_material3), p.mKeyTextSize);
         assertEquals(0f, newView.keyHysteresisDistance, 0f);
-        assertEquals(sameDrawable(oldView.getBackground()), sameDrawable(newView.getBackground()));
-        assertEquals(oldView.getPaddingLeft(), newView.getPaddingLeft());
-        assertEquals(oldView.getPaddingTop(), newView.getPaddingTop());
-        assertEquals(oldView.getPaddingRight(), newView.getPaddingRight());
-        assertEquals(oldView.getPaddingBottom(), newView.getPaddingBottom());
+        assertEquals(res.getDimensionPixelOffset(R.dimen.mini_keyboard_vertical_correction), newView.verticalCorrection, 0f);
+        assertEquals(sameDrawable(ContextCompat.getDrawable(context, R.drawable.keyboard_popup_panel_background_material3)),
+                sameDrawable(newView.getBackground()));
+        // 內距來自小鍵盤背景（GradientDrawable 的 4,4,4,4）
+        assertEquals(4, newView.getPaddingLeft());
+        assertEquals(4, newView.getPaddingTop());
+        assertEquals(4, newView.getPaddingRight());
+        assertEquals(4, newView.getPaddingBottom());
     }
 
     /** 「.」鍵的標點小鍵盤（同 MiniKeyboardPopup 建法）。 */
@@ -102,19 +82,17 @@ public class MiniKeyboardViewTest {
     }
 
     @Test
-    public void sameSizeAsOldMiniKeyboard() {
-        oldView.setKeyboard(popupKeyboard());
+    public void sizeIsKeyboardPlusPadding() {
         newView.setKeyboard(popupKeyboard());
-        int w = View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.AT_MOST);
-        int h = View.MeasureSpec.makeMeasureSpec(2000, View.MeasureSpec.AT_MOST);
-        oldView.measure(w, h);
-        newView.measure(w, h);
-        assertTrue(oldView.getMeasuredHeight() > 50);
-        assertEquals(oldView.getMeasuredWidth(), newView.getMeasuredWidth());
-        assertEquals(oldView.getMeasuredHeight(), newView.getMeasuredHeight());
+        newView.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.AT_MOST),
+                View.MeasureSpec.makeMeasureSpec(2000, View.MeasureSpec.AT_MOST));
+        LIMEBaseKeyboard kb = newView.getKeyboard();
+        assertEquals(kb.getMinWidth() + 8, newView.getMeasuredWidth());
+        assertEquals(kb.getHeight() + 8, newView.getMeasuredHeight());
+        assertTrue(newView.getMeasuredHeight() > 50);
     }
 
-    private static class Recorder implements LIMEKeyboardBaseView.OnKeyboardActionListener {
+    private static class Recorder implements OnKeyboardActionListener {
         final List<String> events = new ArrayList<>();
         public void onPress(int c) { events.add("press " + c); }
         public void onRelease(int c) { events.add("release " + c); }
@@ -127,31 +105,29 @@ public class MiniKeyboardViewTest {
         public void swipeUp() { events.add("swipeUp"); }
     }
 
-    /** 點小鍵盤上每一個鍵，回傳送出的事件。 */
-    private List<String> tapAll(ImeKeyboardView view) {
+    @Test
+    public void tappingEveryKeySendsPressKeyRelease() {
         Recorder r = new Recorder();
-        view.setOnKeyboardActionListener(r);
-        view.setKeyboard(popupKeyboard());
-        View v = view.asView();
-        for (Key k : view.getKeyboard().getKeys()) {
-            float x = k.x + v.getPaddingLeft() + k.width / 2f, y = k.y + v.getPaddingTop() + k.height / 2f;
+        newView.setOnKeyboardActionListener(r);
+        newView.setKeyboard(popupKeyboard());
+        List<String> expected = new ArrayList<>();
+        for (Key k : newView.getKeyboard().getKeys()) {
+            float x = k.x + newView.getPaddingLeft() + k.width / 2f, y = k.y + newView.getPaddingTop() + k.height / 2f;
             long t = SystemClock.uptimeMillis();
             MotionEvent down = MotionEvent.obtain(t, t, MotionEvent.ACTION_DOWN, x, y, 0);
-            v.onTouchEvent(down);
+            newView.onTouchEvent(down);
             down.recycle();
             MotionEvent up = MotionEvent.obtain(t, t + 50, MotionEvent.ACTION_UP, x, y, 0);
-            v.onTouchEvent(up);
+            newView.onTouchEvent(up);
             up.recycle();
             ShadowLooper.idleMainLooper();
+            int c = k.codes[0];
+            expected.add("press " + c);
+            expected.add("key " + c);
+            expected.add("release " + c);
         }
-        return r.events;
-    }
-
-    @Test
-    public void tappingEveryKeySendsSameEventsAsOldMiniKeyboard() {
-        List<String> old = tapAll(oldView);
-        assertTrue(old.toString(), old.size() >= 3 * 18);
-        assertEquals(old, tapAll(newView));
+        assertEquals(18 * 3, expected.size());
+        assertEquals(expected, r.events);
     }
 
     @Test

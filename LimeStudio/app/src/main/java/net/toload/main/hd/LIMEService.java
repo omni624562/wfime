@@ -79,7 +79,7 @@ import net.toload.main.hd.global.LIMEUtilities;
 import net.toload.main.hd.global.RootMapper;
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard;
 import net.toload.main.hd.keyboard.LIMEKeyboard;
-import net.toload.main.hd.keyboard.LIMEKeyboardBaseView;
+import net.toload.main.hd.keyboard.OnKeyboardActionListener;
 import net.toload.main.hd.keyboard.ComposeKeyboardView;
 import net.toload.main.hd.keyboard.ImeKeyboardView;
 import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
@@ -88,7 +88,7 @@ import net.toload.main.hd.keyboard.LIMEMetaKeyKeyListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class LIMEService extends InputMethodService implements
-        LIMEKeyboardBaseView.OnKeyboardActionListener {
+        OnKeyboardActionListener {
 
     static final int KEYCODE_SWITCH_TO_SYMBOL_MODE = -2;
     static final int KEYCODE_SWITCH_TO_ENGLISH_MODE = -9;

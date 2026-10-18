@@ -23,8 +23,6 @@
   -->
 
 <resources>
-    <integer name="config_delay_before_preview">5</integer>
-    <integer name="config_delay_after_preview">70</integer>
     <integer name="config_preview_fade_in_anim_time">17</integer>
     <integer name="config_preview_fade_out_anim_time">53</integer>
     <integer name="config_delay_before_key_repeat_start">400</integer>

@@ -92,7 +92,7 @@ public class TouchLogicTest {
         }
     };
 
-    private final LIMEKeyboardBaseView.OnKeyboardActionListener listener = new LIMEKeyboardBaseView.OnKeyboardActionListener() {
+    private final OnKeyboardActionListener listener = new OnKeyboardActionListener() {
         @Override
         public void onPress(int primaryCode) {
             events.add("press " + name(primaryCode));

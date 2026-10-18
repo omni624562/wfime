@@ -74,7 +74,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
     private var keyDetector: KeyDetector = ProximityKeyDetector()
     // 長按開出的小鍵盤（setupAsMiniKeyboard）：沒有滑動手勢、不往下延伸蓋導覽列、長按只開小鍵盤
     private var isMiniKeyboard = false
-    private var listener: LIMEKeyboardBaseView.OnKeyboardActionListener? = null
+    private var listener: OnKeyboardActionListener? = null
     private val trackers = ArrayList<PointerTracker>()
     private val timers = Timers()
     private val dispatcher = PointerDispatcher(timers) { id -> getPointerTracker(id) }
@@ -115,7 +115,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
         miniPopup = MiniKeyboardPopup(context, object : MiniKeyboardPopup.Host {
             override fun view(): View = this@ComposeKeyboardView
             override fun getKeyboard(): LIMEBaseKeyboard? = this@ComposeKeyboardView.keyboard
-            override fun getOnKeyboardActionListener(): LIMEKeyboardBaseView.OnKeyboardActionListener? =
+            override fun getOnKeyboardActionListener(): OnKeyboardActionListener? =
                 this@ComposeKeyboardView.listener
             override fun isShifted(): Boolean = this@ComposeKeyboardView.isShifted()
             // 同舊鍵盤：主題有按鍵預覽版面就算開啟
@@ -205,7 +205,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
 
     // ---- ImeKeyboardView ----
 
-    override fun setOnKeyboardActionListener(listener: LIMEKeyboardBaseView.OnKeyboardActionListener?) {
+    override fun setOnKeyboardActionListener(listener: OnKeyboardActionListener?) {
         this.listener = listener
         for (tracker in trackers) tracker.setOnKeyboardActionListener(listener)
     }
@@ -325,7 +325,7 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
             l.onText(key.text)
             l.onRelease(0)
         } else {
-            l.onKey(code, key.codes, LIMEKeyboardBaseView.NOT_A_TOUCH_COORDINATE, LIMEKeyboardBaseView.NOT_A_TOUCH_COORDINATE)
+            l.onKey(code, key.codes, OnKeyboardActionListener.NOT_A_TOUCH_COORDINATE, OnKeyboardActionListener.NOT_A_TOUCH_COORDINATE)
             l.onRelease(code)
         }
     }

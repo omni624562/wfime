@@ -4,11 +4,10 @@ import android.view.View
 
 /**
  * 輸入法服務（LIMEService、LIMEKeyboardSwitcher）對鍵盤本體需要的操作。
- * 目前由舊的自繪鍵盤 LIMEKeyboardBaseView 實作；之後的 Compose 鍵盤實作同一個介面，
- * 服務那邊不用跟著改（藍圖 A4-1）。
+ * 由 Compose 鍵盤 ComposeKeyboardView 實作（藍圖 A4-1；舊的自繪鍵盤 LIMEKeyboardBaseView 在 A4-7 移除）。
  */
 interface ImeKeyboardView {
-    fun setOnKeyboardActionListener(listener: LIMEKeyboardBaseView.OnKeyboardActionListener?)
+    fun setOnKeyboardActionListener(listener: OnKeyboardActionListener?)
     fun setKeyboard(keyboard: LIMEBaseKeyboard?)
     fun getKeyboard(): LIMEBaseKeyboard?
     fun setShifted(shifted: Boolean): Boolean

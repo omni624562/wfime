@@ -30,14 +30,13 @@ import android.view.MotionEvent;
 
 import net.toload.main.hd.R;
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key;
-import net.toload.main.hd.keyboard.LIMEKeyboardBaseView.OnKeyboardActionListener;
 
 public class PointerTracker {
     private static final String TAG = "PointerTracker";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_MOVE = false;
     // Miscellaneous constants
-    private static final int NOT_A_KEY = LIMEKeyboardBaseView.NOT_A_KEY;
+    private static final int NOT_A_KEY = KeyDetector.NOT_A_KEY;
     private static final int[] KEY_DELETE = { LIMEBaseKeyboard.KEYCODE_DELETE };
     public final int mPointerId;
     // Timing constants
