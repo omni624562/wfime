@@ -49,7 +49,7 @@ import net.toload.main.hd.R
 import net.toload.main.hd.keyboard.LIMEBaseKeyboard.Key
 
 /**
- * Compose 版螢幕鍵盤（實驗中，藍圖 A4-3）。與舊的 LIMEKeyboardView 並存，由設定「新版鍵盤」切換。
+ * Compose 版螢幕鍵盤（藍圖 A4-3～A4-6）。預設使用；舊的 LIMEKeyboardView 保留一個版本，設定「新版鍵盤」關掉就改用舊鍵盤。
  *
  * 鍵盤模型（LIMEBaseKeyboard）、觸控判斷（PointerDispatcher、PointerTracker）、畫鍵（KeyPainter）
  * 與舊鍵盤共用：鍵先畫進一張點陣圖（同舊鍵盤），再由 Compose 的 Canvas 貼上，外觀與舊鍵盤相同。
