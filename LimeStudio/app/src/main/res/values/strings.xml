@@ -152,6 +152,14 @@
     <string name="help_log_20260927_13">多項穩定性修正：分享文字開啟、長按刪除關聯字、新增備忘錄時不再當機，字根顯示不再錯亂。</string>
     <string name="help_log_20260927_14">學字與匯入改用安全的資料庫查詢，含引號的詞也能正常學習與匯入。</string>
     <string name="help_log_20260927_15">移除滑動選字與未使用的佈景主題。</string>
+    <string name="help_log_20260927_16">新版螢幕鍵盤：白色字母鍵、淡綠功能鍵與圓角，支援 TalkBack 逐鍵朗讀；表情符號與備忘錄面板配色一致，打字更省電。</string>
+    <string name="help_log_20260927_17">學習資料另存一份，匯入字庫後自動套回；可在設定「匯出我的資料」「匯入我的資料」，並可「自動備份到 Google 帳號」。</string>
+    <string name="help_log_20260927_18">大易連打：連續 3 碼以上的英文字母或數字不再自動上字，可直接打英文單字與長數字；同碼字沒有選字記錄時，依前一個字常接的字排第一；刪光組字時中斷連打。</string>
+    <string name="help_log_20260927_19">注音：同音字多的碼列出全部候選；連打選了第一個音節的字後，後面的音節不再不見；簡體等 Big5 以外的字排到同一個音的最後。</string>
+    <string name="help_log_20260927_20">候選列工具列新增語音輸入按鈕；「字根反查」改為設定開關，結果顯示在候選列左側。</string>
+    <string name="help_log_20260927_21">表情符號更新至 Emoji 18.0。</string>
+    <string name="help_log_20260927_22">修正：按過實體鍵盤後換欄位，螢幕鍵盤不再收起重建；鍵盤收起時切換深淺色不再當機；出現英文預測時 Delete 直接刪字。</string>
+    <string name="help_log_20260927_23">移除舊機型實體鍵盤設定、無作用的「重設」選項與簡繁轉換；「快捷鍵速查」補齊實體鍵盤標點。</string>
     <string name="help_log_20260601_1">大易實體外接鍵盤左側翻頁改善 (▲/▼)。</string>
     <string name="help_log_20260601_2">平板雙欄全螢幕沉浸式設定主控台升級，隱藏 XML AppBarLayout。</string>
     <string name="help_log_20260601_3">大易智慧選字核心 AI 卡片改裝與綠/灰狀態呼吸燈導入。</string>

@@ -72,6 +72,14 @@
     <string name="help_log_20260927_13">Stability fixes: no more crashes when opening shared text, deleting a related phrase by long press or adding a memo, and root display no longer mixes up.</string>
     <string name="help_log_20260927_14">Learning and import now use safe database queries, so words with quotes are learned and imported correctly.</string>
     <string name="help_log_20260927_15">Removed swipe selection and unused themes.</string>
+    <string name="help_log_20260927_16">New on-screen keyboard: white letter keys, light green function keys and rounded corners, with TalkBack reading each key; the emoji and memo panels use matching colors, and typing uses less power.</string>
+    <string name="help_log_20260927_17">Learned data is now kept separately and restored after importing a dictionary; use \"Export my data\" and \"Import my data\" in Settings, or turn on \"Back up to Google account\".</string>
+    <string name="help_log_20260927_18">Dayi continuous typing: 3 or more letters or digits in a row are no longer auto-committed, so English words and long numbers can be typed; for characters sharing a code with no selection history, the one that most often follows the previous character comes first; deleting all composing text ends continuous typing.</string>
+    <string name="help_log_20260927_19">Chuyin: readings with many homophones now list every candidate; picking a character for the first syllable in continuous typing no longer drops the following syllables; Simplified and other non-Big5 characters move to the end of the same reading.</string>
+    <string name="help_log_20260927_20">Added a voice input button to the candidate toolbar; \"Reverse lookup\" is now a setting, with results shown on the left of the candidate bar.</string>
+    <string name="help_log_20260927_21">Emoji updated to Emoji 18.0.</string>
+    <string name="help_log_20260927_22">Fixes: switching fields after using a physical keyboard no longer hides and rebuilds the on-screen keyboard; switching light/dark mode while the keyboard is hidden no longer crashes; Delete removes text directly while English predictions are shown.</string>
+    <string name="help_log_20260927_23">Removed old-device physical keyboard settings, the ineffective \"Reset\" option and Simplified/Traditional conversion; \"Shortcut reference\" now lists all physical keyboard punctuation.</string>
     <string name="help_log_20260601_1">Dayi left-side paging for external physical keyboards (▲/▼).</string>
     <string name="help_log_20260601_2">Upgraded the two-pane full-screen immersive settings console on tablets and hid the XML AppBarLayout.</string>
     <string name="help_log_20260601_3">Redesigned the Dayi smart selection AI card and added a green/grey breathing status light.</string>

@@ -37,7 +37,7 @@ WFIME (Wheat Fields Input Method Editor) is a sophisticated Android IME applicat
 - **🎯 Predictive Back Gesture** - Modern Android 13+ back navigation support
 - **🌓 Edge-to-Edge Display** - Full immersive experience with proper insets handling
 - **📊 Smart Candidate System** - Intelligent word suggestions with user scoring
-- **😀 Enhanced Emoji Picker** - Unicode 15.0 support, infinite scroll, and customizable scaling
+- **😀 Enhanced Emoji Picker** - Emoji 18.0 support, infinite scroll, and customizable scaling
 - **🎭 Jetpack Compose UI** - Consolidated "one-stop" settings dashboard and emoji picker for elegant, drawer-free control
 - **⚡ Typing Experience Optimization** - Intelligent radical-filtering prevents intermediate radicals (e.g. "魚鳥言") from polluting host application editors, 100% avoiding search/suggestion interference
 - **🔧 Highly Customizable** - Extensive settings and keyboard layouts
@@ -211,7 +211,7 @@ WFIME（麥田輸入法編輯器）是一個基於 LIME IME 開源專案衍生�
 - **🎯 預測性返回手勢** - 支援現代 Android 13+ 返回導航
 - **🌓 邊到邊顯示** - 完整沉浸式體驗，正確處理插邊
 - **📊 智慧候選系統** - 智慧詞彙建議，使用者評分
-- **😀 強大表情符號選單** - 支援 Unicode 15.0、無限捲動與自訂縮放
+- **😀 強大表情符號選單** - 支援 Emoji 18.0、無限捲動與自訂縮放
 - **🎭 Jetpack Compose UI** - 整合「一站式」設定首頁卡片與表情符號選單，極致流暢且無抽屜選單負擔
 - **⚡ 組字體驗最佳化** - 智慧字根不上字過濾（魚鳥言不上字），在拼打完成前不干擾 Host 應用程式的搜尋與自動建議，點選確認才送出漢字
 - **🔧 高度客製化** - 豐富的設定和鍵盤佈局
