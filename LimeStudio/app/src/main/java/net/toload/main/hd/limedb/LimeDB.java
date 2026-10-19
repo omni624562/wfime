@@ -874,6 +874,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
      *         }
      */
 
+    /** 這個字後面接各個字的權重（關聯字表，大易連打挑同碼字用），見 RelatedStore.getNextCharWeights */
+    public java.util.Map<String, Integer> getRelatedNextCharWeights(String pword) {
+        if (!checkDBConnection()) return new java.util.HashMap<>();
+        return related.getNextCharWeights(pword);
+    }
+
     public List<Mapping> getRelatedPhrase(String pword) {
         return related.getRelatedPhrase(pword);
     }

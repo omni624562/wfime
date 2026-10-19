@@ -360,6 +360,38 @@ final class RelatedStore {
         return result;
     }
 
+    /**
+     * 這個字後面接各個字的權重（大易連打挑同碼字用）：pword 等於這個字的關聯字，依 cword 的第一個字加總
+     * basescore＋score×10（使用者選過的權重較高）。內建字典（basescore）不管「啟用關聯字典」開關都算——
+     * 那個開關只管選字後要不要顯示關聯字；使用者學過的（score）照「啟動自建關聯字」開關。
+     */
+    public java.util.Map<String, Integer> getNextCharWeights(String pword) {
+        java.util.Map<String, Integer> result = new java.util.HashMap<>();
+        if (pword == null || pword.isEmpty()) return result;
+        final boolean userLearnedEnabled = owner.mLIMEPref.getLearnRelatedWord();
+        Cursor cursor = null;
+        try {
+            cursor = LimeDB.db.query(Lime.DB_RELATED,
+                    new String[] { LimeDB.FIELD_DIC_cword, Lime.DB_RELATED_COLUMN_USERSCORE, Lime.DB_RELATED_COLUMN_BASESCORE },
+                    LimeDB.FIELD_DIC_pword + " = ? and " + LimeDB.FIELD_DIC_cword + " is not null",
+                    new String[] { pword }, null, null, null);
+            while (cursor.moveToNext()) {
+                String cword = cursor.getString(0);
+                if (cword == null || cword.isEmpty()) continue;
+                String first = new String(Character.toChars(cword.codePointAt(0)));
+                int weight = cursor.getInt(2) + (userLearnedEnabled ? cursor.getInt(1) * 10 : 0);
+                if (weight <= 0) continue;
+                Integer old = result.get(first);
+                result.put(first, old == null ? weight : old + weight);
+            }
+        } catch (SQLiteException e) {
+            Log.w(TAG, "getNextCharWeights failed: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return result;
+    }
+
     public boolean importBackupRelatedDb(File sourcedbfile) {
         if (!owner.checkDBConnection())
             return false;
