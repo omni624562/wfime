@@ -34,38 +34,12 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent">
 
+        <!-- 候選列（Compose）；平板左側的輸入法簡稱也由 CandidateView 畫 -->
         <net.toload.main.hd.candidate.CandidateView
             android:id="@+id/candidatesView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/candidate_view_right_margin"
             android:gravity="center_vertical" />
-
-        <!-- The TextView for the IME abbreviation on tablets -->
-        <TextView
-            android:id="@+id/candidate_ime_name"
-            android:layout_width="@dimen/candidate_view_right_margin"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp"
-            android:textSize="@dimen/composing_text_size"
-            android:textColor="@color/second_foreground_light"
-            android:visibility="gone" />
-
-        <!-- Small expand button on the right -->
-        <ImageButton
-            android:id="@+id/candidate_right"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:background="@android:color/transparent"
-            android:clickable="true"
-            android:contentDescription="@string/more_cand"
-            android:src="@drawable/btn_expand_white_selector"
-            android:visibility="gone" />
 
     </FrameLayout>
 

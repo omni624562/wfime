@@ -155,6 +155,8 @@ open class CandidateView @JvmOverloads constructor(
     private var _rawKeycode by mutableStateOf("") // Raw keycode like "nh1"
     // 字根反查結果(例如「日=ㄖˋ」):選字後顯示在候選列左側,開始打下一個字時清掉
     private var _reverseLookupHint by mutableStateOf("")
+    // 平板：候選列左側顯示的目前輸入法簡稱（易／注／英）
+    private var _imeName by mutableStateOf("")
     // Cached font size scale — read from SharedPreferences once, updated via updateFontSize()
     // Stored as Compose state so CandidateRow recomposes automatically when it changes
     private var _fontSizeScale by mutableFloatStateOf(1f)
@@ -253,7 +255,7 @@ open class CandidateView @JvmOverloads constructor(
                 setViewTreeSavedStateRegistryOwner(lifecycleOwner)
                 setViewTreeViewModelStoreOwner(lifecycleOwner)
                 setContent {
-                    CandidateRow()
+                    CandidateBarWithImeName()
                 }
             }
             composeView?.let { 
@@ -335,12 +337,52 @@ open class CandidateView @JvmOverloads constructor(
         _reverseLookupHint = text
     }
     
-    override fun computeHorizontalScrollRange(): Int {
-        // Rough estimate to satisfy Container logic
-        // If list is empty, return 0. If not, return something larger than width to force button show?
-        // Actually Container logic: availableWidth < neededWidth -> show button.
-        // For prototype, let's just assume if we have suggestions, we might need scrolling.
-        return if (suggestions.isNotEmpty()) 10000 else 0
+    /** 平板候選列左側顯示的輸入法簡稱（手機不顯示）。 */
+    fun setImeName(name: String) {
+        _imeName = name
+    }
+
+    /**
+     * 候選列；平板在左側留 candidate_view_right_margin 寬的一格顯示輸入法簡稱，高度跟候選列一樣
+     * （原本是候選列外框裡另一個 TextView，靠 onMeasure 同步高度）。手機這格寬度是 0，不顯示。
+     */
+    @Composable
+    private fun CandidateBarWithImeName() {
+        val labelWidth = androidx.compose.ui.res.dimensionResource(R.dimen.candidate_view_right_margin)
+        if (!net.toload.main.hd.BuildConfig.IS_TABLET || labelWidth <= 0.dp) {
+            CandidateRow()
+            return
+        }
+        val labelColor = if (mColorComposingText == 0 || mColorComposingText == AndroidColor.TRANSPARENT)
+            Color(ContextCompat.getColor(context, R.color.second_foreground_light))
+        else Color(mColorComposingText)
+        val labelSize = with(LocalDensity.current) {
+            androidx.compose.ui.res.dimensionResource(R.dimen.composing_text_size).toSp()
+        }
+        Box {
+            Box(modifier = Modifier.padding(start = labelWidth)) {
+                CandidateRow()
+            }
+            Box(
+                modifier = Modifier.matchParentSize(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Box(
+                    modifier = Modifier.width(labelWidth).fillMaxHeight(),
+                    // 置中用整數除法（同原本 TextView 的 gravity="center"），不用 Alignment.Center 的四捨五入
+                    contentAlignment = { size, space, _ ->
+                        androidx.compose.ui.unit.IntOffset((space.width - size.width) / 2, (space.height - size.height) / 2)
+                    }
+                ) {
+                    Text(
+                        text = _imeName,
+                        color = labelColor,
+                        fontSize = labelSize,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        }
     }
     
     @Composable
