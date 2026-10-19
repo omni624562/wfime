@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- chinese_punctuation 是中文標點符號資料，刻意不翻譯（沿用預設值）；*_values / *_codes 陣列為程式內部值，不可翻譯 -->
-    <string name="ime_setting">LIME-HD Settings</string>
+    <string name="ime_setting">WFIME</string>
     <string name="keyboard">Keyboard</string>
     <string name="mapping">Mapping table</string>
-    <string name="keyboard_list">LIME input method switching</string>
+    <string name="keyboard_list">Switch input method</string>
     <string name="enable_emoji">Show emoji</string>
     <string name="enable_emoji_summary">Show emoji for key codes or composed Chinese text. Some emoji may not display correctly depending on font support</string>
     <string name="enable_emoji_position">Emoji position in the candidate bar</string>

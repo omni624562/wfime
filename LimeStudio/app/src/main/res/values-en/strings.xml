@@ -106,7 +106,7 @@
 
     <!-- 表情符號選擇器 EmojiPicker.kt -->
     <string name="emoji_search">Search</string>
-    <string name="emoji_search_hint_physical">Type English keywords on the physical keyboard…</string>
+    <string name="emoji_search_hint_physical">Type keywords on your keyboard…</string>
     <string name="emoji_search_hint">Type English keywords…</string>
     <string name="emoji_search_close">Close search</string>
     <string name="emoji_no_results">No matching emoji</string>

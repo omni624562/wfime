@@ -429,6 +429,9 @@ fun EmojiSearchPane(
                 },
                 color = if (query.isEmpty()) panelColors.secondary else panelColors.text,
                 fontSize = 16.sp,
+                // 查詢列只有一行高：提示太長時以「…」結尾，不要折行被切掉
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = onClose, modifier = Modifier.size(28.dp)) {
