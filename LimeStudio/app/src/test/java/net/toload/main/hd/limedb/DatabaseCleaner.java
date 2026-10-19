@@ -1,5 +1,6 @@
 package net.toload.main.hd.limedb;
 
+import org.junit.Assume;
 import org.junit.Test;
 import java.io.File;
 import java.sql.Connection;
@@ -10,6 +11,11 @@ import java.util.List;
 
 /**
  * 詞庫清理工具 - 用於移除資料庫中的政治人物姓名或特定敏感詞彙。
+ *
+ * 會直接改寫 Database/*.db（刪資料＋VACUUM），所以平常跑全部單元測試時不執行；
+ * 要用時設環境變數 WFIME_CLEAN_DB=1 再跑：
+ * WFIME_CLEAN_DB=1 ./gradlew testPhoneDebugUnitTest --tests "net.toload.main.hd.limedb.DatabaseCleaner" --rerun
+ * （加 --rerun：環境變數不算測試的輸入，不加的話 Gradle 可能判定已是最新而整個略過）
  */
 public class DatabaseCleaner {
 
@@ -42,6 +48,7 @@ public class DatabaseCleaner {
 
     @Test
     public void cleanGlobalPoliticalFigures() {
+        Assume.assumeTrue("要清理詞庫時才設 WFIME_CLEAN_DB=1", "1".equals(System.getenv("WFIME_CLEAN_DB")));
         File dir = new File(DB_DIR);
         File[] dbFiles = dir.listFiles((d, name) -> name.endsWith(".db"));
 
