@@ -5,7 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 // 表情符號面板（EmojiPicker）與備忘錄面板（MemoPanel）的配色：
-// 深色沿用原本的深灰；淺色用 Material3 淺色色票（colors_material3.xml），與候選列（CandidateView）一致
+// 底色、按鍵與新鍵盤一致（colors_keyboard_material3.xml：淺色淺灰綠底＋白色鍵、深色深底＋灰綠鍵），
+// 其餘用 Material3 色票（colors_material3.xml）
 internal data class KeyboardPanelColors(
     val background: Color,       // 面板底色
     val bottomBar: Color,        // 底部 ABC／退格列、搜尋用小鍵盤底、外框（導覽列區）底色
@@ -25,8 +26,8 @@ internal data class KeyboardPanelColors(
 )
 
 internal val DarkKeyboardPanelColors = KeyboardPanelColors(
-    background = Color(0xFF2B2B2B),
-    bottomBar = Color(0xFF1F1F1F),
+    background = Color(0xFF111412),              // 與候選列、鍵盤底相同
+    bottomBar = Color(0xFF111412),               // 與鍵盤底相同
     accent = Color(0xFF4CAF50),
     onAccent = Color.Black,
     icon = Color(0xFFE2E2E2),
@@ -34,17 +35,17 @@ internal val DarkKeyboardPanelColors = KeyboardPanelColors(
     text = Color.White,
     divider = Color.White.copy(alpha = 0.1f),
     skinToneMark = Color.LightGray.copy(alpha = 0.8f),
-    keyBackground = Color(0xFF3A3A3A),
-    popupBackground = Color(0xFF2F2F2F),
-    card = Color(0xFF383838),
+    keyBackground = Color(0xFF373D39),           // 與鍵盤字母鍵相同
+    popupBackground = Color(0xFF373D39),
+    card = Color(0xFF373D39),
     pinnedCard = Color(0xFF203A2B),
     dialogCard = Color(0xFF2E2E2E),
     delete = Color(0xFFE57373)
 )
 
 internal val LightKeyboardPanelColors = KeyboardPanelColors(
-    background = Color(0xFFF0F1EC),              // md_theme_inverseOnSurface（與候選列相同）
-    bottomBar = Color(0xFFFBFDF8),               // md_theme_surface（與鍵盤底色相同）
+    background = Color(0xFFE8EDE8),              // 與候選列、鍵盤底相同
+    bottomBar = Color(0xFFE8EDE8),               // 與鍵盤底相同
     accent = Color(0xFF006C4C),                  // md_theme_primary
     onAccent = Color(0xFFFFFFFF),                // md_theme_onPrimary
     icon = Color(0xFF191C1A),                    // md_theme_onSurface
@@ -52,9 +53,9 @@ internal val LightKeyboardPanelColors = KeyboardPanelColors(
     text = Color(0xFF191C1A),                    // md_theme_onSurface
     divider = Color.Black.copy(alpha = 0.1f),
     skinToneMark = Color(0xFF707972).copy(alpha = 0.8f), // md_theme_outline @ 80%
-    keyBackground = Color(0xFFDBE5DD),           // md_theme_surfaceVariant（與鍵盤按鍵相同）
-    popupBackground = Color(0xFFDBE5DD),         // md_theme_surfaceVariant
-    card = Color(0xFFFBFDF8),                    // md_theme_surface
+    keyBackground = Color(0xFFFFFFFF),           // 與鍵盤字母鍵相同
+    popupBackground = Color(0xFFFFFFFF),
+    card = Color(0xFFFFFFFF),
     pinnedCard = Color(0xFFCFE9D9),              // md_theme_secondaryContainer
     dialogCard = Color(0xFFFBFDF8),              // md_theme_surface
     delete = Color(0xFFBA1A1A)                   // md_theme_error
