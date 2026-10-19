@@ -38,9 +38,6 @@ import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -51,6 +48,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.toload.main.hd.DBServer;
@@ -74,19 +72,13 @@ import net.toload.main.hd.limedb.LimeDB;
 public class SetupImLoadDialog extends DialogFragment {
 
     private static final String IM_TYPE = "IM_TYPE";
+    private static final String STATE_RESTORE_LEARNING = "restoreLearning";
+    private static final String STATE_BACKUP_LEARNING = "backupLearning";
     // IM Log Tag
     private final String TAG = "SetupImLoadDialog";
-    // Default
-    Button btnSetupImDialogCustom;
-    Button btnSetupImDialogLoad1;
-    Button btnSetupImDialogLoad2;
-    Button btnSetupImDialogLoad3;
-    Button btnSetupImDialogLoad4;
-    Button btnSetupImDialogLoad5;
-    Button btnSetupImDialogLoad6;
-    Button btnSetupImDialogCancel;
-    CheckBox chkSetupImBackupLearning;
-    CheckBox chkSetupImRestoreLearning;
+    // 「備份學習資料」「還原學習資料」勾選狀態（畫面由 SetupImLoadContent 畫；旋轉畫面時保留）
+    private boolean backupLearning = true;
+    private boolean restoreLearning = true;
     // Basic
     private SetupImHandler handler;
     private ConnectivityManager connManager;
@@ -148,25 +140,19 @@ public class SetupImLoadDialog extends DialogFragment {
 
         imcount = datasource.count(imtype);
 
-        View rootView = inflater.inflate(R.layout.fragment_dialog_im, container, false);
-
-        chkSetupImBackupLearning = rootView.findViewById(R.id.chkSetupImBackupLearning);
-        chkSetupImRestoreLearning = rootView.findViewById(R.id.chkSetupImRestoreLearning);
-
-        btnSetupImDialogCustom = rootView.findViewById(R.id.btnSetupImDialogCustom);
-        btnSetupImDialogLoad1 = rootView.findViewById(R.id.btnSetupImDialogLoad1);
-        btnSetupImDialogLoad2 = rootView.findViewById(R.id.btnSetupImDialogLoad2);
-        btnSetupImDialogLoad3 = rootView.findViewById(R.id.btnSetupImDialogLoad3);
-        btnSetupImDialogLoad4 = rootView.findViewById(R.id.btnSetupImDialogLoad4);
-        btnSetupImDialogLoad5 = rootView.findViewById(R.id.btnSetupImDialogLoad5);
-        btnSetupImDialogLoad6 = rootView.findViewById(R.id.btnSetupImDialogLoad6);
+        if (savedInstanceState != null) {
+            backupLearning = savedInstanceState.getBoolean(STATE_BACKUP_LEARNING, true);
+            restoreLearning = savedInstanceState.getBoolean(STATE_RESTORE_LEARNING, true);
+        }
+        boolean showBackupLearning = false;
+        boolean showRestoreLearning = false;
+        List<SetupImLoadContent.Action> actions = new ArrayList<>();
 
         if (imtype.equalsIgnoreCase(Lime.DB_RELATED)) {
 
             getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_related_title));
 
-            btnSetupImDialogCustom.setText(getResources().getString(R.string.setup_im_import_related_default));
-            btnSetupImDialogCustom.setOnClickListener(v -> {
+            actions.add(new SetupImLoadContent.Action(getResources().getString(R.string.setup_im_import_related_default), () -> {
                 new MaterialAlertDialogBuilder(activity)
                         .setMessage(
                                 activity.getResources().getString(R.string.setup_im_import_related_default_confirm))
@@ -178,19 +164,10 @@ public class SetupImLoadDialog extends DialogFragment {
                         .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
                                 (dialog, which) -> dialog.dismiss())
                         .show();
-            });
+            }));
 
-            btnSetupImDialogLoad1.setText(getResources().getString(R.string.setup_im_import_related));
-            btnSetupImDialogLoad1.setOnClickListener(v -> selectMappingFile());
-
-            // btnSetupImDialogLoad1.setVisibility(View.GONE);
-            btnSetupImDialogLoad2.setVisibility(View.GONE);
-            btnSetupImDialogLoad3.setVisibility(View.GONE);
-            btnSetupImDialogLoad4.setVisibility(View.GONE);
-            btnSetupImDialogLoad5.setVisibility(View.GONE);
-            btnSetupImDialogLoad6.setVisibility(View.GONE);
-            chkSetupImBackupLearning.setVisibility(View.GONE);
-            chkSetupImRestoreLearning.setVisibility(View.GONE);
+            actions.add(new SetupImLoadContent.Action(getResources().getString(R.string.setup_im_import_related),
+                    this::selectMappingFile));
 
         } else {
 
@@ -199,15 +176,13 @@ public class SetupImLoadDialog extends DialogFragment {
 
                 getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_dialog_title_remove));
 
-                btnSetupImDialogLoad1.setText(getResources().getString(R.string.setup_im_dialog_remove));
-                btnSetupImDialogLoad1.setOnClickListener(v -> {
+                actions.add(new SetupImLoadContent.Action(getResources().getString(R.string.setup_im_dialog_remove), () -> {
                     new MaterialAlertDialogBuilder(activity)
                             .setMessage(activity.getResources()
                                     .getString(R.string.setup_im_dialog_remove_confirm_message))
                             .setPositiveButton(activity.getResources().getString(R.string.dialog_confirm),
                                     (dialog, which) -> {
-                                        boolean backuplearning = chkSetupImBackupLearning.isChecked();
-                                        handler.resetImTable(imtype, backuplearning);
+                                        handler.resetImTable(imtype, backupLearning);
                                         if (imtype.equals(Lime.DB_TABLE_CUSTOM)) {
                                             handler.updateCustomButton();
                                         }
@@ -218,87 +193,66 @@ public class SetupImLoadDialog extends DialogFragment {
                             .setNegativeButton(activity.getResources().getString(R.string.dialog_cancel),
                                     (dialog, which) -> dialog.dismiss())
                             .show();
-                });
-                btnSetupImDialogLoad2.setVisibility(View.GONE);
-                btnSetupImDialogLoad3.setVisibility(View.GONE);
-                btnSetupImDialogLoad4.setVisibility(View.GONE);
-                btnSetupImDialogLoad5.setVisibility(View.GONE);
-                btnSetupImDialogLoad6.setVisibility(View.GONE);
-                btnSetupImDialogCustom.setVisibility(View.GONE);
+                }));
 
-                chkSetupImBackupLearning.setVisibility(View.VISIBLE);
-                chkSetupImRestoreLearning.setVisibility(View.GONE);
+                showBackupLearning = true;
 
             } else {
 
                 // Display Import IM dialog
 
-                // Remove Backup Learning Data Checkbox
-                chkSetupImBackupLearning.setVisibility(View.GONE);
-
                 // Display Restore User Preference Checkbox
-                chkSetupImRestoreLearning.setVisibility(View.VISIBLE);
+                showRestoreLearning = true;
 
                 getDialog().getWindow().setTitle(getResources().getString(R.string.setup_im_dialog_title));
 
-                btnSetupImDialogCustom.setOnClickListener(v -> selectMappingFile());
+                actions.add(new SetupImLoadContent.Action(getResources().getString(R.string.setup_im_dialog_custom),
+                        this::selectMappingFile));
 
                 if (imtype.equals(Lime.DB_TABLE_PHONETIC)) {
 
-                    btnSetupImDialogLoad1.setText(
-                            getResources().getString(R.string.l3_im_download_from_phonetic_big5) + " (15,937)");
-                    btnSetupImDialogLoad1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_BIG5);
-                        }
-                    });
-                    btnSetupImDialogLoad2
-                            .setText(getResources().getString(R.string.l3_im_download_from_phonetic) + " (34,718)");
-                    btnSetupImDialogLoad2
-                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC));
-                    btnSetupImDialogLoad3.setText(
-                            getResources().getString(R.string.l3_im_download_from_phonetic_adv_big5) + " (75,884)");
-                    btnSetupImDialogLoad3.setOnClickListener(
-                            v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV_BIG5));
-                    btnSetupImDialogLoad4
-                            .setText(getResources().getString(R.string.l3_im_download_from_phonetic_adv) + " (113,292)");
-                    btnSetupImDialogLoad4
-                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV));
-
-                    btnSetupImDialogLoad5.setVisibility(View.GONE);
-                    btnSetupImDialogLoad6.setVisibility(View.GONE);
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.l3_im_download_from_phonetic_big5) + " (15,937)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_BIG5)));
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.l3_im_download_from_phonetic) + " (34,718)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC)));
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.l3_im_download_from_phonetic_adv_big5) + " (75,884)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV_BIG5)));
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.l3_im_download_from_phonetic_adv) + " (113,292)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_PHONETIC, Lime.IM_PHONETIC_ADV)));
                 } else if (imtype.equals(Lime.DB_TABLE_DAYI)) {
 
-                    btnSetupImDialogLoad1
-                            .setText(getResources().getString(R.string.setup_load_download_dayiuni) + " (32,806)");
-                    btnSetupImDialogLoad1
-                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNI));
-                    btnSetupImDialogLoad2
-                            .setText(getResources().getString(R.string.setup_load_download_dayiunip) + " (135,630)");
-                    btnSetupImDialogLoad2
-                            .setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNIP));
-                    btnSetupImDialogLoad3
-                            .setText(getResources().getString(R.string.l3_im_download_from_dayi) + " (23,114)");
-                    btnSetupImDialogLoad3.setOnClickListener(v -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYI));
-                    btnSetupImDialogLoad4.setVisibility(View.GONE);
-                    btnSetupImDialogLoad5.setVisibility(View.GONE);
-                    btnSetupImDialogLoad6.setVisibility(View.GONE);
-                } else {
-                    btnSetupImDialogLoad1.setVisibility(View.GONE);
-                    btnSetupImDialogLoad2.setVisibility(View.GONE);
-                    btnSetupImDialogLoad3.setVisibility(View.GONE);
-                    btnSetupImDialogLoad4.setVisibility(View.GONE);
-                    btnSetupImDialogLoad5.setVisibility(View.GONE);
-                    btnSetupImDialogLoad6.setVisibility(View.GONE);
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.setup_load_download_dayiuni) + " (32,806)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNI)));
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.setup_load_download_dayiunip) + " (135,630)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYIUNIP)));
+                    actions.add(new SetupImLoadContent.Action(
+                            getResources().getString(R.string.l3_im_download_from_dayi) + " (23,114)",
+                            () -> downloadAndLoadIm(Lime.DB_TABLE_DAYI, Lime.IM_DAYI)));
                 }
             }
         }
 
-        btnSetupImDialogCancel = rootView.findViewById(R.id.btnSetupImDialogCancel);
-        btnSetupImDialogCancel.setOnClickListener(v -> dismiss());
+        actions.add(new SetupImLoadContent.Action(getResources().getString(R.string.dialog_cancel), this::dismiss));
 
-        return rootView;
+        return SetupImLoadContent.createView(activity,
+                showRestoreLearning ? getResources().getString(R.string.setup_im_restore_learning_data) : null,
+                restoreLearning, checked -> restoreLearning = checked,
+                showBackupLearning ? getResources().getString(R.string.setup_im_backup_learning_data) : null,
+                backupLearning, checked -> backupLearning = checked,
+                actions);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_BACKUP_LEARNING, backupLearning);
+        outState.putBoolean(STATE_RESTORE_LEARNING, restoreLearning);
     }
 
     public void selectMappingFile() {
@@ -370,7 +324,7 @@ public class SetupImLoadDialog extends DialogFragment {
 
     public void downloadAndLoadIm(String code, String type) {
 
-        boolean restorelearning = chkSetupImRestoreLearning.isChecked();
+        boolean restorelearning = restoreLearning;
 
         boolean isConnected = true; // Default to true so we always try by default
         try {
@@ -542,7 +496,7 @@ public class SetupImLoadDialog extends DialogFragment {
 
                     unit.delete(); // 載入 thread 已結束,刪除 SAF 暫存檔
 
-                    boolean restorelearning = chkSetupImRestoreLearning.isChecked();
+                    boolean restorelearning = restoreLearning;
 
                     if (restorelearning) {
 

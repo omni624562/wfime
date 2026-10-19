@@ -27,12 +27,10 @@ package net.toload.main.hd.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -55,20 +53,6 @@ public class ImportDialog extends DialogFragment {
 
     LimeDB datasource;
     Activity activity;
-    View view;
-
-    Button btnImportCancel;
-
-    // Button btnImportCustom;
-    // Button btnImportCj;
-    // Button btnImportCj5;
-    Button btnImportDayi;
-    // Button btnImportEcj;
-    Button btnImportPhonetic;
-    // Button btnImportScj;
-
-    Button btnImportRelated;
-
     ImportDialog importdialog;
 
     String importtext;
@@ -112,14 +96,6 @@ public class ImportDialog extends DialogFragment {
         importdialog = this;
 
         activity = getActivity();
-        view = inflater.inflate(R.layout.fragment_dialog_import, container, false);
-
-        btnImportDayi = view.findViewById(R.id.btnImportDayi);
-        btnImportPhonetic = view.findViewById(R.id.btnImportPhonetic);
-        btnImportRelated = view.findViewById(R.id.btnImportRelated);
-        btnImportCancel = view.findViewById(R.id.btnImportCancel);
-
-        btnImportCancel.setOnClickListener(v -> dismiss());
 
         HashMap<String, String> check = new HashMap<String, String>();
 
@@ -128,37 +104,15 @@ public class ImportDialog extends DialogFragment {
             check.put(imlist.get(i).getCode(), imlist.get(i).getDesc());
         }
 
-        if (check.get(Lime.DB_TABLE_PHONETIC) == null) {
-            btnImportPhonetic.setAlpha(Lime.HALF_ALPHA_VALUE);
-            btnImportPhonetic.setTypeface(null, Typeface.ITALIC);
-            btnImportPhonetic.setEnabled(false);
-        } else {
-            btnImportPhonetic.setAlpha(Lime.NORMAL_ALPHA_VALUE);
-            btnImportPhonetic.setTypeface(null, Typeface.BOLD);
-
-            btnImportPhonetic.setOnClickListener(v -> confirmimportdialog(Lime.IM_PHONETIC));
-        }
-
-        if (check.get(Lime.DB_TABLE_DAYI) == null) {
-            btnImportDayi.setAlpha(Lime.HALF_ALPHA_VALUE);
-            btnImportDayi.setTypeface(null, Typeface.ITALIC);
-            btnImportDayi.setEnabled(false);
-        } else {
-            btnImportDayi.setAlpha(Lime.NORMAL_ALPHA_VALUE);
-            btnImportDayi.setTypeface(null, Typeface.BOLD);
-
-            btnImportDayi.setOnClickListener(v -> confirmimportdialog(Lime.IM_DAYI));
-        }
-
-        if (importtext.length() > 1) {
-            btnImportRelated.setOnClickListener(v -> confirmimportdialog(Lime.DB_RELATED));
-        } else {
-            btnImportRelated.setAlpha(Lime.HALF_ALPHA_VALUE);
-            btnImportRelated.setTypeface(null, Typeface.ITALIC);
-            btnImportRelated.setEnabled(false);
-        }
-
-        return view;
+        // 按鈕由 Compose 畫（ImportDialogContent）：沒載入的輸入法、只有一個字時的關聯字庫不能按
+        return ImportDialogContent.createView(activity,
+                check.get(Lime.DB_TABLE_DAYI) != null,
+                check.get(Lime.DB_TABLE_PHONETIC) != null,
+                importtext.length() > 1,
+                () -> confirmimportdialog(Lime.IM_DAYI),
+                () -> confirmimportdialog(Lime.IM_PHONETIC),
+                () -> confirmimportdialog(Lime.DB_RELATED),
+                this::dismiss);
     }
 
     public void confirmimportdialog(final String imtype) {
