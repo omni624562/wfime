@@ -4062,8 +4062,17 @@ public class LIMEService extends InputMethodService implements
                             && !(ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)
                                     && SearchSrv.isEnglishWordPrefix(probe))
                             && !ComposingRules.keepComposingNumber(mComposing, primaryCode)) {
-                        autoCommitComposing();
-                        if (!SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {
+                        // 整串碼沒有字或首選是罕用字：前段上成常用字、尾巴留給下一個字（或整串切開），
+                        // 見 SearchServer.splitForAutoCommit；不需要時照舊上目前碼的首選字
+                        String[] carried = SearchSrv.splitForAutoCommit(mComposing.toString(), (char) primaryCode);
+                        if (carried != null) {
+                            commitTyped(carried[0]);
+                            mComposing.append(carried[1]);
+                        } else {
+                            autoCommitComposing();
+                        }
+                        if ((carried == null || carried[1].isEmpty())
+                                && !SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {
                             // 新鍵本身不是任何碼的起點:直接上屏該字元,不開新組字
                             if (ic != null)
                                 ic.commitText(String.valueOf((char) primaryCode), 1);

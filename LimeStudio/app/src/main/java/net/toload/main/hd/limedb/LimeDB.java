@@ -1042,7 +1042,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
         try {
             Cursor cursor = db.rawQuery(
-                    "SELECT " + FIELD_WORD + ", " + FIELD_SCORE + " FROM " + table
+                    "SELECT " + FIELD_WORD + ", " + FIELD_SCORE + ", " + FIELD_BASESCORE + " FROM " + table
                             + " WHERE " + FIELD_CODE + " = ? AND " + FIELD_WORD + " IS NOT NULL"
                             + " ORDER BY " + FIELD_SCORE + " DESC, " + FIELD_BASESCORE + " DESC, "
                             + FIELD_ID + " ASC LIMIT " + limit,
@@ -1053,6 +1053,7 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                     m.setCode(code);
                     m.setWord(cursor.getString(0));
                     m.setScore(cursor.getInt(1));
+                    m.setBasescore(cursor.getInt(2));
                     results.add(m);
                 }
                 cursor.close();

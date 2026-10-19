@@ -236,11 +236,16 @@ public class SearchServer {
      * 試驗（約 80 句日常短句）：自動上錯的字從 5.0% 降到 2.9%。
      */
     static int pickByNextCharWeights(List<Mapping> result, Map<String, Integer> weights) {
+        return pickByNextCharWeights(result, weights, true);
+    }
+
+    /** exactOnly＝false 時清單裡每一筆都算（連打自動上字查的清單沒有標記碼完全相符） */
+    static int pickByNextCharWeights(List<Mapping> result, Map<String, Integer> weights, boolean exactOnly) {
         if (result == null || weights == null || weights.isEmpty()) return -1;
         int topIndex = -1, bestIndex = -1, bestWeight = 0;
         for (int i = 0; i < result.size(); i++) {
             Mapping m = result.get(i);
-            if (!m.isExactMatchToCodeRecord() || m.getWord() == null) continue;
+            if ((exactOnly && !m.isExactMatchToCodeRecord()) || m.getWord() == null) continue;
             if (topIndex < 0) topIndex = i;
             Integer w = weights.get(m.getWord());
             if (w != null && w > bestWeight) {
@@ -634,6 +639,101 @@ public class SearchServer {
         boolean result = dbadapter.hasEnglishWordPrefix(key);
         cache.put(key, result);
         return result;
+    }
+
+    /** 大易連打自動上字：字頻（basescore）低於這個值算罕用字（同一個字的各個碼字頻相同） */
+    static final int RARE_BASESCORE = 20;
+
+    /**
+     * 大易連打模式：新鍵 nextKey 接不上、要自動上字時，整串碼沒有字或首選是罕用字
+     * （例如今＋天打成 ab＋e、停＋水打成 akjx 的「儱」），改成：
+     * 1. 前段上成常用字、尾巴留給下一個字（尾巴＋新鍵要接得上；尾巴越短越好），例如 abe＋v → 上「今」、留 e；
+     * 2. 沒有可留的尾巴時，整串切成段數最少的常用字，例如 akjx → 「停水」；
+     * 3. 都不行就照舊（純字母或純數字又沒有字時也照舊，當英文或數字）。
+     * 已經在打英文單字（4 個字母以上、是英文字典裡單字的開頭）或數字串（4 位以上）時一律照舊。
+     * 回傳 {要上的字, 留下的碼}；照舊時回 null。主執行緒同步呼叫，查詢都經快取。
+     * 模擬 80 句（句中都不按空白）：字對 57.3% → 81.0%（research/dayi_lianda_sim.py）。
+     */
+    public String[] splitForAutoCommit(String rawComposing, char nextKey) {
+        if (rawComposing == null || rawComposing.length() < 2 || tablename == null
+                || !tablename.startsWith("dayi")) return null;
+        String code = rawComposing.toLowerCase(Locale.US);
+        String next = String.valueOf(nextKey).toLowerCase(Locale.US);
+        if (code.length() >= 4 && (code.matches("[0-9]+") || (code.matches("[a-z]+") && isEnglishWordPrefix(code))))
+            return null;
+        String prev = lastCommittedChar;
+        Mapping whole = topInContext(code, prev);
+        if (whole != null && whole.getBasescore() >= RARE_BASESCORE) return null;
+        for (int i = code.length() - 1; i >= 1; i--) {
+            if (!canExtendCode(code.substring(i) + next)) continue;
+            String head = code.substring(0, i);
+            Mapping m = topInContext(head, prev);
+            String words = m != null && m.getBasescore() >= RARE_BASESCORE ? m.getWord() : fewestCommonSplit(head, prev);
+            if (words != null && !words.isEmpty()) return new String[] { words, rawComposing.substring(i) };
+        }
+        if (whole == null && (code.matches("[a-z]+") || code.matches("[0-9]+"))) return null;
+        String words = fewestCommonSplit(code, prev);
+        return words != null ? new String[] { words, "" } : null;
+    }
+
+    /** 這段碼自動上字會上的字：智慧選字（前一字之後選過）優先，其次前後字搭配，否則字庫第一個 */
+    private Mapping topInContext(String code, String prev) {
+        List<Mapping> list = cachedSegmentWords(code);
+        if (list.isEmpty()) return null;
+        if (prev != null && !prev.isEmpty() && mLIMEPref.getDayiSmartSelectionEnabled()) {
+            SmartSelectionManager manager = SmartSelectionManager.getInstance(mContext);
+            Mapping best = null;
+            int bestCount = 0;
+            for (Mapping m : list) {
+                if (m.getWord() == null) continue;
+                int c = manager.getContextCount(code, m.getWord(), prev);
+                if (c > bestCount) {
+                    bestCount = c;
+                    best = m;
+                }
+            }
+            if (best != null) return best;
+            int i = pickByNextCharWeights(list, nextCharWeights(prev), false);
+            if (i > 0) return list.get(i);
+        }
+        return list.get(0);
+    }
+
+    /**
+     * 把碼切成至少 2 段、每段首選都是常用字的切法：段數最少優先，同段數比 Σlog(字頻＋1)＋前後字搭配。
+     * 切不出回 null。
+     */
+    private String fewestCommonSplit(String code, String prev) {
+        int n = code.length();
+        int[] segs = new int[n + 1];
+        double[] score = new double[n + 1];
+        String[] words = new String[n + 1];
+        String[] last = new String[n + 1];
+        java.util.Arrays.fill(segs, Integer.MAX_VALUE);
+        segs[0] = 0;
+        words[0] = "";
+        last[0] = prev;
+        for (int i = 1; i <= n; i++) {
+            for (int len = 1; len <= Math.min(4, i); len++) {
+                int j = i - len;
+                if (segs[j] == Integer.MAX_VALUE) continue;
+                Mapping m = topInContext(code.substring(j, i), last[j]);
+                if (m == null || m.getWord() == null || m.getWord().isEmpty()
+                        || m.getBasescore() < RARE_BASESCORE) continue;
+                double sc = score[j] + Math.log(m.getBasescore() + 1.0);
+                if (last[j] != null && !last[j].isEmpty()) {
+                    Integer w = nextCharWeights(last[j]).get(m.getWord().substring(0, 1));
+                    if (w != null) sc += 0.5 * Math.log(1.0 + w);
+                }
+                if (segs[j] + 1 < segs[i] || (segs[j] + 1 == segs[i] && sc > score[i])) {
+                    segs[i] = segs[j] + 1;
+                    score[i] = sc;
+                    words[i] = words[j] + m.getWord();
+                    last[i] = m.getWord().substring(m.getWord().length() - 1);
+                }
+            }
+        }
+        return segs[n] != Integer.MAX_VALUE && segs[n] >= 2 ? words[n] : null;
     }
 
     /**
