@@ -70,7 +70,6 @@ import java.util.Locale;
 import net.toload.main.hd.R;
 import net.toload.main.hd.candidate.CandidateInInputViewContainer;
 import net.toload.main.hd.candidate.CandidateView;
-import net.toload.main.hd.candidate.CandidateViewContainer;
 import net.toload.main.hd.candidate.ComposingTextPopup;
 import net.toload.main.hd.data.ChineseSymbol;
 import net.toload.main.hd.data.Mapping;
@@ -140,8 +139,6 @@ public class LIMEService extends InputMethodService implements
     boolean mFixedCandidateViewOn; // Jeremy'12,5,3
     CandidateView mCandidateView = null;
     CandidateView mCandidateViewInInputView = null;
-    CandidateView mCandidateViewStandAlone = null;
-    private CandidateViewContainer mCandidateViewContainer = null;
     private ComposingTextPopup mComposingPopup = null;
     CompletionInfo[] mCompletions;
     StringBuilder mComposing = new StringBuilder();
@@ -734,12 +731,8 @@ public class LIMEService extends InputMethodService implements
     }
 
     void hideComposingPopup() {
-        // Clear roots + raw code from both candidate views so the
+        // Clear roots + raw code from the candidate view so the
         // physical-keyboard slot disappears after commit
-        if (mCandidateViewStandAlone != null) {
-            mCandidateViewStandAlone.setComposingText("");
-            mCandidateViewStandAlone.setRawKeycode("");
-        }
         if (mCandidateViewInInputView != null) {
             mCandidateViewInInputView.setComposingText("");
             mCandidateViewInInputView.setRawKeycode("");
@@ -823,9 +816,6 @@ public class LIMEService extends InputMethodService implements
                                 + group.getChildAt(i).getClass().getSimpleName());
                     }
                 }
-            } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
-                if (DEBUG) Log.d("EMOJI_DEBUG", "Hiding candidate view");
-                hideCandidateView();
             }
 
             // THEN: Show emoji picker
@@ -966,9 +956,6 @@ public class LIMEService extends InputMethodService implements
                         group.getChildAt(i).setVisibility(View.GONE);
                     }
                 }
-            } else if (mCandidateViewContainer != null && !mFixedCandidateViewOn) {
-                Log.d("MEMO_DEBUG", "Hiding candidate view");
-                hideCandidateView();
             }
 
             // THEN: Show memo panel
@@ -1023,51 +1010,9 @@ public class LIMEService extends InputMethodService implements
 
     private void updateImeNameOnTablet() {
         String shortName = mEnglishOnly ? getString(R.string.ime_name_english) : (mIMSwitchHelper != null ? mIMSwitchHelper.getActiveIMShortName() : "");
-        if (mCandidateViewContainer != null) {
-            mCandidateViewContainer.setImeName(shortName);
-        }
         if (mCandidateInInputView != null) {
             mCandidateInInputView.setImeName(shortName);
         }
-    }
-
-    /**
-     * Create and return the view hierarchy used to show candidates.
-     * This will be called once, when the candidates are first displayed.
-     * You can return null to have no candidates view; the default implementation
-     * returns null.
-     */
-
-    @Override
-    public View onCreateCandidatesView() {
-
-        if (DEBUG)
-            Log.i(TAG, "onCreateCandidatesView()");
-
-        // Tear down the previous Compose candidate view before re-inflating,
-        // otherwise its Recomposer keeps running and roots the old view tree
-        if (mCandidateViewStandAlone != null) {
-            mCandidateViewStandAlone.destroy();
-            mCandidateViewStandAlone = null;
-        }
-
-        @SuppressLint("InflateParams")
-        CandidateViewContainer candidateViewContainer = (CandidateViewContainer) getLayoutInflater()
-                .inflate(R.layout.candidates, null);
-        candidateViewContainer.initViews();
-        mCandidateViewContainer = candidateViewContainer;
-        updateImeNameOnTablet();
-
-        mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
-        mCandidateViewStandAlone = mCandidateViewContainer.findViewById(R.id.candidates);
-        mCandidateViewStandAlone.setService(this);
-
-
-        if (!mFixedCandidateViewOn)
-            mCandidateView = mCandidateViewStandAlone;
-
-        return mCandidateViewContainer;
-
     }
 
     /**
@@ -2901,7 +2846,8 @@ public class LIMEService extends InputMethodService implements
             WindowManager.LayoutParams lp = window.getAttributes();
             // Jeremy '11,8,28 Use candidate instead of mInputview because mInputView may
             // not present when using physical keyboard
-            lp.token = mCandidateViewStandAlone.getWindowToken(); // always there Jeremy '12,5,4
+            // 輸入法視窗本身的 token（原本借獨立候選列的 token，同一個視窗；獨立候選列已移除）
+            lp.token = getWindow().getWindow().getDecorView().getWindowToken();
             lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
             window.setAttributes(lp);
             window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
@@ -3540,13 +3486,9 @@ public class LIMEService extends InputMethodService implements
         }
         String result = sb.toString();
 
-        // Feed raw code into BOTH candidate views: mCandidateView may still
-        // point at the other instance on the very first keystroke (it is
-        // switched later in setSuggestions). The root display itself is fed
+        // Feed raw code into the candidate view. The root display itself is fed
         // from updateCandidates() with the authoritative DB keynames —
         // RootMapper here can disagree with the DB (e.g. dayi 'i': 金 vs 木).
-        if (mCandidateViewStandAlone != null)
-            mCandidateViewStandAlone.setRawKeycode(rawString);
         if (mCandidateViewInInputView != null)
             mCandidateViewInInputView.setRawKeycode(rawString);
 
@@ -3673,27 +3615,11 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
-    /**
-     * 候選列固定在鍵盤裡時，系統的獨立候選列區從不顯示：隱藏時用 GONE，不用系統預設的 INVISIBLE。
-     * INVISIBLE 仍會參與版面量測，每按一鍵都要重新量測與組合一次看不到的候選列。
-     */
-    @Override
-    public int getCandidatesHiddenVisibility() {
-        Configuration config = getResources().getConfiguration();
-        boolean physicalKeyboard = config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-        if (mFixedCandidateViewOn || physicalKeyboard)
-            return View.GONE;
-        return super.getCandidatesHiddenVisibility();
-    }
-
     public void setCandidatesViewShown(boolean shown) {
 
         if (DEBUG)
             Log.i(TAG, "setCandidateViewShown():" + shown);
         super.setCandidatesViewShown(shown);
-
-        if (DEBUG)
-            Log.i(TAG, "isCandidateViewShown:" + mCandidateViewStandAlone.isShown());
 
     }
 
@@ -3890,7 +3816,7 @@ public class LIMEService extends InputMethodService implements
                 mInputView.setHardwareAcceleratedDrawingEnabled(mIsHardwareAcceleratedDrawingEnabled);
 
             }
-            mCandidateView = mCandidateViewStandAlone;
+            // 非固定模式已不使用（候選列一律放在鍵盤裡），沒有獨立候選列可指
 
         }
 
@@ -4477,10 +4403,6 @@ public class LIMEService extends InputMethodService implements
             if (mCandidateViewInInputView != null) {
                 mCandidateViewInInputView.destroy();
                 mCandidateViewInInputView = null;
-            }
-            if (mCandidateViewStandAlone != null) {
-                mCandidateViewStandAlone.destroy();
-                mCandidateViewStandAlone = null;
             }
             if (mEmojiKeyboardView instanceof ComposeWrapperView) {
                 ((ComposeWrapperView) mEmojiKeyboardView).dispose();

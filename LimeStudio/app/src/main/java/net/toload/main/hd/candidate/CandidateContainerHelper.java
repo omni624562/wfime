@@ -12,7 +12,7 @@ import net.toload.main.hd.R;
 
 /**
  * Shared logic for the two candidate containers
- * (CandidateViewContainer / CandidateInInputViewContainer):
+ * (CandidateInInputViewContainer):
  * tablet-only IME-name label setup and height sync.
  */
 final class CandidateContainerHelper {

@@ -58,12 +58,6 @@ class CandidateController {
             service.mCandidateView.clear();
         service.hasCandidatesShown = false;
         service.hasChineseSymbolCandidatesShown = false;
-        if (service.mCandidateViewStandAlone == null || (!service.mCandidateViewStandAlone.isShown()))
-            return; // escape if mCandidateViewStandAlone is not created or it's not shown '12,5,6,
-                    // Jeremy
-
-        service.mCandidateViewHandler.hideCandidateViewDelayed(LIMEService.DELAY_BEFORE_HIDE_CANDIDATE_VIEW);
-
     }
 
     void forceHideCandidateView() {
@@ -108,21 +102,14 @@ class CandidateController {
                 // which is forced by updateInputViewContainer()
                 if (service.mCandidateViewInInputView != null) {
                     service.mCandidateView = service.mCandidateViewInInputView;
-                    if (service.mCandidateViewStandAlone != null) service.mCandidateViewStandAlone.clear();
                 }
 
                 // Ensure IME window is shown but don't force separate candidate window
                 service.requestShowSelf(0);
                 service.setCandidatesViewShown(false);
-            } else if (!service.mFixedCandidateViewOn && service.mCandidateView != service.mCandidateViewStandAlone) {
-                service.mCandidateViewInInputView.clear();
-                service.mCandidateView = service.mCandidateViewStandAlone;
             } else if (service.mFixedCandidateViewOn && service.mCandidateView != service.mCandidateViewInInputView) {
-                service.mCandidateViewStandAlone.clear();
                 hideCandidateView();
                 service.mCandidateView = service.mCandidateViewInInputView;
-                if (service.mCandidateViewStandAlone != null)
-                    service.mCandidateViewStandAlone.setEmbeddedComposingView(null);
             }
 
             showCandidateView();
@@ -189,15 +176,13 @@ class CandidateController {
         service.hideComposingPopup();
     }
 
-    // Push the root-name string (e.g. 木牛舟) into both candidate views for
+    // Push the root-name string (e.g. 木牛舟) into the candidate view for
     // the physical-keyboard fixed slot / tablet inline box. Posted to the
     // main thread because callers may run on the query executor.
     // forCode:這串字根對應的組字碼;套用時組字已經變了就不套用(過期的查詢結果)
     void updateComposingRootsDisplay(String roots, String forCode) {
         service.mMainHandler.post(() -> {
             if (!forCode.contentEquals(service.mComposing)) return;
-            if (service.mCandidateViewStandAlone != null)
-                service.mCandidateViewStandAlone.setComposingText(roots);
             if (service.mCandidateViewInInputView != null)
                 service.mCandidateViewInInputView.setComposingText(roots);
         });

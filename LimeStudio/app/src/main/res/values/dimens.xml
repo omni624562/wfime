@@ -41,7 +41,6 @@
     <dimen name="key_vertical_gap_material3">2dp</dimen>
 
     <dimen name="candidate_view_right_margin">0dp</dimen>
-    <dimen name="candidate_expand_button_width">36sp</dimen>
     <dimen name="candidate_font_size">18sp</dimen>
     <dimen name="key_text_size">20dp</dimen>
     <dimen name="label_text_size">13dp</dimen>

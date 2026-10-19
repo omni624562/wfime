@@ -15,7 +15,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -165,10 +164,9 @@ open class CandidateView @JvmOverloads constructor(
     private val coroutineScope = CoroutineScope(SupervisorJob() + AndroidUiDispatcher.Main)
     private var recomposer: Recomposer? = null
     
-    // Compatibility Fields exposed to CandidateViewContainer (Java)
+    // Compatibility Fields exposed to CandidateInInputViewContainer (Java)
     @JvmField var mColorBackground: Int = 0
     @JvmField var mColorNormalText: Int = 0
-    @JvmField var mDrawableExpandButton: Drawable? = null
     @JvmField var mDrawableSuggestHighlight: Drawable? = null
     @JvmField var mDrawableSymbolInput: Drawable? = null
     @JvmField var mDrawableCloseButton: Drawable? = null
@@ -183,7 +181,6 @@ open class CandidateView @JvmOverloads constructor(
     private var mColorSelKey: Int = 0
     private var mColorSelKeyShifted: Int = 0
     
-    private var embeddedComposingView: TextView? = null
     private var composeView: ComposeView? = null
     
     // Preference manager for font size setting
@@ -208,7 +205,6 @@ open class CandidateView @JvmOverloads constructor(
         try {
             mDrawableSuggestHighlight = a.getDrawable(R.styleable.LIMECandidateView_suggestHighlight)
             mDrawableSymbolInput = a.getDrawable(R.styleable.LIMECandidateView_voiceInputIcon)
-            mDrawableExpandButton = a.getDrawable(R.styleable.LIMECandidateView_ExpandButtonIcon)
             mDrawableCloseButton = a.getDrawable(R.styleable.LIMECandidateView_closeButtonIcon)
             
             mColorBackground = a.getColor(
@@ -337,10 +333,6 @@ open class CandidateView @JvmOverloads constructor(
 
     fun setReverseLookupHint(text: String) {
         _reverseLookupHint = text
-    }
-    
-    fun setEmbeddedComposingView(view: TextView?) {
-        this.embeddedComposingView = view
     }
     
     override fun computeHorizontalScrollRange(): Int {
