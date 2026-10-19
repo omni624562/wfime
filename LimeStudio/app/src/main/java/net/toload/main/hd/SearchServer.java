@@ -90,6 +90,7 @@ public class SearchServer {
     // 大易連打的查詢/結果快取(key 皆含 tablename)
     private static Map<String, List<Mapping>> topWordsCache = null;   // code -> exact 前幾名字(空清單=查過無此碼)
     private static Map<String, Boolean> prefixCache = null;           // code -> hasCodeOrPrefix
+    private static Map<String, Boolean> englishPrefixCache = null;    // 小寫字母串 -> 是英文單字的開頭
     private static Map<String, List<String>> phraseWordsCache = null; // 縮碼_詞長 -> 詞
     private static Map<String, Boolean> pairCache = null;             // code\0word -> 是否對映
     private static Map<String, List<Mapping>> segmentCache = null;    // 碼串 -> 切分候選結果
@@ -619,6 +620,23 @@ public class SearchServer {
     }
 
     /**
+     * 大易連打模式：已打的字母是不是英文字典裡某個單字的開頭（決定純字母要不要繼續組成英文單字）。
+     * 主執行緒同步呼叫；FTS 前綴查詢＋快取。資料庫鎖定時回 true（照舊當英文）且不快取。
+     */
+    public boolean isEnglishWordPrefix(String letters) {
+        if (letters == null || letters.isEmpty()) return false;
+        String key = letters.toLowerCase(Locale.US);
+        Map<String, Boolean> cache = englishPrefixCache;
+        if (cache == null) cache = englishPrefixCache = newLruMap(MAX_CACHE_ENTRIES);
+        Boolean cached = cache.get(key);
+        if (cached != null) return cached;
+        if (dbadapter.isDatabseOnHold()) return true;
+        boolean result = dbadapter.hasEnglishWordPrefix(key);
+        cache.put(key, result);
+        return result;
+    }
+
+    /**
      * 大易連打模式:取首選字(碼完全相符,沒有時用三碼;主執行緒同步 fallback);無則 null。
      */
     public Mapping getTopExactMapping(String rawCode) {
@@ -914,6 +932,7 @@ public class SearchServer {
         relatedPhraseCache = newLruMap(MAX_CACHE_ENTRIES);
         topWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         prefixCache = newLruMap(MAX_CACHE_ENTRIES);
+        englishPrefixCache = newLruMap(MAX_CACHE_ENTRIES);
         phraseWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         pairCache = newLruMap(MAX_CACHE_ENTRIES);
         segmentCache = newLruMap(MAX_CACHE_ENTRIES);

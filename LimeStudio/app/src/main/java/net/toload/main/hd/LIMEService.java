@@ -4056,9 +4056,11 @@ public class LIMEService extends InputMethodService implements
                         && activeIM != null && activeIM.startsWith("dayi")
                         && mComposing != null && mComposing.length() > 0) {
                     String probe = mComposing.toString() + (char) primaryCode;
-                    // 純字母或純數字已 3 碼以上：不自動上字，讓英文單字或數字串繼續組成
+                    // 純字母已 3 碼以上、而且打的字母是英文字典裡單字的開頭：不自動上字，讓英文單字繼續組成
+                    // （不是單字開頭的字母串照常上字，例如「今天天氣」的 abevevc）；純數字 3 碼以上同理不上字
                     if (!SearchSrv.canExtendCode(probe)
-                            && !ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)
+                            && !(ComposingRules.keepComposingEnglishWord(mComposing, primaryCode)
+                                    && SearchSrv.isEnglishWordPrefix(probe))
                             && !ComposingRules.keepComposingNumber(mComposing, primaryCode)) {
                         autoCommitComposing();
                         if (!SearchSrv.canExtendCode(String.valueOf((char) primaryCode))) {

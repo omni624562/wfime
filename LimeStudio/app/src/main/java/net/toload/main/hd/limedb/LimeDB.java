@@ -1251,6 +1251,19 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         return imInfo.getKeyboardCode(im);
     }
 
+    /** 英文字典裡有沒有以 prefix 開頭的單字（prefix 本身是完整單字也算）；資料庫鎖定時回 true（照舊當英文） */
+    public boolean hasEnglishWordPrefix(String prefix) {
+        if (!checkDBConnection())
+            return true;
+        // FTS 前綴查詢，prefix 以 ? 綁定
+        try (Cursor cursor = db.rawQuery("SELECT 1 FROM dictionary WHERE word MATCH ? LIMIT 1",
+                new String[]{prefix + "*"})) {
+            return cursor.moveToFirst();
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     public List<String> getEnglishSuggestions(String word) {
 
         // Jeremy '12,5,1 !checkDBConnection() when db is restoring or replaced.
