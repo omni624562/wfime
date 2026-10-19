@@ -3673,6 +3673,19 @@ public class LIMEService extends InputMethodService implements
         }
     }
 
+    /**
+     * 候選列固定在鍵盤裡時，系統的獨立候選列區從不顯示：隱藏時用 GONE，不用系統預設的 INVISIBLE。
+     * INVISIBLE 仍會參與版面量測，每按一鍵都要重新量測與組合一次看不到的候選列。
+     */
+    @Override
+    public int getCandidatesHiddenVisibility() {
+        Configuration config = getResources().getConfiguration();
+        boolean physicalKeyboard = config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+        if (mFixedCandidateViewOn || physicalKeyboard)
+            return View.GONE;
+        return super.getCandidatesHiddenVisibility();
+    }
+
     public void setCandidatesViewShown(boolean shown) {
 
         if (DEBUG)
