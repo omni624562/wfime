@@ -376,6 +376,12 @@ public class SearchServer {
                 }
             }
 
+            // 注音：完整版碼表也收了 Big5 以外的字，其中有簡體字（例如 ㄈㄟˋ 的「费」「废」緊接在「費」「廢」後面）。
+            // 含 Big5 以外字的候選移到最後（彼此順序不變）；不刪除，罕用字仍選得到
+            if (tablename.equals("phonetic") && result.size() > 1) {
+                result = big5First(result);
+            }
+
             // Finally add the raw composing code at the beginning
             // Jeremy '24,1,7: Don't add raw code for Dayi to prevent things like "./" showing up
             // BUT allow it if it's alphanumeric or common Dayi radicals (like ",./") so users see a reaction
@@ -451,6 +457,27 @@ public class SearchServer {
         }
 
         return result;
+    }
+
+    /** 字（詞）全部是 Big5 字的候選排前面，含 Big5 以外字的排後面；兩邊各自維持原本順序。 */
+    static List<Mapping> big5First(List<Mapping> list) {
+        java.nio.charset.CharsetEncoder big5;
+        try {
+            big5 = java.nio.charset.Charset.forName("Big5").newEncoder();
+        } catch (Exception e) {
+            Log.w(TAG, "Big5 charset not available: " + e.getMessage());
+            return list;
+        }
+        List<Mapping> head = new LinkedList<>();
+        List<Mapping> tail = new LinkedList<>();
+        for (Mapping m : list) {
+            String w = m.getWord();
+            if (w == null || big5.canEncode(w)) head.add(m);
+            else tail.add(m);
+        }
+        if (tail.isEmpty()) return list;
+        head.addAll(tail);
+        return head;
     }
 
     /**
