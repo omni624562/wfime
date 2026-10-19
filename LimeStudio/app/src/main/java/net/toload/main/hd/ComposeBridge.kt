@@ -27,7 +27,7 @@ import net.toload.main.hd.ui.DarkKeyboardPanelColors
 import net.toload.main.hd.ui.EmojiPicker
 import net.toload.main.hd.ui.LightKeyboardPanelColors
 import net.toload.main.hd.ui.MemoPanel
-import net.toload.main.hd.ui.compose.settings.SettingsScreen
+import net.toload.main.hd.ui.compose.settings.MainScreen
 import net.toload.main.hd.ui.compose.settings.SettingsViewModel
 import net.toload.main.hd.ui.compose.settings.SettingsViewModelFactory
 import net.toload.main.hd.ui.compose.theme.LimeTheme
@@ -314,7 +314,9 @@ object ComposeBridge {
      */
     fun createSettingsView(
         context: Context,
-        viewModelStoreOwner: ViewModelStoreOwner
+        viewModelStoreOwner: ViewModelStoreOwner,
+        showTopBar: Boolean,
+        onHelp: Runnable
     ): View? {
         return try {
             ComposeView(context).apply {
@@ -333,7 +335,7 @@ object ComposeBridge {
                     val viewModel = ViewModelProvider(viewModelStoreOwner, factory)[SettingsViewModel::class.java]
 
                     LimeTheme {
-                        SettingsScreen(viewModel = viewModel)
+                        MainScreen(viewModel = viewModel, showTopBar = showTopBar, onHelp = { onHelp.run() })
                     }
                 }
             }

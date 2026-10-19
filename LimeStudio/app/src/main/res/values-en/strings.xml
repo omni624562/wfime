@@ -5,6 +5,7 @@
     <string name="dialog_confirm">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="action_help">Help</string>
+    <string name="action_more_options">More options</string>
     <string name="setup_im_import_complete">Database import completed</string>
     <string name="setup_im_download">Download input methods</string>
     <string name="setup_im_download_description">Download and import the built-in input methods. A network connection is required. Please enable your network</string>

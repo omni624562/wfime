@@ -39,6 +39,7 @@
 
 
     <string name="action_help">使用說明</string>
+    <string name="action_more_options">更多選項</string>
     <string name="action_preference" translatable="false">麥田輸入法</string>
 
 

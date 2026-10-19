@@ -28,11 +28,9 @@ import net.toload.main.hd.ui.LoadingDialogHelper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -52,10 +50,6 @@ public class MainActivity extends AppCompatActivity {
     // private static final int STORAGE_PERMISSION_CODE = android.permission.;
 
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
     // private CharSequence mCode;
 
     private LimeDB datasource;
@@ -84,22 +78,6 @@ public class MainActivity extends AppCompatActivity {
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Set up Toolbar
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        toolbar.setNavigationIcon(null);
-
-        // Hide toolbar/appbar completely on tablet to reclaim screen space
-        boolean isTablet = this.getResources().getConfiguration().screenWidthDp >= 600;
-        if (isTablet) {
-            com.google.android.material.appbar.AppBarLayout appBar = findViewById(R.id.app_bar);
-            if (appBar != null) {
-                appBar.setVisibility(android.view.View.GONE);
-            }
-        }
 
         handler = new MainActivityHandler(this);
 
@@ -142,18 +120,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Load Compose Settings Screen directly as requested by the user
-        android.widget.FrameLayout container = findViewById(R.id.container);
-        if (container != null) {
-            container.removeAllViews();
-            android.view.View settingsView = ComposeBridge.INSTANCE.createSettingsView(this, this);
-            if (settingsView != null) {
-                container.addView(settingsView);
-            }
+        // 設定首頁（Compose）：手機有標題列與「使用說明」選單，平板不顯示標題列
+        boolean isTablet = this.getResources().getConfiguration().screenWidthDp >= 600;
+        android.view.View settingsView = ComposeBridge.INSTANCE.createSettingsView(this, this, !isTablet,
+                this::showHelpDialog);
+        if (settingsView != null) {
+            setContentView(settingsView);
         }
-
-        mTitle = this.getResources().getString(R.string.action_preference);
-        restoreActionBar();
     }
 
 
@@ -180,36 +153,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar == null)
-            throw new AssertionError();
-        boolean isTablet = this.getResources().getConfiguration().screenWidthDp >= 600;
-        actionBar.setDisplayShowTitleEnabled(!isTablet);
-        if (!isTablet) {
-            actionBar.setTitle(mTitle);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        restoreActionBar();
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(android.view.MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_help) {
-            // Show help dialog
-            net.toload.main.hd.ui.HelpDialog helpDialog = new net.toload.main.hd.ui.HelpDialog();
-            helpDialog.show(getSupportFragmentManager(), "helpDialog");
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     public void showToastMessage(String msg, int length) {
         Toast toast = Toast.makeText(this, msg, length);
