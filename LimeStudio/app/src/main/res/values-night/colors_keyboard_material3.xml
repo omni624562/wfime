@@ -11,9 +11,9 @@
         Keyboard Background Colors
         Uses Material3 dark surface tokens
     -->
-    <color name="keyboard_background_material3">@color/md_theme_surface</color>
-    <color name="keyboard_second_background_material3">@color/md_theme_surfaceVariant</color>
-    <color name="keyboard_functional_background_material3">@color/md_theme_surfaceVariant</color>
+    <color name="keyboard_background_material3">#111412</color> <!-- 鍵盤底：比 surface 深一階 -->
+    <color name="keyboard_second_background_material3">#373D39</color> <!-- 字母鍵 -->
+    <color name="keyboard_functional_background_material3">@color/md_theme_secondaryContainer</color> <!-- 功能鍵（Shift、刪除、地球） -->
 
     <!--
         Composing Text Popup Background
@@ -34,7 +34,7 @@
         Uses Material3 primary (lighter in dark mode) and outline tokens
     -->
     <color name="keyboard_candidate_spacer_material3">@color/md_theme_outline</color>
-    <color name="keyboard_candidate_bar_background_material3">#2B2B2B</color> <!-- 候選列底色，沿用原本的 Gboard 風格深灰 -->
+    <color name="keyboard_candidate_bar_background_material3">#111412</color> <!-- 候選列底色，與鍵盤底、CandidateView 的深色配色一致 -->
     <color name="keyboard_selection_keys_material3">#CC6CDBAC</color> <!-- md_theme_primary (dark) @ 80% -->
     <color name="keyboard_action_key_material3">@color/md_theme_primaryContainer</color>
     <color name="keyboard_action_key_icon_material3">@color/md_theme_onPrimaryContainer</color>

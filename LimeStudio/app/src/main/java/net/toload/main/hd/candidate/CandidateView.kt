@@ -113,7 +113,7 @@ private data class CandidateBarColors(
 )
 
 private val DarkCandidateBarColors = CandidateBarColors(
-    background = Color(0xFF2B2B2B),
+    background = Color(0xFF111412),              // 與鍵盤底一致（colors_keyboard_material3.xml）
     icon = Color.White,
     text = Color.White,
     selectedText = Color(0xFF4FC3F7),
@@ -126,7 +126,7 @@ private val DarkCandidateBarColors = CandidateBarColors(
 )
 
 private val LightCandidateBarColors = CandidateBarColors(
-    background = Color(0xFFF0F1EC),              // md_theme_inverseOnSurface（比鍵盤底色 surface 暗一階）
+    background = Color(0xFFE8EDE8),              // 與鍵盤底一致（colors_keyboard_material3.xml）
     icon = Color(0xFF404943),                    // md_theme_onSurfaceVariant
     text = Color(0xFF191C1A),                    // md_theme_onSurface
     selectedText = Color(0xFF006C4C),            // md_theme_primary
