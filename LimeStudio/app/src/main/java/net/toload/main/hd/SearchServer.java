@@ -377,7 +377,7 @@ public class SearchServer {
             }
 
             // 注音：完整版碼表也收了 Big5 以外的字，其中有簡體字（例如 ㄈㄟˋ 的「费」「废」緊接在「費」「廢」後面）。
-            // 含 Big5 以外字的候選移到最後（彼此順序不變）；不刪除，罕用字仍選得到
+            // 同一個碼的候選裡，含 Big5 以外字的移到該碼的最後（彼此順序不變）；不刪除，罕用字仍選得到
             if (tablename.equals("phonetic") && result.size() > 1) {
                 result = big5First(result);
             }
@@ -459,7 +459,10 @@ public class SearchServer {
         return result;
     }
 
-    /** 字（詞）全部是 Big5 字的候選排前面，含 Big5 以外字的排後面；兩邊各自維持原本順序。 */
+    /**
+     * 同一個碼的候選（連續、碼相同的一段）裡，字（詞）全是 Big5 字的排前面，含 Big5 以外字的排到這段最後；
+     * 各段之間的先後不變（打的碼本身的字仍排在碼較短的字前面），段內兩邊各自維持原本順序。
+     */
     static List<Mapping> big5First(List<Mapping> list) {
         java.nio.charset.CharsetEncoder big5;
         try {
@@ -468,16 +471,27 @@ public class SearchServer {
             Log.w(TAG, "Big5 charset not available: " + e.getMessage());
             return list;
         }
-        List<Mapping> head = new LinkedList<>();
-        List<Mapping> tail = new LinkedList<>();
+        List<Mapping> out = new LinkedList<>();
+        List<Mapping> tail = new ArrayList<>();
+        String runCode = null;
+        boolean moved = false;
         for (Mapping m : list) {
+            String c = m.getCode();
+            if (!java.util.Objects.equals(c, runCode)) {
+                out.addAll(tail);
+                tail.clear();
+                runCode = c;
+            }
             String w = m.getWord();
-            if (w == null || big5.canEncode(w)) head.add(m);
-            else tail.add(m);
+            if (w == null || big5.canEncode(w)) {
+                out.add(m);
+            } else {
+                tail.add(m);
+                moved = true;
+            }
         }
-        if (tail.isEmpty()) return list;
-        head.addAll(tail);
-        return head;
+        out.addAll(tail);
+        return moved ? out : list;
     }
 
     /**
