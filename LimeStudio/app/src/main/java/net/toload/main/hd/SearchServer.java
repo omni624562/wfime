@@ -693,6 +693,27 @@ public class SearchServer {
     /**
      * get real code length
      */
+    /**
+     * 注音選字後，組字裡被這個字用掉幾碼。
+     * - 選中的碼不帶聲調：用掉碼長；
+     * - 組字以帶聲調的碼開頭（連打時選第一個音節的單字，例如組字 su3cl3 選 su3 的「你」）：用掉碼長，
+     *   剩下的 cl3 留著繼續選（原本落到最後的「意外情況」，整串都算用掉，後面的音節就不見了）；
+     * - 組字只打了不帶聲調的碼：用掉去掉聲調後的碼長；
+     * - 其他：整串都算用掉。
+     */
+    static int phoneticCodeLengthUsed(String code, String currentCode) {
+        String noToneCode = code.replaceAll("[3467 ]", "");
+        if (code.equals(noToneCode)) {
+            return code.length();
+        } else if (currentCode.startsWith(code)) {
+            return code.length();
+        } else if (currentCode.startsWith(noToneCode)) {
+            return noToneCode.length();
+        } else {
+            return currentCode.length(); // unexpected condition.
+        }
+    }
+
     int getRealCodeLength(final Mapping selectedMapping, String currentCode) {
         if (DEBUG)
             Log.i(TAG, "getRealCodeLength()");
@@ -702,15 +723,7 @@ public class SearchServer {
         if (code == null) return 0;
         int realCodeLen = code.length();
         if (tablename.equals("phonetic")) {
-            String lcode = currentCode;
-            String noToneCode = code.replaceAll("[3467 ]", "");
-            if (code.equals(noToneCode)) {
-                realCodeLen = code.length();
-            } else if (!lcode.startsWith(code) && lcode.startsWith(noToneCode)) {
-                realCodeLen = noToneCode.length();
-            } else {
-                realCodeLen = currentCode.length(); // unexpected condition.
-            }
+            realCodeLen = phoneticCodeLengthUsed(code, currentCode);
         }
 
         // remove elements in suggestionLoL with code length smaller than current code
