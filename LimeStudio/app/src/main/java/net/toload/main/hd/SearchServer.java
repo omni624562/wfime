@@ -94,6 +94,7 @@ public class SearchServer {
     private static Map<String, Boolean> pairCache = null;             // code\0word -> 是否對映
     private static Map<String, List<Mapping>> segmentCache = null;    // 碼串 -> 切分候選結果
     private static Map<String, List<Mapping>> threeCodeCache = null;  // 3 碼 -> 三碼的 4 碼字(只含 Big5)
+    private static volatile java.util.Set<String> simplifiedChars = null;  // 大易不列的簡體字
     private static final java.util.concurrent.atomic.AtomicBoolean prefetchRunning =
             new java.util.concurrent.atomic.AtomicBoolean(false);
 
@@ -394,6 +395,9 @@ public class SearchServer {
                         // (例如打 nh1 時碼為 nh、n 的 鴛 鳭 角)和延伸碼(碼比打的還長,
                         // 例如打 ujn 時 ujny 的 煎),都不列出
                         if (tablename.startsWith("dayi") && !m.isExactMatchToCodeRecord())
+                            continue;
+                        // 大易不列簡體字(例如 1d 的「旧」、fw 的「击」),同碼的繁體字照常列出
+                        if (tablename.startsWith("dayi") && hasSimplifiedChar(m.getWord()))
                             continue;
                         if (seenWords.add(m.getWord())) {
                             result.add(m);
@@ -896,9 +900,29 @@ public class SearchServer {
         String key = tablename + "_" + code;
         List<Mapping> cached = topWordsCache.get(key);
         if (cached != null) return cached;
-        List<Mapping> result = dbadapter.getTopWordsByExactCode(tablename, code, 5);
+        // 多取幾個再去掉簡體字(同一個碼最多 4 個簡體字),連打自動上字不會上簡體字
+        List<Mapping> result = new LinkedList<>();
+        for (Mapping m : dbadapter.getTopWordsByExactCode(tablename, code, 10)) {
+            if (result.size() < 5 && !hasSimplifiedChar(m.getWord())) result.add(m);
+        }
         if (!dbadapter.isDatabseOnHold()) topWordsCache.put(key, result); // 鎖定中查不到不快取
         return result;
+    }
+
+    /** 字(詞)裡有沒有簡體字(見 LimeHanConverter.getSimplifiedChars) */
+    private boolean hasSimplifiedChar(String word) {
+        if (word == null || word.isEmpty()) return false;
+        java.util.Set<String> set = simplifiedChars;
+        if (set == null) {
+            set = dbadapter.getSimplifiedChars();
+            simplifiedChars = set;
+        }
+        for (int i = 0; i < word.length(); ) {
+            int cp = word.codePointAt(i);
+            if (set.contains(new String(Character.toChars(cp)))) return true;
+            i += Character.charCount(cp);
+        }
+        return false;
     }
 
     private List<String> cachedWordsByCodeAndLength(String code, int wordLength) {

@@ -30,6 +30,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Art Hung
  */
@@ -114,6 +119,27 @@ public class LimeHanConverter extends SQLiteOpenHelper {
         }
 
         return score;
+    }
+
+    /**
+     * 簡體字：簡轉繁表（SCTC）裡轉成繁體會變、而且不在 Big5 的字（例如 论、旧）；
+     * 丑、后、里這類 Big5 也有的字不算。讀不到回空集合。
+     */
+    public Set<String> getSimplifiedChars() {
+        Set<String> result = new HashSet<>();
+        try (Cursor cursor = this.getReadableDatabase().query("SCTC", new String[] { FIELD_CODE, FIELD_WORD },
+                null, null, null, null, null)) {
+            CharsetEncoder big5 = Charset.forName("Big5").newEncoder();
+            while (cursor.moveToNext()) {
+                String simplified = cursor.getString(0);
+                if (simplified != null && !simplified.isEmpty() && !simplified.equals(cursor.getString(1))
+                        && !big5.canEncode(simplified))
+                    result.add(simplified);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getSimplifiedChars(): " + e.getMessage());
+        }
+        return result;
     }
 
 }

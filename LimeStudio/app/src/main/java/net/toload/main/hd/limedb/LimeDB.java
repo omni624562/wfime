@@ -1254,6 +1254,12 @@ public class LimeDB extends LimeSQLiteOpenHelper {
 
     }
 
+    /** 簡體字集合（見 LimeHanConverter.getSimplifiedChars） */
+    public java.util.Set<String> getSimplifiedChars() {
+        checkHanDB();
+        return hanConverter.getSimplifiedChars();
+    }
+
     // APK 內 res/raw/emoji.db 的資料版本;更新資料時遞增,裝置端會重新複製
     // (產生器見 tools/emoji/gen_emoji.py)
     // v2: 2026-07 以 Unicode 17.0 + CLDR 48 重建 en/tw 表
