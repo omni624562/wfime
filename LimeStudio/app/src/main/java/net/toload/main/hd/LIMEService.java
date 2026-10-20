@@ -29,7 +29,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +40,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -310,7 +310,7 @@ public class LIMEService extends InputMethodService implements
 
         mFixedCandidateViewOn = mLIMEPref.getFixedCandidateViewDisplay();
 
-        mVibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+        mVibrator = getSystemService(Vibrator.class);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         mLongPressKeyTimeout = getResources().getInteger(R.integer.config_long_press_key_timeout); // Jeremy '11,8,15
@@ -455,24 +455,22 @@ public class LIMEService extends InputMethodService implements
         if (dialog != null && dialog.getWindow() != null) {
             android.view.Window window = dialog.getWindow();
             android.view.View decorView = window.getDecorView();
-            int flags = decorView.getSystemUiVisibility();
-            
             boolean isMaterial3 = getKeyboardTheme() == net.toload.main.hd.R.style.LIMETheme_Material3;
             boolean isSystemDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
             boolean isLightMode = isMaterial3 && !isSystemDarkMode;
 
             if (isLightMode) {
-                flags |= android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 if (isMaterial3) {
                     window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
                 }
             } else {
-                flags &= ~android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 if (isMaterial3) {
                     window.setNavigationBarColor(mThemeContext.getResources().getColor(net.toload.main.hd.R.color.md_theme_surface, mThemeContext.getTheme()));
                 }
             }
-            decorView.setSystemUiVisibility(flags);
+            // 淺色時導覽列用深色圖示（原本的 SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR）
+            new androidx.core.view.WindowInsetsControllerCompat(window, decorView)
+                    .setAppearanceLightNavigationBars(isLightMode);
         }
 
         if (DEBUG) Log.d("EMOJI_DEBUG", "=== onCreateInputView() called ===");
@@ -4338,7 +4336,9 @@ public class LIMEService extends InputMethodService implements
             Log.i(TAG, "doVibrateSound()");
         if (hasVibration) {
             // Jeremy '11,9,1 add preference on vibrate level
-            mVibrator.vibrate(mLIMEPref.getVibrateLevel());
+            int ms = mLIMEPref.getVibrateLevel();
+            if (mVibrator != null && ms > 0)
+                mVibrator.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
         }
         if (hasSound) {
             int sound = AudioManager.FX_KEYPRESS_STANDARD;

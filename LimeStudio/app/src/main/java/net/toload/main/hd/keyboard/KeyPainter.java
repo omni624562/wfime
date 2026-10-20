@@ -4,6 +4,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -350,7 +351,7 @@ final class KeyPainter {
                             : (key.pressed ? mKeyTextColorPressed : mKeyTextColorNormal);
             
             icon.mutate();
-            icon.setColorFilter(iconTintColor, PorterDuff.Mode.SRC_IN);
+            icon.setColorFilter(new PorterDuffColorFilter(iconTintColor, PorterDuff.Mode.SRC_IN));
             icon.setAlpha(255);
 
             // Special handing for the upper-right number hint icons

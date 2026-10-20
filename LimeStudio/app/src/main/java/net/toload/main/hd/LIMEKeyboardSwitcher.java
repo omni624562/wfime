@@ -454,7 +454,7 @@ public class LIMEKeyboardSwitcher {
                 if (key.codes[0] == net.toload.main.hd.keyboard.LIMEBaseKeyboard.KEYCODE_SPACE) {
                     if (mode == MODE_NUMBER) {
                         key.label = null;
-                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_spacebar_numeric_material3);
+                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_spacebar_numeric_material3, null);
                     } else {
                         key.icon = null;
                         if (isIm) {
@@ -472,7 +472,7 @@ public class LIMEKeyboardSwitcher {
                     } else {
                         // Globe icon (Gboard-style) for Symbol/English mode
                         key.label = null;
-                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_globe_material3);
+                        key.icon = mThemedContext.getResources().getDrawable(R.drawable.sym_keyboard_globe_material3, null);
                     }
                 }
 
