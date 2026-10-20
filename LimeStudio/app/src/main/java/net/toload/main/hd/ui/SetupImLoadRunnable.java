@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -97,6 +98,7 @@ public class SetupImLoadRunnable implements Runnable {
             if (tempfile != null)
                 tempfile.delete();
             handler.cancelProgress();
+            handler.showToastMessage(activity.getResources().getString(R.string.l3_tab_initial_error), Toast.LENGTH_LONG);
             return;
         }
 
@@ -107,6 +109,7 @@ public class SetupImLoadRunnable implements Runnable {
 
         if (count < 0) {
             handler.cancelProgress();
+            handler.showToastMessage(activity.getResources().getString(R.string.error_import_db), Toast.LENGTH_LONG);
             return;
         }
 
