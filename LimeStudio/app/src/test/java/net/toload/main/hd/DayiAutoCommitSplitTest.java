@@ -77,9 +77,13 @@ public class DayiAutoCommitSplitTest {
         insertWord(db, "2", "丁", 500);
         insertWord(db, "0", "乙", 500);
         insertWord(db, "6a", "某", 500);
-        // 選過切分候選學到的詞：碼是整串、字頻 0（不擋的話會被當罕用字切成「一來」）
+        // 碼接成常用字的例子：e＋w 接成 ew 的「徒」（字頻 20，剛好算常用），一、起都很常用
         insertWord(db, "w", "起", 100000);
+        insertWord(db, "ew", "徒", 20);
+        insertWord(db, "eq", "好", 2000);
+        insertWord(db, "q", "去", 100000);
         insertWord(db, "wx", "來", 50000);
+        // 選過切分候選學到的詞：碼是整串、字頻 0
         insertWord(db, "ewx", "一起來", 0);
         db.execSQL("DROP TABLE IF EXISTS dictionary");
         db.execSQL("CREATE VIRTUAL TABLE dictionary USING fts3(word)");
@@ -117,7 +121,18 @@ public class DayiAutoCommitSplitTest {
     }
 
     @Test
+    public void splitsCommonMergeOnlyWhenClearlyMoreLikely() {
+        // 一＋起 比「徒」可能得多（字頻比遠超過 100 倍），尾巴 w＋z 接不上 → 整串切開
+        assertArrayEquals(new String[] { "一起", "" }, searchServer.splitForAutoCommit("ew", 'z'));
+        // 一＋去 比「好」可能，但差不到 100 倍 → 照舊上「好」
+        assertNull(searchServer.splitForAutoCommit("eq", 'z'));
+        // 尾巴 w＋x 是完整的碼（來）：上「一」、留 w
+        assertArrayEquals(new String[] { "一", "w" }, searchServer.splitForAutoCommit("ew", 'x'));
+    }
+
+    @Test
     public void keepsLearnedPhrase() {
+        // 整串碼是學過的詞（字頻 0）：不當罕用字切成「一來」
         assertNull(searchServer.splitForAutoCommit("ewx", 'z'));
     }
 

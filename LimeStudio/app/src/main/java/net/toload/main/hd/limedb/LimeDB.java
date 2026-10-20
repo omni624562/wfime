@@ -962,6 +962,20 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     /**
      * 取 exact code 分數最高的前 limit 個字(供切分的智慧選字挑字);無此碼回空清單。
      */
+    /**
+     * 單字字頻總和：每個字取各碼中最大的 basescore 加總，再加字數（每字至少算 1）。
+     * 大易連打算「某字出現的機率」用；查不到回 0。
+     */
+    public long getCharFrequencyTotal(String table) {
+        if (!checkDBConnection()) return 0;
+        try (Cursor cursor = db.rawQuery("SELECT sum(m) + count(*) FROM (SELECT max(" + FIELD_BASESCORE + ") AS m FROM "
+                + validateTableName(table) + " WHERE length(" + FIELD_WORD + ") = 1 GROUP BY " + FIELD_WORD + ")", null)) {
+            return cursor.moveToFirst() ? cursor.getLong(0) : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     public List<Mapping> getTopWordsByExactCode(String table, String code, int limit) {
         List<Mapping> results = new LinkedList<>();
         if (!checkDBConnection()) return results;

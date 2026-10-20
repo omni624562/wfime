@@ -650,6 +650,7 @@ public class SearchServer {
      * 2. 沒有可留的尾巴時，整串切成段數最少的常用字，例如 akjx → 「停水」；
      * 3. 都不行就照舊（純字母或純數字又沒有字時也照舊，當英文或數字）。
      * 已經在打英文單字（4 個字母以上、是英文字典裡單字的開頭）或數字串（4 位以上）時一律照舊。
+     * 整串碼的首選是常用字時見 splitCommonMerge（切開要明顯更可能才切）。
      * 回傳 {要上的字, 留下的碼}；照舊時回 null。主執行緒同步呼叫，查詢都經快取。
      * 模擬 80 句（句中都不按空白）：字對 57.3% → 81.0%（research/dayi_lianda_sim.py）。
      */
@@ -666,7 +667,8 @@ public class SearchServer {
         if (whole != null && whole.getWord() != null
                 && whole.getWord().codePointCount(0, whole.getWord().length()) > 1)
             return null;
-        if (whole != null && whole.getBasescore() >= RARE_BASESCORE) return null;
+        if (whole != null && whole.getBasescore() >= RARE_BASESCORE)
+            return splitCommonMerge(code, rawComposing, next, prev, whole);
         for (int i = code.length() - 1; i >= 1; i--) {
             if (!canExtendCode(code.substring(i) + next)) continue;
             String head = code.substring(0, i);
@@ -677,6 +679,101 @@ public class SearchServer {
         if (whole == null && (code.matches("[a-z]+") || code.matches("[0-9]+"))) return null;
         String words = fewestCommonSplit(code, prev);
         return words != null ? new String[] { words, "" } : null;
+    }
+
+    /** 整串碼的首選是常用字時，切開要比整串可能這麼多倍以上才切（研究：你選過的 11,612 次字一次都不會被切開） */
+    static final double MERGE_SPLIT_RATIO = 100;
+    private static final Map<String, Long> charFrequencyTotalCache = new ConcurrentHashMap<>();
+
+    /**
+     * 整串碼的首選 whole 是常用字（例如一＋起打成 e＋起 接成「徒」）：
+     * 1. 找「前段是常用字（或切成常用字）、尾巴＋新鍵是完整的碼」的切法，比
+     *    「前段＋尾巴接新鍵的字」與「整串的字＋新鍵的字」；
+     * 2. 再比整串切成常用字（段數不限）與整串的字。
+     * 分數＝Σlog(字頻／總字頻)＋前後字搭配，切法要高出 log(MERGE_SPLIT_RATIO) 才切；否則回 null（照舊）。
+     * 研究 research/dayi_merge_risk.py：80 句測試多對 5 句、0 句變錯。
+     */
+    private String[] splitCommonMerge(String code, String rawComposing, String next, String prev, Mapping whole) {
+        Long cachedTotal = charFrequencyTotalCache.get(tablename);
+        long total = cachedTotal != null ? cachedTotal : dbadapter.getCharFrequencyTotal(tablename);
+        if (total <= 0) return null;
+        if (cachedTotal == null && !dbadapter.isDatabseOnHold()) charFrequencyTotalCache.put(tablename, total);
+        double threshold = Math.log(MERGE_SPLIT_RATIO);
+        double wholeScore = logFrequency(whole, total) + pairScore(prev, whole.getWord());
+        Mapping afterWhole = topInContext(next, lastCharOf(whole.getWord()));
+        double nextAfterWhole = logFrequency(afterWhole != null ? afterWhole : whole, total);
+        for (int i = code.length() - 1; i >= 1; i--) {
+            String rest = code.substring(i);
+            if (cachedSegmentWords(rest + next).isEmpty()) continue;
+            String head = code.substring(0, i);
+            Mapping m = topInContext(head, prev);
+            ScoredSplit headSplit = m != null && m.getBasescore() >= RARE_BASESCORE
+                    ? new ScoredSplit(m.getWord(), logFrequency(m, total))
+                    : bestCommonSplit(head, prev, total);
+            if (headSplit == null) continue;
+            Mapping tail = topInContext(rest + next, lastCharOf(headSplit.words));
+            double tailScore = tail != null ? logFrequency(tail, total) : -99;
+            if (headSplit.score + tailScore - (wholeScore + nextAfterWhole) > threshold)
+                return new String[] { headSplit.words, rawComposing.substring(i) };
+        }
+        ScoredSplit split = bestCommonSplit(code, prev, total);
+        return split != null && split.score - wholeScore > threshold ? new String[] { split.words, "" } : null;
+    }
+
+    private static final class ScoredSplit {
+        final String words;
+        final double score;
+
+        ScoredSplit(String words, double score) {
+            this.words = words;
+            this.score = score;
+        }
+    }
+
+    private static double logFrequency(Mapping m, long total) {
+        return Math.log((Math.max(0, m.getBasescore()) + 1.0) / total);
+    }
+
+    /** 前後字搭配加分：0.5·log(1＋前一字後面接這個字的權重) */
+    private double pairScore(String prev, String word) {
+        if (prev == null || prev.isEmpty() || word == null || word.isEmpty()) return 0;
+        Integer w = nextCharWeights(prev).get(word.substring(0, 1));
+        return w != null ? 0.5 * Math.log(1.0 + w) : 0;
+    }
+
+    private static String lastCharOf(String s) {
+        return s == null || s.isEmpty() ? null : s.substring(s.length() - 1);
+    }
+
+    /** 每段首選都是常用字、至少 2 段、分數（Σlog 字頻比例＋搭配）最高的切法；切不出回 null */
+    private ScoredSplit bestCommonSplit(String code, String prev, long total) {
+        int n = code.length();
+        double[] score = new double[n + 1];
+        String[] words = new String[n + 1];
+        String[] last = new String[n + 1];
+        int[] segs = new int[n + 1];
+        boolean[] ok = new boolean[n + 1];
+        ok[0] = true;
+        words[0] = "";
+        last[0] = prev;
+        for (int i = 1; i <= n; i++) {
+            for (int len = 1; len <= Math.min(4, i); len++) {
+                int j = i - len;
+                if (!ok[j]) continue;
+                Mapping m = topInContext(code.substring(j, i), last[j]);
+                if (m == null || m.getWord() == null || m.getWord().isEmpty()
+                        || m.getBasescore() < RARE_BASESCORE) continue;
+                double sc = score[j] + logFrequency(m, total) + pairScore(last[j], m.getWord());
+                if (!ok[i] || sc > score[i]) {
+                    ok[i] = true;
+                    score[i] = sc;
+                    words[i] = words[j] + m.getWord();
+                    last[i] = lastCharOf(m.getWord());
+                    segs[i] = segs[j] + 1;
+                }
+            }
+        }
+        return ok[n] && segs[n] >= 2 ? new ScoredSplit(words[n], score[n]) : null;
     }
 
     /** 這段碼自動上字會上的字：智慧選字（前一字之後選過）優先，其次前後字搭配，否則字庫第一個 */
@@ -1036,6 +1133,7 @@ public class SearchServer {
         topWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         prefixCache = newLruMap(MAX_CACHE_ENTRIES);
         englishPrefixCache = newLruMap(MAX_CACHE_ENTRIES);
+        charFrequencyTotalCache.clear();
         phraseWordsCache = newLruMap(MAX_CACHE_ENTRIES);
         pairCache = newLruMap(MAX_CACHE_ENTRIES);
         segmentCache = newLruMap(MAX_CACHE_ENTRIES);
