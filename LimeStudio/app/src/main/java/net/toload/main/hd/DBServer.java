@@ -25,7 +25,6 @@
 package net.toload.main.hd;
 
 import android.content.Context;
-import android.content.Intent;
 
 import android.util.Log;
 
@@ -33,17 +32,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import net.toload.main.hd.data.KeyboardObj;
@@ -63,7 +55,6 @@ public class DBServer {
     protected static Context appContext = null;
     private static String loadingTablename = ""; // Jeremy '12,6,2 change all variable to static for all instances to
                                                  // share these variables
-    private static boolean abortDownload = false;
 
     public DBServer(Context context) {
         DBServer.appContext = context.getApplicationContext();
@@ -74,70 +65,6 @@ public class DBServer {
 
     public static void resetCache() {
         SearchServer.resetCache(true);
-    }
-
-    /*
-     * Decompress retrieved file to target folder
-     */
-    public static boolean decompressFile(File sourceFile, String targetFolder, String targetFile,
-            boolean removeOriginal) {
-        if (DEBUG)
-            Log.i(TAG, "decompressFile(), srouce = " + sourceFile.toString() + "" + ", target = " + targetFolder + "/"
-                    + targetFile);
-
-        try {
-
-            File targetFolderObj = new File(targetFolder);
-            if (!targetFolderObj.exists()) {
-                targetFolderObj.mkdirs();
-            }
-
-            try (FileInputStream fis = new FileInputStream(sourceFile);
-                 ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
-                // ZipEntry entry;
-                while ((zis.getNextEntry()) != null) {
-
-                    int size;
-                    byte[] buffer = new byte[2048];
-
-                    File OutputFile = new File(targetFolderObj.getAbsolutePath() + File.separator + targetFile);
-                    OutputFile.delete();
-
-                    try (FileOutputStream fos = new FileOutputStream(OutputFile);
-                         BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length)) {
-                        while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
-                            bos.write(buffer, 0, size);
-                        }
-                        bos.flush();
-                    }
-
-                    // Log.i("ART","uncompress Output File:"+OutputFile.getAbsolutePath() + " / " +
-                    // OutputFile.length());
-
-                }
-            }
-
-            if (removeOriginal) {
-                sourceFile.delete();
-            }
-            return true;
-        } catch (Exception e) {
-            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // Jeremy '12,4,23 rewriting using alert notification builder in LIME utilities
-    // to replace the deprecated method
-    public static void showNotificationMessage(String message) {
-
-        Intent i = null;
-        i = new Intent(appContext, MainActivity.class);
-
-        LIMEUtilities.showNotification(
-                appContext, true, appContext.getText(R.string.ime_setting), message, i);
-
     }
 
     public void loadMapping(String filename, String tablename, LIMEProgressListener progressListener)
@@ -259,101 +186,6 @@ public class DBServer {
             {
         // if (datasource == null) {loadLimeDB();}
         return datasource.getKeyboardCode(im);
-    }
-
-    /*
-     * Select Remote File to download
-     */
-    public File downloadRemoteFile(String backup_url, String url, String folder, String filename) {
-
-        File olddbfile = new File(folder + filename);
-        if (olddbfile.exists()) {
-            olddbfile.delete();
-        }
-
-        // mLIMEPref.setParameter("reload_database", true);
-        abortDownload = false;
-        File target = downloadRemoteFile(url, folder, filename);
-        if (!target.exists() || target == null || target.length() == 0) {
-            target = downloadRemoteFile(backup_url, folder, filename);
-        }
-        return target;
-    }
-
-    /*
-     * Download Remote File
-     */
-    public File downloadRemoteFile(String url, String folder, String filename) {
-
-        if (DEBUG)
-            Log.i(TAG, "downloadRemoteFile() Starting....");
-
-        try {
-            URL downloadUrl = new URL(url);
-            URLConnection conn = downloadUrl.openConnection();
-            conn.connect();
-            long remoteFileSize = conn.getContentLength();
-            long downloadedSize = 0;
-
-            if (DEBUG)
-                Log.i(TAG, "downloadRemoteFile() contentLength:");
-
-            File downloadFolder = new File(folder);
-            downloadFolder.mkdirs();
-
-            // Log.i("ART","downloadFolder Folder status :"+ downloadFolder.exists());
-
-            File downloadedFile = new File(downloadFolder.getAbsolutePath() + File.separator + filename);
-            if (downloadedFile.exists()) {
-                downloadedFile.delete();
-            }
-
-            // '04,12,27 Jeremy modified buf size from 128 to 128k and dramatically speed-up
-            // downloading speed on modern devices
-            byte[] buf = new byte[128000];
-            try (InputStream is = conn.getInputStream();
-                 FileOutputStream fos = new FileOutputStream(downloadedFile)) {
-                if (is == null) {
-                    throw new RuntimeException("stream is null");
-                }
-                do {
-                    int numread = is.read(buf);
-                    downloadedSize += numread;
-
-                    if (DEBUG)
-                        Log.i(TAG, "downloadRemoteFile(), contentLength:"
-                                + remoteFileSize + ". downloadedSize:" + downloadedSize);
-
-                    if (numread <= 0) {
-                        break;
-                    }
-                    fos.write(buf, 0, numread);
-                } while (!abortDownload);
-            }
-
-            return downloadedFile;
-
-        } catch (FileNotFoundException e) {
-            Log.d(TAG, "downloadRemoteFile(); can't open temp file on sdcard for writing.");
-            showNotificationMessage(appContext.getText(R.string.l3_initial_download_write_sdcard_failed) + "");
-            e.printStackTrace();
-
-        } catch (MalformedURLException e) {
-            Log.d(TAG, "downloadRemoteFile() MalformedURLException....");
-            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d(TAG, "downloadRemoteFile() IOException....");
-            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
-            e.printStackTrace();
-        } catch (Exception e) {
-            Log.d(TAG, "downloadRemoteFile() Others....");
-            showNotificationMessage(appContext.getText(R.string.l3_initial_download_failed) + "");
-            e.printStackTrace();
-        }
-        if (DEBUG)
-            Log.i(TAG, "downloadRemoteFile() failed.");
-        return null;
     }
 
     public void compressFile(File sourceFile, String targetFolder, String targetFile) {

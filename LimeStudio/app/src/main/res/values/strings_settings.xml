@@ -27,7 +27,6 @@
     <!-- Image button description  -->
 
     <!-- Title for Latin keyboard  -->
-    <string name="ime_setting">麥田輸入法</string>
 
     <!-- Symbols that are commonly considered word separators in this language -->
 
@@ -236,8 +235,6 @@
 
 
 
-    <string name="l3_initial_download_failed">資料轉換錯誤, 請重置資料庫再重新下載!</string>
-    <string name="l3_initial_download_write_sdcard_failed">請確定SDCARD已掛載, 重置資料庫再重新下載!</string>
 
 
 

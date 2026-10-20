@@ -24,15 +24,10 @@
 
 package net.toload.main.hd.global;
 
-import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import android.view.inputmethod.InputMethodManager;
 
-import androidx.core.app.NotificationCompat;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -155,35 +150,6 @@ public class LIMEUtilities {
             try { inStream.close(); } catch (Exception ignored) {}
             try { outStream.close(); } catch (Exception ignored) {}
         }
-    }
-
-    /**
-     * Add by Jeremy '12,4,23 Show notification with notification builder in
-     * compatibility package replacing the deprecated alert dialog creation
-     */
-    public static void showNotification(Context context, Boolean autoCancel, CharSequence title, CharSequence message,
-            Intent intent) {
-
-        // Intent resultIntent = new Intent(context, MainActivity.class);
-        // PendingIntent pi = PendingIntent.getActivity(context, 0, resultIntent, 0);
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setLargeIcon(getNotificationIconBitmap(context))
-                .setContentTitle(title)
-                .setAutoCancel(autoCancel)
-                .setTicker(message)
-                .setContentText(message);
-
-        mBuilder.setSmallIcon(R.drawable.logobw);
-
-        NotificationManager mNotificationManager = (NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(501, mBuilder.build());
-    }
-
-    private static Bitmap getNotificationIconBitmap(Context context) {
-        return BitmapFactory.decodeResource(context.getResources(), R.drawable.logo);
     }
 
     public static void showInputMethodPicker(Context context) {

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- chinese_punctuation 是中文標點符號資料，刻意不翻譯（沿用預設值）；*_values / *_codes 陣列為程式內部值，不可翻譯 -->
-    <string name="ime_setting">WFIME</string>
     <string name="keyboard">Keyboard</string>
     <string name="mapping">Mapping table</string>
     <string name="keyboard_list">Switch input method</string>
@@ -81,8 +80,6 @@
     <string name="typing_mode_english">Switch input mode / English</string>
     <string name="typing_mode_mixed">Switch input mode / Mixed</string>
     <string name="l3_tab_initial_error">Download failed. Please make sure the device is connected to the internet.</string>
-    <string name="l3_initial_download_failed">Data conversion error. Please reset the database and download again!</string>
-    <string name="l3_initial_download_write_sdcard_failed">Please make sure the SD card is mounted, then reset the database and download again!</string>
     <string name="l3_im_download_from_dayi">Install OpenVanilla Dayi key codes</string>
     <string name="l3_im_download_from_phonetic">Install OpenVanilla Chuyin key codes</string>
     <string name="l3_im_download_from_phonetic_big5">Install OpenVanilla Chuyin key codes (Big5)</string>
