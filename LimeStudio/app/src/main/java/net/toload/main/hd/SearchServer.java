@@ -662,6 +662,10 @@ public class SearchServer {
             return null;
         String prev = lastCommittedChar;
         Mapping whole = topInContext(code, prev);
+        // 整串碼的首選是詞（例如選過切分候選學到的 v5a6＝「我們」，字頻 0）：使用者要的就是它，不切
+        if (whole != null && whole.getWord() != null
+                && whole.getWord().codePointCount(0, whole.getWord().length()) > 1)
+            return null;
         if (whole != null && whole.getBasescore() >= RARE_BASESCORE) return null;
         for (int i = code.length() - 1; i >= 1; i--) {
             if (!canExtendCode(code.substring(i) + next)) continue;

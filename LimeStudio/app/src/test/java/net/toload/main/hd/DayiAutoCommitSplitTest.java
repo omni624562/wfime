@@ -77,6 +77,10 @@ public class DayiAutoCommitSplitTest {
         insertWord(db, "2", "丁", 500);
         insertWord(db, "0", "乙", 500);
         insertWord(db, "6a", "某", 500);
+        // 選過切分候選學到的詞：碼是整串、字頻 0（不擋的話會被當罕用字切成「一來」）
+        insertWord(db, "w", "起", 100000);
+        insertWord(db, "wx", "來", 50000);
+        insertWord(db, "ewx", "一起來", 0);
         db.execSQL("DROP TABLE IF EXISTS dictionary");
         db.execSQL("CREATE VIRTUAL TABLE dictionary USING fts3(word)");
         db.execSQL("INSERT INTO dictionary (word) VALUES ('book')");
@@ -110,6 +114,11 @@ public class DayiAutoCommitSplitTest {
         assertNull(searchServer.splitForAutoCommit("qqqq", 'n'));   // 純字母又沒有字：照舊（英文）
         assertNull(searchServer.splitForAutoCommit("bob", 'z'));    // 純字母沒有字、尾巴接不上：不整串切成「目口目」
         assertNull(searchServer.splitForAutoCommit("x", 'n'));      // 只有一碼
+    }
+
+    @Test
+    public void keepsLearnedPhrase() {
+        assertNull(searchServer.splitForAutoCommit("ewx", 'z'));
     }
 
     @Test
