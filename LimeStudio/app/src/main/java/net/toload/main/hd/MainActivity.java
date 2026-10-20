@@ -45,9 +45,6 @@ import net.toload.main.hd.ui.SetupImLoadDialog;
 import android.os.RemoteException;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String ARG_ADD_WORD = "arg_add_word";
-    private static final int STORAGE_PERMISSION_CODE = 0;
-    // private static final int STORAGE_PERMISSION_CODE = android.permission.;
 
 
     // private CharSequence mCode;

@@ -69,10 +69,6 @@ abstract class KeyDetector {
         return mKeys;
     }
 
-    public boolean isProximityCorrectionEnabled() {
-        return mProximityCorrectOn;
-    }
-
     public void setProximityCorrectionEnabled(boolean enabled) {
         mProximityCorrectOn = enabled;
     }

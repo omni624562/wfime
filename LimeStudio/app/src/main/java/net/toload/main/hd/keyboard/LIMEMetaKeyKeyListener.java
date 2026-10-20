@@ -30,11 +30,6 @@ import android.view.KeyEvent;
 public abstract class LIMEMetaKeyKeyListener extends MetaKeyKeyListener {
 
 
-    public static final int META_SELECTING = 1 << 16;
-    private static final int LOCKED_SHIFT = 8;
-    public static final int META_CAP_LOCKED = KeyEvent.META_SHIFT_ON << LOCKED_SHIFT;
-    public static final int META_ALT_LOCKED = KeyEvent.META_ALT_ON << LOCKED_SHIFT;
-    public static final int META_SYM_LOCKED = KeyEvent.META_SYM_ON << LOCKED_SHIFT;
     //private static final Object CAP = new NoCopySpan.Concrete();
     //private static final Object ALT = new NoCopySpan.Concrete();
     //private static final Object SYM = new NoCopySpan.Concrete();

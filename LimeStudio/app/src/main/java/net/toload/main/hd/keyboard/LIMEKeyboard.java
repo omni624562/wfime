@@ -64,7 +64,6 @@ public class LIMEKeyboard extends LIMEBaseKeyboard {
 
     private static SlidingSpaceBarDrawable mSlidingSpaceBarIcon = null;
 
-    private static boolean themedResourcesLoaded = false;
     /**
      * Drawable to override function key icons
      */

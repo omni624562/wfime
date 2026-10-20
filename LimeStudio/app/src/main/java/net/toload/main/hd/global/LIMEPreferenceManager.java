@@ -130,10 +130,6 @@ public class LIMEPreferenceManager {
         return sp.getBoolean("learning_switch", true);
     }
 
-    public boolean getCandidateSuggestionPunctutation() {
-        return sp.getBoolean("candidate_suggestion_punctuation", true);
-    }
-
     public boolean getPhysicalKeyboardSortSuggestions() {
 
         return sp.getBoolean("physical_keyboard_sort", true);

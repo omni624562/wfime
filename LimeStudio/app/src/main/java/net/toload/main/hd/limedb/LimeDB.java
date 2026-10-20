@@ -76,18 +76,9 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     public final static String FIELD_BASESCORE = "basescore"; // jeremy '11,9,8 base frequency got from han converter
                                                               // when table loading.
     public final static String FIELD_NO_TONE_CODE = "code3r";
-    public final static String FIELD_DIC_id = "_id";
-    public final static String FIELD_DIC_pcode = "pcode";
     public final static String FIELD_DIC_pword = "pword";
-    public final static String FIELD_DIC_ccode = "ccode";
     public final static String FIELD_DIC_cword = "cword";
     public final static String FIELD_DIC_score = "score";
-    public final static String FIELD_DIC_is = "isDictionary";
-    public static final String DB_MEMO = "memo";
-    public static final String DB_MEMO_COLUMN_ID = "_id";
-    public static final String DB_MEMO_COLUMN_CONTENT = "content";
-    public static final String DB_MEMO_COLUMN_PINNED = "pinned";
-    public static final String DB_MEMO_COLUMN_CREATED_AT = "created_at";
     static final boolean DEBUG = false;
     static final String TAG = "LIMEDB";
     private final static int DATABASE_VERSION = 103;
@@ -98,7 +89,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                                                                // improved performance using binary tree.
     final static int DUALCODE_COMPOSING_LIMIT = 16; // Jeremy '12,5,30 changed from 7 to 16 because of improved
                                                             // performance using binary tree.
-    private final static int BETWEEN_SEARCH_WAY_BACK_LEVELS = 5; // Jeremy '15,6,30
     // for keyToChar
     final static String DAYI_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
     final static String DAYI_CHAR = "言|牛|目|四|王|門|田|米|足|金|石|山|一|工|糸|火|艸|木|口|耳|人|革|日|土|手|鳥|月|立|女|虫|心|水|鹿|禾|馬|魚|雨|力|舟|竹";
@@ -109,10 +99,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
     final static String SHIFTED_SYMBOL_KEY = "<>?_:+\"";
     final static String SHIFTED_SYMBOL_KEY_REMAP = ",./-;='";
 
-    private final static String CJ_KEY = "abcdefghijklmnopqrstuvwxyz";
-    private final static String CJ_CHAR = "日|月|金|木|水|火|土|竹|戈|十|大|中|一|弓|人|心|手|口|尸|廿|山|女|田|難|卜";
-    private final static String ARRAY_KEY = "1234567890qwertyuiopasdfghjkl;zxcvbnm,./";
-    private final static String ARRAY_CHAR = "1-|2-|3-|4-|5-|6-|7-|8-|9-|0-|1⇡|2⇡|3⇡|4⇡|5⇡|6⇡|7⇡|8⇡|9⇡|0⇡|1⇣|2⇣|3⇣|4⇣|5⇣|6⇣|7⇣|8⇣|9⇣|0⇣|？|＊|．|，|。";
 
     // ==================== Security: Table Name Validation ====================
     // SQL Injection Prevention: Whitelist of valid table names
@@ -435,64 +421,6 @@ public class LimeDB extends LimeSQLiteOpenHelper {
                 }
 
             }
-        }
-    }
-
-    public void checkAndUpdateRelatedTable() {
-        // Check related table structure
-        String CHECK_RELATED = "SELECT basescore FROM " + Lime.DB_RELATED;
-
-        // If system can find the score field which is mean the table still use old
-        // schema
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery(CHECK_RELATED, null);
-            if (cursor == null || !cursor.moveToFirst()) {
-                try {
-                    String add_column = "ALTER TABLE " + Lime.DB_RELATED + " ADD ";
-                    add_column += Lime.DB_RELATED_COLUMN_BASESCORE + " INTEGER";
-                    db.execSQL(add_column);
-                } catch (SQLiteException e) {
-                    Log.e("LimeDB", "Error adding basescore column: " + e.getMessage());
-                }
-            }
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-
-        // Check and create index for pword
-        cursor = null;
-        try {
-            cursor = db.query("sqlite_master", null, "type='index' and name = 'related_idx_pword'", null, null, null,
-                    null);
-            if (cursor == null || !cursor.moveToFirst()) {
-                try {
-                    db.execSQL("create index 'related_idx_pword' on related (pword)");
-                } catch (SQLiteException e) {
-                    Log.e("LimeDB", "Error creating pword index: " + e.getMessage());
-                }
-            }
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-
-        // Check and create index for cword
-        cursor = null;
-        try {
-            cursor = db.query("sqlite_master", null, "type='index' and name = 'related_idx_cword'", null, null, null,
-                    null);
-            if (cursor == null || !cursor.moveToFirst()) {
-                try {
-                    db.execSQL("create index 'related_idx_cword' on related (cword)");
-                } catch (SQLiteException e) {
-                    Log.e("LimeDB", "Error creating cword index: " + e.getMessage());
-                }
-            }
-        } finally {
-            if (cursor != null)
-                cursor.close();
         }
     }
 

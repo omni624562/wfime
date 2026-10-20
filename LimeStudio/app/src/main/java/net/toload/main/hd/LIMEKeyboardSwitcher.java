@@ -41,18 +41,14 @@ import net.toload.main.hd.keyboard.ImeKeyboardView;
 public class LIMEKeyboardSwitcher {
 
     public static final int MODE_TEXT = 1;
-    public static final int MODE_SYMBOLS = 2;
     public static final int MODE_PHONE = 3;
     public static final int MODE_URL = 4;
     public static final int MODE_EMAIL = 5;
     public static final int MODE_IM = 6;
     public static final int MODE_NUMBER = 7;
-    public static final int MODE_TEXT_ALPHA = 1;
     public static final int KEYBOARDMODE_NORMAL = R.id.mode_normal;
     public static final int KEYBOARDMODE_URL = R.id.mode_url;
     public static final int KEYBOARDMODE_EMAIL = R.id.mode_email;
-    public static final int KEYBOARDMODE_IM = R.id.mode_im;
-    public static final int IM_KEYBOARD = 0;
     static final boolean DEBUG = false;
     static final String TAG = "LIMEKeyboardSwitcher";
     private static final int SYMBOLS_KEYBOARD_1 = 1;
@@ -73,7 +69,6 @@ public class LIMEKeyboardSwitcher {
     private boolean mIsShifted;
     private boolean mIsSymbols;
     private boolean mIsChinese = true;
-    private boolean mPreferSymbols;
     private int mCurrentSymbolsKeyboard = SYMBOLS_KEYBOARD_1;
     private int mLastDisplayWidth;
     private String imtype = null;

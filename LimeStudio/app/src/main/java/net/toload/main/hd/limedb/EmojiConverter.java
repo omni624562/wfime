@@ -51,8 +51,6 @@ public class EmojiConverter extends SQLiteOpenHelper {
     private final static String DATABASE_NAME = "emoji.db";
     private final static int DATABASE_VERSION = 1;
 
-    private static final String FIELD_TAG = "tag";
-    private static final String FIELD_VALUE = "value";
 
     // 裝置字型是否能顯示該 emoji 的快取;顯示不了的(豆腐格)不進候選列
     private final static Map<String, Boolean> glyphCache = new ConcurrentHashMap<>();

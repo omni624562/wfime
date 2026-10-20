@@ -99,7 +99,6 @@ public class LIMEBaseKeyboard {
     public static final int KEYCODE_DONE = -3;
 
     public static final int KEYCODE_DELETE = -5;
-    public static final int KEYCODE_ALT = -6;
     public static final int KEYCODE_UP = -11;
     public static final int KEYCODE_DOWN = -12;
     public static final int KEYCODE_LEFT = -13;
@@ -108,7 +107,6 @@ public class LIMEBaseKeyboard {
     public static final int KEYCODE_ENTER = '\n';
     public static final int KEYCODE_SPACE = ' ';
     // Jeremy '12,6,19
-    public static final int SPLIT_KEYBOARD_NEVER = 0;
     public static final int SPLIT_KEYBOARD_ALWAYS = 1;
     public static final int SPLIT_KEYBOARD_LANDSCAPD_ONLY = 2;
 
@@ -997,10 +995,6 @@ public class LIMEBaseKeyboard {
 
     public boolean isShifted() {
         return mShifted;
-    }
-
-    public int getShiftKeyIndex() {
-        return mShiftKeyIndex;
     }
 
     private void computeNearestNeighbors() {

@@ -54,7 +54,6 @@ public class SearchServer {
     private static final String TAG = "LIME.SearchServer";
     private static final int MAX_CACHE_ENTRIES = 512;
     // Jeremy '12,6,9 make run-time suggestion phrase
-    private static final boolean doRunTimeSuggestion = true;
 
     // Jeremy '12,5,1 shared single LIMEDB object
     // Jeremy '12,4,6 Combine updatedb and quierydb into db,

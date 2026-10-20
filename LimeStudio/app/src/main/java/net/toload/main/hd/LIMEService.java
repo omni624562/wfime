@@ -110,7 +110,6 @@ public class LIMEService extends InputMethodService implements
     private static final int FOREGROUND_NOTIFICATION_ID = 1001;
     // Jeremy '16,7,22 To control delayed hiding candidate view and avoid hide and
     // show candidate view in short time.
-    static final int DELAY_BEFORE_HIDE_CANDIDATE_VIEW = 200;
     private static final long SHIFT_LOCK_TIMEOUT = 500; // Jeremy '24,1,7: Double-tap timeout for caps lock
     private static final KeyboardTheme[] KEYBOARD_THEMES = {
             new KeyboardTheme("Material3", 0, R.style.LIMETheme_Material3),
