@@ -3737,6 +3737,10 @@ public class LIMEService extends InputMethodService implements
         mKeyboardSwitcher.toggleChinese();
         mEnglishOnly = !mKeyboardSwitcher.isChinese();
         mLIMEPref.setLanguageMode(mEnglishOnly);
+        // 切回中文時同螢幕鍵切換（KEYCODE_SWITCH_TO_IM_MODE）設好字表：開「記憶中英模式」以英文啟動時
+        // initOnStartInput 不會設，只換鍵盤會變成打什麼都只有原碼
+        if (!mEnglishOnly)
+            initialIMKeyboard();
 
         if (DEBUG)
             Log.i(TAG, "switchChiEng(): mEnglishOnly updated as " + mEnglishOnly);
