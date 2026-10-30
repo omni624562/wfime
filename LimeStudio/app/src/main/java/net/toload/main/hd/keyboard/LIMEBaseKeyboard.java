@@ -978,6 +978,11 @@ public class LIMEBaseKeyboard {
         return mTotalHeight;
     }
 
+    /** 這個鍵盤排版用的寬度（建構時傳入的 displayWidth，沒傳時是螢幕寬） */
+    public int getDisplayWidth() {
+        return mDisplayWidth;
+    }
+
     public int getMinWidth() {
         return mTotalWidth;
     }

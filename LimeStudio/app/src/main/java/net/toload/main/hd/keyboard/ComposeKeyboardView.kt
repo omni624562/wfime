@@ -392,6 +392,21 @@ class ComposeKeyboardView @JvmOverloads constructor(context: Context, attrs: Att
             w = paddingLeft + paddingRight
             h = paddingTop + paddingBottom
         } else {
+            // 鍵盤排版比可用寬度窄很多（平板橫放縮窄，見 LIMEService.getKeyboardLayoutWidth）時
+            // 左右補內距置中，背景仍蓋滿整排；其餘情況內距維持 0（同原本）
+            if (!isMiniKeyboard) {
+                val avail = MeasureSpec.getSize(widthMeasureSpec)
+                val side = if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED
+                        && avail - kb.minWidth > avail / 10) (avail - kb.minWidth) / 2 else 0
+                if (side != paddingLeft || side != paddingRight) {
+                    setPadding(side, paddingTop, side, paddingBottom)
+                    clipToPadding = false // 小鍵盤開著時的壓暗層要蓋到左右內距
+                    keys = keyDetector.setKeyboard(kb, -paddingLeft.toFloat(), -paddingTop + verticalCorrection)
+                    for (tracker in trackers) tracker.setKeyboard(keys, keyHysteresisDistance)
+                    invalidateAllKeys()
+                    a11yVersion++ // 無障礙節點位置含內距
+                }
+            }
             var width = kb.minWidth + paddingLeft + paddingRight
             if (MeasureSpec.getSize(widthMeasureSpec) < width + 10) width = MeasureSpec.getSize(widthMeasureSpec)
             w = width

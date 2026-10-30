@@ -683,6 +683,23 @@ public class LIMEService extends InputMethodService implements
     }
 
 
+    // 平板橫放時螢幕鍵盤占視窗寬度的比例（按鍵不再拉滿整個螢幕）
+    private static final float TABLET_LANDSCAPE_KEYBOARD_WIDTH = 0.55f;
+
+    /**
+     * 螢幕鍵盤排版用的寬度：平板橫放、沒開分割鍵盤與方向鍵時縮窄，
+     * 由 ComposeKeyboardView 左右補內距置中；其餘同 getMaxWidth()。
+     */
+    public int getKeyboardLayoutWidth() {
+        int width = getMaxWidth();
+        if (BuildConfig.IS_TABLET
+                && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+                && mLIMEPref.getSplitKeyboard() == 0 && mLIMEPref.getShowArrowKeys() == 0) {
+            return Math.round(width * TABLET_LANDSCAPE_KEYBOARD_WIDTH);
+        }
+        return width;
+    }
+
     private void initComposingPopup() {
         if (mComposingPopup == null) {
             mComposingPopup = new ComposingTextPopup(this);

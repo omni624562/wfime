@@ -158,9 +158,10 @@ final class MiniKeyboardPopup {
                     -1, host.getPaddingLeft() + host.getPaddingRight(),
                     mHost.getKeyboard().getKeySizeScale());
         } else {
-            keyboard = new LIMEBaseKeyboard(mContext, popupKeyboardId,
-                    mHost.getKeyboard().getKeySizeScale(), 0, 0); // Jeremy '12,5,21 never show arrow
-                                                                  // keys in popup keyboard
+            // 寬度跟主鍵盤的排版寬度（平板橫放縮窄時小鍵盤也跟著縮）
+            keyboard = new LIMEBaseKeyboard(mContext, popupKeyboardId, 0,
+                    mHost.getKeyboard().getKeySizeScale(), 0, 0, // Jeremy '12,5,21 never show arrow
+                    mHost.getKeyboard().getDisplayWidth());      // keys in popup keyboard
         }
         // mini keyboard in fling mode override with fling correction. Jeremy '12,5,27
         if (!isLargeScreen || keyboard.getKeys().size() == 1)

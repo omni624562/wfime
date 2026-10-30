@@ -81,6 +81,32 @@ public class ComposeKeyboardViewTest {
         assertEquals(900, newView.getMeasuredWidth());
     }
 
+    @Test
+    public void narrowKeyboardIsCentered() {
+        // 平板橫放：鍵盤用較窄的寬度排版，整排寬度不變、左右補內距置中，點右邊的鍵送出那個鍵
+        Recorder r = new Recorder();
+        newView.setOnKeyboardActionListener(r);
+        newView.setKeyboard(new LIMEKeyboard(context, R.xml.lime, 0, 1f, 0, 0, 600));
+        int h = View.MeasureSpec.makeMeasureSpec(2000, View.MeasureSpec.AT_MOST);
+        newView.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY), h);
+        int side = (1080 - newView.getKeyboard().getMinWidth()) / 2;
+        assertTrue(side > 200);
+        assertEquals(side, newView.getPaddingLeft());
+        assertEquals(side, newView.getPaddingRight());
+        assertEquals(1080, newView.getMeasuredWidth());
+        Key p = key(newView.getKeyboard(), 'p');
+        long down = SystemClock.uptimeMillis();
+        touch(newView, MotionEvent.ACTION_DOWN, p, down);
+        touch(newView, MotionEvent.ACTION_UP, p, down);
+        ShadowLooper.idleMainLooper();
+        assertEquals(Arrays.asList("press 112", "key 112", "release 112"), r.events);
+        // 換回滿版鍵盤時內距回到 0
+        newView.setKeyboard(keyboard());
+        newView.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY), h);
+        assertEquals(0, newView.getPaddingLeft());
+        assertEquals(0, newView.getPaddingRight());
+    }
+
     /** 記下鍵盤送出的事件。 */
     private static class Recorder implements OnKeyboardActionListener {
         final List<String> events = new ArrayList<>();

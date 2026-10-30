@@ -229,7 +229,7 @@ public class LIMEKeyboardSwitcher {
         // If keyboards have already been made, check if we have a screen width change
         // and
         // create the keyboard layouts again at the correct orientation
-        int displayWidth = mService.getMaxWidth();
+        int displayWidth = mService.getKeyboardLayoutWidth();
         if (displayWidth != mLastDisplayWidth) {
             mLastDisplayWidth = displayWidth;
             clearKeyboards();
@@ -252,7 +252,7 @@ public class LIMEKeyboardSwitcher {
                         mThemedContext, id.mXml, id.mMode, mKeySizeScale,
                         mLIMEPref.getShowArrowKeys(), // Jeremy '12,5,21 add the show arrow keys option
                         mLIMEPref.getSplitKeyboard(),
-                        mService.getMaxWidth() // Jeremy '26,1,7 Pass max width to prevent overflow
+                        mService.getKeyboardLayoutWidth() // Jeremy '26,1,7 Pass max width to prevent overflow（平板橫放會縮窄）
                 ); // Jeremy '12,5,27 add the split keyboard option
                 keyboard.setKeyboardSwitcher(this);
                 if (id.mEnableShiftLock) {
