@@ -360,6 +360,12 @@ class UserDataStore(context: Context) {
         write("syncMappingWord") { src, out -> upsertMapping(src, out, im, "word = ?", arrayOf(word)) }
     }
 
+    /** 刪掉單一學過的字碼（LimeDB.forgetLearnedMapping）。 */
+    fun forgetMapping(im: String?, code: String?, word: String?) {
+        if (im == null || im !in IM_TABLES || code.isNullOrEmpty() || word.isNullOrEmpty()) return
+        write("forgetMapping") { _, out -> out.delete("learned_mapping", "im = ? AND code = ? AND word = ?", arrayOf(im, code, word)) }
+    }
+
     /** 新增或更新單一字碼（LimeDB.addOrUpdateMappingRecord）。 */
     fun syncMapping(im: String?, code: String?, word: String?) {
         if (im == null || im !in IM_TABLES || code.isNullOrEmpty() || word.isNullOrEmpty()) return

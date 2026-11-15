@@ -603,10 +603,45 @@ public class SearchServer {
                 dbadapter.addOrUpdateMappingRecord(code, word);
                 if (topWordsCache != null) topWordsCache.remove(key);
                 if (segmentCache != null) segmentCache.remove(key);
+                removeCodeFromMappingCache(code); // 同碼串再打就直接查到學過的詞,不用等重開輸入法
             } catch (Exception e) {
                 Log.e(TAG, "learnSegmentedPhrase failed: " + e.getMessage());
             }
         });
+    }
+
+    /**
+     * 純字母／數字碼串(原碼排第一的那種)學過切分後,使用者又選了原碼:刪掉學過的切分,
+     * 下次同碼串原碼又排第一。字庫內建的詞不刪。
+     */
+    public void forgetSegmentedPhrase(String rawCode) {
+        if (rawCode == null || !tablename.startsWith("dayi") || !ComposingRules.rawCodeFirst(rawCode)) return;
+        final String code = rawCode.toLowerCase(Locale.US);
+        final String key = tablename + "_" + code;
+        final String table = tablename;
+        backgroundExecutor.execute(() -> {
+            try {
+                boolean forgot = false;
+                for (Mapping m : cachedTopWords(code)) {
+                    if (m.getWord() == null || m.getWord().length() < 2 || !isSegmentationOf(code, m.getWord())) continue;
+                    dbadapter.forgetLearnedMapping(table, code, m.getWord());
+                    forgot = true;
+                }
+                if (!forgot) return;
+                if (topWordsCache != null) topWordsCache.remove(key);
+                if (segmentCache != null) segmentCache.remove(key);
+                removeCodeFromMappingCache(code);
+            } catch (Exception e) {
+                Log.e(TAG, "forgetSegmentedPhrase failed: " + e.getMessage());
+            }
+        });
+    }
+
+    /** 候選查詢快取裡這個碼的結果(螢幕鍵盤與實體鍵盤各一份)都清掉 */
+    private void removeCodeFromMappingCache(String code) {
+        if (cache == null || tablename.equals("phonetic")) return;
+        cache.remove(dbadapter.getTablename() + code);
+        cache.remove(mLIMEPref.getPhysicalKeyboardType() + dbadapter.getTablename() + code);
     }
 
     /**
@@ -885,6 +920,24 @@ public class SearchServer {
     private Mapping cachedTopSegmentWord(String code) {
         List<Mapping> list = cachedSegmentWords(code);
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    /**
+     * 碼串能否逐段切成詞裡每個字的碼(學切分時就是這樣存的)。
+     * 用縮碼學來的詞(每字首碼＋末碼)通常切不成,不會被當成切分忘掉。
+     */
+    private boolean isSegmentationOf(String code, String word) {
+        int n = code.length(), w = word.length();
+        boolean[][] ok = new boolean[w + 1][n + 1]; // ok[k][i]:前 k 個字用掉 code 前 i 碼
+        ok[0][0] = true;
+        for (int k = 0; k < w; k++)
+            for (int i = 0; i < n; i++) {
+                if (!ok[k][i]) continue;
+                for (int len = 1; len <= 4 && i + len <= n; len++)
+                    if (segmentMapsToWord(code.substring(i, i + len), String.valueOf(word.charAt(k))))
+                        ok[k + 1][i + len] = true;
+            }
+        return ok[w][n];
     }
 
     /** 這段碼是否對映到此字(完全相符,或 3 碼的三碼) */

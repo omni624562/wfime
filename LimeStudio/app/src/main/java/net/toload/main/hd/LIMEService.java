@@ -2187,6 +2187,10 @@ public class LIMEService extends InputMethodService implements
             ic.commitText(text, 1);
         }
 
+        // 點候選列左邊的原碼或按 Enter 送出原碼:和選原碼候選一樣,忘掉這個碼串學過的切分
+        if (mComposing.length() > 0 && text.contentEquals(mComposing) && SearchSrv != null)
+            SearchSrv.forgetSegmentedPhrase(text);
+
         if (text.length() > 0) {
             String lastChar = text.substring(text.length() - 1);
             if (lastChar.charAt(0) > 127) {
@@ -2342,6 +2346,9 @@ public class LIMEService extends InputMethodService implements
                                     SearchSrv.learnSegmentedPhrase(
                                             committedCandidate.getCode(), committedCandidate.getWord());
                                 } else {
+                                    // 選了原碼(例如 abev 學過「今天」後又選英文):忘掉學過的切分,下次原碼排第一
+                                    if (committedCandidate.isComposingCodeRecord())
+                                        SearchSrv.forgetSegmentedPhrase(committedCandidate.getCode());
                                     SearchSrv.learnRelatedPhraseAndUpdateScore(committedCandidate);
 
                                     // 字根反查:結果顯示在候選列左側,開始打下一個字時消失

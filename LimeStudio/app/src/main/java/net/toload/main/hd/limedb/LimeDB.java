@@ -632,6 +632,11 @@ public class LimeDB extends LimeSQLiteOpenHelper {
         learning.addOrUpdateMappingRecord(table, code, word, score);
     }
 
+    /** 刪掉學來的字碼（字庫內建的列不刪），user.db 同步刪除 */
+    public synchronized void forgetLearnedMapping(String table, String code, String word) {
+        learning.forgetLearnedMapping(table, code, word);
+    }
+
     public synchronized void addScore(Mapping srcunit) {
         learning.addScore(srcunit);
     }

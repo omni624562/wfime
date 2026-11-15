@@ -50,6 +50,20 @@ final class LearningStore {
         this.owner = owner;
     }
 
+    /** 刪掉學來的字碼：只刪字庫沒有字頻的列（basescore 是 0 或空），user.db 同步刪除 */
+    public void forgetLearnedMapping(String table, String code, String word) {
+        if (!owner.checkDBConnection() || code == null || word == null)
+            return;
+        try {
+            table = LimeDB.validateTableName(table);
+            LimeDB.db.delete(table, LimeDB.FIELD_CODE + " = ? AND " + LimeDB.FIELD_WORD + " = ? AND IFNULL("
+                    + LimeDB.FIELD_BASESCORE + ", 0) = 0", new String[] { code, word });
+            owner.userStore().forgetMapping(table, code, word);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Add new mapping into current table
      */
