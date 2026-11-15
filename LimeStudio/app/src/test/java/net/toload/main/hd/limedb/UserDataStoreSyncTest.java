@@ -216,6 +216,8 @@ public class UserDataStoreSyncTest {
     private File sourceDb(String name, String srcTable, String likeTable, String[][] rows) {
         File src = new File(context.getCacheDir(), name);
         src.delete();
+        // lime.db 開啟時沒有 CREATE 旗標，ATTACH 不一定能建新檔（Linux 上會 SQLITE_CANTOPEN），先建空檔
+        SQLiteDatabase.openOrCreateDatabase(src, null).close();
         db.execSQL("ATTACH DATABASE ? AS s", new Object[]{src.getPath()});
         db.execSQL("CREATE TABLE s." + srcTable + " AS SELECT * FROM main." + likeTable + " WHERE 0");
         for (String[] r : rows)
@@ -381,6 +383,7 @@ public class UserDataStoreSyncTest {
         assertNotNull(store.migrateIfNeeded(limeDb));
         File src = new File(context.getCacheDir(), "related_src.db");
         src.delete();
+        SQLiteDatabase.openOrCreateDatabase(src, null).close();
         // 用 lime.db 的 related 結構建一份來源檔:一筆新的已學關聯字、一筆和既有同組的內建列
         db.execSQL("ATTACH DATABASE ? AS s", new Object[]{src.getPath()});
         db.execSQL("CREATE TABLE s.related AS SELECT * FROM main.related WHERE 0");
