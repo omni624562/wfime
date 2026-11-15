@@ -400,6 +400,14 @@ fun TutorialCard(title: String, steps: List<String>) {
 fun TabUpdateLog() {
     val logs = listOf(
         UpdateLogItem(
+            version = "v1.6.0",
+            date = "2026.11.15",
+            changes = listOf(
+                stringResource(R.string.help_log_20261115_1),
+                stringResource(R.string.help_log_20261115_2)
+            )
+        ),
+        UpdateLogItem(
             version = "v1.5.0",
             date = "2026.11.15",
             changes = listOf(

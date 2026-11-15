@@ -58,6 +58,8 @@
     <string name="help_physical_step2">To page, tap \"▲ (previous page)\" and \"▼ (next page)\" at the far left edge of the tablet screen with your left hand.</string>
     <string name="help_physical_step3">Physical keyboards can commit words directly by default. You can also turn on \"Sort by selection on physical keyboard\" in Settings to keep frequently used words at the front.</string>
     <string name="help_physical_step4">If you still want the on-screen keyboard while a physical keyboard is connected, turn off \"Auto-hide on-screen keyboard\" in Settings.</string>
+    <string name="help_log_20261115_1">Dayi codes for several characters followed by Space: splits now weigh how common each character is, so a frequently picked character no longer brings in a rare one (天氣 no longer becomes 一毩); each character is chosen the same way as when typing one at a time.</string>
+    <string name="help_log_20261115_2">Dayi code strings made only of letters (for example abev for 今天): after you pick the Chinese once, Space enters it next time; tapping the raw code at the left of the candidate bar or pressing Enter switches back to the raw code first.</string>
     <string name="help_log_20260927_1">Added an English interface that follows the system or app language; the 注音 input method is called Chuyin.</string>
     <string name="help_log_20260927_2">Importing mapping files now uses the system file picker, so you can pick files from anywhere; imports run in the background and no longer freeze the screen.</string>
     <string name="help_log_20260927_3">Added \"Import related phrases\"; learned related phrases are kept when importing.</string>

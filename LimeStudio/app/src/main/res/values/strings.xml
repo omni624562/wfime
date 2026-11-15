@@ -138,6 +138,8 @@
     <string name="help_physical_step2">需要翻頁時，左手直接點選平板最左側螢幕邊緣的「▲ (前一頁)」與「▼ (後一頁)」進行翻頁，極具效率。</string>
     <string name="help_physical_step3">系統預設支援實體鍵盤直接送出字詞，亦可於設定內開啟「實體鍵盤優先排序」確保常用字前排顯示。</string>
     <string name="help_physical_step4">接上實體鍵盤仍想使用螢幕鍵盤時，可到設定關閉「自動隱藏軟鍵盤」。</string>
+    <string name="help_log_20261115_1">大易連續打幾個字的碼再按空白：切分時比較字頻，常選的字不再帶出罕用字（例如天氣不再變成一毩）；每個字和一字一字打時挑同一個字。</string>
+    <string name="help_log_20261115_2">大易全是字母的碼串（例如今天 abev）：選過一次中文，下次按空白就上中文；之後點候選列左邊的原碼或按 Enter 送出原碼，就改回原碼排第一。</string>
     <string name="help_log_20260927_1">新增英文介面，會依系統或 app 語言自動切換；注音的英文名稱為 Chuyin。</string>
     <string name="help_log_20260927_2">導入字根檔改用系統檔案選擇器，可從任何位置選檔；匯入改在背景執行，不再卡住畫面。</string>
     <string name="help_log_20260927_3">新增「導入關聯字庫」入口，匯入時保留已學習的關聯字。</string>
