@@ -141,6 +141,7 @@ public class DayiRelatedPairTest {
         db.execSQL("DELETE FROM related");
         insertWord(db, "x", "又", 300);
         insertWord(db, "x", "水", 200);
+        insertWord(db, "akj", "停", 100);
         insertRelated(db, "停", "水", 50, 0);      // 內建：停水
         insertRelated(db, "喝", "水果", 0, 1);     // 使用者學過一次：喝水果 → 水（1×10，不乘 10 就不到 2）
         insertRelated(db, "我", "又", 5, 0);
@@ -163,6 +164,14 @@ public class DayiRelatedPairTest {
         assertEquals("水", firstWordAfter("喝", "x"));   // 使用者學過的權重 ×10
         assertEquals("又", firstWordAfter("我", "x"));   // 本來第一個就是常接的
         assertEquals("又", firstWordAfter("的", "x"));   // 沒有搭配資料：照字庫順序
+    }
+
+    @Test
+    public void segmentedPhrasePicksLikeSingleTyping() {
+        // 連續打幾個字的碼再按空白：切分候選裡每個字和一字一字打時挑同一個（停＋x → 停水）
+        SearchServer.setLastCommittedChar(null);
+        List<Mapping> segmented = searchServer.getSegmentedPhraseMappings("akjx");
+        assertEquals("停水", segmented.get(0).getWord());
     }
 
     @Test

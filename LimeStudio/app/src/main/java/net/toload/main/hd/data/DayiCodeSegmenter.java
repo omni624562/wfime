@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 大易連打切分:把連續輸入的長碼串(如 nh12vdbxe)以動態規劃切成
- * 合法大易碼序列(每字 1–4 碼)。偏好段數少,同段數比 score 總和。
+ * 合法大易碼序列(每字 1–4 碼)。偏好段數少,同段數比各段首選字 Σlog(1＋字頻＋10×選字分數)。
  * 純邏輯、查詢以介面注入,便於單元測試;實際查詢由 SearchServer 提供(含快取)。
  */
 public final class DayiCodeSegmenter {
@@ -22,25 +22,25 @@ public final class DayiCodeSegmenter {
     private DayiCodeSegmenter() {
     }
 
-    // K-best DP 的一個解:到某位置為止的段數/總分,與回溯資訊
+    // K-best DP 的一個解:到某位置為止的段數/字頻分,與回溯資訊
     private static final class Solution {
         final int segments;
-        final long scoreSum;
         final int prevPos;       // 前一段結束位置
         final int prevRank;      // 在 dp[prevPos] 中的名次
         final String lastCode;   // 最後一段的碼
+        final double freqSum;    // 各段首選字 Σlog(1＋字頻＋10×選字分數)
 
-        Solution(int segments, long scoreSum, int prevPos, int prevRank, String lastCode) {
+        Solution(int segments, int prevPos, int prevRank, String lastCode, double freqSum) {
             this.segments = segments;
-            this.scoreSum = scoreSum;
             this.prevPos = prevPos;
             this.prevRank = prevRank;
             this.lastCode = lastCode;
+            this.freqSum = freqSum;
         }
 
         boolean betterThan(Solution other) {
             if (segments != other.segments) return segments < other.segments;
-            return scoreSum > other.scoreSum;
+            return freqSum > other.freqSum;
         }
     }
 
@@ -58,7 +58,7 @@ public final class DayiCodeSegmenter {
         // dp[i]:覆蓋 code[0..i) 的前 K 個解,最佳在前
         List<List<Solution>> dp = new ArrayList<>(n + 1);
         for (int i = 0; i <= n; i++) dp.add(new ArrayList<>());
-        dp.get(0).add(new Solution(0, 0, -1, -1, null));
+        dp.get(0).add(new Solution(0, -1, -1, null, 0));
 
         for (int i = 1; i <= n; i++) {
             List<Solution> here = dp.get(i);
@@ -71,8 +71,8 @@ public final class DayiCodeSegmenter {
                 List<Solution> prevList = dp.get(j);
                 for (int r = 0; r < prevList.size(); r++) {
                     Solution prev = prevList.get(r);
-                    here.add(new Solution(prev.segments + 1,
-                            prev.scoreSum + top.getScore(), j, r, segCode));
+                    here.add(new Solution(prev.segments + 1, j, r, segCode,
+                            prev.freqSum + Math.log(1.0 + Math.max(0, top.getBasescore()) + 10.0 * Math.max(0, top.getScore()))));
                 }
             }
             here.sort((a, b) -> a.betterThan(b) ? -1 : (b.betterThan(a) ? 1 : 0));

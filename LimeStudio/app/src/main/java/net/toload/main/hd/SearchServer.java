@@ -969,12 +969,10 @@ public class SearchServer {
     /**
      * 詞庫優先＋智慧選字挑字:
      * - 相鄰段落先組縮碼(每字首碼+末碼)查詞庫,詞命中且逐字驗證通過就整段採用
-     * - 其餘單字段落用智慧選字上下文(前一字)挑字,無記錄時取最高分
+     * - 其餘單字段落和連打自動上字一樣挑字(topInContext:智慧選字上下文、前後字搭配,否則字庫第一個)
      */
     private String refineSegmentWords(List<String> segs) {
         StringBuilder sb = new StringBuilder();
-        boolean smart = mLIMEPref.getDayiSmartSelectionEnabled();
-        SmartSelectionManager smartMgr = smart ? SmartSelectionManager.getInstance(mContext) : null;
         String prevChar = lastCommittedChar;
         int n = segs.size();
         int i = 0;
@@ -999,20 +997,9 @@ public class SearchServer {
                 }
             }
             if (!matched) {
-                List<Mapping> tops = cachedSegmentWords(segs.get(i));
-                if (tops.isEmpty() || tops.get(0).getWord() == null) return null;
-                String chosen = tops.get(0).getWord();
-                if (smartMgr != null && prevChar != null && !prevChar.isEmpty()) {
-                    int bestCount = 0;
-                    for (Mapping m : tops) {
-                        if (m.getWord() == null) continue;
-                        int c = smartMgr.getContextCount(segs.get(i), m.getWord(), prevChar);
-                        if (c > bestCount) {
-                            bestCount = c;
-                            chosen = m.getWord();
-                        }
-                    }
-                }
+                Mapping top = topInContext(segs.get(i), prevChar);
+                if (top == null || top.getWord() == null) return null;
+                String chosen = top.getWord();
                 sb.append(chosen);
                 if (!chosen.isEmpty())
                     prevChar = String.valueOf(chosen.charAt(chosen.length() - 1));

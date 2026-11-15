@@ -27,6 +27,12 @@ public class DayiCodeSegmenterTest {
             return this;
         }
 
+        StubLookup put(String code, String word, int score, int basescore) {
+            put(code, word, score);
+            table.get(code).setBasescore(basescore);
+            return this;
+        }
+
         @Override
         public Mapping top(String exactCode) {
             return table.get(exactCode);
@@ -130,6 +136,17 @@ public class DayiCodeSegmenterTest {
         assertEquals("dj", DayiCodeSegmenter.abbreviate("dj"));
         assertEquals(",5", DayiCodeSegmenter.abbreviate(",l5"));
         assertEquals(",;", DayiCodeSegmenter.abbreviate(",4b;"));
+    }
+
+    @Test
+    public void testSameSegmentCount_CommonCharsBeatFrequentlyPickedPlusRare() {
+        // 天氣 evc8:e|vc8＝一（常選、選字分數高）＋毩（罕用）不該勝過 ev|c8＝天＋氣（都是常用字）
+        StubLookup lookup = new StubLookup()
+                .put("e", "一", 300, 10000).put("vc8", "毩", 0, 0)
+                .put("ev", "天", 0, 5000).put("c8", "氣", 0, 3000);
+        Mapping result = DayiCodeSegmenter.segment("evc8", lookup);
+        assertNotNull(result);
+        assertEquals("天氣", result.getWord());
     }
 
     @Test
