@@ -428,7 +428,8 @@ fun TabUpdateLog() {
                 stringResource(R.string.help_log_20260927_23),
                 stringResource(R.string.help_log_20260927_24),
                 stringResource(R.string.help_log_20260927_25),
-                stringResource(R.string.help_log_20260927_26)
+                stringResource(R.string.help_log_20260927_26),
+                stringResource(R.string.help_log_20260927_27)
             )
         ),
         UpdateLogItem(
