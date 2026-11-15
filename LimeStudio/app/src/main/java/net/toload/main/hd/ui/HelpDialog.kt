@@ -404,7 +404,8 @@ fun TabUpdateLog() {
             date = "2026.11.15",
             changes = listOf(
                 stringResource(R.string.help_log_20261115_1),
-                stringResource(R.string.help_log_20261115_2)
+                stringResource(R.string.help_log_20261115_2),
+                stringResource(R.string.help_log_20261115_3)
             )
         ),
         UpdateLogItem(
