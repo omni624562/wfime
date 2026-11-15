@@ -759,6 +759,38 @@ public class SearchServer {
         return split != null && split.score - wholeScore > threshold ? new String[] { split.words, "" } : null;
     }
 
+    /** 候選列用：整串碼明顯比較像幾個常用字（見 splitOverWhole）時回切分候選，否則回 null */
+    public Mapping getSplitOverWholeMapping(String rawCode) {
+        String words = splitOverWhole(rawCode, lastCommittedChar, true);
+        if (words == null) return null;
+        Mapping m = new Mapping();
+        m.setWord(words);
+        m.setCode(rawCode.toLowerCase(Locale.US));
+        m.setSegmentedPhraseRecord();
+        return m;
+    }
+
+    /**
+     * 大易連續打幾個字的碼再按空白，整串碼剛好是某個單字的碼（例如一下 ee9＝「征」、大家 vm,＝「稼」）：
+     * 切成常用字（Σlog 字頻＋前後字搭配）比整串的字可能 MERGE_SPLIT_RATIO 倍以上時回切開的詞，否則回 null。
+     * 整串的首選是詞、或使用者在這個碼選過這個字（分數 > 0）時不切（respectLearned）。
+     */
+    String splitOverWhole(String rawCode, String prev, boolean respectLearned) {
+        if (rawCode == null || rawCode.length() < 2 || tablename == null || !tablename.startsWith("dayi")) return null;
+        String code = rawCode.toLowerCase(Locale.US);
+        Mapping whole = topInContext(code, prev);
+        if (whole == null || whole.getWord() == null
+                || whole.getWord().codePointCount(0, whole.getWord().length()) != 1) return null;
+        if (respectLearned && whole.getScore() > 0) return null;
+        Long cachedTotal = charFrequencyTotalCache.get(tablename);
+        long total = cachedTotal != null ? cachedTotal : dbadapter.getCharFrequencyTotal(tablename);
+        if (total <= 0) return null;
+        if (cachedTotal == null && !dbadapter.isDatabseOnHold()) charFrequencyTotalCache.put(tablename, total);
+        double wholeScore = logFrequency(whole, total) + pairScore(prev, whole.getWord());
+        ScoredSplit split = bestCommonSplit(code, prev, total);
+        return split != null && split.score - wholeScore > Math.log(MERGE_SPLIT_RATIO) ? split.words : null;
+    }
+
     private static final class ScoredSplit {
         final String words;
         final double score;

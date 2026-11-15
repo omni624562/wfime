@@ -3113,6 +3113,14 @@ public class LIMEService extends InputMethodService implements
                                 for (Mapping segmented : segmentedList)
                                     list.add(pos++, segmented);
                             }
+                        } else {
+                            // 整串碼剛好是某個單字的碼(一下 ee9＝征、大家 vm,＝稼),切成常用字明顯更可能時切開的詞排第一
+                            Mapping split = SearchSrv.getSplitOverWholeMapping(finalKeyString);
+                            if (split != null) {
+                                int pos = 0;
+                                while (pos < list.size() && list.get(pos).isComposingCodeRecord()) pos++;
+                                list.add(pos, split);
+                            }
                         }
                     }
 
