@@ -46,8 +46,10 @@ public class LatestQueryRunnerTest {
         main.shutdownNow();
     }
 
-    // 等主執行緒把已排隊的工作做完
+    // 等主執行緒把已排隊的工作做完。awaitWork 在背景工作標記做完時就返回，結果是之後才由背景執行緒
+    // 排到主執行緒；先等背景執行緒空出來，否則背景執行緒慢一點時會在套用前就檢查結果
     private void drainMain() throws Exception {
+        work.submit(() -> { }).get();
         for (int i = 0; i < 3; i++) main.submit(() -> { }).get();
     }
 
