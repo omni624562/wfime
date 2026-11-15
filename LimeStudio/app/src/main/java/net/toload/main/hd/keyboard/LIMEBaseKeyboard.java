@@ -1283,8 +1283,8 @@ public class LIMEBaseKeyboard {
                         parseKeyboardAttributes(res, parser);
 
                         if (mSplitKeyboard) {
-                            leftSplitBorder = (mKeysInRow / 2 - 1) * mDefaultHorizontalGap
-                                    + (mKeysInRow / 2) * mSplitKeyWidth;
+                            // 每個鍵占的寬度（mSplitKeyWidth）已含鍵距，不能再加，否則有鍵距的版面會分成 6:4
+                            leftSplitBorder = (mKeysInRow / 2) * mSplitKeyWidth;
                             splitDistance = mDisplayWidth - mKeysInRow * mSplitKeyWidth;
                             if (mReservedColumnsForSplitedKeyboard > 2)
                                 reservedCenterSpace = mSplitKeyWidth; // reserved 2 columns in the center
