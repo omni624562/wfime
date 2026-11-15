@@ -85,6 +85,7 @@
     <string name="help_log_20260927_25">Fixes: with \"Remember Chinese/English mode\" on and the keyboard starting in English, switching back to Chinese with Ctrl+Space on a physical keyboard now types characters; a message is shown when downloading or importing an input method fails.</string>
     <string name="help_log_20260927_26">The settings home screen and import dialogs use the new interface; in dark mode the title bar and dialog buttons now match the rest of the settings.</string>
     <string name="help_log_20260927_27">On tablets in landscape, the on-screen keyboard is now 55 percent of the screen width and centered, making it easier to type; the split keyboard now splits Chuyin, English and symbol layouts evenly (previously 6 keys on the left and 4 on the right).</string>
+    <string name="help_log_20260927_28">Dayi candidates and continuous-typing auto-commit no longer include Simplified characters; characters also in Big5, such as 后, are still listed.</string>
     <string name="help_log_20260601_1">Dayi left-side paging for external physical keyboards (▲/▼).</string>
     <string name="help_log_20260601_2">Upgraded the two-pane full-screen immersive settings console on tablets and hid the XML AppBarLayout.</string>
     <string name="help_log_20260601_3">Redesigned the Dayi smart selection AI card and added a green/grey breathing status light.</string>
